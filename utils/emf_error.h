@@ -41,6 +41,21 @@ typedef enum{
   ERROR_UNKNOW      = 15 ,     //< Busy
 }error_t;
 
+
+
+#define EMF_ASSERT(expr)                                 \
+do {                                                     \
+    if (!(expr)) {                                       \
+        emf_assert_internal(#expr, __FILE__, __LINE__);  \
+    }                                                    \
+} while (0)
+
+
+/*****************************************************************************************************
+**  Function
+******************************************************************************************************/
+extern void emf_assert_internal(const char *expr, const char *file, int line);
+
 #ifdef __cplusplus
 }
 #endif

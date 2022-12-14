@@ -11,7 +11,7 @@
 #ifndef	_EMF_TYPEDEF_H
 #define	_EMF_TYPEDEF_H
 #include "compiler_abstraction.h"
-#include "sdk_typedef.h"
+#include "hal_typedef.h"
 #include "emf_typedef.h"
 //std include
 #include <stdint.h>
@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "emf_error.h"
-#include "emf_utils.h"
+
 
 #ifdef __cplusplus
 extern "C" {

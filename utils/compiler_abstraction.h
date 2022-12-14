@@ -170,7 +170,9 @@ extern "C" {
         #define __PACKED           __attribute__((packed)) 
     #endif
 
-    #define GET_SP()               
+    #define GET_SP()        
+#else
+	#error undefined c complier
 #endif
 
 #ifdef __cplusplus

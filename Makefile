@@ -12,11 +12,12 @@
 
 
 # c compile
-PREFIX = #arm-none-eabi-			#切换交叉编译链
+PREFIX = #arm-none-eabi-				#切换交叉编译链
 CC = $(PREFIX)gcc
 AR = $(PREFIX)ar 					#静态库链接
-CFLAGS =
-LDFLAGS =
+CFLAGS =						#编译参数
+LDFLAGS =						#连接参数
+DEFINES =						# 宏定义
 # 选择优化等级:
 # 1. gcc中指定优化级别的参数有：-O0、-O1、-O2、-O3、-Og、-Os、-Ofast。
 # 2. 在编译时，如果没有指定上面的任何优化参数，则默认为 -O0，即没有优化。
@@ -31,6 +32,9 @@ CFLAGS += -W #-Wall #-W
 #是否开启优化掉未使用的函数和符号
 LDFLAGS += -Wl,--gc-sections
 
+ifeq ($(OS), Windows_NT)				#minigw 不支持weak
+DEFINES += -D__WEAK=
+endif
 
 
 # define root dir
@@ -48,19 +52,20 @@ BUILD_OBJ = $(wildcard $(BUILD_DIR)/*.o)
 # 头文件包含
 INCLUDES = \
 	-I $(ROOT_DIR) \
-	-I $(ROOT_DIR)/hal \
-	-I $(ROOT_DIR)/sdk_hal \
-	-I $(ROOT_DIR)/utils
+	-I $(ROOT_DIR)/app \
+	-I $(ROOT_DIR)/utils\
+	-I $(ROOT_DIR)/api \
+	-I $(ROOT_DIR)/hal 
 
 #源文件目录
 SRC_DIR = \
-	-C $(ROOT_DIR)/utils \
 	$(ROOT_DIR)/app \
-	$(ROOT_DIR)/hal \
-	$(ROOT_DIR)/sdk_hal 
+	$(ROOT_DIR)/utils \
+	$(ROOT_DIR)/api \
+	$(ROOT_DIR)/hal 
 
 #export 编译器compile
-export CC AR CFLAGS 
+export CC AR CFLAGS DEFINES
 #export DIR
 export ROOT_DIR BUILD_DIR INCLUDES		
 
@@ -69,7 +74,9 @@ all: debug pre_build build link		#执行make指令默认参数是make all
 
 debug: 
 	@echo  "-----------------------------------echo-----------------------------------"
+	@echo  "OS = $(OS)"
 	@echo "CC = $(CC)"
+	@echo "DEFINES = $(DEFINES)"
 	@echo "SRC_DIR = $(SRC_DIR)	"
 	@echo  "ROOT_DIR = $(ROOT_DIR)"
 	@echo  "TARGET_LIBA = $(TARGET_LIBA)"

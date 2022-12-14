@@ -12,7 +12,8 @@
 #ifndef _emf_utils_h
 #define _emf_utils_h
 #include "emf_typedef.h"
-
+#include "emf_mem.h"
+#include "app_fifo.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

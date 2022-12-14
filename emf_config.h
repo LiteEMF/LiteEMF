@@ -9,8 +9,8 @@
 */
 
 
-#ifndef _template_h
-#define _template_h
+#ifndef _emf_config_h
+#define _emf_config_h
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,9 +32,6 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void template_init(void);
-void template_deinit(void);
-void template_handler(void);
 
 #ifdef __cplusplus
 }

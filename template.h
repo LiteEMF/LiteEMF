@@ -12,6 +12,7 @@
 
 #ifndef _template_h
 #define _template_h
+#include "emf_typedef.h"
 
 #ifdef __cplusplus
 extern "C" {

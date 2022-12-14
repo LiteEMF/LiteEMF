@@ -9,7 +9,7 @@ SUB_DIR =
 all : $(OBJ) sub_make
 
 $(OBJ):$(BUILD_DIR)/%.o:%.c				#.c 编译生成.o
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 sub_make:
 ifneq ($(SUB_DIR),)
