@@ -144,6 +144,26 @@ typedef struct{			//vector
 }vector3f_t;
 
 
+
+#define CONSTRAIN_AXIS2(axisp)	do{(axisp)->x = CONSTRAIN((axisp)->x,INT8_MIN,INT8_MAX);(axisp)->y = CONSTRAIN(axisp->y,INT8_MIN,INT8_MAX); }while(0)
+#define CONSTRAIN_AXIS3(axisp)	do{(axisp)->x = CONSTRAIN((axisp)->x,INT8_MIN,INT8_MAX);(axisp)->y = CONSTRAIN(axisp->y,INT8_MIN,INT8_MAX);(axisp)->z = CONSTRAIN((axisp)->z,INT8_MIN,INT8_MAX);  }while(0)
+#define CONSTRAIN_AXIS2i(axisp)	do{(axisp)->x = CONSTRAIN((axisp)->x,INT16_MIN,INT16_MAX);(axisp)->y = CONSTRAIN(axisp->y,INT16_MIN,INT16_MAX); }while(0)
+#define CONSTRAIN_AXIS3i(axisp)	do{(axisp)->x = CONSTRAIN((axisp)->x,INT16_MIN,INT16_MAX);(axisp)->y = CONSTRAIN(axisp->y,INT16_MIN,INT16_MAX);(axisp)->z = CONSTRAIN((axisp)->z,INT16_MIN,INT16_MAX); }while(0)
+
+
+#define AXIS2_COPY(disp,srcp)	do{(disp)->x = (srcp)->x;(disp)->y = (srcp)->y;}while(0)
+#define AXIS3_COPY(disp,srcp)	do{(disp)->x = (srcp)->x;(disp)->y = (srcp)->y;(disp)->z = (srcp)->z;}while(0)
+
+#define AXIS2_ADD(axisp, addp)  do{(axisp)->x += (addp)->x;(axisp)->y += (addp)->y;}while(0)
+#define AXIS2_SUB(axisp, subp)  do{(axisp)->x -= (subp)->x;(axisp)->y -= (subp)->y;}while(0)
+#define AXIS2_MUL(axisp, mul)  do{(axisp)->x *= mul;(axisp)->y *= mul;}while(0)
+#define AXIS2_DIV(axisp, div)  do{(axisp)->x /= div;(axisp)->y /= div;}while(0)
+#define AXIS3_ADD(axisp, addp)  do{(axisp)->x += (addp)->x;(axisp)->y += (addp)->y;(axisp)->z += (addp)->z;}while(0)
+#define AXIS3_SUB(axisp, subp)  do{(axisp)->x -= (subp)->x;(axisp)->y -= (subp)->y;(axisp)->z -= (subp)->z;}while(0)
+#define AXIS3_MUL(axisp, mul)  do{(axisp)->x *= mul;(axisp)->y *= mul;(axisp)->z *= mul;}while(0)
+#define AXIS3_DIV(axisp, div)  do{(axisp)->x /= div;(axisp)->y /= div;(axisp)->z /= div;}while(0)
+
+
 void  axis3i_swapl( axis3i_t* p);
 void  axis2i_swapl( axis2i_t* p);
 void  axis3i_swaph( axis3i_t* p);
@@ -153,14 +173,40 @@ void  axis2l_swapl( axis2l_t* p);
 void  axis3l_swaph( axis3l_t* p);
 void  axis2l_swaph( axis2l_t* p);
 
-void  axis2i_add( axis2i_t* outp, axis2i_t a, axis2i_t b);
-void  axis2i_sub( axis2i_t* outp, axis2i_t a, axis2i_t b);
-void  axis3i_add( axis3i_t* outp, axis3i_t a, axis3i_t b);
-void  axis3i_sub( axis3i_t* outp, axis3i_t a, axis3i_t b);
-void  axis2l_add( axis2l_t* outp, axis2l_t a, axis2l_t b);
-void  axis2l_sub( axis2l_t* outp, axis2l_t a, axis2l_t b);
-void  axis3l_add( axis3l_t* outp, axis3l_t a, axis3l_t b);
-void  axis3l_sub( axis3l_t* outp, axis3l_t a, axis3l_t b);
+void constrain_axis2(axis2i_t* axisp);
+void constrain_axis2i(axis2l_t* axisp);
+void constrain_axis3(axis3i_t* axisp);
+void constrain_axis3i(axis3l_t* axisp);
+
+
+void  axis2i_add( axis2i_t* axisp, axis2i_t* a);
+void  axis3i_add( axis3i_t* axisp, axis3i_t* a);
+void  axis2l_add( axis2l_t* axisp, axis2l_t* a);
+void  axis3l_add( axis3l_t* axisp, axis3l_t* a);
+void  axis2f_add( axis2f_t* axisp, axis2f_t* a);
+void  axis3f_add( axis3f_t* axisp, axis3f_t* a);
+
+
+void  axis2i_sub( axis2i_t* axisp, axis2i_t* a);
+void  axis3i_sub( axis3i_t* axisp, axis3i_t* a);
+void  axis2l_sub( axis2l_t* axisp, axis2l_t* a);
+void  axis3l_sub( axis3l_t* axisp, axis3l_t* a);
+void  axis2f_sub( axis2f_t* axisp, axis2f_t* a);
+void  axis3f_sub( axis3f_t* axisp, axis3f_t* a);
+
+void  axis2i_mul( axis2i_t* axisp,int32_t k);
+void  axis3i_mul( axis3i_t* axisp,int32_t k);
+void  axis2l_mul( axis2l_t* axisp,int32_t k);
+void  axis3l_mul( axis3l_t* axisp,int32_t k);
+void  axis2f_mul( axis2f_t* axisp, float k);
+void  axis3f_mul( axis3f_t* axisp, float k);
+
+void  axis2i_div( axis2i_t* axisp,int32_t k);
+void  axis3i_div( axis3i_t* axisp,int32_t k);
+void  axis2l_div( axis2l_t* axisp,int32_t k);
+void  axis3l_div( axis3l_t* axisp,int32_t k);
+void  axis2f_div( axis2f_t* axisp, float k);
+void  axis3f_div( axis3f_t* axisp, float k);
 
 void vector2f_normalization(vector2f_t* vectorp);
 void vector3f_normalization(vector3f_t* vectorp);

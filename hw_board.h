@@ -53,6 +53,31 @@ extern "C" {
 			{PA_01,0,0}	\
 			}
 
+		//martix key
+		#define MATRIX_KEY_IN_GPIO	{PA_00, PA_01, PA_02}		//OUT
+		#define MATRIX_KEY_OUT_GPIO	{PA_00, PA_01}				//IN	
+		#define MATRIX_KEY	{		\
+			{HW_KEY_A, HW_KEY_B, HW_KEY_C},\
+			{HW_KEY_X, HW_KEY_Y, HW_KEY_Z},\
+		}
+
+
+		#define MATRIX_KB_IN_GPIO	{PA_00, PA_01, PA_02}		//OUT
+		#define MATRIX_KB_OUT_GPIO	{PA_00, PA_01}				//IN	
+		#define MATRIX_KB	{	\
+			{KB_A, KB_B, KB_C},\
+			{KB_X, KB_Y, KB_Z},\
+		}
+
+		#define IO_KB_GPIO 			{PA_00,PA_01,PA_02}
+		#define IO_KB 				{KB_A,KB_B,KB_C}
+
+		#define HW_LED_MAP 			{PA_00,PA_01,PA_02,PA_03}
+		#define HW_LED_ACTIVE_MAP 	{true,true,true,true}
+
+		#define HW_STORAGE			\
+			uint8_t vendor;			\
+			uint8_t led_sta[5]
 	#else
 
 	#endif

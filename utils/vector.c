@@ -75,53 +75,128 @@ void  axis2l_swaph( axis2l_t* p)
 ** Returns:	
 ** Description:		vector operation
 *******************************************************************/
-void  axis2i_add( axis2i_t* outp, axis2i_t a, axis2i_t b)
+void constrain_axis2(axis2i_t* axisp)
 {
-    outp->x = a.x + b.x;
-    outp->y = a.y + b.y;
+    CONSTRAIN_AXIS2(axisp);
 }
-void  axis2i_sub( axis2i_t* outp, axis2i_t a, axis2i_t b)
+void constrain_axis2i(axis2l_t* axisp)
 {
-    outp->x = a.x - b.x;
-    outp->y = a.y - b.y;
+    CONSTRAIN_AXIS2i(axisp);
 }
-void  axis3i_add( axis3i_t* outp, axis3i_t a, axis3i_t b)
+void constrain_axis3(axis3i_t* axisp)
 {
-    outp->x = a.x + b.x;
-    outp->y = a.y + b.y;
-    outp->z = a.z + b.z;
+    CONSTRAIN_AXIS2(axisp);
 }
-void  axis3i_sub( axis3i_t* outp, axis3i_t a, axis3i_t b)
+void constrain_axis3i(axis3l_t* axisp)
 {
-    outp->x = a.x - b.x;
-    outp->y = a.y - b.y;
-    outp->z = a.z - b.z;
+    CONSTRAIN_AXIS3i(axisp);
 }
-void  axis2l_add( axis2l_t* outp, axis2l_t a, axis2l_t b)
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		vector operation
+*******************************************************************/
+void  axis2i_add( axis2i_t* axisp, axis2i_t* a)
 {
-    outp->x = a.x + b.x;
-    outp->y = a.y + b.y;
+    AXIS2_ADD(axisp,a);
 }
-void  axis2l_sub( axis2l_t* outp, axis2l_t a, axis2l_t b)
+void  axis3i_add( axis3i_t* axisp, axis3i_t* a)
 {
-    outp->x = a.x - b.x;
-    outp->y = a.y - b.y;
+    AXIS3_ADD(axisp,a);
 }
-void  axis3l_add( axis3l_t* outp, axis3l_t a, axis3l_t b)
+void  axis2l_add( axis2l_t* axisp, axis2l_t* a)
 {
-    outp->x = a.x + b.x;
-    outp->y = a.y + b.y;
-    outp->z = a.z + b.z;
+    AXIS2_ADD(axisp,a);
 }
-void  axis3l_sub( axis3l_t* outp, axis3l_t a, axis3l_t b)
+void  axis3l_add( axis3l_t* axisp, axis3l_t* a)
 {
-    outp->x = a.x - b.x;
-    outp->y = a.y - b.y;
-    outp->z = a.z - b.z;
+    AXIS3_ADD(axisp,a);
+}
+void  axis2f_add( axis2f_t* axisp, axis2f_t* a)
+{
+    AXIS2_ADD(axisp,a);
+}
+void  axis3f_add( axis3f_t* axisp, axis3f_t* a)
+{
+    AXIS3_ADD(axisp,a);
+}
+
+void  axis2i_sub( axis2i_t* axisp, axis2i_t* a)
+{
+    AXIS2_SUB(axisp,a);
+}
+void  axis3i_sub( axis3i_t* axisp, axis3i_t* a)
+{
+    AXIS3_SUB(axisp,a);
+}
+void  axis2l_sub( axis2l_t* axisp, axis2l_t* a)
+{
+    AXIS2_SUB(axisp,a);
+}
+void  axis3l_sub( axis3l_t* axisp, axis3l_t* a)
+{
+    AXIS3_SUB(axisp,a);
+}
+void  axis2f_sub( axis2f_t* axisp, axis2f_t* a)
+{
+    AXIS2_SUB(axisp,a);
+}
+void  axis3f_sub( axis3f_t* axisp, axis3f_t* a)
+{
+    AXIS3_SUB(axisp,a);
+}
+
+void  axis2i_mul( axis2i_t* axisp,int32_t k)
+{
+   AXIS2_MUL(axisp,k);
+}
+void  axis3i_mul( axis3i_t* axisp,int32_t k)
+{
+    AXIS3_MUL(axisp,k);
+}
+void  axis2l_mul( axis2l_t* axisp,int32_t k)
+{
+    AXIS2_MUL(axisp,k);
+}
+void  axis3l_mul( axis3l_t* axisp,int32_t k)
+{
+    AXIS3_MUL(axisp,k);
+}
+void  axis2f_mul( axis2f_t* axisp,float k)
+{
+    AXIS2_MUL(axisp,k);
+}
+void  axis3f_mul( axis3f_t* axisp,float k)
+{
+    AXIS3_MUL(axisp,k);
 }
 
 
-
+void  axis2i_div( axis2i_t* axisp,int32_t k)
+{
+    AXIS2_DIV(axisp,k);
+}
+void  axis3i_div( axis3i_t* axisp,int32_t k)
+{
+    AXIS3_DIV(axisp,k);
+}
+void  axis2l_div( axis2l_t* axisp,int32_t k)
+{
+    AXIS2_DIV(axisp,k);
+}
+void  axis3l_div( axis3l_t* axisp,int32_t k)
+{
+    AXIS3_DIV(axisp,k);
+}
+void  axis2f_div( axis2f_t* axisp,float k)
+{
+    AXIS2_DIV(axisp,k);
+}
+void  axis3f_div( axis3f_t* axisp,float k)
+{
+    AXIS3_DIV(axisp,k);
+}
 /*******************************************************************
 ** Parameters:		
 ** Returns:	

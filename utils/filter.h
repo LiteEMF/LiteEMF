@@ -35,13 +35,15 @@ extern "C" {
 
 
 
-//sample #define IMPULSE_RESPONSE_DEFAULT	{1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH}
+//samples: #define IMPULSE_RESPONSE_DEFAULT	{1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH,1.0/FIR_FILTER_LENGTH}
 #ifndef FIR_FILTER_LENGTH
-#define FIR_FILTER_LENGTH 		16
+#define FIR_FILTER_LENGTH 		8
 #endif
-#if !defined SAMPLE_FIR_FILTER			//used fixed value
-	#define SAMPLE_FIR_FILTER		1
-#elif defined IMPULSE_RESPONSE_DEFAULT							//used default value
+#ifndef SAMPLE_FIR_FILTER			//used fixed value
+#define SAMPLE_FIR_FILTER		1
+#endif
+
+#if !SAMPLE_FIR_FILTER && defined IMPULSE_RESPONSE_DEFAULT	//used default value
 	floatc_t s_impulse_response[FIR_FILTER_LENGTH]=IMPULSE_RESPONSE_DEFAULT;
 #endif
 
@@ -53,7 +55,7 @@ extern "C" {
 
 	
 /*******************************************************************
-*	Q:Process noise,Q increases, dynamic response becomes faster, convergence stability becomes worse
+*	Q: Process noise,Q increases, dynamic response becomes faster, convergence stability becomes worse
 *	R: Measurement noise, R increases, dynamic response slows down, convergence stability becomes better
 *	smoot = 100 * ((Q+R)/Q)
 *	R = smoot;

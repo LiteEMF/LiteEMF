@@ -3,15 +3,21 @@ OBJ := $(SRC:.c=.o)
 OBJ := $(OBJ:%=$(BUILD_DIR)/%)		#当前.o 文件目录改成$(BUILD_DIR)/*.o目录
 
 #源文件目录
-SUB_DIR =
+SUB_DIR = \
+	$(ROOT_DIR)/app/gps \
+	$(ROOT_DIR)/app/gsm \
+	$(ROOT_DIR)/app/imu \
+	$(ROOT_DIR)/app/nfc \
+	$(ROOT_DIR)/app/wifi 
 
 
-all : $(OBJ) sub_make
+all : $(OBJ) sub_make 
+
 
 $(OBJ):$(BUILD_DIR)/%.o:%.c				#.c 编译生成.o
 	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 sub_make:
 ifneq ($(SUB_DIR),)
-	make -C $(SUB_DIR)
+	@for dir in $(SUB_DIR); do $(MAKE) -C $$dir ; done
 endif

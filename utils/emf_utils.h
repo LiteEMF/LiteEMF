@@ -12,8 +12,12 @@
 #ifndef _emf_utils_h
 #define _emf_utils_h
 #include "emf_typedef.h"
-#include "emf_mem.h"
-#include "app_fifo.h"
+#include "utils/emf_mem.h"
+#include "utils/app_fifo.h"
+#include "utils/at_commander.h"
+#include "utils/commander.h"
+#include "utils/filter.h"
+#include "utils/vector.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,7 +46,7 @@ int8_t negative_int8(int8_t val);
 int16_t negative_int16(int16_t val);
 void int_to_bit12(uint8_t* buf, int16_t x, int16_t y);
 void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py);
-
+uint8_t get_bit_pos(uint32_t val);
 
 #ifdef __cplusplus
 }

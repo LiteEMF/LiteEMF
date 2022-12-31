@@ -14,5 +14,5 @@ $(OBJ):$(BUILD_DIR)/%.o:%.c				#.c 编译生成.o
 
 sub_make:
 ifneq ($(SUB_DIR),)
-	make -C $(SUB_DIR)
+	@for dir in $(SUB_DIR); do $(MAKE) -C $$dir ; done
 endif

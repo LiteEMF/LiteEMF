@@ -15,6 +15,11 @@
 extern "C" {
 #endif
 
+#define	WEAK_ENABLE         1
+#define PRAGMA_PACK_ENABLE  1
+
+
+
 #if defined ( __CC_ARM )
 
     #ifndef __ASM
@@ -128,7 +133,11 @@ extern "C" {
         #define __INLINE            
     #endif
 
-	#define	UNSUPPORT_WEAK			//C51 not support
+    #undef  WEAK_ENABLE
+    #undef  PRAGMA_PACK_ENABLE
+	#define	WEAK_ENABLE             0			//C51 not support
+    #define	PRAGMA_PACK_ENABLE      0			//C51 not support
+    
     #ifndef __WEAK 
         #define  __WEAK              
     #endif

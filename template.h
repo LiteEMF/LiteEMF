@@ -34,8 +34,8 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void template_init(void);
-void template_deinit(void);
+bool template_init(void);
+bool template_deinit(void);
 void template_handler(void);
 
 #ifdef __cplusplus

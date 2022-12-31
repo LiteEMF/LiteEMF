@@ -11,8 +11,7 @@
 #ifndef	_EMF_TYPEDEF_H
 #define	_EMF_TYPEDEF_H
 #include "compiler_abstraction.h"
-#include "hal_typedef.h"
-#include "emf_typedef.h"
+#include "hal/hal_typedef.h"
 //std include
 #include <stdint.h>
 #include <stdbool.h>
@@ -20,7 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "emf_error.h"
+#include "utils/emf_error.h"
 
 
 #ifdef __cplusplus
@@ -38,7 +37,7 @@ extern "C" {
 #endif
 #define NOT(a)	 ((bool)!(a))
 #ifndef BIT
-#define BIT(n)              (1UL << (n&0x1f))
+#define BIT(n)              (1UL << (n))
 #endif
 #ifndef _STR
 #define _STR(arg)  #arg      //转义宏,防止宏定义提前展开
@@ -46,8 +45,8 @@ extern "C" {
 #ifndef STR
 #define STR(arg)  _STR(arg)     //将任意输入转换为字符串
 #endif
-#ifndef BOOL
-#define BOOL(a)		( (0 == (a))? false:true)
+#ifndef BOOL_SET
+#define BOOL_SET(a)		( (0 == (a))? false:true)
 #endif
 #ifndef MAX
 #define MAX(a,b)	( ( (a) > (b) )? (a):(b) )
@@ -135,8 +134,8 @@ b(high): if x is greater than b.
 #define UNUSED_PARAMETER(X) UNUSED_VARIABLE(X)
 #endif
 
-#ifndef MODULE_ENABLED
-#define MODULE_ENABLED(module) (defined(##module) && (##module))
+#ifndef MODULE_ENABLE
+#define MODULE_ENABLE(module) (defined(##module) && (##module))
 #endif
 
 

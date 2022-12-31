@@ -137,8 +137,16 @@ void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py)
 	*py = y;
 }
 
-
-
-
-
+uint8_t get_bit_pos(uint32_t val)
+{
+    uint8_t i;
+    uint32_t tmp = 0x01;
+    for(i = 0; i < 32; i++){
+        if(tmp & val){
+            return i;
+        }
+        tmp <<= 1;
+    }
+    return i;
+}
 

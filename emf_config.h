@@ -20,18 +20,49 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#define ID_NC   (0xff)
+
+//*********************************************************************************//
+//                       	APP modules                  						   //
+//*********************************************************************************//
+#ifndef APP_KEY_ENABLE
+#define APP_KEY_ENABLE			1
+#endif
+#ifndef APP_KM_ENABLE
+#define APP_KM_ENABLE			1
+#endif
+#ifndef APP_IMU_ENABLE
+#define APP_IMU_ENABLE			1
+#endif
+#ifndef APP_JOYSTICK_ENABLE
+#define APP_JOYSTICK_ENABLE		1
+#endif
+#ifndef APP_BATTERY_ENABLE
+#define APP_BATTERY_ENABLE		1
+#endif
+#ifndef APP_RUMBLE_ENABLE
+#define APP_RUMBLE_ENABLE		1
+#endif
+#ifndef APP_LED_ENABLE
+#define APP_LED_ENABLE			1
+#endif
+#ifndef APP_RGB_ENABLE
+#define APP_RGB_ENABLE			1
+#endif
+#ifndef APP_NFC_ENABLE
+#define APP_NFC_ENABLE			1
+#endif
+#ifndef APP_GPS_ENABLE
+#define APP_GPS_ENABLE			1
+#endif
+#ifndef APP_GSM_ENABLE
+#define APP_GSM_ENABLE			1
+#endif
+#ifndef APP_WIFI_ENABLE
+#define APP_WIFI_ENABLE			1
+#endif
 
 
-
-/******************************************************************************************************
-**	Parameters
-*******************************************************************************************************/
-
-
-
-/*****************************************************************************************************
-**  Function
-******************************************************************************************************/
 
 #ifdef __cplusplus
 }
