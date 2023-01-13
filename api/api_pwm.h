@@ -25,13 +25,13 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #define PWM_FREQ_POS		(0)
-#define PWM_FREQ_MAS		0X0000FFFF		//HZ
+#define PWM_FREQ_MASK		0X0000FFFF		//HZ
 #define PWM_CH_POS			(16)
-#define PWM_CH_MSK			0X00FF0000		//0~7, spi read addr bit 
+#define PWM_CH_MASK			0X00FF0000		//0~7, spi read addr bit 
 #define PWM_ACTIVE_POS		(24)
-#define PWM_ACTIVE_MSK		0X01000000
+#define PWM_ACTIVE_MASK		0X01000000
 #define PWM_RES_POS			(25)
-#define PWM_RES_MSK			0X01000000
+#define PWM_RES_MASK			0X01000000
 
 #ifndef PWM_FREQ_ATT
 #define PWM_FREQ_ATT(id)  		(FLD2VAL(PWM_FREQ, m_pwm_map[id].att))

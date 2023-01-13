@@ -171,6 +171,11 @@ bool api_storage_sync(void)
 	storage_timer = m_tick;
 	return ret;
 }
+bool api_storage_sync_complete(void)
+{
+	return true;
+}
+
 
 void api_storage_auto_sync(void)
 {

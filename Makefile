@@ -10,7 +10,7 @@
 # 
 
 
-
+#@ref: https://www.zhaixue.cc/makefile/makefile-intro.html
 # c compile
 PREFIX = #arm-none-eabi-				#切换交叉编译链
 CC = $(PREFIX)gcc
@@ -18,6 +18,7 @@ AR = $(PREFIX)ar 					#静态库链接
 CFLAGS =						#编译参数
 LDFLAGS =						#连接参数
 DEFINES =						# 宏定义
+DEBUG = @
 # 选择优化等级:
 # 1. gcc中指定优化级别的参数有：-O0、-O1、-O2、-O3、-Og、-Os、-Ofast。
 # 2. 在编译时，如果没有指定上面的任何优化参数，则默认为 -O0，即没有优化。
@@ -32,7 +33,8 @@ CFLAGS += -W #-Wall #-W
 #是否开启优化掉未使用的函数和符号
 LDFLAGS += -Wl,--gc-sections
 
-ifeq ($(OS), Windows_NT)				#minigw 不支持weak
+#minigw 不支持weak
+ifeq ($(OS), Windows_NT)
 DEFINES += -D__WEAK=
 endif
 
@@ -40,8 +42,8 @@ endif
 # define root dir
 TARGET = LiteEMF
 TARGET_LIBA = $(addprefix $(TARGET), .a)
-ROOT_DIR = $(PWD)
-BUILD_DIR = $(ROOT_DIR)/build
+ROOT_DIR := $(PWD)
+BUILD_DIR := $(ROOT_DIR)/build
 
 #搜索所有的c文件，制作所有的.c文件依赖Obj
 #PS:去掉终极目标的原始路径前缀并添加输出文件夹路径前缀(改变了依赖文件的路径前缀，需要重新指定搜索路径)
@@ -65,12 +67,13 @@ SRC_DIR = \
 	$(ROOT_DIR)/hal 
 
 #export 编译器compile
-export CC AR CFLAGS DEFINES
+export CC AR CFLAGS DEFINES DEBUG
 #export DIR
 export ROOT_DIR BUILD_DIR INCLUDES		
 
 .PHONY: all clean debug pre_build build
-all: debug pre_build build link		#执行make指令默认参数是make all 
+#执行make指令默认参数是make all
+all: debug pre_build build link
 
 debug: 
 	@echo  "-----------------------------------echo-----------------------------------"
@@ -85,17 +88,20 @@ pre_build:debug
 	@echo  "-----------------------------------pre_build-----------------------------------"
 	mkdir -p $(BUILD_DIR)
 	@echo "none"
-build:pre_build 								#在$(SUB_DIR) 目录下面执行make,-C Change to DIRECTORY before doing anything.
+	
+#在$(SUB_DIR) 目录下面执行make,-C Change to DIRECTORY before doing anything.
+build:pre_build 								
 	@echo  "-----------------------------------build-----------------------------------"
 	@for dir in $(SRC_DIR); do $(MAKE) -C $$dir ; done
 
 # 通过.o 链接生产目标执行文件	
 link:build
 	@echo  "-----------------------------------link-----------------------------------"
-	$(AR) -rc $(TARGET_LIBA) $(BUILD_OBJ)
+	$(DEBUG) $(AR) -rc $(TARGET_LIBA) $(BUILD_OBJ)
 ifneq ($(PREFIX),arm-none-eabi-)
-	$(CC) $(LDFLAGS) -o $(TARGET) $(BUILD_OBJ)
+	$(DEBUG) $(CC) $(LDFLAGS) -o $(TARGET) $(BUILD_OBJ)
 endif
+	@echo  "make success..."
 
 clean:
 	@echo  "-----------------------------------clean-----------------------------------"

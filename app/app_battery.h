@@ -28,11 +28,11 @@ extern "C" {
 #ifndef	BAT_PROTECT_VOL
 #define	BAT_PROTECT_VOL     			3350		//mv
 #endif
-#ifndef	BAT_POWER_ON_PROTECT_VOL
-#define	BAT_POWER_ON_PROTECT_VOL		3400     
+#ifndef	BAT_POWERON_PROTECT_VOL
+#define	BAT_POWERON_PROTECT_VOL			3400     
 #endif
 #ifndef	BAT_LOW_POWER_VOL
-#define	BAT_LOW_POWER_VOL            	3450	
+#define	BAT_LOW_POWER_VOL            	3450
 #endif
 
 
@@ -54,9 +54,10 @@ extern bat_state_t	m_battery_sta;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bat_state_t app_battery_sta(uint16_t bat_vol);		//__WEAK
+bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol);		//__WEAK
 uint16_t app_battery_vol(void);						//__WEAK
 uint8_t app_battery_percent(uint16_t vol);
+void app_battery_scan(bool power_on);
 bool app_battery_init(void);
 bool app_battery_deinit(void);
 void app_battery_handler(void);

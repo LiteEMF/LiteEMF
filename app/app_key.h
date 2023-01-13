@@ -61,6 +61,7 @@ typedef struct {
 extern uint8_t  m_app_stick_key;
 extern app_key_t m_app_key;
 
+extern uint32_t m_key_pressed;
 extern uint32_t m_key_short;
 extern uint32_t m_key_pressed_b;
 extern uint32_t m_key_long;
@@ -71,8 +72,8 @@ extern bool m_key_power_on;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void app_key_vendor_scan(app_key_t *keyp);	//__WEAK 
-void app_key_event(void);		//__WEAK
+void app_key_vendor_scan(app_key_t *keyp);		//__WEAK 
+void app_key_event(void);						//__WEAK
 void app_key_trigger_std(app_key_t* keyp);		//standard
 void app_key_swapl(app_key_t* keyp);
 

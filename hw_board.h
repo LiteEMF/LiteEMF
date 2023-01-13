@@ -29,18 +29,18 @@ extern "C" {
 		//uart
 		#define HW_UART_MAP {\
 			{PA_00,0,0},	\
-			{PA_01,0,0}	\
+			{PA_01,0,0}		\
 			}
 
 		//adc
-		#define HW_ADC_MAP {\
-			{PA_00,0,0},	\
-			{PA_01,0,0}	\
+		#define HW_ADC_MAP {	\
+			{PA_00,0,0},		\
+			{PA_01,0,0}			\
 			}
 		//IIC
-		#define HW_IIC_MAP {\
+		#define HW_IIC_MAP {	\
 			{PA_00,0,0,0,0},	\
-			{PA_01,0,0,0,0}	\
+			{PA_01,0,0,0,0}		\
 			}
 		//spi
 		#define HW_SPI_MAP {\
@@ -48,9 +48,9 @@ extern "C" {
 			{PA_01,0,0,0,0,0}	\
 			}
 		//pwm
-		#define HW_PWM_MAP {\
-			{PA_00,0,0},	\
-			{PA_01,0,0}	\
+		#define HW_PWM_MAP {	\
+			{PA_00,0,0},		\
+			{PA_01,0,0}			\
 			}
 
 		//martix key

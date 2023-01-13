@@ -1,16 +1,22 @@
-SRC = $(wildcard *.c)				#当前目录SRC
+
+
+#$(shell basename $(shell pwd))		#当前文件夹
+DIR_BASE = $(shell basename $(shell pwd))
+#当前目录SRC
+SRC = $(wildcard *.c)	
 OBJ := $(SRC:.c=.o)
-OBJ := $(OBJ:%=$(BUILD_DIR)/%)		#当前.o 文件目录改成$(BUILD_DIR)/*.o目录
+#当前.o 文件目录改成$(BUILD_DIR)/*.o目录
+OBJ := $(OBJ:%=$(BUILD_DIR)/%)
 
 #源文件目录
-SUB_DIR =
+SUB_DIR := $(shell find ./ -maxdepth 1 -mindepth 1 -type d)
+SUB_DIR := $(addprefix $(ROOT_DIR)/$(DIR_BASE)/,$(SUB_DIR))
 
+all : $(OBJ) sub_make
 
-all : $(OBJ) sub_make 
-
-
-$(OBJ):$(BUILD_DIR)/%.o:%.c				#.c 编译生成.o
-	$(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
+#.c 编译生成.o
+$(OBJ):$(BUILD_DIR)/%.o:%.c
+	$(DEBUG) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
 sub_make:
 ifneq ($(SUB_DIR),)

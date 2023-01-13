@@ -13,9 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if APP_RGB_ENABLE
-
-#include  "app/app_rgb.h"
+#if APP_USB_ENABLE
+#include  "app_otg.h"
 
 /******************************************************************************************************
 ** Defined
@@ -37,17 +36,13 @@
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-__WEAK bool app_rgb_show(uint8_t* frame)
-{
-	bool ret = false;
-}
 
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_rgb_init(void)
+bool app_otg_init(void)
 {
 	return true;
 }
@@ -57,7 +52,7 @@ bool app_rgb_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_rgb_deinit(void)
+bool app_otg_deinit(void)
 {
 	return true;
 }
@@ -67,7 +62,7 @@ bool app_rgb_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_rgb_handler(void)
+void app_otg_handler(void)
 {
 
 }

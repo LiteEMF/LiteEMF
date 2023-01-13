@@ -78,6 +78,7 @@ uint8_t api_storage_map_index(void);
 bool api_storage_set_map(uint8_t index);
 bool api_storage_sync(void);
 void api_storage_auto_sync(void);
+bool api_storage_sync_complete(void);
 bool api_storage_init(void);
 void api_storage_handler(void);
 

@@ -73,10 +73,10 @@ b(high): if x is greater than b.
 #define REMAP(x, in_min, in_max, out_min, out_max) ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 #endif
 #ifndef VAL2FLD
-#define VAL2FLD(field_str, value) (((uint32_t)(value) << (field_str##_POS)) & (field_str##_MSK))
+#define VAL2FLD(field_str, value) (((uint32_t)(value) << (field_str##_POS)) & (field_str##_MASK))
 #endif
 #ifndef FLD2VAL
-#define FLD2VAL(field_str, value) (((uint32_t)(value)&(field_str##_MSK)) >> (field_str##_POS))
+#define FLD2VAL(field_str, value) (((uint32_t)(value)&(field_str##_MASK)) >> (field_str##_POS))
 #endif
 
 

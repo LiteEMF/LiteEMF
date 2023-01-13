@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_rgb_h
-#define _app_rgb_h
+#ifndef _app_otg_h
+#define _app_otg_h
 #include "emf_typedef.h"
 
 #ifdef __cplusplus
@@ -34,11 +34,9 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_rgb_show(uint8_t* frame);			//__WEAK
-\
-bool app_rgb_init(void);
-bool app_rgb_deinit(void);
-void app_rgb_handler(void);
+bool app_otg_init(void);
+bool app_otg_deinit(void);
+void app_otg_handler(void);
 
 #ifdef __cplusplus
 }

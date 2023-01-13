@@ -32,12 +32,13 @@ extern "C" {
 *******************************************************************************************************/
 typedef enum{
 	PM_RESON_POR=0,		//power on reset
-	PM_RESON_SOFT,		//soft reset
-	PM_RESON_PIN,		//pin reset
 	PM_RESON_VCM,		//exten isr weakup reset
+	PM_RESON_SOFT,		//soft reset
+	PM_RESON_RESET_PIN,	//pin reset
 	PM_RESON_WDT,
 	PM_RESON_SYS,
 }pm_reson_t;
+
 
 extern pm_reson_t m_reset_reson;
 /*****************************************************************************************************
@@ -46,15 +47,15 @@ extern pm_reson_t m_reset_reson;
 void api_weakup_init(void);
 void api_boot(uint8_t index);
 void api_reset(void);
-void api_stop(void);
-void api_pm_init(void);
+void api_sleep(void);
+bool api_pm_init(void);
 
 //hal
 void hal_weakup_init(void);
 pm_reson_t hal_get_reset_reson(void);
 void hal_boot(uint8_t index);
 void hal_reset(void);
-void hal_stop(void);
+void hal_sleep(void);
 
 #ifdef __cplusplus
 }

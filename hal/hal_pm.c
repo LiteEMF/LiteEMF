@@ -40,7 +40,7 @@ void hal_boot(uint8_t index)
 void hal_reset(void)
 {
 }
-void hal_stop(void)
+void hal_sleep(void)
 {
 }
 

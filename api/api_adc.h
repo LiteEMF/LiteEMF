@@ -37,34 +37,34 @@ extern "C" {
 #endif
 
 #ifndef ADC_BATTERY_ID
-#define ADC_BATTERY_ID		ID_NC
+#define ADC_BATTERY_ID		ID_NULL
 #endif
 #ifndef ADC_LX_ID			
-#define ADC_LX_ID			ID_NC
+#define ADC_LX_ID			ID_NULL
 #endif
 #ifndef ADC_LY_ID	
-#define ADC_LY_ID			ID_NC
+#define ADC_LY_ID			ID_NULL
 #endif
 #ifndef ADC_RX_ID	
-#define ADC_RX_ID			ID_NC
+#define ADC_RX_ID			ID_NULL
 #endif
 #ifndef ADC_RY_ID	
-#define ADC_RY_ID			ID_NC
+#define ADC_RY_ID			ID_NULL
 #endif
 #ifndef ADC_L2_ID	
-#define ADC_L2_ID			ID_NC
+#define ADC_L2_ID			ID_NULL
 #endif
 #ifndef ADC_R2_ID	
-#define ADC_R2_ID			ID_NC
+#define ADC_R2_ID			ID_NULL
 #endif
 #ifndef ADC_EAR_DET_ID	
-#define ADC_EAR_DET_ID		ID_NC
+#define ADC_EAR_DET_ID		ID_NULL
 #endif
 
 #define ADC_CHANNEL_POS		(0)
-#define ADC_CHANNEL_MSK		0X0000FFFF
+#define ADC_CHANNEL_MASK		0X0000FFFF
 #define ADC_PULL_POS		(16)
-#define ADC_PULL_MSK		0X00FF0000
+#define ADC_PULL_MASK		0X00FF0000
 
 
 

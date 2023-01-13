@@ -32,11 +32,11 @@ extern "C" {
 
 
 #define SPI_BADU_POS		(0)
-#define SPI_BADU_MSK		0X0000FFFF		//kHZ
+#define SPI_BADU_MASK		0X0000FFFF		//kHZ
 #define SPI_READ_BIT_POS	(16)
-#define SPI_READ_BIT_MSK	0X00FF0000		//0~7, spi read addr bit 
+#define SPI_READ_BIT_MASK	0X00FF0000		//0~7, spi read addr bit 
 #define SPI_RES_POS			(24)
-#define SPI_RES_MSK			0XFF000000
+#define SPI_RES_MASK			0XFF000000
 
 
 #ifndef SPI_DELAY

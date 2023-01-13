@@ -18,7 +18,7 @@
 #include  "app/app_battery.h"
 #include  "app/app_key.h"
 #include  "api/api_tick.h"
-#if (ID_NC != ADC_BATTERY_ID)
+#if (ID_NULL != ADC_BATTERY_ID)
 #include  "api/api_adc.h"
 #endif
 /******************************************************************************************************
@@ -42,9 +42,17 @@ bat_state_t	m_battery_sta = BAT_NORMAL_STA;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-__WEAK bat_state_t app_battery_sta(uint16_t bat_vol)
+__WEAK bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol)
 {
 	bat_state_t	state;
+	uint16_t protect_vol;
+
+	if(power_on){				//上电保护电源和工作保护电源不一样
+		protect_vol = BAT_POWERON_PROTECT_VOL;
+	}else{
+		protect_vol = BAT_PROTECT_VOL;
+	}
+
 	if (KEY_USB_DET || KEY_CHARGER){
 		if ((bat_vol >= 4200) || !KEY_CHARGER){
 			state = BAT_CHARGE_DONE_STA;
@@ -52,7 +60,7 @@ __WEAK bat_state_t app_battery_sta(uint16_t bat_vol)
 			state = BAT_CHARGE_STA;
 		}
 	}else{
-		if(bat_vol <= BAT_PROTECT_VOL){
+		if(bat_vol <= protect_vol){
 			state = BAT_PROTECT_STA;
 		}else if(bat_vol <= BAT_LOW_POWER_VOL){
 			state = BAT_LOWPOWER_STA;
@@ -68,7 +76,7 @@ __WEAK uint16_t app_battery_vol(void)
 {
 	uint16_t adc,vol=4200;
 
-	#if (ID_NC != ADC_BATTERY_ID)
+	#if (ID_NULL != ADC_BATTERY_ID)
 	adc = api_adc_value(ADC_BATTERY_ID);
 	vol = api_adc_to_voltage(adc)*BAT_R;
 	#endif
@@ -90,7 +98,23 @@ uint8_t app_battery_percent(uint16_t vol)
 	return battery;
 }
 
+void app_battery_scan(bool power_on)
+{
+	uint16_t vol;
+	bat_state_t	state;
 
+	static bat_state_t	s_state;
+
+	vol = app_battery_vol();
+	state = app_battery_sta(power_on,vol);
+
+	if(s_state != state){
+		s_state = state;
+	}else{
+		m_battery_sta = state;
+	}
+	m_battery = app_battery_percent(vol);
+}
 
 /*******************************************************************
 ** Parameters:		
@@ -99,11 +123,11 @@ uint8_t app_battery_percent(uint16_t vol)
 *******************************************************************/
 bool app_battery_init(void)
 {
-	int16_t vol;
-	vol = app_battery_vol();
-	m_battery_sta = app_battery_sta(vol);
-	m_battery = app_battery_percent(vol);
-
+	uint8_t i;
+	for(i = 0; i < 6; i++){
+		app_battery_scan(false);
+		delay_ms(1);
+	}
 	return true;
 }
 
@@ -124,28 +148,16 @@ bool app_battery_deinit(void)
 *******************************************************************/
 void app_battery_handler(void)
 {
-	uint16_t vol;
-	bat_state_t	state;
-
-	static bat_state_t	s_state;
 	static timer_t battery_timer;
 
 	if ((m_tick - battery_timer) > 200){
     	battery_timer = m_tick;
 
-		vol = app_battery_vol();
-		state = app_battery_sta(vol);
-
-		if(s_state != state){
-			s_state = state;
-		}else{
-			m_battery_sta = state;
-		}
-
-		m_battery = app_battery_percent(vol);
-
+		app_battery_scan(false);
 	}
 }
+
+
 
 
 

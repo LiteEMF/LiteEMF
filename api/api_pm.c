@@ -19,7 +19,7 @@
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define SOFT_RESET_MSK		('r')
+#define SOFT_RESET_MASK		('r')
 
 /******************************************************************************************************
 **	public Parameters
@@ -50,21 +50,22 @@ void api_boot(uint8_t index)
 
 void api_reset(void)
 {
-	m_storage.reset_reson = SOFT_RESET_MSK;
+	m_storage.reset_reson = SOFT_RESET_MASK;
     hal_reset();
 }
 
-void api_stop(void)
+void api_sleep(void)
 {
-    hal_stop();
+    hal_sleep();
 }
 
-void api_pm_init(void)
+bool api_pm_init(void)
 {
     m_reset_reson = hal_get_reset_reson();
-	if(SOFT_RESET_MSK == m_storage.reset_reson){
+	if(SOFT_RESET_MASK == m_storage.reset_reson){
 		m_reset_reson = PM_RESON_SOFT;
 	}
+    return true;
 }
 
 
