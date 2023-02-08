@@ -1,12 +1,10 @@
 # LiteEMF
 
-中文 | [EN](./README-en.md)
+EN | [中文](./README.md)
 
-LiteEMF 嵌入式中间通用框架,基于HAL硬件抽象层上集成了嵌入式设备通用模块和功能。
+LiteEMF lite embedded middle framework is an embedded general framework, which integrates modules and functions common to embedded devices based on a HAL layer general hardware API.
 
-通过LiteEMF 可以快速的移植应用到任意的嵌入式平台SDK中,帮助开发者快速产品开发
-
-同时由于采样了HAL硬件抽象层,也可以帮助开发者的应用能够快速的移植到其他平台中使用, 真正实现了应用和硬件隔离
+through LiteEMF can be quickly ported to any chiand system, helping developers quickly achieve product development
 
 ---
 

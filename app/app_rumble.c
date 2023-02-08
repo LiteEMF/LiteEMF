@@ -16,7 +16,9 @@
 #if APP_RUMBLE_ENABLE
 
 #include  "app/app_rumble.h"
+#ifdef HW_PWM_MAP
 #include  "api/api_pwm.h"
+#endif
 #include  "api/api_tick.h"
 #include  "api/api_log.h"
 /******************************************************************************************************
@@ -53,7 +55,9 @@ __WEAK bool app_rumble_show(void)
 		show_timer = m_tick;
 
         for (id = 0; id < APP_RUMBLE_NUM; id++){
+            #ifdef HW_PWM_MAP
             ret &= api_pwm_set_duty(id,  m_rumble.duty[id]);
+            #endif
         }
 	}
     return ret;

@@ -48,7 +48,6 @@ trps_t m_product_trs = PRODUCT_TRS;
 int main()
 {
 	logd("main...\n");
-	dump("main",sizeof("main"));
 	return 0;
 }
 /*******************************************************************

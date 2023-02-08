@@ -9,15 +9,14 @@
 * 
 */
 
+// @ref: https://android.googlesource.com/platform/packages/modules/adb/+/HEAD/protocol.txt
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if APP_MODE_ENABLE
-#include  "template.h"
+#if APP_ADB_ENABLE
 
-
-#include "api/api_log.h"
+#include  "app/adb/app_adb.h"
 
 /******************************************************************************************************
 ** Defined
@@ -45,7 +44,7 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool template_init(void)
+bool app_adb_init(void)
 {
 	return true;
 }
@@ -55,7 +54,7 @@ bool template_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool template_deinit(void)
+bool app_adb_deinit(void)
 {
 	return true;
 }
@@ -65,7 +64,7 @@ bool template_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void template_handler(void)
+void app_adb_handler(void)
 {
 
 }

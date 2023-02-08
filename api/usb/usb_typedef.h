@@ -22,7 +22,7 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-//reference:https://www.usb.org/defined-class-codes
+// @ref:https://www.usb.org/defined-class-codes
 #define CLASS_AUDIO     			0x01
 #define CLASS_COMMUNIC  			0x02
 #define CLASS_HID       			0x03

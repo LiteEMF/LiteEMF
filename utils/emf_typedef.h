@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "stddef.h"
 
 #include "utils/emf_error.h"
 
@@ -94,6 +95,19 @@ b(high): if x is greater than b.
            (((l) & 0x0000ff00) << 8)  | \
            ((l) << 24))  
 #endif
+
+
+
+/* This structure is used for 'bytes' arrays.
+ * It has the number of bytes in the beginning, and after that an array.
+ * Note that actual structs used will have a different length of bytes array.
+ */
+#define BYTES_ARRAY_SIZE(n) ((uint16_t)n + offsetof(pb_bytes_array_t, bytes))
+typedef struct _bytes_array_t {
+    uint16_t size;
+    uint8_t bytes[1];
+}bytes_array_t;
+
 
 #ifdef __BIG_ENDIAN
     #ifndef SWAP16_L

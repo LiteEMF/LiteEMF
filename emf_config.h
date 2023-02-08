@@ -338,6 +338,9 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #ifndef APP_NFC_ENABLE
 #define APP_NFC_ENABLE			1
 #endif
+#ifndef APP_ADB_ENABLE
+#define APP_ADB_ENABLE			1
+#endif
 #ifndef APP_GPS_ENABLE
 #define APP_GPS_ENABLE			1
 #endif

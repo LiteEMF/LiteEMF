@@ -32,6 +32,8 @@ CFLAGS += -Og
 CFLAGS += -W #-Wall #-W 
 #是否开启优化掉未使用的函数和符号
 LDFLAGS += -Wl,--gc-sections
+#输出map信息
+LDFLAGS += -Wl,-Map=$(MAP_FILE)
 
 #minigw 不支持weak
 ifeq ($(OS), Windows_NT)
@@ -44,7 +46,7 @@ TARGET = LiteEMF
 TARGET_LIBA = $(addprefix $(TARGET), .a)
 ROOT_DIR := $(PWD)
 BUILD_DIR := $(ROOT_DIR)/build
-
+MAP_FILE = $(ROOT_DIR)/build/$(TARGET).map
 #搜索所有的c文件，制作所有的.c文件依赖Obj
 #PS:去掉终极目标的原始路径前缀并添加输出文件夹路径前缀(改变了依赖文件的路径前缀，需要重新指定搜索路径)
 # SRC = $(shell find ./ -type f -iname "*.c")
@@ -77,12 +79,12 @@ all: debug pre_build build link
 
 debug: 
 	@echo  "-----------------------------------echo-----------------------------------"
-	@echo  "OS = $(OS)"
+	@echo "OS = $(OS)"
 	@echo "CC = $(CC)"
 	@echo "DEFINES = $(DEFINES)"
 	@echo "SRC_DIR = $(SRC_DIR)	"
-	@echo  "ROOT_DIR = $(ROOT_DIR)"
-	@echo  "TARGET_LIBA = $(TARGET_LIBA)"
+	@echo "ROOT_DIR = $(ROOT_DIR)"
+	@echo "TARGET_LIBA = $(TARGET_LIBA)"
 	
 pre_build:debug
 	@echo  "-----------------------------------pre_build-----------------------------------"
@@ -92,7 +94,7 @@ pre_build:debug
 #在$(SUB_DIR) 目录下面执行make,-C Change to DIRECTORY before doing anything.
 build:pre_build 								
 	@echo  "-----------------------------------build-----------------------------------"
-	@for dir in $(SRC_DIR); do $(MAKE) -C $$dir ; done
+	@for dir in $(SRC_DIR); do  $(MAKE) -C $$dir ; done
 
 # 通过.o 链接生产目标执行文件	
 link:build
@@ -105,7 +107,7 @@ endif
 
 clean:
 	@echo  "-----------------------------------clean-----------------------------------"
-	rm -rf $(BUILD_DIR)/*.o
+	rm -rf $(BUILD_DIR)/*.o $(MAP_FILE)
 	rm -f *.o $(TARGET) $(TARGET_LIBA)
 
 

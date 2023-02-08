@@ -10,10 +10,9 @@
 */
 
 
-#ifndef _app_pm_h
-#define _app_pm_h
+#ifndef _app_adb_h
+#define _app_adb_h
 #include "emf_typedef.h"
-#include "api/api_pm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,42 +22,21 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef DISCONNECTED_SLEEP_TIME
-#define DISCONNECTED_SLEEP_TIME    	(3*1000*60UL)		//ms
-#endif
-#ifndef CONNECTED_SLEEP_TIME
-#define CONNECTED_SLEEP_TIME    	(15*1000*60UL)		//ms
-#endif
-#ifndef KEY_POWERON_TIME
-#define KEY_POWERON_TIME    		(0)					//ms
-#endif
 
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-typedef enum _tgpad_sta{
-	PM_STA_NORMAL,
-	PM_STA_CHARG_NOT_WORK,
-	PM_STA_RESET,
-	PM_STA_SLEEP,
-}pm_sta_t;
 
-extern pm_sta_t	m_pm_sta;
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_pm_sleep_hook(void);				//__WEAK 
-void app_pm_weakup_check(void);
-void app_boot(uint8_t index);
-void app_reset(void);
-void app_sleep(void);
-bool app_pm_init(void);
-bool app_pm_deinit(void);
-void app_pm_handler(void);
+bool app_adb_init(void);
+bool app_adb_deinit(void);
+void app_adb_handler(void);
 
 #ifdef __cplusplus
 }
