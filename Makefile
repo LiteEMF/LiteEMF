@@ -29,11 +29,13 @@ DEBUG = @
 # 7. 如果想知道上面的优化参数具体做了哪些优化，可以使用 gcc -Q --help=optimizers 命令来查询，比如下面是查询 -O3 参数开启了哪些优化：
 CFLAGS += -Og
 #开关警告
-CFLAGS += -W #-Wall #-W 
+CFLAGS += -W -Wpointer-to-int-cast
 #是否开启优化掉未使用的函数和符号
-LDFLAGS += -Wl,--gc-sections
+LDFLAGS += -Wl,--gc-sections -Wint-to-pointer-cast
 #输出map信息
 LDFLAGS += -Wl,-Map=$(MAP_FILE)
+
+
 
 #minigw 不支持weak
 ifeq ($(OS), Windows_NT)
@@ -59,6 +61,7 @@ INCLUDES = \
 	-I $(ROOT_DIR)/app \
 	-I $(ROOT_DIR)/utils\
 	-I $(ROOT_DIR)/api \
+	-I $(ROOT_DIR)/unit-test \
 	-I $(ROOT_DIR)/hal 
 
 #源文件目录
@@ -66,6 +69,7 @@ SRC_DIR = \
 	$(ROOT_DIR)/app \
 	$(ROOT_DIR)/utils \
 	$(ROOT_DIR)/api \
+	$(ROOT_DIR)/unit-test \
 	$(ROOT_DIR)/hal 
 
 #export 编译器compile
@@ -73,9 +77,17 @@ export CC AR CFLAGS DEFINES DEBUG
 #export DIR
 export ROOT_DIR BUILD_DIR INCLUDES		
 
-.PHONY: all clean debug pre_build build
+.PHONY: all clean $(SRC_DIR)
+
 #执行make指令默认参数是make all
-all: debug pre_build build link
+all: debug pre_build $(SRC_DIR)
+	@echo  "-----------------------------------link-----------------------------------"
+	$(DEBUG) $(AR) -rc $(TARGET_LIBA) $(BUILD_OBJ)
+ifneq ($(PREFIX),arm-none-eabi-)
+	$(DEBUG) $(CC) $(LDFLAGS) -o $(TARGET) $(BUILD_OBJ)
+endif
+	@echo  "make success..."
+
 
 debug: 
 	@echo  "-----------------------------------echo-----------------------------------"
@@ -90,25 +102,12 @@ pre_build:debug
 	@echo  "-----------------------------------pre_build-----------------------------------"
 	mkdir -p $(BUILD_DIR)
 	@echo "none"
-	
-#在$(SUB_DIR) 目录下面执行make,-C Change to DIRECTORY before doing anything.
-build:pre_build 								
-	@echo  "-----------------------------------build-----------------------------------"
-	@for dir in $(SRC_DIR); do  $(MAKE) -C $$dir ; done
 
-# 通过.o 链接生产目标执行文件	
-link:build
-	@echo  "-----------------------------------link-----------------------------------"
-	$(DEBUG) $(AR) -rc $(TARGET_LIBA) $(BUILD_OBJ)
-ifneq ($(PREFIX),arm-none-eabi-)
-	$(DEBUG) $(CC) $(LDFLAGS) -o $(TARGET) $(BUILD_OBJ)
-endif
-	@echo  "make success..."
+$(SRC_DIR):
+	$(MAKE) -C $@
 
 clean:
 	@echo  "-----------------------------------clean-----------------------------------"
 	rm -rf $(BUILD_DIR)/*.o $(MAP_FILE)
 	rm -f *.o $(TARGET) $(TARGET_LIBA)
-
-
 

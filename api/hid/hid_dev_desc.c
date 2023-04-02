@@ -13,8 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if HID_SUPPORT
-#include  "hid_desc.h"
+#if HIDD_SUPPORT
+#include  "hid_dev_desc.h"
 
 /******************************************************************************************************
 ** Defined
@@ -23,73 +23,78 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-#if HID_SUPPORT & BIT(HID_TYPE_GAMEPADE)
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
 static uint8c_t hid_desc_gamepad_map[] =
 {
-    #include "hid_desc_gamepad.h"
+    #include "api/hid/hid_desc_gamepad.h"
 };
 #endif
 
-#if BT_HID_SUPPORT & BIT(HID_TYPE_SWITCH)
+#if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
 static uint8c_t hid_desc_switch_bt_map[] =
 {
     #include "hid_desc_switch_bt.h"
 };
 #endif
-#if USBD_HID_SUPPORT & BIT(HID_TYPE_SWITCH)
+#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
 static uint8c_t hid_desc_switch_usb_map[] =
 {
     #include "hid_desc_switch_bt.h"
 };
 #endif
 
-#if BT_HID_SUPPORT & BIT(HID_TYPE_XBOX)				//only bt 
+#if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)				//only bt 
 static uint8c_t hid_desc_xbox_bt_map[] =
 {
     #include "hid_desc_xboxone_bt.h"
 };
 #endif
 
-#if BT_HID_SUPPORT & BIT(HID_TYPE_PS4)
+#if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 static uint8c_t hid_desc_ps4_bt_map[] =
 {
     #include "hid_desc_ps4_bt.h"
 };
 #endif
-#if USBD_HID_SUPPORT & BIT(HID_TYPE_PS4)
+#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 static uint8c_t hid_desc_ps4_usb_map[] =
 {
     #include "hid_desc_ps4_usb.h"
 };
 #endif
 
-#if	HID_SUPPORT & BIT(HID_TYPE_KB)
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
 static uint8c_t hid_desc_kb_map[] =
 {
     #include "hid_desc_keyboard.h"
 };
 #endif
-#if	HID_SUPPORT & BIT(HID_TYPE_MOUSE)
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
 static uint8c_t hid_desc_mouse_map[] =
 {
     #include "hid_desc_mouse.h"
 };
 #endif
-#if	HID_SUPPORT & BIT(HID_TYPE_CONSUMER)
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)
 static uint8c_t hid_desc_consumer_map[] =
 {
     #include "hid_desc_consumer.h"
 };
 #endif
-
-#if	HID_SUPPORT & BIT(HID_TYPE_MT)
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_TOUCH)        //单点触控
+static uint8c_t hid_desc_touch_map[] =
+{
+    #include "hid_desc_touch.h"
+};
+#endif
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MT)        //多点触控
 static uint8c_t hid_desc_mt_map[] =
 {
     #include "hid_desc_mt.h"
 };
 #endif
 
-#if	HID_SUPPORT & BIT(HID_TYPE_VENDOR)
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
 static uint8c_t hid_desc_vendor_map[] =
 {
     #include "hid_desc_vendor.h"
@@ -110,79 +115,85 @@ static uint8c_t hid_desc_vendor_map[] =
 ** Returns:	 return: report map len
 ** Description:		
 *******************************************************************/
-uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type ,uint8_t** ppmap)
+uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
 {
 	uint16_t map_len = 0;
     uint8_t i;
     switch(hid_type){
-        #if HID_SUPPORT & BIT(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
         case HID_TYPE_GAMEPADE:
-            *ppmap = hid_desc_gamepad_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_gamepad_map;
             map_len = sizeof(hid_desc_gamepad_map);
             break;
         #endif
         case HID_TYPE_SWITCH:
-            if(api_is_bt_trp(trp)){
-                #if BT_HID_SUPPORT & BIT(HID_TYPE_SWITCH)
-                *ppmap = hid_desc_switch_bt_map;
+            if(api_trp_is_bt(trp)){
+                #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_switch_bt_map;
                 map_len = sizeof(hid_desc_switch_bt_map);
                 #endif
-            }else if(api_is_usb_trp(trp)){
-                #if USBD_HID_SUPPORT & BIT(HID_TYPE_SWITCH)
-                *ppmap = hid_desc_switch_usb_map;
+            }else if(api_trp_is_usb(trp)){
+                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_switch_usb_map;
                 map_len = sizeof(hid_desc_switch_usb_map);
                 #endif
             }
             break;
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            if(api_is_bt_trp(trp)){
-                #if BT_HID_SUPPORT & BIT(HID_TYPE_PS4)
-                *ppmap = hid_desc_ps4_bt_map;
+            if(api_trp_is_bt(trp)){
+                #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps4_bt_map;
                 map_len = sizeof(hid_desc_ps4_bt_map);
                 #endif
-            }else if(api_is_usb_trp(trp)){
-                #if USBD_HID_SUPPORT & BIT(HID_TYPE_PS4)
-                *ppmap = hid_desc_ps4_usb_map;
+            }else if(api_trp_is_usb(trp)){
+                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps4_usb_map;
                 map_len = sizeof(hid_desc_ps4_usb_map);
                 #endif
             }
             break;
-        #if BT_HID_SUPPORT & BIT(HID_TYPE_XBOX)
+        #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
         case HID_TYPE_XBOX	:
-            if(api_is_bt_trp(trp)){
-                *ppmap = hid_desc_xbox_bt_map;
+            if(api_trp_is_bt(trp)){
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_bt_map;
                 map_len = sizeof(hid_desc_xbox_bt_map);
             }
             break;
         #endif
-        #if	HID_SUPPORT & BIT(HID_TYPE_KB)
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
         case HID_TYPE_KB 	:
-            *ppmap = hid_desc_kb_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_kb_map;
             map_len = sizeof(hid_desc_kb_map);
             break;
         #endif
-        #if	HID_SUPPORT & BIT(HID_TYPE_MOUSE)
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
         case HID_TYPE_MOUSE :
-            *ppmap = hid_desc_mouse_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_mouse_map;
             map_len = sizeof(hid_desc_mouse_map);
             break;
         #endif
-        #if	HID_SUPPORT & BIT(HID_TYPE_CONSUMER)
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)
         case HID_TYPE_CONSUMER	:
-            *ppmap = hid_desc_consumer_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_consumer_map;
             map_len = sizeof(hid_desc_consumer_map);
             break;
         #endif
-        #if	HID_SUPPORT & BIT(HID_TYPE_MT)
+        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_TOUCH)
+        case HID_TYPE_TOUCH	:
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_touch_map;
+            map_len = sizeof(hid_desc_touch_map);
+            break;
+        #endif
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MT)
         case HID_TYPE_MT	:
-            *ppmap = hid_desc_mt_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_mt_map;
             map_len = sizeof(hid_desc_mt_map);
             break;
         #endif
-        #if	HID_SUPPORT & BIT(HID_TYPE_VENDOR)
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
         case HID_TYPE_VENDOR	:
-            *ppmap = hid_desc_vendor_map;
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_vendor_map;
             map_len = sizeof(hid_desc_vendor_map);
             break;
         #endif

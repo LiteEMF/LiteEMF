@@ -27,8 +27,8 @@
 #ifndef m_task_tick10us
 volatile timerd_t m_task_tick10us;	//used for task tick 10us
 #endif
-#ifndef m_tick
-volatile timerd_t m_tick;			//1ms
+#ifndef m_systick
+volatile timerd_t m_systick;			//1ms
 #endif
 /*****************************************************************************************************
 **  Function
@@ -62,7 +62,7 @@ void delay_ms(uint32_t ms)
 void api_tick_init(void)
 {
 	m_task_tick10us = 0;	//10us
-	m_tick = 0;				//1ms
+	m_systick = 0;				//1ms
     hal_tick_init();
 }
 

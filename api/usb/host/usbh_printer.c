@@ -12,7 +12,12 @@
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
-#include  "utils/commander.h"
+#include "hw_config.h"
+#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+#include "api/usb/host/usbh.h"
+
+
+#include "api/api_log.h"
 
 /******************************************************************************************************
 ** Defined
@@ -35,14 +40,15 @@
 **  Function
 ******************************************************************************************************/
 
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	pclass->pdata used storage hub port numbers	
 *******************************************************************/
-bool commander_init(void)
+void usbh_printer_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-	return true;
+	logd("printer endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 }
 
 /*******************************************************************
@@ -50,9 +56,17 @@ bool commander_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool commander_deinit(void)
+error_t usbh_match_printer( uint8_t id, usbh_class_t *pclass)
 {
-	return true;
+	error_t err = ERROR_NOT_FOUND;
+
+	if ((USB_CLASS_PRINTER == pclass->itf.if_cls)){
+		if( (pclass->endpin.addr) && (pclass->endpout.addr) ){
+			err = ERROR_SUCCESS;
+		}
+	}
+
+	return err;
 }
 
 /*******************************************************************
@@ -60,12 +74,50 @@ bool commander_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void commander_handler(void)
+error_t usbh_printer_open( uint8_t id, usbh_class_t *pclass) 
 {
+    error_t err = ERROR_UNKNOW;
+	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+    if(ERROR_SUCCESS == err) pdev->class_ready = true;
+    return err;
+}
+
+error_t usbh_printer_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len)
+{
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
+	UNUSED_PARAMETER(pdesc);
+	UNUSED_PARAMETER(len);
+    return 0;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+error_t usbh_printer_deinit( uint8_t id, usbh_class_t *pclass) 
+{
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
+	return 0;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void usbh_printer_handler(uint8_t id, usbh_class_t *pclass)
+{
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
 }
 
 
+#endif
 
 
 

@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _hid_desc_h
-#define _hid_desc_h
+#ifndef _hid_dev_desc_h
+#define _hid_dev_desc_h
 #include "emf_typedef.h"
 #include "hw_config.h"
 #include "api/api_transport.h"
@@ -21,36 +21,37 @@ extern "C" {
 #endif
 
 
+
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
 
 enum {					//为了节省蓝牙服务通过宏定义枚举类型
 	DEFAULT_REPORT_ID = 0,
-	#if HID_SUPPORT & BIT(HID_TYPE_GAMEPADE)
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
 	GAMEPAD_REPORT_ID,
 	#endif
-	#if HID_SUPPORT & BIT(HID_TYPE_KB)
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
 	KB_REPORT_ID,
 	#endif
-	#if HID_SUPPORT & BIT(HID_TYPE_MOUSE)
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
 	MOUSE_REPORT_ID,
 	#endif
-	#if HID_SUPPORT & BIT(HID_TYPE_CONSUMER)
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)
 	CONSUMER_REPORT_ID,
 	#endif
-	#if HID_SUPPORT & BIT(HID_TYPE_MT)
-	MT_REPORT_ID,
+	#if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_MT) | BIT_ENUM(HID_TYPE_TOUCH))
+	TOUCH_REPORT_ID,
 	#endif
-	#if HID_SUPPORT & BIT(HID_TYPE_VENDOR)
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
 	VENDOR_REPORT_ID,
 	#endif
 	REPORT_ID_NUM,
 };
 
 
-#ifndef KB_MAX_NUM		
-#define KB_MAX_NUM					6	//stadend keyboard report key num
+#ifndef KB_MAX_NUM						//stadend keyboard report key num
+#define KB_MAX_NUM					6	
 #endif
 #ifndef KB_BIT_MAP_ENABLE		
 #define KB_BIT_MAP_ENABLE			1
@@ -59,18 +60,15 @@ enum {					//为了节省蓝牙服务通过宏定义枚举类型
 #ifndef MT_CONTACT_NUM		
 #define MT_CONTACT_NUM				5
 #endif
-#ifndef MT_X_LOGICAL_MAX	
-#define MT_X_LOGICAL_MAX			4096
+#ifndef TOUCH_X_LOGICAL_MAX	
+#define TOUCH_X_LOGICAL_MAX			4096
 #endif
-#ifndef MT_Y_LOGICAL_MAX	
-#define MT_Y_LOGICAL_MAX			4096
+#ifndef TOUCH_Y_LOGICAL_MAX	
+#define TOUCH_Y_LOGICAL_MAX			4096
 #endif
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-typedef uint8_t 	hid_type_t;		//see @ref HID_TYPE_NONE
-typedef uint16_t 	hid_types_t;	//see @ref HID_TYPE_NONE
-
 
 
 /*****************************************************************************************************

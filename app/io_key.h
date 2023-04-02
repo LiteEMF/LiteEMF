@@ -39,14 +39,117 @@ extern "C" {
 #ifndef POWER_KEY_ACTIVE
 #define POWER_KEY_ACTIVE	0
 #endif
-#ifndef POWER_KEY_PULL
-#define POWER_KEY_PULL		PIN_PULLNONE		//pin_pull_t 
+#ifndef POWER_KEY_PULL							//pin_pull_t 
+#define POWER_KEY_PULL		PIN_PULLNONE		
 #endif
-#ifndef POWER_SWITCH_KEY
-#define POWER_SWITCH_KEY	0					//used switch key
+#ifndef POWER_SWITCH_KEY						//used switch key
+#define POWER_SWITCH_KEY	0					
 #endif
 
 
+
+#ifndef KEY_POWER_GPIO
+#define KEY_POWER_GPIO 		PIN_NULL
+#endif
+#ifndef KEY_USB_DET_GPIO
+#define KEY_USB_DET_GPIO	PIN_NULL
+#endif
+#ifndef KEY_CHARGER_GPIO
+#define KEY_CHARGER_GPIO	PIN_NULL
+#endif
+#ifndef KEY_A_GPIO
+#define KEY_A_GPIO 			PIN_NULL
+#endif
+#ifndef KEY_B_GPIO
+#define KEY_B_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_C_GPIO	
+#define KEY_C_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_X_GPIO	
+#define KEY_X_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_Y_GPIO	
+#define KEY_Y_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_Z_GPIO	
+#define KEY_Z_GPIO        	PIN_NULL
+#endif
+#ifndef KEY_L1_GPIO
+#define KEY_L1_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_R1_GPIO	
+#define KEY_R1_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_L2_GPIO	
+#define KEY_L2_GPIO        	PIN_NULL
+#endif	
+#ifndef KEY_R2_GPIO	
+#define KEY_R2_GPIO        	PIN_NULL
+#endif
+#ifndef KEY_SELECT_GPIO
+#define KEY_SELECT_GPIO    	PIN_NULL
+#endif
+#ifndef KEY_START_GPIO
+#define KEY_START_GPIO		PIN_NULL
+#endif
+#ifndef KEY_HOME_GPIO
+#define KEY_HOME_GPIO		PIN_NULL
+#endif
+#ifndef KEY_L3_GPIO
+#define KEY_L3_GPIO			PIN_NULL
+#endif
+#ifndef KEY_R3_GPIO
+#define KEY_R3_GPIO			PIN_NULL
+#endif
+#ifndef KEY_CAPTURE_GPIO
+#define KEY_CAPTURE_GPIO	PIN_NULL
+#endif
+#ifndef KEY_UP_GPIO
+#define KEY_UP_GPIO			PIN_NULL
+#endif
+#ifndef KEY_DOWN_GPIO
+#define KEY_DOWN_GPIO		PIN_NULL
+#endif
+#ifndef KEY_LEFT_GPIO
+#define KEY_LEFT_GPIO		PIN_NULL
+#endif
+#ifndef KEY_RIGHT_GPIO
+#define KEY_RIGHT_GPIO		PIN_NULL
+#endif
+#ifndef KEY_MENU_GPIO
+#define KEY_MENU_GPIO		PIN_NULL
+#endif
+#ifndef KEY_MODE_GPIO
+#define KEY_MODE_GPIO		PIN_NULL
+#endif
+#ifndef KEY_FN_GPIO
+#define KEY_FN_GPIO			PIN_NULL
+#endif
+#ifndef KEY_M1_GPIO
+#define KEY_M1_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M2_GPI	
+#define KEY_M2_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M3_GPI	
+#define KEY_M3_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M4_GPI	
+#define KEY_M4_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M5_GPI	
+#define KEY_M5_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M6_GPI	
+#define KEY_M6_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M7_GPI	
+#define KEY_M7_GPIO       	PIN_NULL
+#endif	
+#ifndef KEY_M8_GPI	
+#define KEY_M8_GPIO       	PIN_NULL
+#endif
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/

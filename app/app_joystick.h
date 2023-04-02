@@ -15,7 +15,7 @@
 #include "emf_typedef.h"
 #include "emf_utils.h"
 #include "key_typedef.h"
-
+#include "api/api_adc.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

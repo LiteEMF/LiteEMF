@@ -171,17 +171,17 @@ static imu_move_t imu_static_check(void)
 	s_acc = m_acc;
 
 	if(move1){
-		if(m_tick - timer > 3000){
-			timer = m_tick;
+		if(m_systick - timer > 3000){
+			timer = m_systick;
 			is_imu_move = IMU_MOVE_NONE;
 		}
 	}else if(move2){
-		if(m_tick - timer > 3000){
-			timer = m_tick;
+		if(m_systick - timer > 3000){
+			timer = m_systick;
 			is_imu_move = IMU_MOVE_LEVE1;
 		}
 	}else{
-		timer = m_tick;
+		timer = m_systick;
 		is_imu_move = IMU_MOVE_LEVE2;
 	}
 	return is_imu_move;
@@ -204,7 +204,7 @@ static void imu_cal_handle(void)
     switch (imu_cal_sta){
     case IMU_CAL_START:
 		s_count = 0;
-		timer = m_tick;
+		timer = m_systick;
 		memset(&gyro_sum,0,sizeof(gyro_sum));
 		memset(&acc_sum,0,sizeof(acc_sum));
 		imu_cal_sta = IMU_CAL_ING;
@@ -237,7 +237,7 @@ static void imu_cal_handle(void)
 			memset(&gyro_sum,0,sizeof(gyro_sum));
 			memset(&acc_sum,0,sizeof(acc_sum));
 
-			if(m_tick - timer >= IMU_CAL_TIMEOUT){
+			if(m_systick - timer >= IMU_CAL_TIMEOUT){
 				imu_cal_sta = IMU_CAL_FAILED;
 			}
 		}
@@ -334,12 +334,12 @@ void app_imu_handler(void)
 			imu_cal_handle();
 
 			if((IMU_CAL_NONE == imu_cal_sta) && IMU_MOVE_NONE == is_imu_move){
-				if(m_tick - atuo_cal_timer > 6000){
+				if(m_systick - atuo_cal_timer > 6000){
 					imu_cal_sta = IMU_CAL_START;
 					imu_auto_cal =  true;
 				}
 			}else{
-				atuo_cal_timer = m_tick;
+				atuo_cal_timer = m_systick;
 			}
 		}
 	}

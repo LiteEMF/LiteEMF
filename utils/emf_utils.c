@@ -126,12 +126,25 @@ void int_to_bit12(uint8_t* buf, int16_t x, int16_t y)
 	buf[1] = (x >> 8) + ((y & 0x0f)<<4);
 	buf[2] = y >> 4;
 }
+void  bit12_to_uint(uint8_t* buf, uint16_t* px, uint16_t*py)
+{
+	int16_t x,y;
+	
+	x = ((uint16_t)(buf[1]&0x0f)<<8) + buf[0];
+	y = (buf[1]>>4) + ((uint16_t)buf[2]<<4);
+
+	*px = x;
+	*py = y;
+}
 void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py)
 {
 	int16_t x,y;
 	
 	x = ((uint16_t)(buf[1]&0x0f)<<8) + buf[0];
 	y = (buf[1]>>4) + ((uint16_t)buf[2]<<4);
+
+    if(x & 0X800) x |= 0XF000;
+    if(y & 0X800) y |= 0XF000;
 
 	*px = x;
 	*py = y;

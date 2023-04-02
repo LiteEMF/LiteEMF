@@ -15,9 +15,10 @@
 #include "utils/emf_mem.h"
 #include "utils/app_fifo.h"
 #include "utils/at_commander.h"
-#include "utils/commander.h"
 #include "utils/filter.h"
 #include "utils/vector.h"
+#include "utils/crc/crc.h"
+#include "utils/check_sum.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,6 +46,7 @@ int16_t constrain_int16(int32_t val);
 int8_t negative_int8(int8_t val);
 int16_t negative_int16(int16_t val);
 void int_to_bit12(uint8_t* buf, int16_t x, int16_t y);
+void  bit12_to_uint(uint8_t* buf, uint16_t* px, uint16_t*py);
 void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py);
 uint8_t get_bit_pos(uint32_t val);
 

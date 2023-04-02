@@ -48,6 +48,7 @@
     0x95, 0x03,        //   Report Count (3)
     0x75, 0x01,        //   Report Size (1)
     0x05, 0x08,        //   Usage Page (LEDs)
+    0x25, 0x01,        //   Logical Maximum (1)
     0x19, 0x01,        //   Usage Minimum (Num Lock)
     0x29, 0x03,        //   Usage Maximum (Scroll Lock)
     0x91, 0x02,        //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
@@ -57,4 +58,4 @@
 0xC0,              // End Collection
 
 
-// 59 / 61 bytes
+// 61 / 63 bytes

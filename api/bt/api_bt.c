@@ -12,7 +12,6 @@
 #if APP_BT_ENABLE
 #include "app/app_bt.h"
 #include "api/api_tick.h"
-#include "utils/commander.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************

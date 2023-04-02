@@ -51,8 +51,8 @@ __WEAK bool app_rumble_show(void)
 	uint8_t id;
 	static timer_t show_timer = 0;
 
-	if(m_tick - show_timer >= 16){
-		show_timer = m_tick;
+	if(m_systick - show_timer >= 16){
+		show_timer = m_systick;
 
         for (id = 0; id < APP_RUMBLE_NUM; id++){
             #ifdef HW_PWM_MAP
@@ -146,8 +146,8 @@ void app_rumble_handler(void)
 {
     uint8_t id;
     static timer_t rumble_timer = 0;
-    if (m_tick - rumble_timer >= 64){
-        rumble_timer = m_tick;
+    if (m_systick - rumble_timer >= 64){
+        rumble_timer = m_systick;
 
         for (id = 0; id < APP_RUMBLE_NUM; id++){
             if (rumble_ctb[id].timeout){

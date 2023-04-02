@@ -136,12 +136,12 @@ bool api_uart_deinit(uint8_t id)
 	bool ret;
 	ret = hal_uart_deinit(id);
 	if(ret){
-		emf_free(s_uart_rx_fifop[id],sizeof(app_fifo_t*));
-		emf_free(uart_rx_buf[id],uart_pa[id].rx_buf_len);
+		emf_free(s_uart_rx_fifop[id]);
+		emf_free(uart_rx_buf[id]);
 		
 		#if UART_TX_FIFO_ENABLED
-		emf_free(s_uart_tx_fifop[id],sizeof(app_fifo_t*));
-		emf_free(uart_tx_buf[id],uart_pa[id].tx_buf_len);
+		emf_free(s_uart_tx_fifop[id]);
+		emf_free(uart_tx_buf[id]);
 		#endif
 	}
 	return ret;

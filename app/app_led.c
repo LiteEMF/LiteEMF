@@ -56,17 +56,19 @@ static void show_led(void)
 	static timer_t	led_timer;
 	int8_t i = 0;
 	
-	if ((m_tick - led_timer) >= 50){
-		led_timer = m_tick;
+	if ((m_systick - led_timer) >= 50){
+		led_timer = m_systick;
 		led_tick++;
 		
 		for(i=0; i< m_led_num; i++){
-			if (0 == (led_tick % (led_ctb[i].period))){
-				led_ctb[i].turn = !led_ctb[i].turn;	
-				if(led_ctb[i].turn && led_ctb[i].times) {
-					led_ctb[i].times--;
-					if(0 == led_ctb[i].times){
-						led_ctb[i].period = LED_OFF;
+			if(0 != led_ctb[i].period){
+				if (0 == (led_tick % led_ctb[i].period)){
+					led_ctb[i].turn = !led_ctb[i].turn;	
+					if(led_ctb[i].turn && led_ctb[i].times) {
+						led_ctb[i].times--;
+						if(0 == led_ctb[i].times){
+							led_ctb[i].period = LED_OFF;
+						}
 					}
 				}
 			}

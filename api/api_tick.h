@@ -40,8 +40,8 @@ extern "C" {
 #ifndef m_task_tick10us
 extern volatile timerd_t m_task_tick10us;	//used for task tick 10us
 #endif
-#ifndef m_tick
-extern  volatile timerd_t m_tick;			//1ms
+#ifndef m_systick
+extern  volatile timerd_t m_systick;			//1ms
 #endif
 /*****************************************************************************************************
 **  Function

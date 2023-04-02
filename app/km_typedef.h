@@ -22,8 +22,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
 //keyboard page 0X04~0X81
+#define    KB_NONE      0x00
 #define    KB_A			0x04
 #define    KB_B			0x05
 #define    KB_C			0x06
@@ -222,6 +222,32 @@ extern "C" {
 #define   CONSUMER_BACK			    0X224
 
 
+
+
+typedef struct 
+{
+    uint8_t id;
+	uint8_t but;
+	int16_t x;	
+	int16_t y;	
+	int8_t w;	
+} mouse_t;
+
+typedef struct 
+{
+    uint8_t id;
+	uint8_t key[8];
+} kb_t;
+
+typedef union{
+    struct{
+        uint8_t numLock       : 1;
+        uint8_t capsLock      : 1;
+        uint8_t scrollLock    : 1;
+        uint8_t res : 5;
+    }bit;
+    uint8_t val;
+}kb_ledd_t;
 
 
 #ifdef __cplusplus

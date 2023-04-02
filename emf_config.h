@@ -29,174 +29,111 @@ extern "C" {
 #define EXTERNAL_MODULE			BIT(1)
 #endif
 
-//*********************************************************************************//
-//                                VID/PID cfg                                      //
-//*********************************************************************************//
-#ifndef CFG_VID
-#define CFG_VID				0X4353
-#endif
-#ifndef CFG_KM_PID
-#define CFG_KM_PID			0X0001
-#endif
-#ifndef CFG_MT_PID
-#define CFG_MT_PID			0X0002
-#endif
-#ifndef CFG_DINPUT_PID
-#define CFG_DINPUT_PID		0X0003
-#endif
-#ifndef CFG_XINPUT_PID
-#define CFG_XINPUT_PID		0X0004
-#endif
-#ifndef CFG_PRINTER_PID
-#define CFG_PRINTER_PID		0X0005
-#endif
-#ifndef CFG_MSD_PID
-#define CFG_MSD_PID			0X0006
-#endif
-#ifndef CFG_CDC_PID
-#define CFG_CDC_PID			0X0007
-#endif
-#ifndef CFG_AUDIO_PID
-#define CFG_AUDIO_PID		(0X0008 | AUDIO_PID_MAK)
-#endif
-#ifndef CFG_VENDOR_PID
-#define CFG_VENDOR_PID		0X000F
-#endif
-#ifndef AUDIO_PID_MAK
-#define AUDIO_PID_MAK		0X0010
-#endif
-
-
-//TODO
-#ifndef USB_CFG_VID
-#define USB_CFG_VID			CFG_VID
-#endif
-#ifndef USB_KM_PID
-#define USB_KM_PID			CFG_KM_PID
-#endif
-#ifndef USB_MT_PID
-#define USB_MT_PID			CFG_MT_PID
-#endif
-#ifndef USB_DINPUT_PID
-#define USB_DINPUT_PID		CFG_DINPUT_PID
-#endif
-#ifndef USB_XINPUT_PID
-#define USB_XINPUT_PID		CFG_XINPUT_PID
-#endif
-#ifndef USB_PRINTER_PID
-#define USB_PRINTER_PID		CFG_PRINTER_PID
-#endif
-#ifndef USB_MSD_PID
-#define USB_MSD_PID			CFG_MSD_PID
-#endif
-#ifndef USB_CDC_PID
-#define USB_CDC_PID			CFG_CDC_PID
-#endif
-#ifndef USB_AUDIO_PID
-#define USB_AUDIO_PID		(CFG_AUDIO_PID | AUDIO_PID_MAK)
-#endif
-#ifndef USB_VENDOR_PID
-#define USB_VENDOR_PID		CFG_VENDOR_PID
+#ifndef VID_DEFAULT
+#define VID_DEFAULT				0X4353
 #endif
 
 
 //*********************************************************************************//
-//                                模式配置                                    	   //
-//*********************************************************************************//
-/*------------------------mode-----------------------------*/
-#define	MODE_KM				0
-#define	MODE_CKM			1
-#define	MODE_GP				2
-#define	MODE_MT				3
-#define	MODE_CDC			4
-#define	MODE_AUDIO			5
-#define	MODE_MSD			6
-#define	MODE_VENDOR			7
-/*------------------------transport-----------------------------*/
-#define	TR_BLE				0
-#define	TR_EDR				1
-#define	TR_BLEC				2
-#define	TR_EDRC				3
-#define	TR_BLE_RF			4				//BLE模拟2.4G	
-#define	TR_BLEC_RF			5
-#define	TR_RF				6
-#define	TR_RFC				7
-#define	TR_USBD				8
-#define	TR_USBH				9
-#define	TR_UART				10
-
-/*------------------------sub mode-----------------------------*/
-typedef enum {
-	DINPUT_MODE=0,	
-	SWITCH_MODE,	
-	PS3_MODE,	
-	PS4_MODE,	
-	PS5_MODE,
-	X360_MODE,
-	XBOX_MODE,
-}gpad_sub_mode_t;
-
-#ifndef   PRODUCT_MODE						//产品模式
-#error	  "must defined PRODUCT_MODE"
-#endif
-#ifndef   PRODUCT_MODE_SUPPORT				//支持的产品模式
-#error	  "must defined PRODUCT_MODE_SUPPORT"
-#endif
-#ifndef   PRODUCT_SUB_MODE					//产品子模式
-#error	  "must defined PRODUCT_SUB_MODE"
-#endif
-#ifndef   PRODUCT_TRS					//产品传输层支持
-#error	  "must defined PRODUCT_TRS"
-#endif
-#ifndef   PRODUCT_ATT_SUPPORT
-#define   PRODUCT_ATT_SUPPORT   			0
-#endif
-
-//*********************************************************************************//
-//                          传输支持的设备类型                               		//
+//                          支持的设备类型                               		//
 //*********************************************************************************//
 /*------------------------type defined-----------------------------*/
-//transport type
-#define TYPE_VENDOR    			0
-#define TYPE_AUTO				1
-#define TYPE_HID				2
-#define TYPE_AUDIO     			3
-#define TYPE_PRINTER   			4
-#define TYPE_MSD   				5		//mass storage devices
-#define TYPE_HUB       			6
-#define TYPE_CDC				7		// Communications Device Class
-#define TYPE_ADB          		8
-#define TYPE_USBMUXD	   		9
-#define TYPE_AOA          		10
-#define TYPE_IAP2				11
-#define DEV_TYPE_NONE			16		//type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)
+//dev type
+#define DEF_DEV_TYPE_HID				0
+#define DEF_DEV_TYPE_AUDIO     			1
+#define DEF_DEV_TYPE_PRINTER   			2
+#define DEF_DEV_TYPE_MSD   				3		//mass storage devices
+#define DEF_DEV_TYPE_HUB       			4
+#define DEF_DEV_TYPE_CDC				5		// Communications Device Class
+//6,7
+#define DEF_DEV_TYPE_VENDOR    			8
+#define DEF_DEV_TYPE_ADB          		9
+#define DEF_DEV_TYPE_AOA          		10
+#define DEF_DEV_TYPE_USBMUXD	   		11
+#define DEF_DEV_TYPE_IAP2				12
+#define DEF_DEV_TYPE_AUTO				15
+#define DEF_DEV_TYPE_NONE				16		//type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)
+//dev type
+typedef enum{
+	DEV_TYPE_HID	=	DEF_DEV_TYPE_HID	,	
+	DEV_TYPE_AUDIO	=	DEF_DEV_TYPE_AUDIO  , 
+	DEV_TYPE_PRINTER=	DEF_DEV_TYPE_PRINTER,
+	DEV_TYPE_MSD	=	DEF_DEV_TYPE_MSD   	,   	
+	DEV_TYPE_HUB	=	DEF_DEV_TYPE_HUB    ,     
+	DEV_TYPE_CDC	=	DEF_DEV_TYPE_CDC	,	
+	//
+	DEV_TYPE_VENDOR = 	DEF_DEV_TYPE_VENDOR , 
+	DEV_TYPE_ADB	=	DEF_DEV_TYPE_ADB    ,     
+	DEV_TYPE_AOA	=	DEF_DEV_TYPE_AOA    ,	    
+	DEV_TYPE_USBMUXD=	DEF_DEV_TYPE_USBMUXD,	
+	DEV_TYPE_IAP2	=	DEF_DEV_TYPE_IAP2	,		
+
+	DEV_TYPE_AUTO	=	DEF_DEV_TYPE_AUTO	,
+	DEV_TYPE_NONE 	= 	DEF_DEV_TYPE_NONE	,
+}dev_type_t;
+
 //hid type
-#define HID_TYPE_GAMEPADE		0
-#define HID_TYPE_SWITCH			1
-#define HID_TYPE_PS3			2
-#define HID_TYPE_PS4			3
-#define HID_TYPE_PS5			4
-#define HID_TYPE_X360			5
-#define HID_TYPE_XBOX			6
-#define HID_TYPE_KB 			7
-#define HID_TYPE_MOUSE    		8
-#define HID_TYPE_CONSUMER    	9
-#define HID_TYPE_MT				10
+#define DEF_HID_TYPE_VENDOR			0
+#define DEF_HID_TYPE_KB 			1
+#define DEF_HID_TYPE_MOUSE    		2
+#define DEF_HID_TYPE_CONSUMER    	3
+#define DEF_HID_TYPE_TOUCH			4
+#define DEF_HID_TYPE_MT				5
+#define DEF_HID_TYPE_GAMEPADE		6
+#define DEF_HID_TYPE_X360			7
+#define DEF_HID_TYPE_XBOX			8
+#define DEF_HID_TYPE_SWITCH			9
+#define DEF_HID_TYPE_PS3			10
+#define DEF_HID_TYPE_PS4			11
+#define DEF_HID_TYPE_PS5			12
+//RES
+#define DEF_HID_TYPE_NONE 			16
 
-#define HID_TYPE_VENDOR			15
-#define HID_TYPE_NONE    		16	//hid type none0 == ((uint16_t)BIT(DEV_TYPE_NONE)
+//hid type
+typedef enum{
+	HID_TYPE_VENDOR		=	DEF_HID_TYPE_VENDOR		,
+	HID_TYPE_KB 		=	DEF_HID_TYPE_KB 		,
+	HID_TYPE_MOUSE    	=	DEF_HID_TYPE_MOUSE    	,
+	HID_TYPE_CONSUMER   =	DEF_HID_TYPE_CONSUMER   ,
+	HID_TYPE_TOUCH		=	DEF_HID_TYPE_TOUCH		,		//单独触控
+	HID_TYPE_MT			=	DEF_HID_TYPE_MT			,		//多点触控
+	HID_TYPE_GAMEPADE	=	DEF_HID_TYPE_GAMEPADE	,
+	HID_TYPE_X360		=	DEF_HID_TYPE_X360		,
+	HID_TYPE_XBOX		=	DEF_HID_TYPE_XBOX		,
+	HID_TYPE_SWITCH		=	DEF_HID_TYPE_SWITCH		,
+	HID_TYPE_PS3		=	DEF_HID_TYPE_PS3		,
+	HID_TYPE_PS4		=	DEF_HID_TYPE_PS4		,
+	HID_TYPE_PS5		=	DEF_HID_TYPE_PS5		,
+	//
+	HID_TYPE_NONE    	=	DEF_HID_TYPE_NONE		,
+}hid_type_t;
 
-#define HID_SWITCH_MASK			BIT(HID_TYPE_SWITCH)
-#define HID_PS_MASK				(BIT(HID_TYPE_PS3) | BIT(HID_TYPE_PS4) | BIT(HID_TYPE_PS5))
-#define HID_XBOX_MASK			(BIT(HID_TYPE_X360) | BIT(HID_TYPE_XBOX))
+typedef struct{
+	dev_type_t dev;
+	hid_type_t hid;
+}emf_type_t;
+
+#define HID_SWITCH_MASK			BIT_ENUM(HID_TYPE_SWITCH)
+#define HID_PS_MASK				(BIT_ENUM(HID_TYPE_PS3) | BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5))
+#define HID_XBOX_MASK			(BIT_ENUM(HID_TYPE_X360) | BIT_ENUM(HID_TYPE_XBOX))
 
 
-/*------------------------transport type support-----------------------------*/
-#ifndef BLE_TYPE_SUPPORT		
-#define BLE_TYPE_SUPPORT		0				//不能同时支持内部和外部蓝牙所以定义一个就可以
+/*------------------------dev type default-----------------------------*/
+#ifndef   DEV_TRPS_DEFAULT						//默认传输类型
+#define   DEV_TRPS_DEFAULT				0
 #endif
-#ifndef BLE_RF_TYPE_SUPPORT		
-#define BLE_RF_TYPE_SUPPORT		0				//不能同时支持内部和外部蓝牙所以定义一个就可以
+#ifndef   DEV_TYPES_DEFAULT						//默认设备类型
+#define   DEV_TYPES_DEFAULT				0
+#endif
+#ifndef   HID_TYPES_DEFAULT						//默认HID设备类型
+#define   HID_TYPES_DEFAULT				0
+#endif
+//dev type support dev_type_t
+#ifndef BLE_TYPE_SUPPORT						//不能同时支持内部和外部蓝牙所以定义一个就可以
+#define BLE_TYPE_SUPPORT		0				
+#endif
+#ifndef BLE_RF_TYPE_SUPPORT						//不能同时支持内部和外部蓝牙所以定义一个就可以
+#define BLE_RF_TYPE_SUPPORT		0				
 #endif
 #ifndef EDR_TYPE_SUPPORT		
 #define EDR_TYPE_SUPPORT		0
@@ -216,7 +153,7 @@ typedef enum {
 #ifndef USBH_TYPE_SUPPORT		
 #define USBH_TYPE_SUPPORT		0
 #endif
-//dev hid type support
+//dev hid type support	hid_type_t
 #ifndef BLE_HID_SUPPORT
 #define BLE_HID_SUPPORT			0
 #endif
@@ -250,21 +187,16 @@ typedef enum {
 
 #define BT_TYPE_SUPPORT		(BLE_TYPE_SUPPORT | BLE_RF_TYPE_SUPPORT | EDR_TYPE_SUPPORT)
 #define BTC_TYPE_SUPPORT	(BLEC_TYPE_SUPPORT | BLEC_RF_TYPE_SUPPORT | EDRC_TYPE_SUPPORT)
-
 #define BT_HID_SUPPORT		(BLE_HID_SUPPORT | BLE_RF_HID_SUPPORT | EDR_HID_SUPPORT)
 #define BTC_HID_SUPPORT		(BLEC_HID_SUPPORT | BLEC_RF_HID_SUPPORT | EDRC_HID_SUPPORT)
-
-#define HID_SUPPORT			(BT_HID_SUPPORT | USBD_HID_SUPPORT)
-
-
-// extern uint16_t usbd_types;
-// extern uint16_t usbd_hid_types;
-
-// extern uint16_t usbh_types;
-// extern uint16_t usbh_hid_types;
-// extern uint16_t aoa_hid_types;
-// extern uint16_t iap_hid_types;
-
+//hid device support宏定义预编译,必须使用 BIT_ENUM(enum)
+#ifndef HIDD_SUPPORT
+#define HIDD_SUPPORT		(BT_HID_SUPPORT | USBD_HID_SUPPORT | AOA_HID_SUPPORT | IAP2_HID_SUPPORT)		
+#endif
+//hid host support宏定义预编译,必须使用 BIT_ENUM(enum)	
+#ifndef HIDH_SUPPORT
+#define HIDH_SUPPORT		(BTC_HID_SUPPORT | USBH_HID_SUPPORT)		
+#endif
 
 //*********************************************************************************//
 //                                 蓝牙配置                                   	  //
@@ -273,29 +205,29 @@ typedef enum {
 disable: 0
 enable: INTER_MODULE,EXTERNAL_MODULE
 */
-#ifndef RF_ENABLE
-#define RF_ENABLE 			0		//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
+#ifndef RF_ENABLE					//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
+#define RF_ENABLE 			0
 #endif
-#ifndef RFC_ENABLE
-#define RFC_ENABLE 			0		//rf central
+#ifndef RFC_ENABLE					//rf central
+#define RFC_ENABLE 			0
 #endif
-#ifndef BLE_ENABLE
-#define BLE_ENABLE			0		//ble peripheral
+#ifndef BLE_ENABLE					//ble peripheral
+#define BLE_ENABLE			0
 #endif	
-#ifndef BLEC_ENABLE	
-#define BLEC_ENABLE			0		//ble central
+#ifndef BLEC_ENABLE					//ble central
+#define BLEC_ENABLE			0
 #endif
-#ifndef BLE_RF_ENABLE	
-#define BLE_RF_ENABLE		0		//ble peripheral 模拟2.4G
+#ifndef BLE_RF_ENABLE				//ble peripheral 模拟2.4G
+#define BLE_RF_ENABLE		0
 #endif	
-#ifndef BLEC_RF_ENABLE	
-#define BLEC_RF_ENABLE		0		//ble central
+#ifndef BLEC_RF_ENABLE				//ble central
+#define BLEC_RF_ENABLE		0
 #endif	
-#ifndef EDR_ENABLE	
-#define EDR_ENABLE			0		//edr peripheral
+#ifndef EDR_ENABLE					//edr peripheral
+#define EDR_ENABLE			0
 #endif	
-#ifndef EDRC_ENABLE	
-#define EDRC_ENABLE			0		//edr central
+#ifndef EDRC_ENABLE					//edr central
+#define EDRC_ENABLE			0
 #endif	
 
 #define BT_ENABLE			(BLE_ENABLE  | BLE_RF_ENABLE | EDR_ENABLE)
@@ -305,7 +237,12 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 //*********************************************************************************//
 //                       	USB			                  						   //
 //*********************************************************************************//
-
+#ifndef APP_USBD_ENABLE
+#define APP_USBD_ENABLE			1
+#endif
+#ifndef APP_USBH_ENABLE
+#define APP_USBH_ENABLE			1
+#endif
 
 
 //*********************************************************************************//
@@ -326,6 +263,9 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #ifndef APP_BATTERY_ENABLE
 #define APP_BATTERY_ENABLE		1
 #endif
+#ifndef APP_PM_ENABLE
+#define APP_PM_ENABLE			1
+#endif
 #ifndef APP_RUMBLE_ENABLE
 #define APP_RUMBLE_ENABLE		1
 #endif
@@ -337,9 +277,6 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #endif
 #ifndef APP_NFC_ENABLE
 #define APP_NFC_ENABLE			1
-#endif
-#ifndef APP_ADB_ENABLE
-#define APP_ADB_ENABLE			1
 #endif
 #ifndef APP_GPS_ENABLE
 #define APP_GPS_ENABLE			1
@@ -354,36 +291,14 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #define APP_BT_ENABLE		(BT_ENABLE | BTC_ENABLE | RF_ENABLE | RFC_ENABLE)
 #define APP_USB_ENABLE		(USBD_ENABLE | USBH_ENABLE)
 
+#ifndef APP_SOFT_TIMER_ENABLE
+#define APP_SOFT_TIMER_ENABLE			1
+#endif
 
+#ifndef API_AUDIO_ENABLE
+#define API_AUDIO_ENABLE				1
+#endif
 
-/*-------------------------transport link----------------------------*/
-#ifndef TR_BLE_ENABLE
-#define TR_BLE_ENABLE		0
-#endif
-#ifndef TR_EDR_ENABLE
-#define TR_EDR_ENABLE		0
-#endif
-#ifndef TR_BLEC_ENABLE
-#define TR_BLEC_ENABLE		0
-#endif
-#ifndef TR_EDRC_ENABLE
-#define TR_EDRC_ENABLE		0
-#endif
-#ifndef TR_RF_ENABLE
-#define TR_RF_ENABLE		0
-#endif
-#ifndef TR_RFC_ENABLE
-#define TR_RFC_ENABLE		0
-#endif
-#ifndef TR_HUART_ENABLE
-#define TR_HUART_ENABLE		1
-#endif
-#ifndef TR_USBD_ENABLE
-#define TR_USBD_ENABLE		0
-#endif
-#ifndef TR_USBH_ENABLE
-#define TR_USBH_ENABLE		0
-#endif
 
 
 

@@ -150,8 +150,8 @@ void app_battery_handler(void)
 {
 	static timer_t battery_timer;
 
-	if ((m_tick - battery_timer) > 200){
-    	battery_timer = m_tick;
+	if ((m_systick - battery_timer) > 200){
+    	battery_timer = m_systick;
 
 		app_battery_scan(false);
 	}

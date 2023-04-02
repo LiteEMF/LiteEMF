@@ -13,10 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if 1
+#if APP_PM_ENABLE
 #include  "app/app_pm.h"
 #include "api/api_tick.h"
-#include "utils/commander.h"
 #include "api/api_storage.h"
 
 #ifdef HW_ADC_MAP
@@ -53,7 +52,7 @@
 #include "app/wifi/app_wifi.h"
 #endif
 #if APP_USB_ENABLE
-#include "usb/app_otg.h"
+#include "usb/api/usb/device/usbd.h"
 #endif
 #if APP_BT_ENABLE
 #include "app_bt.h"
@@ -102,6 +101,7 @@ void app_pm_weakup_check(void)
 	#if (APP_BATTERY_ENABLE) && (KEY_POWER_GPIO)
 	if((PM_RESON_POR == m_reset_reson) || (PM_RESON_VCM == m_reset_reson)){
 		if(KEY_POWER){				//按键开机	
+			#if KEY_POWERON_TIME
 			for(i=0; i<KEY_POWERON_TIME; i++){
 				delay_ms(1);
 
@@ -109,6 +109,7 @@ void app_pm_weakup_check(void)
 					api_sleep();
 				}
 			}
+			#endif
 		}else{
 			if((BAT_CHARGE_STA == m_battery_sta) || (BAT_CHARGE_DONE_STA == m_battery_sta)){
 				app_sleep();
@@ -164,7 +165,7 @@ bool app_pm_init(void)
 *******************************************************************/
 bool app_pm_deinit(void)
 {
-	s_pm_timer = m_tick;
+	s_pm_timer = m_systick;
 
 	if(PM_STA_SLEEP == m_pm_sta){
 		#ifdef HW_ADC_MAP
@@ -205,15 +206,15 @@ void app_pm_handler(void)
 
 	static bool s_dev_connected = false;
 
-	if((m_tick - s_pm_timer) > 100){
-		s_pm_timer = m_tick;
+	if((m_systick - s_pm_timer) > 100){
+		s_pm_timer = m_systick;
 
 		#if APP_KEY_ENABLE
 		if( m_app_key.key ){
-			m_pm_sleep_timer = m_tick;
+			m_pm_sleep_timer = m_systick;
 		}
 		if(m_app_stick_key){
-			m_pm_sleep_timer = m_tick;
+			m_pm_sleep_timer = m_systick;
         }
 		#endif
 
@@ -248,11 +249,11 @@ void app_pm_handler(void)
 
 				if(s_dev_connected != dev_connected){
 					s_dev_connected = dev_connected;
-					m_pm_sleep_timer = m_tick;
+					m_pm_sleep_timer = m_systick;
 				}
 				
-				if(m_tick - m_pm_sleep_timer > sleep_timeout){
-					m_pm_sleep_timer = m_tick;
+				if(m_systick - m_pm_sleep_timer > sleep_timeout){
+					m_pm_sleep_timer = m_systick;
 					logd("m_pm_sleep_timer. %d\n", sleep_timeout);
 					app_sleep();	
 				}

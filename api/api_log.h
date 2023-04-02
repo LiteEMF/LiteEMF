@@ -44,7 +44,7 @@ extern "C" {
 #if defined   (__C51__) 		//Note c51 log must be on one line
 	#if INFO_LOG_ENABLE && LOG_ENABLE
 		#define logi          	HAL_PRINTF
-		#define dumpi         	dump
+		#define dumpi         	api_dump
 	#else
 		#define logi          	/##/
 		#define dumpi			/##/
@@ -52,7 +52,7 @@ extern "C" {
 
 	#if DEBUG_LOG_ENABLE && LOG_ENABLE
 		#define logd          	HAL_PRINTF
-		#define dumpd         	dump
+		#define dumpd         	api_dump
 	#else
 		#define logd          	/##/
 		#define dumpd			/##/
@@ -60,7 +60,7 @@ extern "C" {
 
 	#if ERR_LOG_ENABLE && LOG_ENABLE
 		#define loge          	HAL_PRINTF
-		#define dumpe         	dump
+		#define dumpe         	api_dump
 	#else
 		#define loge          	/##/
 		#define dumpe			/##/
@@ -80,7 +80,7 @@ extern "C" {
 #else
 	#if INFO_LOG_ENABLE && LOG_ENABLE
 		#define logi(format, ...)       HAL_PRINTF(format , ## __VA_ARGS__)
-        #define dumpi                   dump
+        #define dumpi                   api_dump
 	#else
 		#define logi(fmt,args...)
         #define dumpi(fmt,args...)
@@ -88,7 +88,7 @@ extern "C" {
 
 	#if DEBUG_LOG_ENABLE && LOG_ENABLE
 		#define logd(format, ...)       HAL_PRINTF(format , ## __VA_ARGS__)
-		#define dumpd                   dump
+		#define dumpd                   api_dump
 	#else
 		#define logd(fmt,args...)
         #define dumpd(fmt,args...)
@@ -96,7 +96,7 @@ extern "C" {
 
 	#if ERR_LOG_ENABLE && LOG_ENABLE
 		#define loge(format, ...)       HAL_PRINTF(format , ## __VA_ARGS__)
-		#define dumpe                   dump
+		#define dumpe                   api_dump
 	#else
 		#define loge(fmt,args...)
 		#define dumpe(fmt,args...)
@@ -141,8 +141,10 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-extern void dump(void const *buf, uint16_t len);				//WEAK
+extern void api_dump(void const *buf, uint16_t len);				//WEAK
 
+//hal
+extern bool hal_dump(void const *buf, uint16_t len);
 #ifdef __cplusplus
 }
 #endif

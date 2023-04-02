@@ -13,6 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
+
+#ifdef HW_TIMER_MAP
 #include  "api/api_timer.h"
 
 /******************************************************************************************************
@@ -27,6 +29,8 @@
 **	static Parameters
 *******************************************************************************************************/
 
+const_t timer_map_t m_timer_map[] = HW_TIMER_MAP;          
+uint8c_t m_timer_num = countof(timer_map_t);
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -54,8 +58,22 @@ bool api_timer_deinit(uint8_t id)
 	return hal_timer_deinit(id);
 }
 
+void api_timers_init(void)
+{
+	uint8_t id;
+	for(id=0; id<m_timer_num; id++){
+		api_timer_init(id,m_timer_map[id].period);
+	}   
+}
+void api_timers_deinit(void)
+{
+	uint8_t id;
+	for(id=0; id<m_timer_num; id++){
+		api_timer_deinit(id);
+	}   
+}
 
-
+#endif
 
 
 

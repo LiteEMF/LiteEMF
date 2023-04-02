@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 #ifndef APP_RUMBLE_NUM
-#define APP_RUMBLE_NUM				2
+#define APP_RUMBLE_NUM				4
 #endif
 
 #ifndef APP_RUMBLE_SYNC_TIMES

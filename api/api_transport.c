@@ -22,6 +22,8 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
+uint16_t m_trps = DEV_TRPS_DEFAULT;
+
 
 
 /******************************************************************************************************
@@ -52,14 +54,59 @@ bool api_transporte_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool api_is_usb_trp(trp_t trp)
+bool api_trp_is_usb(trp_t trp)
 {	
 	return ((TR_USBD == trp) || (TR_USBH == trp));
 }
 
-bool api_is_bt_trp(trp_t trp)
+bool api_trp_is_bt(trp_t trp)
 {	
 	return (TR_RFC >= trp);
+}
+
+uint16_t api_get_transport_mtu(trp_handle_t* phandle)
+{
+	return 0;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t size)
+{
+	bool ret = true;
+	if (size <= 0)			return false;
+	if (NULL == buf)		return false;
+
+	switch(phandle->trp){
+		case TR_BLE	:
+			break;
+		case TR_EDR	:
+			break;
+		case TR_BLEC:
+			break;	
+		case TR_EDRC:
+			break;	
+		case TR_BLE_RF:
+			break;
+		case TR_BLEC_RF:
+			break;
+		case TR_RF:
+			break;
+		case TR_RFC:
+			break;
+		case TR_USBD:
+			break;	
+		case TR_USBH:
+			break;	
+		case TR_UART:
+			break;	
+		default:
+			break;
+	}
+	return ret;
 }
 
 /*******************************************************************

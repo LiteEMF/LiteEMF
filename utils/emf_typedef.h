@@ -36,15 +36,21 @@ extern "C" {
 #ifndef TRUE
 #define TRUE 	true
 #endif
+#ifndef _STR					//转义宏,防止宏定义提前展开
+#define _STR(arg)  #arg
+#endif
+#ifndef STR						//将任意输入转换为字符串
+#define STR(arg)  _STR(arg)
+#endif
 #define NOT(a)	 ((bool)!(a))
 #ifndef BIT
 #define BIT(n)              (1UL << (n))
 #endif
-#ifndef _STR
-#define _STR(arg)  #arg      //转义宏,防止宏定义提前展开
+#ifndef DEF_ENUM
+#define DEF_ENUM(e)	(DEF_##e)
 #endif
-#ifndef STR
-#define STR(arg)  _STR(arg)     //将任意输入转换为字符串
+#ifndef BIT_ENUM			//枚举无法在预编译展开,定义DEF_xxx, 使用BIT_ENUM(xxx)展开枚举用于枚举的预编译处理
+#define BIT_ENUM(e)			(BIT(DEF_##e))
 #endif
 #ifndef BOOL_SET
 #define BOOL_SET(a)		( (0 == (a))? false:true)
@@ -61,6 +67,30 @@ extern "C" {
 #ifndef countof
 #define countof(a) (sizeof(a) / sizeof(*(a)))
 #endif
+
+// import from include/linux
+#ifndef  offsetof
+	#ifdef __compiler_offsetof
+		#define offsetof(TYPE,MEMBER) __compiler_offsetof(TYPE,MEMBER)
+	#else
+		#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+	#endif
+#endif
+/**
+* container_of - cast a member of a structure out to the containing structure
+* @ptr:        the pointer to the member.
+* @type:       the type of the container struct this is embedded in.
+* @member:     the name of the member within the struct.
+* @example:
+			test_t test;
+			test_t *p = container_of(&test.list, test_t,list);
+*
+*/
+#ifndef container_of
+#define container_of(ptr, type, memb) \
+		((type *)((char *)(ptr) - offsetof(type, memb)))
+#endif
+
 /*
 Constrains a number to be within a range return:
 x: if x is between a and b.
@@ -80,6 +110,12 @@ b(high): if x is greater than b.
 #define FLD2VAL(field_str, value) (((uint32_t)(value)&(field_str##_MASK)) >> (field_str##_POS))
 #endif
 
+#ifndef U16
+#define U16(msb,lsb)	( ((uint16_t)(msb) << 8) | (lsb) )
+#endif
+#ifndef U32
+#define U32(msb,msbl,lsbh,lsb)	( ((uint32_t)(msb) << 24) | ((uint32_t)(msbl) << 16) | ((uint32_t)(lsbh) << 8) | (lsb) )
+#endif
 
 
 #ifndef SWAP16
@@ -138,11 +174,7 @@ typedef struct _bytes_array_t {
 #endif
 
 #ifndef UNUSED_VARIABLE
-	#if defined(__C51__)
-	#define UNUSED_VARIABLE(X)  (X = X)
-	#else
 	#define UNUSED_VARIABLE(X)  ((void)(X))
-	#endif
 #endif
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(X) UNUSED_VARIABLE(X)
@@ -278,5 +310,6 @@ typedef struct _bytes_array_t {
 #ifdef __cplusplus
 }
 #endif
+
 #endif
 

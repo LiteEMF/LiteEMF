@@ -168,7 +168,7 @@ bool api_storage_sync(void)
 	bool ret = false;
     ret = api_storage_write_map(s_map_index, m_storage_map, sizeof(m_storage_map));
 	is_stg_auto_sync = !ret;
-	storage_timer = m_tick;
+	storage_timer = m_systick;
 	return ret;
 }
 bool api_storage_sync_complete(void)
@@ -179,7 +179,7 @@ bool api_storage_sync_complete(void)
 
 void api_storage_auto_sync(void)
 {
-    storage_timer = m_tick;
+    storage_timer = m_systick;
 	is_stg_auto_sync = true;
 }
 
@@ -198,7 +198,7 @@ bool api_storage_init(void)
 void api_storage_handler(void)
 {
     if(is_stg_auto_sync){
-        if(m_tick - storage_timer >= API_STORAGE_TIME){
+        if(m_systick - storage_timer >= API_STORAGE_TIME){
             if(api_storage_sync()){
             	is_stg_auto_sync = false;
 			}

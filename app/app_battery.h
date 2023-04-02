@@ -25,8 +25,8 @@ extern "C" {
 #ifndef BAT_R		//(R1+R2)/R1
 #define	BAT_R     	(2/1)
 #endif
-#ifndef	BAT_PROTECT_VOL
-#define	BAT_PROTECT_VOL     			3350		//mv
+#ifndef	BAT_PROTECT_VOL					//mv
+#define	BAT_PROTECT_VOL     			3350
 #endif
 #ifndef	BAT_POWERON_PROTECT_VOL
 #define	BAT_POWERON_PROTECT_VOL			3400     
@@ -65,6 +65,7 @@ void app_battery_handler(void);
 #ifdef __cplusplus
 }
 #endif
+
 #endif
 
 

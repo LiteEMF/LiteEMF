@@ -47,11 +47,11 @@ void* emf_malloc(uint32_t size)
 	}
 	return p;
 }
-void emf_free(void* p,uint32_t size)
+void emf_free(void* p)
 {
 	if(NULL != p){
 		free(p);
-		s_mempoll_used -= size;
+		// s_mempoll_used -= size;
 		p = NULL;
 	}
 }

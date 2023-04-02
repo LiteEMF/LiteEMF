@@ -90,8 +90,8 @@ bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint16_t mtu,uint16_t fifo_len)
 	fifo_buf = (uint8_t*)emf_malloc(fifo_len);
 	tx_buf = (uint8_t*)emf_malloc(mtu);
 	if((NULL == fifo_buf) || (NULL == tx_buf)){
-		emf_free((void*)fifo_buf,fifo_len);
-		emf_free((void*)tx_buf,mtu);
+		emf_free((void*)fifo_buf);
+		emf_free((void*)tx_buf);
 		return false;
 	}
 
@@ -104,8 +104,8 @@ bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint16_t mtu,uint16_t fifo_len)
 }
 bool bt_tx_fifo_deinit(bt_tx_fifo_t* txp, uint16_t mtu,uint16_t fifo_len)
 {
-	emf_free(txp->tx_buf,mtu);
-	emf_free(txp->fifo.p_buf,fifo_len);
+	emf_free(txp->tx_buf);
+	emf_free(txp->fifo.p_buf);
 	memset(&txp,0,sizeof(bt_tx_fifo_t));
 	return true;
 }
@@ -220,38 +220,41 @@ bool app_bt_get_mac(bt_t bt, uint8_t *buf )		//这里高3byte是public地址,和
  	#if (BT_TYPE_SUPPORT & BIT(TYPE_HID))					//优化代码,不支持HID不编译
 	if(bt_ctbp->types & BIT(TYPE_HID)){
 		switch(bt_ctbp->hid_types){
-			case BIT(HID_TYPE_GAMEPADE):
+			case BIT_ENUM(HID_TYPE_GAMEPADE):
 				base_mac[2] += HID_TYPE_GAMEPADE;
 				break;
-			case BIT(HID_TYPE_SWITCH):
+			case BIT_ENUM(HID_TYPE_SWITCH):
 				base_mac[2] += HID_TYPE_SWITCH;
 				break;
-			case BIT(HID_TYPE_PS3)	:
+			case BIT_ENUM(HID_TYPE_PS3)	:
 				base_mac[2] += HID_TYPE_PS3;
 				break;
-			case BIT(HID_TYPE_PS4)	:
+			case BIT_ENUM(HID_TYPE_PS4)	:
 				base_mac[2] += HID_TYPE_PS4;
 				break;
-			case BIT(HID_TYPE_PS5)	:
+			case BIT_ENUM(HID_TYPE_PS5)	:
 				base_mac[2] += HID_TYPE_PS5;
 				break;
-			case BIT(HID_TYPE_X360)	:
+			case BIT_ENUM(HID_TYPE_X360)	:
 				base_mac[2] += HID_TYPE_X360;
 				break;
-			case BIT(HID_TYPE_XBOX)	:
+			case BIT_ENUM(HID_TYPE_XBOX)	:
 				base_mac[2] += HID_TYPE_XBOX;
 				break;
-			case BIT(HID_TYPE_KB) 	:
+			case BIT_ENUM(HID_TYPE_KB) 	:
 				base_mac[2] += HID_TYPE_KB;
 				break;
-			case BIT(HID_TYPE_MOUSE) :
+			case BIT_ENUM(HID_TYPE_MOUSE) :
 				base_mac[2] += HID_TYPE_MOUSE;
 				break;
-			case BIT(HID_TYPE_CONSUMER)	:
+			case BIT_ENUM(HID_TYPE_CONSUMER)	:
 				base_mac[2] += HID_TYPE_CONSUMER;
 				break;
-			case BIT(HID_TYPE_MT)	:
+			case BIT_ENUM(HID_TYPE_MT)	:
 				base_mac[2] += HID_TYPE_MT;
+				break;
+			case BIT_ENUM(HID_TYPE_TOUCH)	:
+				base_mac[2] += HID_TYPE_TOUCH;
 				break;
 			default :			//comble device
 				base_mac[2] += 16;
@@ -282,26 +285,26 @@ uint8_t app_bt_get_name(bt_t bt, char *buf, uint8_t len )
 	memset(buf,0,len);
     memset(name,0,sizeof(name));
 
-	#if (BT_TYPE_SUPPORT & BIT(TYPE_HID))
-	if(bt_ctbp->types & BIT(TYPE_HID)){
+	#if (BT_TYPE_SUPPORT & BIT_ENUM(TYPE_HID))
+	if(bt_ctbp->types & BIT_ENUM(TYPE_HID)){
 		switch(bt_ctbp->hid_types){
 			#if (BT_HID_SUPPORT & HID_SWITCH_MASK)
-			case BIT(HID_TYPE_SWITCH):
+			case BIT_ENUM(HID_TYPE_SWITCH):
 				memcpy(name,"Pro Controller",sizeof("Pro Controller"));
 				ret = true;
 				break;
 			#endif
 			#if (BT_HID_SUPPORT & HID_PS_MASK)
-			case BIT(HID_TYPE_PS3)	:
-			case BIT(HID_TYPE_PS4)	:
-			case BIT(HID_TYPE_PS5)	:
+			case BIT_ENUM(HID_TYPE_PS3)	:
+			case BIT_ENUM(HID_TYPE_PS4)	:
+			case BIT_ENUM(HID_TYPE_PS5)	:
 				memcpy(name,"Wireless Controller",sizeof("Wireless Controller"));
 				ret = true;
 				break;
 			#endif
 			#if (BT_HID_SUPPORT & HID_XBOX_MASK)
-			case BIT(HID_TYPE_X360)	:
-			case BIT(HID_TYPE_XBOX)	:
+			case BIT_ENUM(HID_TYPE_X360)	:
+			case BIT_ENUM(HID_TYPE_XBOX)	:
 				memcpy(name,"Xbox Wireless Controller",sizeof("Xbox Wireless Controller"));
 				ret = true;
 				break;
@@ -346,7 +349,7 @@ void app_bt_tx_fifo_fush(bt_t bt)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		根据不同设备选择fifo_tx 或者直接tx发送
+** Description: 根据不同设备选择fifo_tx 或者直接tx发送
 *******************************************************************/
 bool app_bt_uart_tx(bt_t bt,uint8_t *buf, uint16_t len)
 {
@@ -429,7 +432,7 @@ __WEAK void app_bt_rx(bt_t bt, bt_evt_rx_t* pa)
 	if(NULL == bt_ctbp) return;
 	if(BT_UART == pa->bts){			//uart
 		// if(api_get_command(bt,buffer, length)){
-		//     zkm_device_decode(bt,m_ble_cmd.rx_buf,m_ble_cmd.rx_len);
+		//     device_decode(bt,m_ble_cmd.rx_buf,m_ble_cmd.rx_len);
 		// }
 	}else{							//hid and other
 		
@@ -552,7 +555,7 @@ static void btc_event(bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			#ifdef BTC_SEARCH_NAME
 			/*
 			1. 底层默认开启扫描地址,名字的广播,筛选由此处理
-			2. zkm层当有绑定信息,使用的是扫描地址,否则扫面的是名字.
+			2. 当有绑定信息,使用的是扫描地址,否则扫面的是名字.
 			*/
 			if(pa != NULL){
 				logi("btc scan name: %s\n", pscanning->name);

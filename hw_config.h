@@ -28,10 +28,10 @@ extern "C" {
 
 #if PROJECT_KM
 	/**********************************************************************************/
-	#define   PRODUCT_MODE				MODE_KM								//产品模式
-	#define   PRODUCT_MODE_SUPPORT		BIT(MODE_KM)						//支持的产品模式
-	#define   PRODUCT_SUB_MODE			0									//产品子模式
-	#define   PRODUCT_TRS				(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持
+	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))				//产品传输层支持
+	#define DEV_TYPES_DEFAULT			BIT(DEV_TYPE_HID)
+	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_KB)
+
 	/**********************************************************************************/
 
 	#define HELLOW_KEYBOARD						1
@@ -44,40 +44,55 @@ extern "C" {
 	#endif
 #elif PROJECT_DEMO
 	/**********************************************************************************/
-	#define   PRODUCT_MODE				MODE_KM								//产品模式
-	#define   PRODUCT_MODE_SUPPORT		BIT(MODE_KM)						//支持的产品模式
-	#define   PRODUCT_SUB_MODE			0									//产品子模式
-	#define   PRODUCT_TRS				(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持
+	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持4
+	#define DEV_TYPES_DEFAULT			(BIT(DEV_TYPE_HID) | BIT(DEV_TYPE_CDC))
+	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_VENDOR)
 	/**********************************************************************************/
 
-	#define DEMO1								1
+	#define DEMO1								0
+	#define DEMO_WIN32               			1
+
 	#if DEMO1
 		#define SW_VERSION                     	0x01
         #define DEFAULT_NAME			       	"demo01"
         #define DEFAULT_MODEL					"DEMO01"
+	#elif DEMO_WIN32
+		#define SW_VERSION                     	0x01
+        #define DEFAULT_NAME			       	"win32"
+        #define DEFAULT_MODEL					"win32"
+
+		#define USBH_TYPE_SUPPORT		0XFFFF
+		#define USBD_TYPE_SUPPORT		0XFFFF
+		#define USBD_HID_SUPPORT		0XFFFF
+		#define USBH_HID_SUPPORT        0XFFFF
+
+		//for test 	desc parser
+		#define HIDH_SUPPORT			0XFFFF
+		#define HIDD_SUPPORT			0XFFFF	
+		#define AOA_HID_SUPPORT			0xFFFF
 	#else
 
 	#endif
 #endif
 
 
-#ifndef RF_ENABLE
-#define RF_ENABLE 			EXTERNAL_MODULE					//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
+#ifndef RF_ENABLE				//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
+#define RF_ENABLE 			EXTERNAL_MODULE					
 #endif
 #ifndef RFC_ENABLE
-#define RFC_ENABLE 			INTER_MODULE					//rf central
+#define RFC_ENABLE 			INTER_MODULE
 #endif
 #ifndef BLE_ENABLE
-#define BLE_ENABLE			INTER_MODULE		//ble peripheral
+#define BLE_ENABLE			INTER_MODULE		
 #endif	
 #ifndef EDR_ENABLE	
-#define EDR_ENABLE			INTER_MODULE		//edr peripheral
+#define EDR_ENABLE			INTER_MODULE
 #endif				
 #ifndef BLEC_ENABLE				
-#define BLEC_ENABLE			INTER_MODULE					//ble central
+#define BLEC_ENABLE			INTER_MODULE
 #endif			
 #ifndef EDRC_ENABLE				
-#define EDRC_ENABLE			INTER_MODULE					//edr central
+#define EDRC_ENABLE			INTER_MODULE
 #endif	
 
 #include "emf_config.h"

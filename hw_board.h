@@ -78,6 +78,14 @@ extern "C" {
 		#define HW_STORAGE			\
 			uint8_t vendor;			\
 			uint8_t led_sta[5]
+	#elif DEMO_WIN32
+		
+		//IIC
+		#define HW_IIC_MAP {	\
+			{PIN_NULL,0,0,0,0},	\
+			{PIN_NULL,0,0,0,0}		\
+			}
+
 	#else
 
 	#endif

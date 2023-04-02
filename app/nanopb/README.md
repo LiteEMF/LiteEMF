@@ -1,6 +1,6 @@
 # protobuf build proto file to *.c *.h
 
-[nanopb](https://github.com/nanopb/nanopb#readme) 
+[nanopb](https://github.com/nanopb/nanopb#readme)
 
 [nanopb api](https://jpa.kapsi.fi/nanopb/docs/reference.html#proto-file-options)
 
@@ -10,8 +10,8 @@
 
 * 安装python
 * python 安装依赖包 pip install --upgrade protobuf grpcio-tools
-* cd app/nanopb
-* python generator/nanopb_generator.py simple.proto
+* python app/nanopb/generator/nanopb_generator.py unit-test/simple.proto
+* 修改头文件包含为: #include "app/nanopb/pb.h"
 
 ## binary packages build
 

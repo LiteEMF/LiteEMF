@@ -44,13 +44,13 @@
 
 /*******************************************************************
 ** Parameters:		
-** Returns:	
+** Returns:	true: used hal dump, false: do not used hal dump
 ** Description:		
 *******************************************************************/
-// void dump( void const *buf, uint16_t len)
-// {
-
-// }
+bool hal_dump(void const *buf, uint16_t len)
+{
+	return false;
+}
 
 
 

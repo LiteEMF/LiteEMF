@@ -13,7 +13,8 @@
 #ifndef _app_bt_h
 #define _app_bt_h
 #include "emf_typedef.h"
-#include "bt_typedef.h"
+#include "utils/emf_utils.h"
+#include "app/bt_typedef.h"
 #include "api/bt/api_bt.h"
 
 #ifdef __cplusplus
@@ -41,19 +42,20 @@ typedef struct{
 	uint8_t* 	tx_buf;
 }bt_tx_fifo_t;
 
+
 typedef struct{
 	uint8_t init_ok:1;
 	uint8_t enable:1;
 	uint8_t res:6;
 	uint16_t inteval;	//1.25ms
 	bt_sta_t sta;
-	hid_types_t types;
-	hid_types_t hid_types;
+	uint16_t types;
+	uint16_t hid_types;
 
 	bt_tx_fifo_t* fifo_txp;
 }app_bt_ctb_t;
 
-extern bt_t app_bt_trs;		//bt_t
+extern bt_t app_bt_trs;			//bt_t
 #if BLE_ENABLE					//ble peripheral
 extern app_bt_ctb_t m_ble;
 #endif

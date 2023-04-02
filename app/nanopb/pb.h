@@ -81,7 +81,7 @@
 #define PB_SYSTEM_HEADER "emf_typedef.h"
 
 #ifdef PB_SYSTEM_HEADER
-#include PB_SYSTEM_HEADER
+#include "emf_typedef.h"
 #else
 #include <stdint.h>
 #include <stddef.h>

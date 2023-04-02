@@ -48,7 +48,7 @@ bool api_pwm_set_duty(uint16_t id, uint8_t duty)
 {
 	bool ret = false;
     if(id >= m_pwm_num) return ret;
-    if((pin_t)PIN_NC == m_pwm_map[id].pin) return false;
+    if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
 	pwm_duty[id] = duty;
 	if(PWM_ACTIVE_ATT(id)) {
@@ -69,7 +69,7 @@ bool api_pwm_start(uint16_t id)
 {
 	bool ret = false;
     if(id >= m_pwm_num) return ret;
-    if((pin_t)PIN_NC == m_pwm_map[id].pin) return false;
+    if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
     api_pwm_set_duty(id, pwm_duty[id]);
     return true;
@@ -80,7 +80,7 @@ bool api_pwm_stop(uint16_t id)
 	bool ret = false;
 
     if(id >= m_pwm_num) return ret;
-    if((pin_t)PIN_NC == m_pwm_map[id].pin) return false;
+    if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
     api_pwm_set_duty(id, 0);
     return true;
@@ -94,7 +94,7 @@ bool api_pwm_init(uint16_t id)
     if(id >= m_pwm_num) return ret;
 	pwm_duty[id] = 0;
 
-	if((pin_t)PIN_NC == m_pwm_map[id].pin) return false;
+	if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
     if(PWM_ACTIVE_ATT(id)) {
 		duty = 0xff - pwm_duty[id];
@@ -106,7 +106,7 @@ bool api_pwm_deinit(uint16_t id)
 {
 	bool ret = false;
 	if(id >= m_pwm_num) return ret;
-    if((pin_t)PIN_NC == m_pwm_map[id].pin) return false;
+    if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
     hal_pwm_deinit(id);
     return true;

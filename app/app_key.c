@@ -181,8 +181,8 @@ void app_key_decode(void)
 	static uint16_t key_cnt[32];
     static timer_t key_timer;
 
-    if((m_tick - key_timer) >= KEY_PERIOD_DEFAULT){
-        key_timer = m_tick;
+    if((m_systick - key_timer) >= KEY_PERIOD_DEFAULT){
+        key_timer = m_systick;
 		key = m_app_key.key;
 
         for(i = 0; i < 32; i++){

@@ -289,12 +289,12 @@ static void joystick_cal_handler(joystick_t* adcp)
         s_cal.mid = *adcp;
         s_cal.max = *adcp;
         
-        cal_timer = m_tick;
+        cal_timer = m_systick;
         joystick_cal_sta = JOYSTICK_CAL_MID;
         break;
     case JOYSTICK_CAL_MID:
-        if(m_tick - cal_timer > 3*JOYSTICK_CAL_TIMEOUT){
-            cal_timer = m_tick;
+        if(m_systick - cal_timer > 3*JOYSTICK_CAL_TIMEOUT){
+            cal_timer = m_systick;
             joystick_cal_sta = JOYSTICK_CAL_FAILED;
         }else{
             if(joystick_get_cal_val(&s_cal,&r,adcp)){
@@ -305,7 +305,7 @@ static void joystick_cal_handler(joystick_t* adcp)
     case JOYSTICK_CAL_SID:
         joystick_get_cal_val(&s_cal,&r,adcp);
 
-        if(m_tick - cal_timer > JOYSTICK_CAL_TIMEOUT){
+        if(m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT){
             joystick_cal_sta = JOYSTICK_CAL_CHECK;
         }
         break;
@@ -344,11 +344,11 @@ static void joystick_cal_handler(joystick_t* adcp)
             api_storage_auto_sync();
         }
 
-        cal_timer = m_tick;
+        cal_timer = m_systick;
         break;
     case JOYSTICK_CAL_SUCCEED:
     case JOYSTICK_CAL_FAILED:
-        if (m_tick - cal_timer > JOYSTICK_CAL_TIMEOUT){
+        if (m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT){
             joystick_cal_sta = JOYSTICK_CAL_NONE;
         }
         break;

@@ -115,38 +115,38 @@ extern "C" {
 #define  STICK_R_RIGHT		(STICK_RIGHT<<4)
 
 
-// #define KEY_A_GPIO 				PIN_NC
-// #define KEY_B_GPIO 				PIN_NC	
-// #define KEY_C_GPIO 				PIN_NC
-// #define KEY_X_GPIO 				PIN_NC
-// #define KEY_Y_GPIO 				PIN_NC
-// #define KEY_Z_GPIO 				PIN_NC
-// #define KEY_L1_GPIO 				PIN_NC
-// #define KEY_R1_GPIO 				PIN_NC
-// #define KEY_R2_GPIO 				PIN_NC
-// #define KEY_L2_GPIO 				PIN_NC
-// #define KEY_SELECT_GPIO 			PIN_NC
-// #define KEY_START_GPIO 			PIN_NC
-// #define KEY_HOME_GPIO 			PIN_NC
-// #define KEY_L3_GPIO 				PIN_NC
-// #define KEY_R3_GPIO 				PIN_NC
-// #define KEY_CAPTURE_GPIO			PIN_NC
+// #define KEY_A_GPIO 				PIN_NULL
+// #define KEY_B_GPIO 				PIN_NULL	
+// #define KEY_C_GPIO 				PIN_NULL
+// #define KEY_X_GPIO 				PIN_NULL
+// #define KEY_Y_GPIO 				PIN_NULL
+// #define KEY_Z_GPIO 				PIN_NULL
+// #define KEY_L1_GPIO 				PIN_NULL
+// #define KEY_R1_GPIO 				PIN_NULL
+// #define KEY_R2_GPIO 				PIN_NULL
+// #define KEY_L2_GPIO 				PIN_NULL
+// #define KEY_SELECT_GPIO 			PIN_NULL
+// #define KEY_START_GPIO 			PIN_NULL
+// #define KEY_HOME_GPIO 			PIN_NULL
+// #define KEY_L3_GPIO 				PIN_NULL
+// #define KEY_R3_GPIO 				PIN_NULL
+// #define KEY_CAPTURE_GPIO			PIN_NULL
 
-// #define KEY_UP_GPIO 				PIN_NC
-// #define KEY_DOWN_GPIO 			PIN_NC
-// #define KEY_LEFT_GPIO 			PIN_NC
-// #define KEY_RIGHT_GPIO 			PIN_NC
-// #define KEY_MODE_GPIO 			PIN_NC
-// #define KEY_MENU_GPIO 			PIN_NC
-// #define KEY_FN_GPIO 				PIN_NC
-// #define KEY_M1_GPIO 				PIN_NC
-// #define KEY_M2_GPIO 				PIN_NC
-// #define KEY_M3_GPIO 				PIN_NC
-// #define KEY_M4_GPIO 				PIN_NC
-// #define KEY_M5_GPIO 				PIN_NC
-// #define KEY_M6_GPIO 				PIN_NC
-// #define KEY_M7_GPIO 				PIN_NC
-// #define KEY_M8_GPIO 				PIN_NC		
+// #define KEY_UP_GPIO 				PIN_NULL
+// #define KEY_DOWN_GPIO 			PIN_NULL
+// #define KEY_LEFT_GPIO 			PIN_NULL
+// #define KEY_RIGHT_GPIO 			PIN_NULL
+// #define KEY_MODE_GPIO 			PIN_NULL
+// #define KEY_MENU_GPIO 			PIN_NULL
+// #define KEY_FN_GPIO 				PIN_NULL
+// #define KEY_M1_GPIO 				PIN_NULL
+// #define KEY_M2_GPIO 				PIN_NULL
+// #define KEY_M3_GPIO 				PIN_NULL
+// #define KEY_M4_GPIO 				PIN_NULL
+// #define KEY_M5_GPIO 				PIN_NULL
+// #define KEY_M6_GPIO 				PIN_NULL
+// #define KEY_M7_GPIO 				PIN_NULL
+// #define KEY_M8_GPIO 				PIN_NULL		
 
 #ifdef KEY_POWER_GPIO
 	#if POWER_KEY_ACTIVE

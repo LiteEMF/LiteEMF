@@ -49,7 +49,7 @@ void hal_delay_ms(uint32_t ms)
 {
 }
 void hal_tick_init(void)
-{
+{	
 }
 
 

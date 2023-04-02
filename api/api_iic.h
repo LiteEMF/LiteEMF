@@ -33,7 +33,7 @@ extern "C" {
 #define IIC_BADU_POS		(0)
 #define IIC_BADU_MASK		0X0000FFFF		//kHZ
 #define IIC_RES_POS			(16)
-#define IIC_RES_MASK			0XFFFF0000
+#define IIC_RES_MASK		0XFFFF0000
 
 #ifndef IIC_DELAY			//TODO check 是否优化代码
 #define  IIC_DELAY(id)  	(1000000/2/FLD2VAL(IIC_BADU, m_iic_map[id].att) - 250) 	//ns, 约400KHZ, use offset for code run delay

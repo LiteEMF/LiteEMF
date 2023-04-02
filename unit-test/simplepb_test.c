@@ -13,9 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if 0
-#include  "pb_decode.h"
-#include  "pb_encode.h"
+
+#include  "app/nanopb/pb_decode.h"
+#include  "app/nanopb/pb_encode.h"
 #include  "simple.pb.h"
 
 #include "api/api_log.h"
@@ -81,7 +81,7 @@ bool protobuf_test(void)
 	o_stream = pb_ostream_from_buffer(buffer, sizeof(buffer));
 	pb_encode(&o_stream, person_t_fields, &persion);
 	logd("ostream max_size=%d, bytes_written=%d\n",o_stream.max_size,o_stream.bytes_written);
-	dump(buffer, o_stream.bytes_written);
+	dumpd(buffer, o_stream.bytes_written);
 	// decode
 	i_stream = pb_istream_from_buffer(buffer, sizeof(buffer));
 	pb_decode(&i_stream, person_t_fields, &unpack_persion);
@@ -93,17 +93,15 @@ bool protobuf_test(void)
 		loge("nonapb test ok...\n");
 		logd("id:%d\n",unpack_persion.student[0].id);
 		logd("array8:%d:",unpack_persion.student[0].array8.size);
-		dump(unpack_persion.student[0].array8.bytes,unpack_persion.student[0].array8.size);
+		dumpd(unpack_persion.student[0].array8.bytes,unpack_persion.student[0].array8.size);
 	}else{
 		loge("nonapb test faile...\n");
-		logd("persion %d:\n",sizeof(persion));dump(&persion,sizeof(persion));
-		logd("unpack_persion %d:\n",sizeof(unpack_persion));dump(&unpack_persion,sizeof(unpack_persion));
+		logd("persion %d:\n",sizeof(persion));dumpd(&persion,sizeof(persion));
+		logd("unpack_persion %d:\n",sizeof(unpack_persion));dumpd(&unpack_persion,sizeof(unpack_persion));
 	}
 
 	return true;
 }
-
-#endif
 
 
 

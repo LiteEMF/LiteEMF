@@ -96,107 +96,107 @@ void iokey_init(void)
 	pull = PIN_PULLUP;
 	#endif
 
-	#ifdef KEY_POWER_GPIO
+	#if PIN_NULL != KEY_POWER_GPIO
 	api_gpio_dir(KEY_POWER_GPIO, PIN_IN,POWER_KEY_PULL);
 	#endif
-	#ifdef KEY_USB_DET_GPIO
+	#if PIN_NULL != KEY_USB_DET_GPIO
 	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLNONE);		// no pull
 	#endif
-	#ifdef KEY_CHARGER_GPIO
+	#if PIN_NULL != KEY_CHARGER_GPIO
 	api_gpio_dir(KEY_CHARGER_GPIO, PIN_IN, PIN_PULLUP);
 	#endif
 
-	#ifdef KEY_A_GPIO
+	#if PIN_NULL != KEY_A_GPIO
 	api_gpio_dir(KEY_A_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_B_GPIO
+	#if PIN_NULL != KEY_B_GPIO
 	api_gpio_dir(KEY_B_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_C_GPIO
+	#if PIN_NULL != KEY_C_GPIO
 	api_gpio_dir(KEY_C_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_X_GPIO
+	#if PIN_NULL != KEY_X_GPIO
 	api_gpio_dir(KEY_X_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_Y_GPIO
+	#if PIN_NULL != KEY_Y_GPIO
 	api_gpio_dir(KEY_Y_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_Z_GPIO
+	#if PIN_NULL != KEY_Z_GPIO
 	api_gpio_dir(KEY_Z_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_L1_GPIO
+	#if PIN_NULL != KEY_L1_GPIO
 	api_gpio_dir(KEY_L1_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_R1_GPIO
+	#if PIN_NULL != KEY_R1_GPIO
 	api_gpio_dir(KEY_R1_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_L2_GPIO
+	#if PIN_NULL != KEY_L2_GPIO
 	api_gpio_dir(KEY_L2_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_R2_GPIO
+	#if PIN_NULL != KEY_R2_GPIO
 	api_gpio_dir(KEY_R2_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_SELECT_GPIO
+	#if PIN_NULL != KEY_SELECT_GPIO
 	api_gpio_dir(KEY_SELECT_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_START_GPIO
+	#if PIN_NULL != KEY_START_GPIO
 	api_gpio_dir(KEY_START_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_HOME_GPIO
+	#if PIN_NULL != KEY_HOME_GPIO
 	api_gpio_dir(KEY_HOME_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_L3_GPIO
+	#if PIN_NULL != KEY_L3_GPIO
 	api_gpio_dir(KEY_L3_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_R3_GPIO
+	#if PIN_NULL != KEY_R3_GPIO
 	api_gpio_dir(KEY_R3_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_CAPTURE_GPIO
+	#if PIN_NULL != KEY_CAPTURE_GPIO
 	api_gpio_dir(KEY_CAPTURE_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_UP_GPIO
+	#if PIN_NULL != KEY_UP_GPIO
 	api_gpio_dir(KEY_UP_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_DOWN_GPIO
+	#if PIN_NULL != KEY_DOWN_GPIO
 	api_gpio_dir(KEY_DOWN_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_LEFT_GPIO
+	#if PIN_NULL != KEY_LEFT_GPIO
 	api_gpio_dir(KEY_LEFT_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_RIGHT_GPIO
+	#if PIN_NULL != KEY_RIGHT_GPIO
 	api_gpio_dir(KEY_RIGHT_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_MENU_GPIO
+	#if PIN_NULL != KEY_MENU_GPIO
 	api_gpio_dir(KEY_MENU_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_MODE_GPIO
+	#if PIN_NULL != KEY_MODE_GPIO
 	api_gpio_dir(KEY_MODE_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_FN_GPIO
+	#if PIN_NULL != KEY_FN_GPIO
 	api_gpio_dir(KEY_FN_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M1_GPIO
+	#if PIN_NULL != KEY_M1_GPIO
 	api_gpio_dir(KEY_M1_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M2_GPIO
+	#if PIN_NULL != KEY_M2_GPIO
 	api_gpio_dir(KEY_M2_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M3_GPIO
+	#if PIN_NULL != KEY_M3_GPIO
 	api_gpio_dir(KEY_M3_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M4_GPIO
+	#if PIN_NULL != KEY_M4_GPIO
 	api_gpio_dir(KEY_M4_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M5_GPIO
+	#if PIN_NULL != KEY_M5_GPIO
 	api_gpio_dir(KEY_M5_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M6_GPIO
+	#if PIN_NULL != KEY_M6_GPIO
 	api_gpio_dir(KEY_M6_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M7_GPIO
+	#if PIN_NULL != KEY_M7_GPIO
 	api_gpio_dir(KEY_M7_GPIO, PIN_IN, pull);
 	#endif
-	#ifdef KEY_M8_GPIO
+	#if PIN_NULL != KEY_M8_GPIO
 	api_gpio_dir(KEY_M8_GPIO, PIN_IN, pull);
 	#endif
 }
@@ -207,97 +207,97 @@ static uint32_t iokey_scan(void)
 {
 	uint32_t value=0;
 
-	#ifdef KEY_A_GPIO
+	#if PIN_NULL != KEY_A_GPIO
 	if(api_gpio_in(KEY_A_GPIO))	value |= HW_KEY_A;
 	#endif
-	#ifdef KEY_B_GPIO
+	#if PIN_NULL != KEY_B_GPIO
 	if(api_gpio_in(KEY_B_GPIO))	value |= HW_KEY_B;
 	#endif
-	#ifdef KEY_C_GPIO
+	#if PIN_NULL != KEY_C_GPIO
 	if(api_gpio_in(KEY_C_GPIO))	value |= HW_KEY_C;
 	#endif
-	#ifdef KEY_X_GPIO
+	#if PIN_NULL != KEY_X_GPIO
 	if(api_gpio_in(KEY_X_GPIO))	value |= HW_KEY_X;
 	#endif
-	#ifdef KEY_Y_GPIO
+	#if PIN_NULL != KEY_Y_GPIO
 	if(api_gpio_in(KEY_Y_GPIO))	value |= HW_KEY_Y;
 	#endif
-	#ifdef KEY_Z_GPIO
+	#if PIN_NULL != KEY_Z_GPIO
 	if(api_gpio_in(KEY_Z_GPIO))	value |= HW_KEY_Z;
 	#endif
-	#ifdef KEY_L1_GPIO
+	#if PIN_NULL != KEY_L1_GPIO
 	if(api_gpio_in(KEY_L1_GPIO))	value |= HW_KEY_L1;
 	#endif
-	#ifdef KEY_R1_GPIO
+	#if PIN_NULL != KEY_R1_GPIO
 	if(api_gpio_in(KEY_R1_GPIO))	value |= HW_KEY_R1;
 	#endif
-	#ifdef KEY_L2_GPIO
+	#if PIN_NULL != KEY_L2_GPIO
 	if(api_gpio_in(KEY_L2_GPIO))	value |= HW_KEY_L2;
 	#endif
-	#ifdef KEY_R2_GPIO
+	#if PIN_NULL != KEY_R2_GPIO
 	if(api_gpio_in(KEY_R2_GPIO))	value |= HW_KEY_R2;
 	#endif
-	#ifdef KEY_SELECT_GPIO
+	#if PIN_NULL != KEY_SELECT_GPIO
 	if(api_gpio_in(KEY_SELECT_GPIO))	value |= HW_KEY_SELECT;
 	#endif
-	#ifdef KEY_START_GPIO
+	#if PIN_NULL != KEY_START_GPIO
 	if(api_gpio_in(KEY_START_GPIO))	value |= HW_KEY_START;
 	#endif
-	#ifdef KEY_HOME_GPIO
+	#if PIN_NULL != KEY_HOME_GPIO
 	if(api_gpio_in(KEY_HOME_GPIO))	value |= HW_KEY_HOME;
 	#endif
-	#ifdef KEY_L3_GPIO
+	#if PIN_NULL != KEY_L3_GPIO
 	if(api_gpio_in(KEY_L3_GPIO))	value |= HW_KEY_L3;
 	#endif
-	#ifdef KEY_R3_GPIO
+	#if PIN_NULL != KEY_R3_GPIO
 	if(api_gpio_in(KEY_R3_GPIO))	value |= HW_KEY_R3;
 	#endif
-	#ifdef KEY_CAPTURE_GPIO
+	#if PIN_NULL != KEY_CAPTURE_GPIO
 	if(api_gpio_in(KEY_CAPTURE_GPIO))	value |= HW_KEY_CAPTURE;
 	#endif
-	#ifdef KEY_UP_GPIO
+	#if PIN_NULL != KEY_UP_GPIO
 	if(api_gpio_in(KEY_UP_GPIO))	value |= HW_KEY_UP;
 	#endif
-	#ifdef KEY_DOWN_GPIO
+	#if PIN_NULL != KEY_DOWN_GPIO
 	if(api_gpio_in(KEY_DOWN_GPIO))	value |= HW_KEY_DOWN;
 	#endif
-	#ifdef KEY_LEFT_GPIO
+	#if PIN_NULL != KEY_LEFT_GPIO
 	if(api_gpio_in(KEY_LEFT_GPIO))	value |= HW_KEY_LEFT;
 	#endif
-	#ifdef KEY_RIGHT_GPIO
+	#if PIN_NULL != KEY_RIGHT_GPIO
 	if(api_gpio_in(KEY_RIGHT_GPIO))	value |= HW_KEY_RIGHT;
 	#endif
-	#ifdef KEY_MENU_GPIO
+	#if PIN_NULL != KEY_MENU_GPIO
 	if(api_gpio_in(KEY_MENU_GPIO))	value |= HW_KEY_MENU;
 	#endif
-	#ifdef KEY_MODE_GPIO
+	#if PIN_NULL != KEY_MODE_GPIO
 	if(api_gpio_in(KEY_MODE_GPIO))	value |= HW_KEY_MODE;
 	#endif
-	#ifdef KEY_FN_GPIO
+	#if PIN_NULL != KEY_FN_GPIO
 	if(api_gpio_in(KEY_FN_GPIO))	value |= HW_KEY_FN;
 	#endif
-	#ifdef KEY_M1_GPIO
+	#if PIN_NULL != KEY_M1_GPIO
 	if(api_gpio_in(KEY_M1_GPIO))	value |= HW_KEY_M1;
 	#endif
-	#ifdef KEY_M2_GPIO
+	#if PIN_NULL != KEY_M2_GPIO
 	if(api_gpio_in(KEY_M2_GPIO))	value |= HW_KEY_M2;
 	#endif
-	#ifdef KEY_M3_GPIO
+	#if PIN_NULL != KEY_M3_GPIO
 	if(api_gpio_in(KEY_M3_GPIO))	value |= HW_KEY_M3;
 	#endif
-	#ifdef KEY_M4_GPIO
+	#if PIN_NULL != KEY_M4_GPIO
 	if(api_gpio_in(KEY_M4_GPIO))	value |= HW_KEY_M4;
 	#endif
-	#ifdef KEY_M5_GPIO
+	#if PIN_NULL != KEY_M5_GPIO
 	if(api_gpio_in(KEY_M5_GPIO))	value |= HW_KEY_M5;
 	#endif
-	#ifdef KEY_M6_GPIO
+	#if PIN_NULL != KEY_M6_GPIO
 	if(api_gpio_in(KEY_M6_GPIO))	value |= HW_KEY_M6;
 	#endif
-	#ifdef KEY_M7_GPIO
+	#if PIN_NULL != KEY_M7_GPIO
 	if(api_gpio_in(KEY_M7_GPIO))	value |= HW_KEY_M7;
 	#endif
-	#ifdef KEY_M8_GPIO
+	#if PIN_NULL != KEY_M8_GPIO
 	if(api_gpio_in(KEY_M8_GPIO))	value |= HW_KEY_M8;
 	#endif
 
@@ -311,8 +311,8 @@ uint32_t io_key_scan(void)
 
 	uint32_t key;
 
-	if((m_tick - key_timer) >= 1){
-		key_timer = m_tick;
+	if((m_systick - key_timer) >= 1){
+		key_timer = m_systick;
 
 		key = iokey_scan();
 		#if defined(MATRIX_KEY_IN_GPIO) && defined(MATRIX_KEY_OUT_GPIO)	&& defined(MATRIX_KEY)	

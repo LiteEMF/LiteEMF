@@ -30,14 +30,14 @@ extern "C" {
 **	Parameters
 *******************************************************************************************************/
 
-
+#define emf_free_and_clear(p)	do {emf_free(p); p = NULL;} while(0)
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
 void emf_mem_init(void);
 void* emf_malloc(uint32_t size);
-void emf_free(void* p,uint32_t size);
+void emf_free(void* p);
 void emf_mem_stats();
 
 #ifdef __cplusplus
