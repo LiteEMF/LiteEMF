@@ -9,8 +9,8 @@
 * 
 */
 
-#ifndef	_driver_bt_h
-#define	_driver_bt_h
+#ifndef	_bt_driver_h
+#define	_bt_driver_h
 #include "hw_config.h"
 
 #ifdef __cplusplus

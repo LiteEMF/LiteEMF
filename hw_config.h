@@ -28,7 +28,7 @@ extern "C" {
 
 #if PROJECT_KM
 	/**********************************************************************************/
-	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))				//产品传输层支持
+	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))				/*产品传输层支持*/
 	#define DEV_TYPES_DEFAULT			BIT(DEV_TYPE_HID)
 	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_KB)
 
@@ -44,7 +44,7 @@ extern "C" {
 	#endif
 #elif PROJECT_DEMO
 	/**********************************************************************************/
-	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持4
+	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持
 	#define DEV_TYPES_DEFAULT			(BIT(DEV_TYPE_HID) | BIT(DEV_TYPE_CDC))
 	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_VENDOR)
 	/**********************************************************************************/
@@ -75,25 +75,13 @@ extern "C" {
 	#endif
 #endif
 
+#ifndef BT0_SUPPORT
+#define BT0_SUPPORT 		(BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF) | BIT_ENUM(TR_EDR) | BIT_ENUM(TR_RF))
+#endif
+#ifndef BT1_SUPPORT
+#define BT1_SUPPORT 		(BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC) | BIT_ENUM(TR_EDRC) | BIT_ENUM(TR_RFC))
+#endif
 
-#ifndef RF_ENABLE				//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
-#define RF_ENABLE 			EXTERNAL_MODULE					
-#endif
-#ifndef RFC_ENABLE
-#define RFC_ENABLE 			INTER_MODULE
-#endif
-#ifndef BLE_ENABLE
-#define BLE_ENABLE			INTER_MODULE		
-#endif	
-#ifndef EDR_ENABLE	
-#define EDR_ENABLE			INTER_MODULE
-#endif				
-#ifndef BLEC_ENABLE				
-#define BLEC_ENABLE			INTER_MODULE
-#endif			
-#ifndef EDRC_ENABLE				
-#define EDRC_ENABLE			INTER_MODULE
-#endif	
 
 #include "emf_config.h"
 #include "hw_board.h"

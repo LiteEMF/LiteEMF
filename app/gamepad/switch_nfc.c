@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if ((HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK) && APP_NFC_ENABLE
+#if ((HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK) && API_NFC_ENABLE
 
 #include "app/gamepad/switch_nfc.h"
 
@@ -96,7 +96,7 @@ static void switch_nfc_state_pack(switch_nfc_t *pnfc,switch_nfc_payload_t* nfc_r
 static void switch_nfc_data_pack(switch_nfc_t *pnfc,switch_nfc_payload_t* nfc_repliesp)
 {
 	switch_nfc_read_head_t* nfc_read_headp = (switch_nfc_read_head_t*)nfc_repliesp->payload;
-	if(0 == m_app_nfc_addr){
+	if(0 == m_api_nfc_addr){
 		nfc_repliesp->id = SWITCH_MCU_NFC_STATE_ID;			//这里忽略第一次发送3A
 		nfc_repliesp->input_type = 7; //5: State info, 7: Ntag read data
 		nfc_repliesp->fragment_id = 0x01;
@@ -112,7 +112,7 @@ static void switch_nfc_data_pack(switch_nfc_t *pnfc,switch_nfc_payload_t* nfc_re
 		memcpy(nfc_read_headp->read_req_pa,"\x03\x00\x3B\x3C\x77\x78\x86\x00\x00",9);
 		memcpy(nfc_read_headp->unknow,"\x07\x85\xEA\x56\xE8\xDB\xB7\xF4\xB1\x0A\x6B\x9A\x23\x1E\xA6\x44\xB1\x35\xCC\x5E\x42\xFC\x8A\x36\xD1\xD6\x01\x94\x39\x02\x07\x2C",32);
 		memcpy(nfc_repliesp->payload+sizeof(switch_nfc_read_head_t), m_nfc_buf,245);
-		m_app_nfc_addr = 245;	//total 540
+		m_api_nfc_addr = 245;	//total 540
 	}else{
 		nfc_repliesp->id = SWITCH_MCU_TAG_READ_ID; 
 		nfc_repliesp->input_type = 7; //5: State info, 7: Ntag read data
@@ -121,7 +121,7 @@ static void switch_nfc_data_pack(switch_nfc_t *pnfc,switch_nfc_payload_t* nfc_re
 		nfc_repliesp->payload_size = 0x127&0xff;	//295
 		nfc_repliesp->payload_size_h = 0x127>>8;
 		memcpy(nfc_repliesp->payload, m_nfc_buf + 245, 0x127);
-		m_app_nfc_addr = 0;
+		m_api_nfc_addr = 0;
 	}
 }
 	
@@ -190,13 +190,13 @@ void switch_nfc_req_process(switch_nfc_t *pnfc,uint8_t* buf,uint16_t len)
             if(SWITCH_NFC_IDLE == pnfc->nfc_state){
                 pnfc->nfc_state = SWITCH_NFC_POLLING_TAG;
                 pnfc->stable_num = 0;
-                app_nfc_start_polling();
+                api_nfc_start_polling();
             }
             break;
         case SWITCH_NFC_STOP_POLLING_CMD	:   //0X02,
             pnfc->nfc_state = SWITCH_NFC_IDLE;
             pnfc->stable_num = 0;
-            app_nfc_stop_polling();
+            api_nfc_stop_polling();
             break;
         case SWITCH_NFC_UNKNOWN_CMD			:   //0X03,
             break;
@@ -210,7 +210,7 @@ void switch_nfc_req_process(switch_nfc_t *pnfc,uint8_t* buf,uint16_t len)
 					pnfc->mcu_report_id = SWITCH_MCU_TAG_READ_ID;
 				}
                 if(2 == nfc_reqp->ack){							//ack 2 结数据上报
-					app_nfc_start_finlsh();
+					api_nfc_start_finlsh();
 					pnfc->mcu_report_id = SWITCH_MCU_NFC_STATE_ID;
 					pnfc->nfc_state = SWITCH_NFC_IREAD_FINLISH;	
 					pnfc->stable_num = 0;
@@ -234,13 +234,13 @@ void switch_nfc_req_process(switch_nfc_t *pnfc,uint8_t* buf,uint16_t len)
             break;
         case SWITCH_NFC_NTAG_READ_CMD		:   //0X06,
             pnfc->nfc_state = SWITCH_NFC_READ_TAG;
-			m_app_nfc_addr = 0;
-			app_nfc_start_read();
+			m_api_nfc_addr = 0;
+			api_nfc_start_read();
             pnfc->stable_num = 0;
             break;
         case SWITCH_NFC_NTAG_WRITE_CMD		:   //0X08
             pnfc->nfc_state = SWITCH_NFC_WRITE_TAG;
-			app_nfc_start_write();
+			api_nfc_start_write();
             pnfc->stable_num = 0;
             logi("SWITCH_NFC_NTAG_WRITE_CMD doing...");
             break;
@@ -374,7 +374,7 @@ bool switch_nfc_emun_process(switch_nfc_t *pnfc,switch_enum_t* enump, uint8_t* b
 void switch_nfc_init(switch_nfc_t *pnfc)
 {
     pnfc->nfc_ic_state = NFC_CLOSE;
-	m_app_nfc_addr = 0;
+	m_api_nfc_addr = 0;
     pnfc->mcu_resum = false;
     pnfc->mcu_report_id = SWITCH_MCU_NONE_ID;       //nfc MCU id
     pnfc->stable_num = 0;

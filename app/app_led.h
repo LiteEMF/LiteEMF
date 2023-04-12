@@ -22,11 +22,12 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#define 	LED_PERIOD	(50*100)	/*50ms*/
 #define 	LED_OFF		0
-#define 	LED_QUICK	2			//100ms
-#define 	LED_SLOW	12			//100ms
+#define 	LED_QUICK	2			/*100ms*/
+#define 	LED_SLOW	12			/*100ms*/
 #define 	LED_ON		0XFF		
-#define 	LED_ALWAYS	0			//times
+#define 	LED_ALWAYS	0			/*times*/
 
 
 
@@ -52,7 +53,7 @@ uint8_t app_get_led(uint8_t id);
 bool app_led_turn(uint8_t id);
 bool app_led_init(void);
 bool app_led_deinit(void);
-void app_led_handler(void);
+void app_led_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

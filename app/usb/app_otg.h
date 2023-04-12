@@ -36,7 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool app_otg_init(void);
 bool app_otg_deinit(void);
-void app_otg_handler(void);
+void app_otg_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

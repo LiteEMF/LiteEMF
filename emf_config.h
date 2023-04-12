@@ -22,17 +22,37 @@ extern "C" {
 *******************************************************************************************************/
 #define ID_NULL   (0xff)
 
-#ifndef INTER_MODULE
-#define INTER_MODULE			BIT(0)
-#endif
-#ifndef EXTERNAL_MODULE
-#define EXTERNAL_MODULE			BIT(1)
-#endif
-
 #ifndef VID_DEFAULT
 #define VID_DEFAULT				0X4353
 #endif
+//*********************************************************************************//
+//                          传输类型                               		//
+//*********************************************************************************//
+#define DEF_TR_BLE			0
+#define DEF_TR_EDR			1
+#define DEF_TR_BLEC			2
+#define DEF_TR_EDRC			3
+#define DEF_TR_BLE_RF		4				
+#define DEF_TR_BLEC_RF		5
+#define DEF_TR_RF			6
+#define DEF_TR_RFC			7
 
+#define DEF_TR_USBD			8
+#define DEF_TR_USBH			9
+#define DEF_TR_UART			10
+typedef enum{
+	TR_BLE		= 0,
+	TR_EDR		= 1,
+	TR_BLEC		= 2,
+	TR_EDRC		= 3,
+	TR_BLE_RF	= 4,				//BLE模拟2.4G	
+	TR_BLEC_RF	= 5,
+	TR_RF		= 6,
+	TR_RFC		= 7,
+	TR_USBD		= 8,
+	TR_USBH		= 9,
+	TR_UART		= 10,
+}trp_t;
 
 //*********************************************************************************//
 //                          支持的设备类型                               		//
@@ -201,38 +221,20 @@ typedef struct{
 //*********************************************************************************//
 //                                 蓝牙配置                                   	  //
 //*********************************************************************************//
-/*
-disable: 0
-enable: INTER_MODULE,EXTERNAL_MODULE
-*/
-#ifndef RF_ENABLE					//rf peripheral 0,INTER_MODULE,EXTERNAL_MODULE
-#define RF_ENABLE 			0
+// 默认: id: 0:芯片自带蓝牙, 1: 外部蓝牙模块, ID_NULL: 无 
+// 蓝牙上层目前不支持自带蓝牙和外部蓝牙相同模块同时支持,项目需要可以调整 api_bt_ctb_t 来支持
+#ifndef BT0_SUPPORT
+#define BT0_SUPPORT 		0
 #endif
-#ifndef RFC_ENABLE					//rf central
-#define RFC_ENABLE 			0
+#ifndef BT1_SUPPORT
+#define BT1_SUPPORT 		0
 #endif
-#ifndef BLE_ENABLE					//ble peripheral
-#define BLE_ENABLE			0
-#endif	
-#ifndef BLEC_ENABLE					//ble central
-#define BLEC_ENABLE			0
-#endif
-#ifndef BLE_RF_ENABLE				//ble peripheral 模拟2.4G
-#define BLE_RF_ENABLE		0
-#endif	
-#ifndef BLEC_RF_ENABLE				//ble central
-#define BLEC_RF_ENABLE		0
-#endif	
-#ifndef EDR_ENABLE					//edr peripheral
-#define EDR_ENABLE			0
-#endif	
-#ifndef EDRC_ENABLE					//edr central
-#define EDRC_ENABLE			0
-#endif	
 
-#define BT_ENABLE			(BLE_ENABLE  | BLE_RF_ENABLE | EDR_ENABLE)
-#define BTC_ENABLE			(BLEC_ENABLE  | BLEC_RF_ENABLE | EDRC_ENABLE)
-
+#define BT_SUPPORT 			(BT0_SUPPORT | BT1_SUPPORT)
+#define BT_ENABLE			((BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF) | BIT_ENUM(TR_EDR)) & BT_SUPPORT)
+#define BTC_ENABLE			((BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC) | BIT_ENUM(TR_EDRC)) & BT_SUPPORT)
+#define API_RF_ENABLE		((BIT_ENUM(TR_RF) | BIT_ENUM(TR_RFC)) & BT_SUPPORT)
+#define API_BT_ENABLE		(BT_ENABLE | BTC_ENABLE | API_RF_ENABLE)
 
 //*********************************************************************************//
 //                       	USB			                  						   //
@@ -243,7 +245,29 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #ifndef APP_USBH_ENABLE
 #define APP_USBH_ENABLE			1
 #endif
+#define APP_USB_ENABLE		(APP_USBD_ENABLE | APP_USBH_ENABLE)
 
+//*********************************************************************************//
+//                       	other API modules                  						//
+//*********************************************************************************//
+#ifndef API_NFC_ENABLE
+#define API_NFC_ENABLE			1
+#endif
+#ifndef API_GPS_ENABLE
+#define API_GPS_ENABLE			1
+#endif
+#ifndef API_GSM_ENABLE
+#define API_GSM_ENABLE			1
+#endif
+#ifndef API_WIFI_ENABLE
+#define API_WIFI_ENABLE			1
+#endif
+#ifndef API_SOFT_TIMER_ENABLE
+#define API_SOFT_TIMER_ENABLE			1
+#endif
+#ifndef API_AUDIO_ENABLE
+#define API_AUDIO_ENABLE				1
+#endif
 
 //*********************************************************************************//
 //                       	APP modules                  						   //
@@ -274,29 +298,6 @@ enable: INTER_MODULE,EXTERNAL_MODULE
 #endif
 #ifndef APP_RGB_ENABLE
 #define APP_RGB_ENABLE			1
-#endif
-#ifndef APP_NFC_ENABLE
-#define APP_NFC_ENABLE			1
-#endif
-#ifndef APP_GPS_ENABLE
-#define APP_GPS_ENABLE			1
-#endif
-#ifndef APP_GSM_ENABLE
-#define APP_GSM_ENABLE			1
-#endif
-#ifndef APP_WIFI_ENABLE
-#define APP_WIFI_ENABLE			1
-#endif
-#define APP_RF_ENABLE		(RF_ENABLE | RFC_ENABLE)
-#define APP_BT_ENABLE		(BT_ENABLE | BTC_ENABLE | RF_ENABLE | RFC_ENABLE)
-#define APP_USB_ENABLE		(USBD_ENABLE | USBH_ENABLE)
-
-#ifndef APP_SOFT_TIMER_ENABLE
-#define APP_SOFT_TIMER_ENABLE			1
-#endif
-
-#ifndef API_AUDIO_ENABLE
-#define API_AUDIO_ENABLE				1
 #endif
 
 

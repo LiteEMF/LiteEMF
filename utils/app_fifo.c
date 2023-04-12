@@ -56,14 +56,13 @@ static __INLINE void fifo_get(app_fifo_t * p_fifo, uint8_t * p_byte)
 
 uint8_t app_fifo_init(app_fifo_t * p_fifo, uint8_t * p_buf, uint16_t buf_size)
 {
-	if(p_fifo->p_buf == NULL) return ERROR_NULL;
-    // Check buffer for null pointer.
-    if (p_buf == NULL)
-    {
-        return ERROR_NULL;
-    }
+	if(p_fifo == NULL) return ERROR_NULL;
 
-    p_fifo->p_buf         = p_buf;
+    if(buf_size){
+        p_fifo->p_buf         = p_buf;
+    }else{
+        p_fifo->p_buf         = NULL;
+    }
     p_fifo->buf_size_max = buf_size;
     p_fifo->read_pos      = 0;
     p_fifo->write_pos     = 0;
@@ -88,6 +87,7 @@ uint8_t app_fifo_put(app_fifo_t * p_fifo, uint8_t byte)
 
 uint8_t app_fifo_get(app_fifo_t * p_fifo, uint8_t * p_byte)
 {
+    if(p_fifo->p_buf == NULL) return ERROR_NULL;
     if (FIFO_EMPTY != p_fifo->fifo_stu)
     {
         fifo_get(p_fifo, p_byte);

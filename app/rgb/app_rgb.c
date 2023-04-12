@@ -67,9 +67,9 @@ bool app_rgb_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_rgb_handler(void)
+void app_rgb_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 #endif

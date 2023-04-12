@@ -744,7 +744,7 @@ void app_iap2_in_process(uint8_t* buf, uint16_t len)
 
 
 
-void app_iap2_handler(void)
+void app_iap2_handler(uint32_t period_10us)
 {
 	bool ret = true;
 	bool iap_retry = true;

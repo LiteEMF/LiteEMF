@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_soft_timer_h
-#define _app_soft_timer_h
+#ifndef _api_soft_timer_h
+#define _api_soft_timer_h
 #include "emf_typedef.h"
 #include "utils/list.h"
 #include "api/api_tick.h"
@@ -59,7 +59,7 @@ error_t soft_timer_start(soft_timer_t *timerp);
 error_t soft_timer_stop(soft_timer_t *timerp);
 error_t soft_timer_delete(soft_timer_t *timerp);
 void soft_timer_delete_all(void);
-void soft_timer_handler(void);
+void soft_timer_handler(uint32_t period_10us);
 bool soft_timer_init(void);
 bool soft_timer_deinit(void);
 

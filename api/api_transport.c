@@ -15,6 +15,18 @@
 #include  "hw_config.h"
 #include  "api/api_transport.h"
 
+#if API_BT_ENABLE
+#include  "api/bt/api_bt.h"
+#endif
+#if APP_USBH_ENABLE
+#include "api/usb/host/usbh.h"
+#endif
+#if APP_USBD_ENABLE
+#include "api/usb/device/usbd.h"
+#endif
+#ifdef HW_UART_MAP
+#include  "api/api_uart.h"
+#endif
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -38,16 +50,6 @@ uint16_t m_trps = DEV_TRPS_DEFAULT;
 **  Function
 ******************************************************************************************************/
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-bool api_transporte_init(void)
-{
-	return true;
-}
-
 
 /*******************************************************************
 ** Parameters:		
@@ -66,6 +68,44 @@ bool api_trp_is_bt(trp_t trp)
 
 uint16_t api_get_transport_mtu(trp_handle_t* phandle)
 {
+	switch(phandle->trp){
+	case TR_BLE		:
+		return BLE_CMD_MTU;
+		break;
+	case TR_EDR		:
+		return EDR_CMD_MTU;
+		break;
+	case TR_BLEC	:
+		return BLEC_CMD_MTU;
+		break;
+	case TR_EDRC	:
+		return EDRC_CMD_MTU;
+		break;
+	case TR_BLE_RF	:
+		return BLE_RF_CMD_MTU;
+		break;
+	case TR_BLEC_RF	:
+		return BLEC_RF_CMD_MTU;
+		break;
+	case TR_RF		:
+		return RF_CMD_MTU;
+		break;
+	case TR_RFC		:
+		return RFC_CMD_MTU;
+		break;
+	case TR_USBD	:
+		return USBD_CMD_MAX;
+		break;
+	case TR_USBH	:
+		return USBH_CMD_MAX;
+		break;
+	case TR_UART	:
+		return UART_CMD_MAX;
+		break;
+	default:
+		break;
+	}
+	
 	return 0;
 }
 
@@ -74,40 +114,50 @@ uint16_t api_get_transport_mtu(trp_handle_t* phandle)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t size)
+bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 {
 	bool ret = true;
-	if (size <= 0)			return false;
+	if (len <= 0)			return false;
 	if (NULL == buf)		return false;
 
 	switch(phandle->trp){
+		#if API_BT_ENABLE
 		case TR_BLE	:
-			break;
 		case TR_EDR	:
-			break;
-		case TR_BLEC:
-			break;	
+		case TR_BLEC:	
 		case TR_EDRC:
-			break;	
 		case TR_BLE_RF:
-			break;
 		case TR_BLEC_RF:
-			break;
 		case TR_RF:
-			break;
 		case TR_RFC:
+			if(DEV_TYPE_VENDOR == (phandle->index >> 8)){
+				ret = api_bt_uart_tx(phandle->id,phandle->trp, buf, len);
+			}else if(DEV_TYPE_HID == (phandle->index >> 8)){
+				ret = api_bt_hid_tx(phandle->id,phandle->trp, buf, len);
+			}
 			break;
+		#endif
+		#if APP_USBD_ENABLE
 		case TR_USBD:
+			ret = !usbd_class_in(phandle->id, phandle->index>>8, phandle->index&0xFF, buf, len);
 			break;	
+		#endif
+		#if APP_USBH_ENABLE
 		case TR_USBH:
+			ret = !usbh_class_out(phandle->index>>8, phandle->index&0xFF, buf, len);
 			break;	
+		#endif
+		#ifdef HW_UART_MAP
 		case TR_UART:
+			ret = api_uart_tx(phandle->id, buf, len);
 			break;	
+		#endif
 		default:
 			break;
 	}
 	return ret;
 }
+
 
 /*******************************************************************
 ** Parameters:		
@@ -116,6 +166,7 @@ bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t size)
 *******************************************************************/
 bool api_trp_init(void)
 {
+	m_trps = DEV_TRPS_DEFAULT;
 	return true;
 }
 
@@ -134,9 +185,9 @@ bool api_trp_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void api_trp_handler(void)
+void api_trp_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 

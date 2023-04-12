@@ -110,7 +110,7 @@ void app_trigger_deadzone(joystick_cfg_t* cfgp,uint16_t *valp);
 
 bool app_joystick_init(void);
 bool app_joystick_deinit(void);
-void app_joystick_handler(void);
+void app_joystick_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

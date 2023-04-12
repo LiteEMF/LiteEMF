@@ -25,7 +25,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef API_STORAGE_TIME			//ms
-#define API_STORAGE_TIME   (100)
+#define API_STORAGE_TIME   (100*100)
 #endif
 
 #ifndef STORAGE_MAP_NUM
@@ -80,7 +80,7 @@ bool api_storage_sync(void);
 void api_storage_auto_sync(void);
 bool api_storage_sync_complete(void);
 bool api_storage_init(void);
-void api_storage_handler(void);
+void api_storage_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

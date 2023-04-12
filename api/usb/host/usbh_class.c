@@ -626,7 +626,7 @@ error_t usbh_class_deinit(uint8_t id)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_class_handler(void)
+void usbh_class_handler(uint32_t period_10us)
 {
 	error_t err = ERROR_NOT_FOUND;
 	uint8_t i,id = USBH_NULL;
@@ -636,8 +636,8 @@ void usbh_class_handler(void)
 	static timer_t s_class_timer;
 	static timer_t s_tick;
 
-	if(m_systick - s_class_timer >= 1){
-		s_class_timer = m_systick;
+	if(m_task_tick10us - s_class_timer >= period_10us){
+		s_class_timer = m_task_tick10us;
 		s_tick++;
 
 		for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){

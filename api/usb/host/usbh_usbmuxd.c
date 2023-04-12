@@ -122,7 +122,7 @@ void usbh_usbmuxd_handler(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	if(USB_STA_CONFIGURED == pdev->state){
-		usbmuxd_handler();
+		usbmuxd_handler(100*1000);
 	}
 	UNUSED_PARAMETER(pclass);
 }

@@ -117,7 +117,7 @@ void usbh_iap2_handler(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	if(USB_STA_CONFIGURED == pdev->state){
-		app_iap2_handler();
+		app_iap2_handler(0);
 	}
 	UNUSED_PARAMETER(pclass);
 }

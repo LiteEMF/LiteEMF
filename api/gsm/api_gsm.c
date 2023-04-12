@@ -13,9 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if APP_GSM_ENABLE
+#if API_GSM_ENABLE
 
-#include  "app/gsm/app_gsm.h"
+#include  "api/gsm/api_gsm.h"
 
 /******************************************************************************************************
 ** Defined
@@ -43,7 +43,7 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_gsm_init(void)
+bool api_gsm_init(void)
 {
 	return true;
 }
@@ -53,7 +53,7 @@ bool app_gsm_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_gsm_deinit(void)
+bool api_gsm_deinit(void)
 {
 	return true;
 }
@@ -63,9 +63,9 @@ bool app_gsm_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_gsm_handler(void)
+void api_gsm_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 

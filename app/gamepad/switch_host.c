@@ -41,7 +41,7 @@ switch_enum_t bt_switch_enump;
 //switch 手柄校准参数,如果是switch主机m_switch_cal在枚举的时候读取
 switch_cal_t m_switch_cal;     
 switch_ctb_t switch_host_ctb;
-#if APP_NFC_ENABLE
+#if API_NFC_ENABLE
 switch_nfc_t switch_host_nfc;
 #endif
 /******************************************************************************************************
@@ -269,7 +269,7 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
                         switch_ctrlp->cmd_data[4] = sizeof(switch_user_imu_cal_t);
                     }
                 }
-            #if APP_NFC_ENABLE
+            #if API_NFC_ENABLE
             }else if(SWITCH_MCU_CTRL_ID == enump->cmd && MCU_SUB_REQ_NFC_DATA == enump->sub_cmd){
                 switch_nfc_req_t* nfc_reqp = (switch_nfc_req_t*)switch_ctrlp->cmd_data;
                 nfc_reqp->fragments = 0x08;
@@ -298,7 +298,7 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
         }
 
         if(ret){
-            switch_dump_cmd_out("enum:",switch_ctrlp,len);
+            switch_dump_cmd_out("enum:",(uint8_t*)switch_ctrlp,len);
             enump->cmd = 0;
             enump->retry = 0;
         }
@@ -459,7 +459,7 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
             if(!enump->ready){
         	    switch_set_emu(enump,SWITCH_CTRL_ID,SUB_SET_PLAYER_LIGHTS,0x01);   //0X30  //手柄编号
             }else{
-                #if APP_NFC_ENABLE
+                #if API_NFC_ENABLE
                 switch_set_emu(enump, SWITCH_MCU_CTRL_ID,MCU_SUB_REQ_STATUS,0);
                 #endif
             }
@@ -492,7 +492,7 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                 switch_set_emu(enump,SWITCH_CTRL_ID,SUB_SET_INPUT_REPORT_MODE,0x30);
                 switch_host_ctb.report_mode = SWITCH_STANDARD_REPORT_ID;
             }else if(SWITCH_LARGE_REPORT_ID == buf[0]){									//处理nfc 请求
-				#if APP_NFC_ENABLE
+				#if API_NFC_ENABLE
 				switch_nfc_emun_process(&switch_host_nfc,enump, buf,len);
 				#endif
             }

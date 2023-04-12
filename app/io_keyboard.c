@@ -154,7 +154,7 @@ static uint8_t iokb_scan(uint8_t* keyp, uint8_t len)
 uint8_t io_keyboard_scan(uint8_t* keyp, uint8_t len)
 {
 	uint8_t i = 0;
-
+	
 	#if defined(IO_KB_GPIO) && defined(IO_KB)
 	i = matrix_kb_scan(keyp, len);
 	#endif
@@ -162,6 +162,7 @@ uint8_t io_keyboard_scan(uint8_t* keyp, uint8_t len)
 	#if defined(MATRIX_KB_IN_GPIO) && defined(MATRIX_KB_OUT_GPIO) && defined(MATRIX_KB)	
 	i += iokb_scan(keyp+i, len-i);
 	#endif
+
 	return i;
 }
 
@@ -188,15 +189,6 @@ bool io_keyboard_deinit(void)
 	return io_keyboard_init();
 }
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-void io_keyboard_handler(void)
-{
-
-}
 
 
 

@@ -78,7 +78,7 @@ extern bool usbmuxd_config_ready;
 
 
 void usbmuxd_init(void);
-void usbmuxd_handler(void);
+void usbmuxd_handler(uint32_t period_10us);
 void usbmuxd_data_process(uint8_t* buf,uint16_t len);
 bool usbmuxd_send_data(uint8_t index,uint8_t* buf,uint16_t len);
 

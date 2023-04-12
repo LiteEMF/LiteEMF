@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_gps_h
-#define _app_gps_h
+#ifndef _api_gsm_h
+#define _api_gsm_h
 #include "emf_typedef.h"
 
 #ifdef __cplusplus
@@ -34,9 +34,9 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_gps_init(void);
-bool app_gps_deinit(void);
-void app_gps_handler(void);
+bool api_gsm_init(void);
+bool api_gsm_deinit(void);
+void api_gsm_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

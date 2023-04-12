@@ -67,23 +67,23 @@
 #if APP_RGB_ENABLE
 #include "rgb/app_rgb.h"
 #endif
-#if APP_NFC_ENABLE
-#include "nfc/app_nfc.h"
+#if API_NFC_ENABLE
+#include "api/nfc/api_nfc.h"
 #endif
 #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB)
 #include "adb/app_adb.h"
 #endif
-#if APP_GPS_ENABLE
-#include "gps/app_gps.h"
+#if API_GPS_ENABLE
+#include "gps/api_gps.h"
 #endif
-#if APP_GSM_ENABLE
-#include "gsm/app_gsm.h"
+#if API_GSM_ENABLE
+#include "gsm/api_gsm.h"
 #endif
-#if APP_WIFI_ENABLE
-#include "wifi/app_wifi.h"
+#if API_WIFI_ENABLE
+#include "wifi/api_wifi.h"
 #endif
-#if APP_SOFT_TIMER_ENABLE
-#include "app_soft_timer.h"
+#if API_SOFT_TIMER_ENABLE
+#include "api/api_soft_timer.h"
 #endif
 
 
@@ -117,7 +117,7 @@ uint16_t m_hid_type	= HID_TYPES_DEFAULT;
 **  Function
 ******************************************************************************************************/
 extern void emf_init(void);
-extern void emf_handler(void);
+extern void emf_handler(uint32_t period_10us);
 
 int  main( int  argc,  char  *argv[])  
 {
@@ -129,7 +129,8 @@ int  main( int  argc,  char  *argv[])
 	
 	// crc_test();
 	// soft_timer_test();
-	hid_desc_parser_test();
+	// hid_desc_parser_test();
+	mem_test();
 
 	while(0){
 		i=0x400000;
@@ -142,7 +143,7 @@ int  main( int  argc,  char  *argv[])
 		if(m_systick > 10 * 1000){
 			break;
 		}
-		emf_handler();
+		emf_handler(0);
 	}
 
 	return 0;
@@ -154,11 +155,17 @@ int  main( int  argc,  char  *argv[])
 *******************************************************************/
 void emf_init(void)
 {
+	emf_mem_init();
+
+	#ifdef HW_UART_MAP
+	api_uart_init(UART_DEBUG_ID);			
+	#endif
+
 	api_tick_init();
 	api_storage_init();
 	
 	#ifdef HW_UART_MAP
-	api_uarts_init();
+	api_uarts_init();				
 	#endif
 
 	#ifdef HW_ADC_MAP
@@ -203,7 +210,7 @@ void emf_init(void)
 	#if APP_RUMBLE_ENABLE
 	app_rumble_init();
 	#endif
-	#if APP_SOFT_TIMER_ENABLE
+	#if API_SOFT_TIMER_ENABLE
 	soft_timer_init();
 	#endif
 }
@@ -225,43 +232,39 @@ void emf_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void emf_handler(void)
+void emf_handler(uint32_t period_10us)
 {
 	#ifdef HW_ADC_MAP
-	api_adc_handler();
+	api_adc_handler(400);
 	#endif
 
-	#if APP_SOFT_TIMER_ENABLE
-	soft_timer_handler();
-	#endif
 	#ifdef HW_UART_MAP
-	api_uart_handler();
+	api_uart_handler(200);
 	#endif
 
 	#if APP_BATTERY_ENABLE
-	app_battery_handler();
+	app_battery_handler(200*100);
 	#endif
 	#if APP_KEY_ENABLE
-	app_key_handler();
+	app_key_handler(100);
 	#endif
 	#if APP_KM_ENABLE
-	app_km_handler();
+	app_km_handler(100);
 	#endif
-
 
 	#if APP_LED_ENABLE
-	app_led_handler();
+	app_led_handler(LED_PERIOD);
 	#endif
 	#if APP_RUMBLE_ENABLE
-	app_rumble_handler();
+	app_rumble_handler(64*100);
 	#endif
-	#if APP_SOFT_TIMER_ENABLE
-	soft_timer_handler();
+	#if API_SOFT_TIMER_ENABLE
+	soft_timer_handler(0);
 	#endif
 
-	api_trp_handler();
-	api_command_handler();
-	api_storage_handler();
+	api_trp_handler(0);
+	api_command_handler(0);
+	api_storage_handler(API_STORAGE_TIME);
 }
 
 

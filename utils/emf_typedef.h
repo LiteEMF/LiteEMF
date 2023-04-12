@@ -111,7 +111,7 @@ b(high): if x is greater than b.
 #endif
 
 #ifndef U16
-#define U16(msb,lsb)	( ((uint16_t)(msb) << 8) | (lsb) )
+#define U16(msb,lsb)	( ((uint16_t)(msb) << 8) | (uint16_t)(lsb) )
 #endif
 #ifndef U32
 #define U32(msb,msbl,lsbh,lsb)	( ((uint32_t)(msb) << 24) | ((uint32_t)(msbl) << 16) | ((uint32_t)(lsbh) << 8) | (lsb) )

@@ -498,11 +498,11 @@ error_t usbd_class_out_process(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t le
 
 
 /*******************************************************************
-** Parameters: index: bit8~15: dev_type_t, bit0~7: report id
+** Parameters:
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len)	//TODO 发送数据不准确
+error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len)
 {
 	error_t err = ERROR_FAILE;
 	usbd_class_t* pclass;
@@ -522,7 +522,7 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void 	usbd_class_handler(uint8_t id)
+void usbd_class_handler(uint8_t id)
 {
 	dev_type_t type;
 

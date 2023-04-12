@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_gsm_h
-#define _app_gsm_h
+#ifndef _api_wifi_h
+#define _api_wifi_h
 #include "emf_typedef.h"
 
 #ifdef __cplusplus
@@ -34,9 +34,9 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_gsm_init(void);
-bool app_gsm_deinit(void);
-void app_gsm_handler(void);
+bool api_wifi_init(void);
+bool api_wifi_deinit(void);
+void api_wifi_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

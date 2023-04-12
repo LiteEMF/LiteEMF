@@ -25,10 +25,6 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef API_ADC_SCAN_TIME
-#define API_ADC_SCAN_TIME		4
-#endif
-
 #ifndef ADC_REF_MV
 #define ADC_REF_MV		3200UL
 #endif
@@ -86,7 +82,7 @@ bool api_adc_init(uint8_t id);
 bool api_adc_deinit(uint8_t id);
 void api_adcs_init(void);
 void api_adcs_deinit(void);
-void api_adc_handler(void);
+void api_adc_handler(uint32_t period_10us);
 
 
 //hal

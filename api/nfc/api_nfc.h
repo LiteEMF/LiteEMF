@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_nfc_h
-#define _app_nfc_h
+#ifndef _api_nfc_h
+#define _api_nfc_h
 #include "emf_typedef.h"
 #include "nfc_driver.h"
 #ifdef __cplusplus
@@ -22,8 +22,6 @@ extern "C" {
 /*******************************************************************************************************************
 **	Defined
 ********************************************************************************************************************/
-#define TAG_SIZE_MAX		540		//NTAG215
-#define TAG_PAGE_SIZE		(60)		//NTAG215 page, 根据不同芯片不一样
 
 /*******************************************************************************************************************
 **	Parameters
@@ -38,29 +36,29 @@ typedef enum {
 	NFC_NTAG_WRITE,
 	NFC_NTAG_WRITE_FINLSH,
 	NFC_NTAG_FINLSH,				//操作完成
-}app_nfc_state_t;
+}api_nfc_state_t;
 
-extern app_nfc_state_t  m_app_nfc_sta;
-extern uint8_t m_app_nfc_addr;
+extern api_nfc_state_t  m_api_nfc_sta;
+extern uint8_t m_api_nfc_addr;
 extern uint8_t m_nfc_sn[8];
 extern uint8_t m_nfc_buf[TAG_SIZE_MAX];
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_nfc_start_polling(void);
-bool app_nfc_stop_polling(void);    
-bool app_nfc_start_read(void);
-bool app_nfc_start_write(void);
-bool app_nfc_start_finlsh(void);
-bool app_nfc_polling(void);
-bool app_nfc_read(uint16_t address,uint8_t* nfc_buf, uint16_t len);
-bool app_nfc_write(uint16_t address,uint8_t* nfc_buf, uint16_t len);
-bool app_nfc_close(void); 
+bool api_nfc_start_polling(void);
+bool api_nfc_stop_polling(void);    
+bool api_nfc_start_read(void);
+bool api_nfc_start_write(void);
+bool api_nfc_start_finlsh(void);
+bool api_nfc_polling(void);
+bool api_nfc_read(uint16_t address,uint8_t* nfc_buf, uint16_t len);
+bool api_nfc_write(uint16_t address,uint8_t* nfc_buf, uint16_t len);
+bool api_nfc_close(void); 
 
-bool app_nfc_init(void);
-bool app_nfc_deinit(void);
-void app_nfc_handler(void);
+bool api_nfc_init(void);
+bool api_nfc_deinit(void);
+void api_nfc_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

@@ -13,9 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if APP_GPS_ENABLE
+#if API_WIFI_ENABLE
 
-#include  "app/gps/app_gps.h"
+#include  "api/wifi/api_wifi.h"
 
 /******************************************************************************************************
 ** Defined
@@ -43,7 +43,7 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_gps_init(void)
+bool api_wifi_init(void)
 {
 	return true;
 }
@@ -53,7 +53,7 @@ bool app_gps_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_gps_deinit(void)
+bool api_wifi_deinit(void)
 {
 	return true;
 }
@@ -63,7 +63,7 @@ bool app_gps_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_gps_handler(void)
+void api_wifi_handler(uint32_t period_10us)
 {
 
 }

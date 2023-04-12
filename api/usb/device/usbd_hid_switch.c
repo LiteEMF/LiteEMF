@@ -91,7 +91,7 @@ error_t usbd_hid_switch_control_request_process(uint8_t id, usbd_class_t *pclass
 
 error_t usbd_hid_switch_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
 {
-	trp_handle_t* trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
+	trp_handle_t trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
 
 	switch_dev_process(&trp_handle, buf,len);
 

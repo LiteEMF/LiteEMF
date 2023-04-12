@@ -99,12 +99,12 @@ void api_adcs_deinit(void)
 		api_adc_deinit(id);
 	}   
 }
-void api_adc_handler(void)
+void api_adc_handler(uint32_t period_10us)
 {
 	uint8_t id;
 	uint16_t adc_val;
 	static timer_t adc_timer=0;
-	if((m_task_tick10us - adc_timer) >= (API_ADC_SCAN_TIME*100)){
+	if((m_task_tick10us - adc_timer) >= period_10us){
         adc_timer = m_task_tick10us;
 
 		for(id=0; id < m_adc_num; id++){

@@ -57,7 +57,7 @@ error_t usbd_out(uint8_t id, uint8_t ep,uint8_t* buf, uint16_t* plen);
 error_t usbd_reset(uint8_t id);
 error_t usbd_set_address(uint8_t id,uint8_t address);
 
-void 	usbd_handler( void );
+void 	usbd_handler( uint32_t period_10us );
 error_t usbd_init(uint8_t id);
 error_t usbd_deinit(uint8_t id);
 

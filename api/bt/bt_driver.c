@@ -32,35 +32,35 @@
 /*****************************************************************************************************
 **  hal bt Function
 ******************************************************************************************************/
-bool hal_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
+bool bt_driver_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -69,35 +69,35 @@ bool hal_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
     return ret;
 }
 
-bool hal_bt_is_bonded(uint8_t id, bt_t bt)
+bool bt_driver_is_bonded(uint8_t id, bt_t bt)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -105,35 +105,35 @@ bool hal_bt_is_bonded(uint8_t id, bt_t bt)
     
     return ret;
 }
-bool hal_bt_debond(uint8_t id, bt_t bt)
+bool bt_driver_debond(uint8_t id, bt_t bt)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -141,35 +141,35 @@ bool hal_bt_debond(uint8_t id, bt_t bt)
     
     return ret;
 }
-bool hal_bt_disconnect(uint8_t id, bt_t bt)
+bool bt_driver_disconnect(uint8_t id, bt_t bt)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -177,35 +177,35 @@ bool hal_bt_disconnect(uint8_t id, bt_t bt)
     
     return ret;
 }
-bool hal_bt_enable(uint8_t id, bt_t bt,bool en)
+bool bt_driver_enable(uint8_t id, bt_t bt,bool en)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -213,35 +213,35 @@ bool hal_bt_enable(uint8_t id, bt_t bt,bool en)
     
     return ret;
 }
-bool hal_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
+bool bt_driver_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -249,35 +249,35 @@ bool hal_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     
     return ret;
 }
-bool hal_bt_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
+bool bt_driver_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
     switch(bt){
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
     case BT_BLE: 	
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
     case BT_EDR: 	    
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
     case BT_EDRC:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
     case BT_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
     case BT_RFC:
         break;
     #endif
@@ -285,67 +285,67 @@ bool hal_bt_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
     
     return ret;
 }
-bool hal_bt_init(uint8_t id)
+bool bt_driver_init(uint8_t id)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
 
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
-
-    #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
 
     #endif
-
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
-
-    #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
 
     #endif
 
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
 
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
+
+    #endif
+
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
+
+    #endif
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
 
     #endif
     
     return ret;
 }
-bool hal_bt_deinit(uint8_t id)
+bool bt_driver_deinit(uint8_t id)
 {
     bool ret = false;
 
-    if(BT_ID0 != id) return false;
+    if(BT_ID1 != id) return false;
 
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
-
-    #endif
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
 
     #endif
-
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
 
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDRC)
+
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
+
+    #endif
+    #if BT1_SUPPORT & BIT_ENUM(TR_EDRC)
 
     #endif
     
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RF)
 
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_RFC)
+    #if BT1_SUPPORT & BIT_ENUM(TR_RFC)
 
     #endif
     
     return ret;
 }
-void hal_bt_handler(uint32_t period_10us)
+void bt_driver_handler(uint32_t period_10us)
 {
-
+    UNUSED_PARAMETER(period_10us);
 }
 
 

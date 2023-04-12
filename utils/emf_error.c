@@ -41,7 +41,7 @@
 *******************************************************************/
 __WEAK void emf_assert_internal(const char *expr, const char *file, int line)
 {
-    loge(expr, 0, file, line);
+    loge_r("assert err %s,file=%s line=%d\n",expr, file, line);
 }
 
 

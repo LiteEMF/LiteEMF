@@ -151,6 +151,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 					preq->setup_len = MIN(preq->setup_len, sizeof(class_reques_in_a3));
 					memcpy(preq->setup_buf,class_reques_in_a3,preq->setup_len);
 					err = ERROR_SUCCESS;
+					break;
                 case 0X12:{
 					ps_bt_mac_t ps_mac;
 					ps_get_bt_mac(&ps_mac);
@@ -196,7 +197,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 
 error_t usbd_hid_ps_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
 {
-	trp_handle_t* trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
+	trp_handle_t trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
 
 	ps_dev_process(&trp_handle, buf,len);
 

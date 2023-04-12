@@ -162,7 +162,6 @@ extern "C" {
 uint32_t io_key_scan(void);
 bool io_key_init(void);
 bool io_key_deinit(void);
-void io_key_handler(void);
 
 #ifdef __cplusplus
 }

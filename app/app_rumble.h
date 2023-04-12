@@ -26,9 +26,13 @@ extern "C" {
 #define RUMBLE_MIN_DEFAULT			0
 #endif
 
-#ifndef APP_RUMBLE_NUM
-#define APP_RUMBLE_NUM				4
-#endif
+typedef enum{
+    RUMBLE_L = 0,
+    RUMBLE_R,
+    RUMBLE_SL,
+    RUMBLE_SR,
+    RUMBLE_MAX
+}rumble_id;
 
 #ifndef APP_RUMBLE_SYNC_TIMES
 #define APP_RUMBLE_SYNC_TIMES		3
@@ -39,7 +43,7 @@ extern "C" {
 typedef struct	
 {
     uint8_t mode;
-    uint8_t duty[APP_RUMBLE_NUM];
+    uint8_t duty[RUMBLE_MAX];
 } rumble_t;
 
 
@@ -60,7 +64,7 @@ void app_rumble_set_duty(uint8_t id,uint8_t duty,uint16_t timeout_ms);
 void app_set_rumble(rumble_t *rumblep,uint16_t timeout_ms);
 bool app_rumble_init(void);
 bool app_rumble_deinit(void);
-void app_rumble_handler(void);
+void app_rumble_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

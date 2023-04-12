@@ -25,7 +25,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef KEY_PERIOD_DEFAULT
-#define KEY_PERIOD_DEFAULT 			(10)			//10ms
+#define KEY_PERIOD_DEFAULT 			(1000)			//10ms
 #endif
 #ifndef KEY_LONG_LONG_TIME
 #define KEY_LONG_LONG_TIME 			(500)
@@ -79,7 +79,7 @@ void app_key_swapl(app_key_t* keyp);
 
 bool app_key_init(void);
 bool app_key_deinit(void);
-void app_key_handler(void);
+void app_key_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

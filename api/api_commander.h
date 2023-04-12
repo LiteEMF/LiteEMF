@@ -71,7 +71,7 @@ bool api_command_byte_unpack(command_stream_rx_t* pstream, uint8_t mtu, uint8_t 
 bool command_rx_free(command_rx_t *rxp);
 bool api_command_init(void);
 bool api_command_deinit(void);
-void api_command_handler(void);
+void api_command_handler(uint32_t period_10us);
 
 
 #ifdef __cplusplus

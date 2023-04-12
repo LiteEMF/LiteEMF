@@ -311,15 +311,15 @@ bool app_imu_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_imu_handler(void)
+void app_imu_handler(uint32_t period_10us)
 {
 	axis3i_t acc, gyro;
 	static timer_t imu_timer;
 	static timer_t atuo_cal_timer;
 
-	imu_driver_handler();
+	imu_driver_handler(period_10us);
 
-	if(m_task_tick10us - imu_timer > 400){
+	if(m_task_tick10us - imu_timer >= period_10us){
 		imu_timer = m_task_tick10us;	
 
 		if(app_imu_get_raw(&acc, &gyro)){

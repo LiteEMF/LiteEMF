@@ -23,7 +23,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef EMF_MEMPOLL_SIZE
-#define EMF_MEMPOLL_SIZE		(2*0x400)			//2k
+#define EMF_MEMPOLL_SIZE		(2*0x400)			/*2k*/
 #endif
 
 /******************************************************************************************************
@@ -38,7 +38,7 @@ extern "C" {
 void emf_mem_init(void);
 void* emf_malloc(uint32_t size);
 void emf_free(void* p);
-void emf_mem_stats();
+void emf_mem_stats(void);
 
 #ifdef __cplusplus
 }

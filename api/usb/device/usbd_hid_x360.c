@@ -195,8 +195,8 @@ error_t usbd_hid_x360_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf
 	logd("gamepade ep%d in%d:",pclass->endpout.addr, len);dumpd(buf,len);
 	// x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;
 	// if (X360_RUMBLE_CMD == motorp->cmd){
-	// 	app_rumble_set_duty(0, motorp->motor1, 20000);
-	// 	app_rumble_set_duty(1, motorp->motor2, 20000);
+	// 	app_rumble_set_duty(RUMBLE_L, motorp->motor1, 20000);
+	// 	app_rumble_set_duty(RUMBLE_R, motorp->motor2, 20000);
 	// }
 	
     return ERROR_SUCCESS;

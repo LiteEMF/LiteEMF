@@ -14,7 +14,7 @@
 #include "hw_config.h"
 #include "bt_typedef.h"
 #include "api/hid/hid_dev_desc.h"
-#include "api/bt/driver_bt.h"
+#include "api/bt/bt_driver.h"
 #include "hal/hal_bt.h"
 #include "utils/emf_utils.h"
 
@@ -48,8 +48,8 @@ extern "C" {
 #ifndef EDR_SNIFF_ENABLE
 #define EDR_SNIFF_ENABLE			1
 #endif
-#ifndef BT_ADV_INTERVAL
-#define BT_ADV_INTERVAL             (160) 		//(unit:0.625ms)
+#ifndef BT_ADV_INTERVAL							//(unit:0.625ms)
+#define BT_ADV_INTERVAL             (160) 		
 #endif
 #ifndef BLE_MULT_HID_SERVICES					//如果pc打开多服务,但是不初始化report map 会有感叹号
 #define BLE_MULT_HID_SERVICES		1
@@ -113,27 +113,37 @@ RF_EVT_TX事件接收后可以根据fifo长度来判断是否填充按键数据
 #ifndef APP_BT_ATT_MTU		//hid数据通道的MTU一般不超过32字节
 	#if BLE_CMD_MAX > 61
 	#define APP_BT_ATT_MTU   (BLE_CMD_MAX)
-	#else
-	#define APP_BT_ATT_MTU   (61)					//不清楚为什么超过61会导致ios13.4鼠标描述符无作用
+	#else					//不清楚为什么超过61会导致ios13.4鼠标描述符无作用
+	#define APP_BT_ATT_MTU   (61)					
 	#endif
+#endif
+
+
+
+
+
+#ifndef RF_FIFO_LEN		
+#define RF_FIFO_LEN		(0x100)
 #endif
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
-#define BT_TR_NUM			8
-#define BT_TRS_MASK			(BT_BLE | BT_EDR | BT_BLEC | BT_EDRC | BT_RF | BT_RFC | BT_BLE_RF | BT_BLEC_RF)
+typedef enum{
+	BT_ID0 = 0,				//默认内置蓝牙模块	
+	BT_ID1 = 1,				//默认外部蓝牙模块
+	BT_ID_MAX
+}bt_id_t;
 typedef enum {
-	BT_NULL = 0,
-	BT_BLE 	= BIT(TR_BLE),		
-	BT_EDR 	= BIT(TR_EDR),		
-	BT_BLEC = BIT(TR_BLEC),		
-	BT_EDRC = BIT(TR_EDRC),		
-	BT_BLE_RF = BIT(TR_BLE_RF),					//BLE模拟2.4G
-	BT_BLEC_RF = BIT(TR_BLEC_RF),	
-	BT_RF = BIT(TR_RF),			
-	BT_RFC = BIT(TR_RFC),	
+	BT_BLE 		= TR_BLE,		
+	BT_EDR 		= TR_EDR,		
+	BT_BLEC 	= TR_BLEC,		
+	BT_EDRC 	= TR_EDRC,		
+	BT_BLE_RF 	= TR_BLE_RF,					//BLE模拟2.4G
+	BT_BLEC_RF 	= TR_BLEC_RF,	
+	BT_RF 		= TR_RF,			
+	BT_RFC 		= TR_RFC,	
+	BT_MAX 	= 8,
 } bt_t;
 
 typedef enum {
@@ -237,47 +247,111 @@ typedef enum {
 }bt_adv_t;
 
 
+
+
+typedef struct{
+	app_fifo_t	fifo;
+	uint8_t		tx_busy;
+	uint16_t 	tx_mtu;
+	uint16_t 	tx_len;
+	uint8_t* 	tx_buf;
+}bt_tx_fifo_t;
+
+
+typedef struct{
+	uint8_t init_ok:1;
+	uint8_t enable:1;
+	uint8_t res:6;
+	uint16_t inteval;	//1.25ms
+	bt_sta_t sta;
+	uint16_t types;
+	uint16_t hid_types;
+
+	bt_tx_fifo_t* fifo_txp;
+}api_bt_ctb_t;
+
+extern bt_t api_bt_trs;			//bt_t
+#if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
+extern api_bt_ctb_t m_ble;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
+extern api_bt_ctb_t m_edr;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_BLEC)					//ble central
+extern api_bt_ctb_t m_blec;
+extern bt_evt_scan_t blec_scan_result;
+#endif
+#if BT_SUPPORT & BIT_ENUM(TR_BLE_RF)
+extern api_bt_ctb_t m_ble_rf;
+#endif
+#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)					//ble central
+extern api_bt_ctb_t m_blec_rf;
+#endif
+#if BT_SUPPORT & BIT_ENUM(TR_EDRC)					//edr central
+extern api_bt_ctb_t m_edrc;
+extern bt_evt_scan_t edrc_scan_result;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_RF)
+extern api_bt_ctb_t m_rf;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+extern api_bt_ctb_t m_rfc;
+#endif
+
+
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_bt_get_mac(bt_t bt, uint8_t *buf );		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
-bool api_bt_is_bonded(bt_t bt);
-bool api_bt_debond(bt_t bt);
-bool api_bt_disconnect(bt_t bt);
-bool api_bt_enable(bt_t bt,bool en);
-bool api_bt_uart_fifo_tx(bt_t bt,app_fifo_t * fifop, uint8_t *buf, uint16_t len);
-bool api_bt_uart_tx(bt_t bt,uint8_t *buf, uint16_t len);
-bool api_bt_hid_tx(bt_t bt,uint16_t id, uint8_t*buf, uint16_t len);
-bool api_bt_stack_init_ok(bt_t bt);
+bt_evt_scan_t* api_bt_get_scan_result(bt_t bt);
+api_bt_ctb_t* api_bt_get_ctb(bt_t bt);
+bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf );		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
+uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len );
+bool api_bt_is_bonded(uint8_t id,bt_t bt);
+bool api_bt_debond(uint8_t id,bt_t bt);
+bool api_bt_disconnect(uint8_t id,bt_t bt);
+bool api_bt_enable(uint8_t id,bt_t bt,bool en);
+void api_bt_enable_all(bool en);
+void api_bt_tx_fifo_fush(bt_t bt);
+bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len);
+bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len);
+error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
+void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
+bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);	//__WEAK
+void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);
 bool api_bt_init(void);
 bool api_bt_deinit(void);
-void api_bt_handler(void);
+void api_bt_handler(uint32_t period_10us);
 
-// bt extern dev driver
-bool bt_driver_get_mac(bt_t bt, uint8_t *buf );
-bool bt_driver_is_bonded(bt_t bt);
-bool bt_driver_debond(bt_t bt);
-bool bt_driver_disconnect(bt_t bt);
-bool bt_driver_enable(bt_t bt,bool en);
-bool bt_driver_uart_tx(bt_t bt,uint8_t *buf, uint16_t len);
-bool bt_driver_hid_tx(bt_t bt,uint16_t id, uint8_t*buf, uint16_t len);
-bool bt_driver_init(void);
-bool bt_driver_deinit(bt_t bt);
-void bt_driver_handler(void);
+
 
 /*******************************************************************************************************************
 **	hal驱动接口
 ********************************************************************************************************************/
-bool hal_bt_get_mac(bt_t bt, uint8_t *buf );		//这里高3byte buf[3]是public地址
-bool hal_bt_is_bonded(bt_t bt);
-bool hal_bt_debond(bt_t bt);
-bool hal_bt_disconnect(bt_t bt);
-bool hal_bt_enable(bt_t bt,bool en);
-bool hal_bt_uart_tx(bt_t bt,uint8_t *buf, uint16_t len);
-bool hal_bt_hid_tx(bt_t bt,uint16_t id, uint8_t*buf, uint16_t len);
-bool hal_bt_init(void);
-bool hal_bt_deinit(bt_t bt);
-void hal_bt_handler(void);
+bool bt_driver_get_mac(uint8_t id,bt_t bt, uint8_t *buf );		//这里高3byte buf[3]是public地址
+bool bt_driver_is_bonded(uint8_t id,bt_t bt);
+bool bt_driver_debond(uint8_t id,bt_t bt);
+bool bt_driver_disconnect(uint8_t id,bt_t bt);
+bool bt_driver_enable(uint8_t id,bt_t bt,bool en);
+bool bt_driver_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
+bool bt_driver_hid_tx(uint8_t id,bt_t bt, uint8_t*buf, uint16_t len);
+bool bt_driver_init(uint8_t id);
+bool bt_driver_deinit(uint8_t id);
+void bt_driver_handler(uint32_t period_10us);
+
+bool hal_bt_get_mac(uint8_t id,bt_t bt, uint8_t *buf );		//这里高3byte buf[3]是public地址
+bool hal_bt_is_bonded(uint8_t id,bt_t bt);
+bool hal_bt_debond(uint8_t id,bt_t bt);
+bool hal_bt_disconnect(uint8_t id,bt_t bt);
+bool hal_bt_enable(uint8_t id,bt_t bt,bool en);
+bool hal_bt_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
+bool hal_bt_hid_tx(uint8_t id,bt_t bt, uint8_t*buf, uint16_t len);
+bool hal_bt_init(uint8_t id);
+bool hal_bt_deinit(uint8_t id);
+void hal_bt_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

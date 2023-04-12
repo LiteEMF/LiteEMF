@@ -62,7 +62,7 @@ bool app_otg_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_otg_handler(void)
+void app_otg_handler(uint32_t period_10us)
 {
 
 }

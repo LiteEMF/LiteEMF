@@ -13,8 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_SOFT_TIMER_ENABLE
-#include "app/app_soft_timer.h"
+#if API_SOFT_TIMER_ENABLE
+#include "api/api_soft_timer.h"
 #include "utils/emf_utils.h"
 
 #include "api/api_log.h"
@@ -37,7 +37,7 @@ void timer2_cb(void* pa)
 	}
 }
 
-void app_soft_timer_test(void)
+void api_soft_timer_test(void)
 {
 	soft_timer_t *timer1;
 	soft_timer_t *timer2;

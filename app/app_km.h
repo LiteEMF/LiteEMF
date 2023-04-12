@@ -42,7 +42,7 @@ typedef struct {
 ******************************************************************************************************/
 bool app_km_init(void);
 bool app_km_deinit(void);
-void app_km_handler(void);
+void app_km_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

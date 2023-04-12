@@ -35,11 +35,12 @@ extern "C" {
 **  Function
 ******************************************************************************************************/
 void api_commander_test(void);
-void app_soft_timer_test(void);
+void api_soft_timer_test(void);
 void crc_test(void);
 void hid_desc_parser_test(void);
 void list_test(void);
 bool protobuf_test(void);
+void mem_test(void);
 
 #ifdef __cplusplus
 }

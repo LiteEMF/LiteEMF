@@ -39,23 +39,23 @@
 #if APP_RGB_ENABLE
 #include "app/rgb/app_rgb.h"
 #endif
-#if APP_NFC_ENABLE
-#include "app/nfc/app_nfc.h"
+#if API_NFC_ENABLE
+#include "api/nfc/api_nfc.h"
 #endif
-#if APP_GPS_ENABLE
-#include "app/gps/app_gps.h"
+#if API_GPS_ENABLE
+#include "api/gps/api_gps.h"
 #endif
-#if APP_GSM_ENABLE
-#include "app/gsm/app_gsm.h"
+#if API_GSM_ENABLE
+#include "api/gsm/api_gsm.h"
 #endif
-#if APP_WIFI_ENABLE
-#include "app/wifi/app_wifi.h"
+#if API_WIFI_ENABLE
+#include "api/wifi/api_wifi.h"
 #endif
 #if APP_USB_ENABLE
-#include "usb/api/usb/device/usbd.h"
+#include "api/usb/device/usbd.h"
 #endif
-#if APP_BT_ENABLE
-#include "app_bt.h"
+#if API_BT_ENABLE
+#include "api/bt/api_bt.h"
 #endif
 
 #include "emf.h"
@@ -182,8 +182,8 @@ bool app_pm_deinit(void)
 	#if APP_RUMBLE_ENABLE
 	app_rumble_deinit();
 	#endif
-	#if APP_BT_ENABLE
-	api_bt_enable(BT_TRS_MASK,0);
+	#if API_BT_ENABLE
+	api_bt_enable_all(0);
 	#endif
 	api_storage_sync();
 
@@ -195,19 +195,19 @@ bool app_pm_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_pm_handler(void)
+void app_pm_handler(uint32_t period_10us)
 {
 	uint8_t i;
 	bool dev_connected = false;
 	timer_t sleep_timeout;
-	#if APP_BT_ENABLE
-	app_bt_ctb_t* bt_ctbp;
+	#if API_BT_ENABLE
+	api_bt_ctb_t* bt_ctbp;
 	#endif
 
 	static bool s_dev_connected = false;
 
-	if((m_systick - s_pm_timer) > 100){
-		s_pm_timer = m_systick;
+	if((m_task_tick10us - s_pm_timer) >= period_10us){
+		s_pm_timer = m_task_tick10us;
 
 		#if APP_KEY_ENABLE
 		if( m_app_key.key ){
@@ -218,10 +218,10 @@ void app_pm_handler(void)
         }
 		#endif
 
-		#if APP_BT_ENABLE
-		app_bt_ctb_t* bt_ctbp;
-		for(i = 0; i < BT_TR_NUM; i++){
-			bt_ctbp = app_bt_get_ctb(BIT(i));
+		#if API_BT_ENABLE
+		api_bt_ctb_t* bt_ctbp;
+		for(i = 0; i < BT_MAX; i++){
+			bt_ctbp = api_bt_get_ctb(BIT(i));
 			if(NULL != bt_ctbp){
 				if(BT_STA_CONN <= bt_ctbp->sta){
 					dev_connected = true;
@@ -232,10 +232,10 @@ void app_pm_handler(void)
 		#endif
 
 
-		// #if USBD_ENABLE
+		// #if APP_USBD_ENABLE
 		// if(BT_STA_READY == m_ble_sta) dev_connected = true;
 		// #endif
-		// #if USBH_ENABLE
+		// #if APP_USBH_ENABLE
 		// if(BT_STA_READY == m_ble_sta) dev_connected = true;
 		// #endif
 

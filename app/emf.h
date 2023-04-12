@@ -35,7 +35,7 @@ extern "C" {
 ******************************************************************************************************/
 bool emf_init(void);
 bool emf_deinit(void);
-void emf_handler(void);
+void emf_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

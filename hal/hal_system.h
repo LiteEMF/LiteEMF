@@ -26,11 +26,11 @@ extern "C" {
 #define HAL_SYS_FREQ			(48 * 1000000L)			//系统时钟
 #endif
 
-#ifndef API_DISABLE_IRQ
-#define API_DISABLE_IRQ()
+#ifndef API_ENTER_CRITICAL
+#define API_ENTER_CRITICAL()
 #endif
-#ifndef API_ENABLE_IRQ
-#define API_ENABLE_IRQ()
+#ifndef API_EXIT_CRITICAL
+#define API_EXIT_CRITICAL()
 #endif
 
 

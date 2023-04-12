@@ -60,7 +60,7 @@ uint8_t app_battery_percent(uint16_t vol);
 void app_battery_scan(bool power_on);
 bool app_battery_init(void);
 bool app_battery_deinit(void);
-void app_battery_handler(void);
+void app_battery_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

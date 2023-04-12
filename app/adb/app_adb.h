@@ -125,7 +125,7 @@ typedef struct {
 bool app_adb_run(void);
 bool app_adb_init(void);
 bool app_adb_deinit(void);
-void app_adb_handler(void);
+void app_adb_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

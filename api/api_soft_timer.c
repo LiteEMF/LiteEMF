@@ -13,8 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_SOFT_TIMER_ENABLE
-#include "app/app_soft_timer.h"
+#if API_SOFT_TIMER_ENABLE
+#include "api/api_soft_timer.h"
 #include "utils/emf_utils.h"
 
 #include "api/api_log.h"
@@ -62,10 +62,11 @@ error_t soft_timer_register(soft_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t 
 ** Parameters:		
 ** Returns:	
 ** Description:	动态注册一个定时器,删除后回自动释放内存
+	由于使用到 emf_malloc 动态内存分配, 常驻定时器不要使用 soft_timer_create 创建定时器
 *******************************************************************/
 soft_timer_t* soft_timer_create(timer_cb_t cb,void *pa,timer_t timeout,soft_timer_ctrl_t ctrl)
 {
-	soft_timer_t * ptimer;
+	soft_timer_t *ptimer;
 	
 	ptimer = emf_malloc(sizeof(soft_timer_t));
 	if(NULL == ptimer) return NULL;
@@ -169,7 +170,7 @@ bool soft_timer_deinit(void)
 }
 
 
-void soft_timer_handler(void)
+void soft_timer_handler(uint32_t period_10us)
 {
 	soft_timer_t *pos, *n;
 
@@ -189,16 +190,18 @@ void soft_timer_handler(void)
 		
 		if(0 == (pos->ctrl & TIMER_ACTIVE)){							//用于单次运行在任务中重新开始判断
 			if(pos->ctrl & (TIMER_ONE_SHOT | TIMER_DEACTIVATED)){		//单次运行,或者销毁
-				API_DISABLE_IRQ();
+				API_ENTER_CRITICAL();
 				list_del(&pos->list);
 				if(pos->ctrl & TIMER_IS_DYNAMIC){
 					emf_free(pos);
 				}
-				API_ENABLE_IRQ();
+				API_EXIT_CRITICAL();
 				break;
 			}
 		}
 	}
+
+	UNUSED_PARAMETER(period_10us);
 }
 
 

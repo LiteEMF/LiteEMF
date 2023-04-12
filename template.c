@@ -68,9 +68,9 @@ bool template_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void template_handler(void)
+void template_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 #endif

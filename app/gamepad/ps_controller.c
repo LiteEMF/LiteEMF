@@ -29,7 +29,7 @@
 #include "api/usb/host/usbh.h"
 #endif
 #if BT_ENABLE
-#include "app/app_bt.h"
+#include  "api/bt/api_bt.h"
 #endif
 
 #if APP_BATTERY_ENABLE
@@ -139,7 +139,7 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint
 	ps_report_index++;
 	ps4p->index = ps_report_index;
 
-	ps_touch_pack(gpadp);
+	ps_touch_pack((app_key_t*)gpadp);
 
 	int_to_bit12(ps4p->touch_pad1, m_ps_touch[0].x, m_ps_touch[0].y);
 	int_to_bit12(ps4p->touch_pad2, m_ps_touch[1].x, m_ps_touch[1].y);
@@ -597,8 +597,10 @@ void ps_get_bt_mac(ps_bt_mac_t *pmac)
     memset(&ps_mac,0,sizeof(ps_mac));
 
 	memcpy(ps_mac.mac, "\xFC\xD3\x1D\xB8\xA0\x1C", 6);	//for default
-    #if EDR_ENABLE
-	app_bt_get_mac(BT_EDR, ps_mac.mac);
+    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+	api_bt_get_mac(BT_ID0, BT_EDR, ps_mac.mac);
+	#else 
+	api_bt_get_mac(BT_ID1, BT_EDR, ps_mac.mac);
 	#endif
 	memcpy(ps_mac.res, "\x08\x25\x00", 3);
 	// swap_buf(ps_mac.mac,6);              //MAC address is Big Endian
@@ -656,8 +658,8 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
      case PS4_BT_EFFECTS_ID:{           //0x11
 		ps4_bt_effects_t *peffects;
         peffects = (ps4_bt_effects_t*)buf;
-		app_rumble_set_duty(0,peffects->effects.rumble_l,10000);
-		app_rumble_set_duty(1,peffects->effects.rumble_r,10000);		
+		app_rumble_set_duty(RUMBLE_L,peffects->effects.rumble_l,10000);
+		app_rumble_set_duty(RUMBLE_R,peffects->effects.rumble_r,10000);		
 		m_ps_enhanced_mode =  true;		//蓝牙手柄模式接收到马达/led后可以切换到large_report模式
         ret = true;
         break;
@@ -666,8 +668,8 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 		#if USBD_HID_SUPPORT & HID_PS_MASK
 		ps4_usb_effects_t *peffects;
         peffects = (ps4_usb_effects_t*)buf;
-        app_rumble_set_duty(0,peffects->effects.rumble_l,10000);
-		app_rumble_set_duty(1,peffects->effects.rumble_r,10000);
+        app_rumble_set_duty(RUMBLE_L,peffects->effects.rumble_l,10000);
+		app_rumble_set_duty(RUMBLE_R,peffects->effects.rumble_r,10000);
 		#if API_AUDIO_ENABLE
 		if(peffects->effects.volume_l || peffects->effects.volume_r){
 			api_audio_spk_set_vol(0, &usbd_audio_info,peffects->effects.volume_l, peffects->effects.volume_r);

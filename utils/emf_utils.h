@@ -12,13 +12,15 @@
 #ifndef _emf_utils_h
 #define _emf_utils_h
 #include "emf_typedef.h"
-#include "utils/emf_mem.h"
+#include "utils/mem/emf_mem.h"
 #include "utils/app_fifo.h"
 #include "utils/at_commander.h"
 #include "utils/filter.h"
 #include "utils/vector.h"
 #include "utils/crc/crc.h"
 #include "utils/check_sum.h"
+#include "utils/emf_error.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -18,10 +18,10 @@
 
 #include "emf_typedef.h"
 #include "app/gamepad/switch_typedef.h"
-#include "app/nfc/app_nfc.h"
+#include "api/nfc/api_nfc.h"
 
 typedef struct {
-	app_nfc_state_t nfc_ic_state;
+	api_nfc_state_t nfc_ic_state;
     switch_mcu_report_id_t mcu_report_id;               //nfc MCU report id
     mcu_state_t mcu_state;
     nfc_state_t nfc_state;

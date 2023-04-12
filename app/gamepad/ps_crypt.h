@@ -56,7 +56,7 @@ extern uint8_t ps_encrypt_buf[1040];
 ********************************************************************************************************************/
 bool os_ps_post_msg(uint32_t msg);			//weak
 bool ps_encrypt_start(uint8_t cmd_index);
-bool ps_encrypt_handler(void);
+bool ps_encrypt_handler(uint32_t period_10us);
 
 #endif
 

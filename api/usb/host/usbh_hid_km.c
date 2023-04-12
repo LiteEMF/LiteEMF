@@ -336,8 +336,8 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
 error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass) 
 {
     if(NULL != pclass->pdata){
-        if( ((uint32_t)pclass->pdata >= (uint32_t)&m_km_items[0]) 
-            && ((uint32_t)pclass->pdata <= (uint32_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
+        if( ((uintptr_t)pclass->pdata >= (uintptr_t)&m_km_items[0]) 
+            && ((uintptr_t)pclass->pdata <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
             memset(pclass->pdata, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
         }
     }

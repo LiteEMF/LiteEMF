@@ -60,9 +60,9 @@ bool at_commander_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void at_commander_handler(void)
+void at_commander_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 

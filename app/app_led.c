@@ -52,43 +52,38 @@
 static void show_led(void)
 {	
 	static uint32_t	led_tick=0;		//50ms
-
-	static timer_t	led_timer;
 	int8_t i = 0;
+
+	led_tick++;
 	
-	if ((m_systick - led_timer) >= 50){
-		led_timer = m_systick;
-		led_tick++;
-		
-		for(i=0; i< m_led_num; i++){
-			if(0 != led_ctb[i].period){
-				if (0 == (led_tick % led_ctb[i].period)){
-					led_ctb[i].turn = !led_ctb[i].turn;	
-					if(led_ctb[i].turn && led_ctb[i].times) {
-						led_ctb[i].times--;
-						if(0 == led_ctb[i].times){
-							led_ctb[i].period = LED_OFF;
-						}
+	for(i=0; i< m_led_num; i++){
+		if(0 != led_ctb[i].period){
+			if (0 == (led_tick % led_ctb[i].period)){
+				led_ctb[i].turn = !led_ctb[i].turn;	
+				if(led_ctb[i].turn && led_ctb[i].times) {
+					led_ctb[i].times--;
+					if(0 == led_ctb[i].times){
+						led_ctb[i].period = LED_OFF;
 					}
 				}
 			}
-			
-			//show 
-			if(LED_ON == led_ctb[i].period){
-				led_frame[i] = true;
-			}else if(LED_OFF == led_ctb[i].period){
-				led_frame[i] = false;
-			}else {
-				#ifdef HW_LED_MAP
-				led_frame[i] = !(led_ctb[i].turn ^ m_led_active_map[i]);
-				#else
-				led_frame[i] = led_ctb[i].turn;
-				#endif
-			}
-		}	
+		}
+		
+		//show 
+		if(LED_ON == led_ctb[i].period){
+			led_frame[i] = true;
+		}else if(LED_OFF == led_ctb[i].period){
+			led_frame[i] = false;
+		}else {
+			#ifdef HW_LED_MAP
+			led_frame[i] = !(led_ctb[i].turn ^ m_led_active_map[i]);
+			#else
+			led_frame[i] = led_ctb[i].turn;
+			#endif
+		}
+	}	
 
-		app_led_show(led_frame);
-	}
+	app_led_show(led_frame);
 }	
 
 /*****************************************************************************************************
@@ -186,9 +181,13 @@ bool app_led_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_led_handler(void)
+void app_led_handler(uint32_t period_10us)
 {
-	show_led();
+	static timer_t	led_timer;
+	if ((m_task_tick10us - led_timer) >= period_10us){
+		led_timer = m_task_tick10us;
+		show_led();
+	}
 }
 
 #endif

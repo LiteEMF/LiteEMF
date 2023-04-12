@@ -186,7 +186,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             }
         }
     }else{                  // Hub bits 1 to n are hub port events
-        for(i = 1; i < (uint8_t)(pclass->pdata); i++){
+        for(i = 1; i < (uintptr_t)(pclass->pdata); i++){
             if(buf[0] & BIT(i)){
                 err = usbh_hub_port_get_status(id | i, hub_stu);
                 if(err) return;
@@ -260,7 +260,7 @@ error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass)
     dumpd(buf,4);
 
     // Set Port Power to be able to detect connection, starting with port 1
-    for(i = 1; i <= (uint8_t)(pclass->pdata); i++){
+    for(i = 1; i <= (uintptr_t)(pclass->pdata); i++){
         err = usbh_hub_port_set_feature(id | i, HUB_FEATURE_PORT_POWER); 
         if(err) return err;
     }
@@ -281,7 +281,7 @@ error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
     err = usbh_hub_get_desc(id, &desc);
     if(err) return err;
 
-    pclass->pdata = (void*)desc.bNbrPorts;
+    pclass->pdata = (void*)((uintptr_t)desc.bNbrPorts);
     logd("hub port=%d\n",desc.bNbrPorts);
 
     return err;

@@ -69,7 +69,7 @@ error_t hal_usbd_cfg_endp(uint8_t id, usb_endp_t *pendp)
 {
 	return 0;
 }
-void 	*hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
+void *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 {
 	return NULL;
 }

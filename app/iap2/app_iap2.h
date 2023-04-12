@@ -101,7 +101,7 @@ typedef enum
 **	Function
 ********************************************************************************************************************/
 void app_iap2_init(void);
-void app_iap2_handler(void);
+void app_iap2_handler(uint32_t period_10us);
 void app_iap2_in_process(uint8_t* buf,uint16_t len);
 bool app_iap2_hidreport(uint16_t index,uint8_t* report_buf,uint8_t len);
 void app_iap2_app_in_process(uint8_t* report_buf,uint8_t len);				//WEAK

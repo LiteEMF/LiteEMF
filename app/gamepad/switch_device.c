@@ -26,7 +26,7 @@
 #include "api/usb/device/usbd.h"
 #endif
 #if BT_ENABLE
-#include "app/app_bt.h"
+#include  "api/bt/api_bt.h"
 #endif
 
 #define DEBUG_LOG_ENABLE     	1
@@ -85,7 +85,7 @@ static uint8c_t switch_user_cal_default[] =
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-#if APP_NFC_ENABLE
+#if API_NFC_ENABLE
 switch_nfc_t switch_dev_nfc;
 #endif
 switch_ctb_t switch_dev_ctb;
@@ -186,9 +186,11 @@ void get_switch_mac_addr(uint8_t* macp)
 {
     memcpy(macp, "\xCA\xB9\x4D\xE9\xB6\x98", 6);    //谷粒 default
 
-    #if EDR_ENABLE
-    app_bt_get_mac(BT_EDR,macp);
-    #endif
+    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+	api_bt_get_mac(BT_ID0, BT_EDR, macp);
+	#else 
+	api_bt_get_mac(BT_ID1, BT_EDR, macp);
+	#endif
 
     swap_buf(macp,6);              //MAC address is Big Endian
 }
@@ -367,8 +369,8 @@ uint16_t switch_large_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, uin
     phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_SWITCH;
     switchp->id = SWITCH_LARGE_REPORT_ID;
     
-    #if APP_NFC_ENABLE
-    switch_dev_nfc.nfc_ic_state = m_app_nfc_sta;
+    #if API_NFC_ENABLE
+    switch_dev_nfc.nfc_ic_state = m_api_nfc_sta;
     switch_nfc_replies_pack(&switch_dev_nfc,switchp);
     switchp->nfc_crc = crc8(switchp->nfc,sizeof(switchp->nfc));
     switch_dump_nfc_data(switchp,len);
@@ -499,11 +501,11 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         break;
     case SUB_SET_HCI_STATE:
         #if (EDR_GAMEPAD_SUPPORT & BIT(DEV_TYPE_SWITCH))          //延时0.5s发送蓝牙数据包
-        // if(m_edr_enable) app_bt_enable(BT_EDR,true);     //TODO 调试用
+        // if(m_edr_enable) api_bt_enable(BT_EDR,true);     //TODO 调试用
         #endif
         break;
     case SUB_SET_NFC_IR_MCU_STATE:
-        #if APP_NFC_ENABLE
+        #if API_NFC_ENABLE
         if(0x01 == switch_ctrlp->cmd_data[0]){  //00:Suspend,01:Resume,02:Resume for update
             switch_dev_nfc.mcu_resum  = true;                         //收到31模式设置回复后,发reset
         }
@@ -580,9 +582,9 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         //Replies with ACK xA0 x20 and 34 bytes of data.
         sub_ack = 0xA0;
 
-        #if APP_NFC_ENABLE
+        #if API_NFC_ENABLE
             extern void switch_mcu_state_pack(switch_nfc_t *pnfc,switch_mcu_state_t*mcu_statep);
-            switch_dev_nfc.nfc_ic_state = m_app_nfc_sta;
+            switch_dev_nfc.nfc_ic_state = m_api_nfc_sta;
             switch_mcu_state_pack(&switch_dev_nfc,(switch_mcu_state_t*)ctrl_replies.cmd_data);
             ctrl_replies.sub_crc8 = crc8(ctrl_replies.cmd_data,sizeof(ctrl_replies.cmd_data));
             if(0x21 == switch_ctrlp->cmd_data[0] && switch_ctrlp->cmd_data[2]){
@@ -730,21 +732,21 @@ bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
             s_motor.duty[0] = motor1;
             motor1 = (uint8_t)(pow(motor1/255.0, 0.5)*255.0);
             if(motor1){                                             //motor为0不做处理，防止马达震动数据下发太快导致不震动
-                app_rumble_set_duty(0, motor1, 150);               //最后震动数据延时150ms 体验感最好
+                app_rumble_set_duty(RUMBLE_L, motor1, 150);               //最后震动数据延时150ms 体验感最好
             }
         }
         if(motor2 != s_motor.duty[1] || motor2 != 0){
             s_motor.duty[1] = motor2 ;
             motor2 = (uint8_t)(pow(motor2/255.0, 0.5)*255.0);
             if(motor2){
-                app_rumble_set_duty(1, motor2, 150);
+                app_rumble_set_duty(RUMBLE_R, motor2, 150);
             }
         }
         ret = true;
         break;
 	}
     case SWITCH_MCU_CTRL_ID:        	//0X11
-        #if APP_NFC_ENABLE
+        #if API_NFC_ENABLE
         switch_nfc_req_process(&switch_dev_nfc,buf,len);
         #endif
         ret = true;
@@ -763,7 +765,7 @@ bool switch_device_init(trp_handle_t *phandle)
     switch_dev_ctb.report_mode=SWITCH_NORMAL_REPORT_ID;           //默认switch repot id
     switch_dev_ctb.lights = 0;
     //nfc
-    #if APP_NFC_ENABLE
+    #if API_NFC_ENABLE
     switch_nfc_init(&switch_dev_nfc);
     #endif
    

@@ -65,9 +65,9 @@ bool imu_driver_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void imu_driver_handler(void)
+void imu_driver_handler(uint32_t period_10us)
 {
-
+	UNUSED_PARAMETER(period_10us);
 }
 
 

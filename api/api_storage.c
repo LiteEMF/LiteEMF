@@ -195,10 +195,10 @@ bool api_storage_init(void)
 	}
 	return ret;
 }
-void api_storage_handler(void)
+void api_storage_handler(uint32_t period_10us)
 {
     if(is_stg_auto_sync){
-        if(m_systick - storage_timer >= API_STORAGE_TIME){
+        if(m_systick - storage_timer >= period_10us/100){
             if(api_storage_sync()){
             	is_stg_auto_sync = false;
 			}

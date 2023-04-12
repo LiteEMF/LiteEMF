@@ -88,7 +88,7 @@ void app_imu_cal_start(void);
 bool app_imu_get_val(axis3i_t *accp, axis3i_t *gyrop);
 bool app_imu_init(void);
 bool app_imu_deinit(void);
-void app_imu_handler(void);
+void app_imu_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

@@ -307,23 +307,17 @@ static uint32_t iokey_scan(void)
 uint32_t io_key_scan(void)
 {
 	static uint32_t s_key;
-	static timer_t key_timer;
-
 	uint32_t key;
 
-	if((m_systick - key_timer) >= 1){
-		key_timer = m_systick;
+	key = iokey_scan();
+	#if defined(MATRIX_KEY_IN_GPIO) && defined(MATRIX_KEY_OUT_GPIO)	&& defined(MATRIX_KEY)	
+	key |= matrix_key_scan();
+	#endif
 
-		key = iokey_scan();
-		#if defined(MATRIX_KEY_IN_GPIO) && defined(MATRIX_KEY_OUT_GPIO)	&& defined(MATRIX_KEY)	
-		key |= matrix_key_scan();
-		#endif
-
-		if(s_key != key){
-			s_key = key;
-		}else{
-			m_io_key = s_key;
-		}
+	if(s_key != key){
+		s_key = key;
+	}else{
+		m_io_key = s_key;
 	}
 
     return m_io_key;
@@ -358,15 +352,7 @@ bool io_key_deinit(void)
 	return io_key_init();
 }
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-void io_key_handler(void)
-{
 
-}
 
 
 

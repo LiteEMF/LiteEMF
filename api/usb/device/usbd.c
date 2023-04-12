@@ -69,7 +69,7 @@ static error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 	UNUSED_PARAMETER(id);
 	return err;
 }
-static error_t usbd_free_setup_buffer(uint8_t id, usbd_req_t *preq)
+static error_t usbd_free_setup_buffer(usbd_req_t *preq)
 {
 	if(preq->setup_buf){
 		emf_free(preq->setup_buf);
@@ -77,7 +77,6 @@ static error_t usbd_free_setup_buffer(uint8_t id, usbd_req_t *preq)
 	preq->setup_len = 0;
 	preq->setup_index = 0;
 	preq->setup_buf = NULL;
-	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 /*****************************************************************************************************
@@ -218,7 +217,7 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 	if(0 == ep & ~USB_DIR_MASK){						//端点0发送完成释放内存
 		usbd_req_t *preq = usbd_get_req_buf(id);
 		if((ERROR_SUCCESS == err) && (preq->setup_index == preq->setup_len)){
-			usbd_free_setup_buffer(id, preq);
+			usbd_free_setup_buffer(preq);
 		}
 	}
     return err;
@@ -241,7 +240,7 @@ error_t usbd_reset(uint8_t id)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	usbd_free_setup_buffer(id,preq);
+	usbd_free_setup_buffer(preq);
 	memset(preq, 0, sizeof(usbd_req_t));
 	memset(pdev, 0, sizeof(usbd_dev_t));
 	pdev->state = USB_STA_DEFAULT;
@@ -674,7 +673,7 @@ void usbd_setup_process( uint8_t id )
 				usbd_in(id, 0x80, preq->setup_buf, preq->setup_len);
 			}else if(ERROR_STALL == err){
 				usbd_endp_stall(id,0x80);
-				usbd_free_setup_buffer(id,preq);
+				usbd_free_setup_buffer(preq);
 			}else{	//数据未就绪
 				//这里不能设置NAK,防止SOCKET情况下ACK后又被设置为NAK
 			}
@@ -687,21 +686,20 @@ void usbd_setup_process( uint8_t id )
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_handler(void)
+void usbd_handler(uint32_t period_10us)
 {
 	uint8_t id;
 	usbd_dev_t *pdev;
 	usbd_req_t *preq;
 	
 	for(id=0; id<USBD_NUM; id++){
-
 		pdev = usbd_get_dev(id);
 		preq = usbd_get_req_buf(id);
 
 		if(pdev->dev.reset){
 			pdev->dev.reset = 0;
 
-			usbd_free_setup_buffer(id,preq);
+			usbd_free_setup_buffer(preq);
 			memset(preq, 0, sizeof(usbd_req_t));
 			memset(pdev, 0, sizeof(usbd_dev_t));
 			pdev->state = USB_STA_DEFAULT;
@@ -715,7 +713,6 @@ void usbd_handler(void)
 		}else{
 			usbd_setup_process(id);
 		}
-
 
 		if(USB_STA_SUSPENDED == pdev->state){
 			usbd_class_handler(id);
@@ -735,6 +732,7 @@ error_t usbd_init(uint8_t id)
 }
 error_t usbd_deinit(uint8_t id)
 {
+	usbd_free_setup_buffer(&m_usbd_req[id]);					//防止资源未被释放
 	memset(&m_usbd_req[id],0, sizeof(usbd_req_t));
 	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
 

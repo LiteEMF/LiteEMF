@@ -396,22 +396,22 @@ static error_t usbh_enum_device( uint8_t id )
 ** Returns:	
 ** Description:		
 *******************************************************************/
-static void usbh_enum_all_device( void )
+static void usbh_enum_all_device( uint32_t period_10us )
 {
 	error_t err;
 	uint8_t id;
     static timer_t s_enumtimer = 0;
     static uint8d_t  s_retry = 0;        //失败时重试次数
 	
-	if(m_systick - s_enumtimer >= 100){
-		s_enumtimer = m_systick;
+	if(m_task_tick10us - s_enumtimer >= period_10us){
+		s_enumtimer = m_task_tick10us;
 
 		id = usbh_find_by_status(BIT(USB_STA_POWERED) | BIT(USB_STA_DEFAULT));
 
 		if(USBH_NULL == id){
 			id = usbh_find_by_status(BIT(USB_STA_ATTACHED));
 			if(USBH_NULL != id){  //查找到刚插入的设备  初始化枚举参数
-				s_enumtimer = m_systick;		//等待设备稳定
+				s_enumtimer = m_task_tick10us;		//等待设备稳定
 				s_retry = 0;
 				usbh_set_status(id, USB_STA_POWERED, 0);
 			}
@@ -471,11 +471,11 @@ error_t usbh_deinit( uint8_t id )
 }
 
 
-void usbh_handler(void)
+void usbh_handler(uint32_t period_10us)
 {
-	hal_usbh_driver_handler( );
-	usbh_class_handler( );
-	usbh_enum_all_device( );
+	hal_usbh_driver_handler( period_10us );
+	usbh_class_handler( period_10us );
+	usbh_enum_all_device( 100 );
 }
 
 

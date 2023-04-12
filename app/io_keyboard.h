@@ -47,7 +47,6 @@ extern "C" {
 uint8_t io_keyboard_scan(uint8_t* keyp, uint8_t len);
 bool io_keyboard_init(void);
 bool io_keyboard_deinit(void);
-void io_keyboard_handler(void);
 
 
 #ifdef __cplusplus

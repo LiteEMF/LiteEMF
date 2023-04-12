@@ -8,338 +8,444 @@
 *       opensource.org/licenses/BSD-2-Clause
 * 
 */
-#include "hw_config.h"
-#if APP_BT_ENABLE
-#include "app/app_bt.h"
-#include "api/api_tick.h"
-#include "api/api_log.h"
+/*******************************************************************
+** Description:	
+	BLE: 	ble peripheral
+	EDR: 	edr peripheral
+	BT:		ble+edr peripheral
+	BLEC:	ble central	
+	EDRC:	edr central
+	RF:		rf peripheral
+	BTC:	ble+edr	central
+	RFC:	rf central
+	APP_BT: ble+edr+rf peripheral and central
+*******************************************************************/
+
+/************************************************************************************************************
+**	Description:	
+************************************************************************************************************/
+#include  "hw_config.h"
+#if API_BT_ENABLE
+#include  "api/bt/api_bt.h"
+
+#include  "api/api_log.h"
+/******************************************************************************************************
+** Defined
+*******************************************************************************************************/
+
 
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
+bt_t api_bt_trs;				//bt_t
+
+#if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
+api_bt_ctb_t m_ble;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_BLEC)					//ble central
+api_bt_ctb_t m_blec;
+bt_evt_scan_t blec_scan_result;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_BLE_RF)
+api_bt_ctb_t m_ble_rf;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)					//ble central
+api_bt_ctb_t m_blec_rf;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
+api_bt_ctb_t m_edr;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_EDRC)					//edr central
+api_bt_ctb_t m_edrc;
+bt_evt_scan_t edrc_scan_result;
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_RF)
+api_bt_ctb_t m_rf;
+static bt_tx_fifo_t app_rf_tx;
+static uint8_t rf_tx_fifo_buf[RF_FIFO_LEN];
+static uint8_t rf_tx_buf[RF_TX_LL_MTU];
+#endif
+
+#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+api_bt_ctb_t m_rfc;
+static bt_tx_fifo_t app_rfc_tx;
+static uint8_t rfc_tx_fifo_buf[RF_FIFO_LEN];
+static uint8_t rfc_tx_buf[RF_TX_LL_MTU];
+#endif
 
 
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
 
-
-/******************************************************************************************************
-**	static Parameters
-*******************************************************************************************************/
-bool bt_stack_init_ok = false;
-bool bt_ex_stack_init_ok = false;
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
 
 
+
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_bt_get_driver(bt_t bt)
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		输入bt_t 输出对应数据
+*******************************************************************/
+bt_evt_scan_t* api_bt_get_scan_result(bt_t bt)
 {
-	#if BLE_ENABLE & INTER_MODULE
-    if(BT_BLE & bt){
-        bt |= BT_BLE;
-    }
-	#endif
-	#if BLEC_ENABLE & INTER_MODULE
-    if(BT_BLEC & bt){
-        bt |= BT_BLEC;
-    }
-    #endif
-	#if BLE_RF_ENABLE & INTER_MODULE
-	if(BT_BLE_RF & bt){
-		bt |= BT_BLE_RF;
-	}
-    #endif
-	#if BLEC_RF_ENABLE & INTER_MODULE
-	if(BT_BLEC_RF & bt){
-		bt |= BT_BLEC_RF;
-	}
-    #endif
-	#if EDR_ENABLE & INTER_MODULE
-    if(BT_EDR == bt){
-        bt |= BT_EDR;
-    }
-    #endif
-    #if EDRC_ENABLE & INTER_MODULE
-    if(BT_EDRC == bt){
-        bt |= BT_EDRC;
-    }
-    #endif
+	bt_evt_scan_t* resultp = NULL;
+	bool ret = false;
 
-	#if RF_ENABLE & INTER_MODULE
-    if(BT_RF & bt){
-        bt |= BT_RF;
-    }
-    #endif
-    #if RFC_ENABLE & INTER_MODULE
-    if(BT_RFC == bt){
-        bt |= BT_RFC;
-    }
-    #endif
-
-	return bt;
+	switch(bt){
+		#if BT_SUPPORT & BIT_ENUM(TR_BLEC)
+		case BT_BLEC:
+			resultp = &blec_scan_result;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_EDRC)
+		case BT_EDRC:
+			resultp = &edrc_scan_result;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+		case BT_RFC:
+			break;
+		#endif
+		default:
+			break;
+	}
+	return resultp;
 }
 
-bool api_bt_get_ex_driver(bt_t bt)
-{
-	#if BLE_ENABLE & EXTERNAL_MODULE
-    if(BT_BLE & bt){
-        bt |= BT_BLE;
-    }
-	#endif
-	#if BLEC_ENABLE & EXTERNAL_MODULE
-    if(BT_BLEC & bt){
-        bt |= BT_BLEC;
-    }
-    #endif
-	#if BLE_RF_ENABLE & EXTERNAL_MODULE
-	if(BT_BLE_RF & bt){
-		bt |= BT_BLE_RF;
-	}
-    #endif
-	#if BLEC_RF_ENABLE & EXTERNAL_MODULE
-	if(BT_BLEC_RF & bt){
-		bt |= BT_BLEC_RF;
-	}
-    #endif
-	#if EDR_ENABLE & EXTERNAL_MODULE
-    if(BT_EDR == bt){
-        bt |= BT_EDR;
-    }
-    #endif
-    #if EDRC_ENABLE & EXTERNAL_MODULE
-    if(BT_EDRC == bt){
-        bt |= BT_EDRC;
-    }
-    #endif
-
-	#if RF_ENABLE & EXTERNAL_MODULE
-    if(BT_RF & bt){
-        bt |= BT_RF;
-    }
-    #endif
-    #if RFC_ENABLE & EXTERNAL_MODULE
-    if(BT_RFC == bt){
-        bt |= BT_RFC;
-    }
-    #endif
-
-	return bt;
-}
-
-bool api_bt_get_mac(bt_t bt, uint8_t *buf )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
+api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 {
 	bool ret = false;
-	bt_t driver_bt;
+	api_bt_ctb_t* api_btp = NULL;
+	switch(bt){
+		#if BT_SUPPORT & BIT_ENUM(TR_BLE)
+		case BT_BLE:
+			api_btp = &m_ble;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_BLEC)
+		case BT_BLEC:
+			api_btp = &m_blec;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RF)
+		case BT_BLE_RF:
+			api_btp = &m_ble_rf;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)
+		case BT_BLEC_RF:
+			api_btp = &m_blec_rf;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_EDR)
+		case BT_EDR:
+			api_btp = &m_edr;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_EDRC)
+		case BT_EDRC:
+			api_btp = &m_edrc;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_RF)
+		case BT_RF:
+			api_btp = &m_rf;
+			break;
+		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+		case BT_RFC:
+			api_btp = &m_rfc;
+			break;
+		#endif
+		default:
+			break;
+	}
+
+	return api_btp;
+}
+/*******************************************************************
+** Parameters: base_mac	:输入基地址
+** Returns:		base_mac:输出计算后的地址
+** Description:	蓝牙MAC地址, 使用大端地址
+ * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
+ * add[0] 用于产品后面随机数,经典蓝牙地址是ble地址(ADD[0]+1)
+ * add[1] 用于产品升级时候进入boot蓝牙地址+1
+ * add[2] 用于产品不同模式下不同mac地址
+ * add[3~5]一般不建议修改
+*******************************************************************/
+bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
+{
+	bool ret = false;
 	uint8_t base_mac[6];
+	api_bt_ctb_t* bt_ctbp;
 
-	if(BT_NULL == bt) return false;
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return false;
+	
+	if(id == BT_ID0){
+		if(!hal_bt_get_mac(id, bt,base_mac)) return false;	//get base_mac
+	}else{
+		if(!hal_bt_get_mac(id, bt,base_mac)) return false;	//get base_mac
+	}
 
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_get_mac(driver_bt,base_mac);
+	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
+		base_mac[0] += 1;								//edr address + 1
+	}
+
+ 	#if (BT_TYPE_SUPPORT & BIT(TYPE_HID))					//优化代码,不支持HID不编译
+	if(bt_ctbp->types & BIT(TYPE_HID)){
+		switch(bt_ctbp->hid_types){
+			case BIT_ENUM(HID_TYPE_GAMEPADE):
+				base_mac[2] += HID_TYPE_GAMEPADE;
+				break;
+			case BIT_ENUM(HID_TYPE_SWITCH):
+				base_mac[2] += HID_TYPE_SWITCH;
+				break;
+			case BIT_ENUM(HID_TYPE_PS3)	:
+				base_mac[2] += HID_TYPE_PS3;
+				break;
+			case BIT_ENUM(HID_TYPE_PS4)	:
+				base_mac[2] += HID_TYPE_PS4;
+				break;
+			case BIT_ENUM(HID_TYPE_PS5)	:
+				base_mac[2] += HID_TYPE_PS5;
+				break;
+			case BIT_ENUM(HID_TYPE_X360)	:
+				base_mac[2] += HID_TYPE_X360;
+				break;
+			case BIT_ENUM(HID_TYPE_XBOX)	:
+				base_mac[2] += HID_TYPE_XBOX;
+				break;
+			case BIT_ENUM(HID_TYPE_KB) 	:
+				base_mac[2] += HID_TYPE_KB;
+				break;
+			case BIT_ENUM(HID_TYPE_MOUSE) :
+				base_mac[2] += HID_TYPE_MOUSE;
+				break;
+			case BIT_ENUM(HID_TYPE_CONSUMER)	:
+				base_mac[2] += HID_TYPE_CONSUMER;
+				break;
+			case BIT_ENUM(HID_TYPE_MT)	:
+				base_mac[2] += HID_TYPE_MT;
+				break;
+			case BIT_ENUM(HID_TYPE_TOUCH)	:
+				base_mac[2] += HID_TYPE_TOUCH;
+				break;
+			default :			//comble device
+				base_mac[2] += 16;
+				break;
 		}
 	}
 	#endif
 
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_get_mac(driver_bt,base_mac);
-		}
-	}
-	#endif
-
-	if(!ret) return false;	//get base_mac
-
-	if(BT_BLE & bt){								//edr address 
-		base_mac[0] += 1;
-	}
-
-	return ret;
-}
-
-bool api_bt_is_bonded(bt_t bt)
-{
-	bool ret = false;
-	bt_t driver_bt;
-
-	if(BT_NULL == bt) return false;
-
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_is_bonded(driver_bt);
-		}
-	}
-	#endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_is_bonded(driver_bt);
-		}
-	}
-	#endif
-
-	return ret;
-}
-
-bool api_bt_debond(bt_t bt)
-{
-	bool ret = false;
-	bt_t driver_bt;
-	if(BT_NULL == bt) return false;
-	logd("bt_debond bt=%d\n",bt);
-
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_debond(driver_bt);
-		}
-	}
-	#endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_debond(driver_bt);
-		}
-	}
-	#endif
-
-	return ret;
-}
-
-
-
-bool api_bt_disconnect(bt_t bt)
-{
-	bool ret = false;
-	bt_t driver_bt;
-
-	if(BT_NULL == bt) return ret;
-
-	app_bt_tx_fifo_fush(bt);				//使用fifo tx 清空fifo
-
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_disconnect(driver_bt);
-		}
-	}
-	#endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_disconnect(driver_bt);
-		}
-	}
-	#endif
 	return ret;
 }
 
 /*******************************************************************
-** Parameters:	
-** Returns:			
-** Description:	btc adv enable
+** Parameters:	len:buf 长度,
+** Returns:		名称字符长度	
+** Description:	获取蓝牙名称,蓝牙名称会根据模式和蓝牙地址不而不同
 *******************************************************************/
-bool api_bt_enable(bt_t bt,bool en)
+uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 {
-	bool ret = true;
-	bt_t driver_bt;
+	bool ret = false;
+	uint8_t name[30] = {0};
+    uint8_t bt_addr[6];
+    char chr[3];
+	api_bt_ctb_t* bt_ctbp;
 
-	if(BT_NULL == bt) return false;
-	logi("bt %d enable=%d\n", bt, en);
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return false;
 
-	#if BLE_ENABLE
-	if(BT_BLE & bt){
-		m_ble.enable = en;
-	}
-	#endif
-	#if BLEC_ENABLE
-	if(BT_BLEC & bt){
-		m_blec.enable = en;
-	}
-	#endif
-	#if BLE_RF_ENABLE
-	if(BT_BLE_RF & bt){
-		m_ble_rf.enable = en;
-	}
-	#endif
-	#if BLEC_RF_ENABLE
-	if(BT_BLEC_RF & bt){
-		m_blec_rf.enable = en;
-	}
-	#endif
-	#if EDR_ENABLE
-	if(BT_EDR & bt){
-		m_edr.enable = en;
-	}
-	#endif
-	#if EDRC_ENABLE
-	if(BT_EDRC & bt){
-		m_edrc.enable = en;
-	}
-	#endif
+	memset(buf,0,len);
+    memset(name,0,sizeof(name));
 
-	#if RF_ENABLE
-	if(BT_RF & bt){
-		m_rf.enable = en;
-	}
-	#endif
-	#if RFC_ENABLE
-	if(BT_RFC & bt){
-		m_rfc.enable = en;
-	}
-	#endif
-
-	if(!en)	api_bt_disconnect(bt);
-
-	app_bt_tx_fifo_fush(bt);				//使用fifo tx 清空fifo
-
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_enable(driver_bt,en);
+	#if (BT_TYPE_SUPPORT & BIT_ENUM(TYPE_HID))
+	if(bt_ctbp->types & BIT_ENUM(TYPE_HID)){
+		switch(bt_ctbp->hid_types){
+			#if (BT_HID_SUPPORT & HID_SWITCH_MASK)
+			case BIT_ENUM(HID_TYPE_SWITCH):
+				memcpy(name,"Pro Controller",sizeof("Pro Controller"));
+				ret = true;
+				break;
+			#endif
+			#if (BT_HID_SUPPORT & HID_PS_MASK)
+			case BIT_ENUM(HID_TYPE_PS3)	:
+			case BIT_ENUM(HID_TYPE_PS4)	:
+			case BIT_ENUM(HID_TYPE_PS5)	:
+				memcpy(name,"Wireless Controller",sizeof("Wireless Controller"));
+				ret = true;
+				break;
+			#endif
+			#if (BT_HID_SUPPORT & HID_XBOX_MASK)
+			case BIT_ENUM(HID_TYPE_X360)	:
+			case BIT_ENUM(HID_TYPE_XBOX)	:
+				memcpy(name,"Xbox Wireless Controller",sizeof("Xbox Wireless Controller"));
+				ret = true;
+				break;
+			#endif
+			default :
+				break;
 		}
 	}
 	#endif
 
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_enable(driver_bt,en);
+	if(!ret){
+		memcpy(name,DEFAULT_NAME,sizeof(DEFAULT_NAME));
+		
+		#if BT_RANDOM_NAME_ENABLE
+		api_bt_get_mac(id, bt,bt_addr);
+		sprintf(chr, "%02x", bt_addr[0]);
+		memcpy(name+strlen(name),chr,3);
+		#endif
+	}
+	
+    len = MIN(len-1,(uint8_t)strlen(name));
+    memcpy(buf, name, len);
+	return len;
+}
+
+bool api_bt_is_bonded(uint8_t id,bt_t bt)
+{
+	bool ret = false;
+	api_bt_ctb_t* bt_ctbp;
+
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	if(!bt_ctbp->init_ok) return ret;
+
+	if(id == BT_ID0){
+		ret = hal_bt_is_bonded(id, bt);
+	}else{
+		ret = bt_driver_is_bonded(id, bt);
+	}
+
+	return ret;
+}
+bool api_bt_debond(uint8_t id,bt_t bt)
+{
+	bool ret = false;
+	api_bt_ctb_t* bt_ctbp;
+
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	if(!bt_ctbp->init_ok) return ret;
+	logd("bt(%d) debond bt=%d\n",id,bt);
+
+	ret = hal_bt_debond(id, bt);
+	if(id == BT_ID0){
+		ret = hal_bt_debond(id, bt);
+	}else{
+		ret = bt_driver_debond(id, bt);
+	}
+	
+	return ret;
+}
+bool api_bt_disconnect(uint8_t id,bt_t bt)
+{
+	bool ret = false;
+	api_bt_ctb_t* bt_ctbp;
+
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	if(!bt_ctbp->init_ok) return ret;
+
+	api_bt_tx_fifo_fush(bt);				//使用fifo tx 清空fifo
+	if(id == BT_ID0){
+		ret = hal_bt_disconnect(id, bt);
+	}else{
+		ret = bt_driver_disconnect(id, bt);
+	}
+	
+	return ret;
+}
+
+bool api_bt_enable(uint8_t id,bt_t bt,bool en)
+{
+	bool ret = false;
+	api_bt_ctb_t* bt_ctbp;
+
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	
+	logi("bt(%d) %d enable=%d\n", id, bt, en);	
+
+	bt_ctbp->enable = en;
+	if(!en) api_bt_disconnect(id,bt);
+
+	if(bt_ctbp->init_ok){
+		if(id == BT_ID0){
+			ret = hal_bt_enable(id, bt, en);
+		}else{
+			ret = bt_driver_enable(id, bt, en);
 		}
 	}
-	#endif
 	
 	return ret;
 }
 
 
-bool api_bt_uart_fifo_tx(bt_t bt,app_fifo_t * fifop, uint8_t *buf, uint16_t len)
+void api_bt_enable_all(bool en)
+{
+	uint8_t i;
+	uint8_t bt_id;
+
+	for(i=0; i<BT_ID_MAX; i++){
+		for(bt_id = 0; bt_id < BT_MAX; bt_id++){
+			if(NULL!= api_bt_get_ctb(bt_id)){
+				api_bt_enable(i,bt_id, en);
+			}
+		}
+	}
+}
+
+static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
+{
+	memset(txp,0,sizeof(bt_tx_fifo_t));
+	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
+	txp->tx_mtu = mtu;
+	txp->tx_buf = tx_buf;
+
+	return true;
+}
+void api_bt_tx_fifo_fush(bt_t bt)
+{
+	#if BT_SUPPORT & BIT_ENUM(TR_RF)
+	if(bt & BT_RF){
+		app_fifo_flush(&m_rf.fifo_txp->fifo);	
+	}
+	#endif
+	#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+	if(bt & BT_RFC){
+		app_fifo_flush(&m_rfc.fifo_txp->fifo);	
+	}
+	#endif
+}
+
+
+bool api_bt_uart_fifo_tx(app_fifo_t * fifop, uint8_t *buf, uint16_t len)
 {
 	bool ret = false;
 	uint16_t fifo_len = len;
-
-	if(BT_NULL == bt) return false;
+	
 	if(fifop->p_buf == NULL) return false;
 
 	if(FIFO_EMPTY_LENGTH(fifop) < fifo_len){
@@ -355,132 +461,391 @@ bool api_bt_uart_fifo_tx(bt_t bt,app_fifo_t * fifop, uint8_t *buf, uint16_t len)
 	return ret;
 }
 
-bool api_bt_uart_tx(bt_t bt,uint8_t *buf, uint16_t len)
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description: 根据不同设备选择fifo_tx 或者直接tx发送
+*******************************************************************/
+bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
 {
 	bool ret = false;
-	bt_t driver_bt;
-	
-	if(BT_NULL == bt) return false;
+	api_bt_ctb_t* bt_ctbp;
 
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_uart_tx(driver_bt,buf, len);
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	if(!bt_ctbp->init_ok || (BT_STA_READY !=  bt_ctbp->sta)) return ret;
+	if(NULL != bt_ctbp->fifo_txp){
+		ret = api_bt_uart_fifo_tx(&bt_ctbp->fifo_txp->fifo,buf, len);
+	}else{
+		if(id == BT_ID0){
+			ret = hal_bt_uart_tx(id, bt, buf, len);
+		}else{
+			ret = bt_driver_uart_tx(id, bt, buf, len);
 		}
 	}
-	#endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_uart_tx(driver_bt,buf, len);
-		}
-	}
-	#endif
-
 	return ret;
 }
 
 /*******************************************************************
 ** Function: 	
-** Parameters: id:高8bit为参数:, 低8bit为:id //TODO
+** Parameters: 
 ** Returns:
 *******************************************************************/
-bool api_bt_hid_tx(bt_t bt,uint16_t id, uint8_t*buf, uint16_t len)
+bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len)
 {
 	bool ret = false;
-	bt_t driver_bt;
+	api_bt_ctb_t* bt_ctbp;
 
-	if(BT_NULL == bt) return false;
+	if(id >= BT_ID_MAX) return false;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return ret;
+	if(!bt_ctbp->init_ok || (BT_STA_READY !=  bt_ctbp->sta)) return ret;
 
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		driver_bt = api_bt_get_ex_driver(bt);
-		if(BT_NULL != driver_bt){
-			ret |= bt_driver_hid_tx(driver_bt,id, buf, len);
-		}
+	ret = hal_bt_hid_tx(id, bt, buf, len);
+	if(id == BT_ID0){
+		ret = hal_bt_hid_tx(id, bt, buf, len);
+	}else{
+		ret = bt_driver_hid_tx(id, bt, buf, len);
 	}
-	#endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		driver_bt = api_bt_get_driver(bt);;
-		if(BT_NULL != driver_bt){
-			ret |= hal_bt_hid_tx(driver_bt,id, buf, len);
-		}
-	}
-	#endif
-
-    return ret;
-}
-
-
-bool api_bt_stack_init_ok(bt_t bt)
-{
-	bool ret = false;
-
-	#if APP_APP_BT_ENABLE & EXTERNAL_MODULE
-	bt_ex_stack_init_ok = true;
-    #endif
-
-	#if APP_APP_BT_ENABLE & INTER_MODULE
-	bt_stack_init_ok = true;
-    #endif
-
+	
 	return ret;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:			
+** Description: 用于BT_EVT_TX 事件触发发送
+*******************************************************************/
+static void bt_tx_event_process(uint8_t id, bt_tx_fifo_t* txp, bt_evt_tx_t* pa)
+{
+	if(BT_UART & pa->bts){
+		uint16_t fifo_len;
 
+		if(txp->tx_len > txp->tx_mtu) txp->tx_len = 0;					//防止数据出错
+
+		fifo_len = fifo_length(&txp->fifo);
+		if(fifo_len || txp->tx_len){
+			fifo_len = MIN(txp->tx_mtu - txp->tx_len, fifo_len);		//遗留数据和新数据要一起发送
+			if(ERROR_SUCCESS == app_fifo_read(&txp->fifo, txp->tx_buf+txp->tx_len, &fifo_len)){
+				txp->tx_len += fifo_len; 
+			}
+			
+			if(id == BT_ID0){
+				if(hal_bt_uart_tx(id, BT_RF,txp->tx_buf,txp->tx_len)){
+					txp->tx_len = 0;
+				}
+			}else{
+				if(bt_driver_uart_tx(id, BT_RF,txp->tx_buf,txp->tx_len)){
+					txp->tx_len = 0;
+				}
+			}
+		}
+	}
+}
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:			
+** Description: 蓝牙从机接收数据,用于在中断外处理蓝牙数据
+*******************************************************************/
+__WEAK error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)	
+{
+	return ERROR_UNSUPPORT;
+}
+
+__WEAK void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
+{
+    logd("weak bt(%d) rx:%d:",bt,pa->len);    //dumpd(pa->buf,pa->len);
+
+	api_bt_ctb_t* bt_ctbp;
+
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return;
+	if(BT_UART == pa->bts){			//uart
+		// if(api_get_command(bt,buffer, length)){
+		//     device_decode(bt,m_ble_cmd.rx_buf,m_ble_cmd.rx_len);
+		// }
+	}else{							//hid and other
+		
+	}
+}
+
+
+
+
+static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
+{
+	api_bt_ctb_t* bt_ctbp;
+
+	if(id >= BT_ID_MAX) return;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return;
+
+	switch(event){
+		case BT_EVT_INIT:			//蓝牙SDK自动广播
+			bt_ctbp->init_ok = true;
+			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
+	
+			bt_ctbp->sta = BT_STA_IDLE;
+			api_bt_enable(id, bt,bt_ctbp->enable);
+			if(api_bt_is_bonded(id, bt)){					//TODO
+				bt_ctbp->sta = BT_STA_DIR_ADV;
+			}else{
+				bt_ctbp->sta = BT_STA_ADV;
+			}
+			break;
+		case BT_EVT_CONNECTED:
+			logd("bt(%d) connect...\n",bt);
+			if(BT_STA_READY != bt_ctbp->sta){	//防止被改回去
+				bt_ctbp->sta = BT_STA_CONN;
+			}
+			break;		
+		case BT_EVT_READY:
+			bt_ctbp->sta = BT_STA_READY;
+			logd("bt(%d) ready...\n",bt);
+			break;		
+		case BT_EVT_IDLE:
+			bt_ctbp->sta = BT_STA_IDLE;
+			break;			
+		case BT_EVT_ADV:
+			bt_ctbp->sta = BT_STA_ADV;
+			break;
+		case BT_EVT_ADV_DIR:
+			bt_ctbp->sta = BT_STA_DIR_ADV;
+			break;
+		case BT_EVT_DISCONNECTED:
+			logd("bt(%d) disconnected...\n",bt);
+			api_bt_enable(id, bt,bt_ctbp->enable);
+			if(bt_ctbp->enable){
+				if(api_bt_is_bonded(id, bt)){
+					bt_ctbp->sta = BT_STA_DIR_ADV;
+				}else{
+					bt_ctbp->sta = BT_STA_ADV;
+				}
+			}else{
+				bt_ctbp->sta = BT_STA_IDLE;
+			}
+			break;
+		case BT_EVT_RX:
+			if(ERROR_UNSUPPORT == os_bt_rx(id, bt, (bt_evt_rx_t*)pa)){
+				api_bt_rx(id, bt, (bt_evt_rx_t*)pa);
+			}
+			break;
+		case BT_EVT_TX:
+			if(NULL != bt_ctbp->fifo_txp){
+				bt_tx_event_process(id, bt_ctbp->fifo_txp,(bt_evt_tx_t*)pa);
+			}
+			break;
+		case BT_EVT_TX_COMPLETE:
+			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
+			break;
+		default:
+			break;
+	}
+}
+
+
+static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
+{
+	api_bt_ctb_t* bt_ctbp;
+	bt_evt_scan_t* bt_scan_resultp;
+
+	if(id >= BT_ID_MAX) return;
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL == bt_ctbp) return;
+
+	bt_scan_resultp = api_bt_get_scan_result(bt);
+
+	switch(event){
+		case BT_EVT_INIT:
+			bt_ctbp->init_ok = true;
+			bt_ctbp->sta = BT_STA_IDLE;
+			api_bt_enable(id, bt,bt_ctbp->enable);
+			if(api_bt_is_bonded(id, bt)){					//TODO
+				bt_ctbp->sta = BT_STA_DIR_ADV;
+			}else{
+				bt_ctbp->sta = BT_STA_ADV;
+			}
+			break;
+		case BT_EVT_CONNECTED:
+			logd("btc(%d) connect...\n",bt);
+			if(BT_STA_READY != bt_ctbp->sta){		//防止被改回去
+				bt_ctbp->sta = BT_STA_CONN;
+			}
+			break;		
+		case BT_EVT_READY:
+			bt_ctbp->sta = BT_STA_READY;
+			logd("btc(%d) ready...\n",bt);
+			break;		
+		case BT_EVT_IDLE:
+			bt_ctbp->sta = BT_STA_IDLE;
+			break;
+		case BT_EVT_SCAN:
+			bt_ctbp->sta = BT_STA_SCAN;
+			#ifdef BTC_SEARCH_NAME
+			/*
+			1. 底层默认开启扫描地址,名字的广播,筛选由此处理
+			2. 当有绑定信息,使用的是扫描地址,否则扫面的是名字.
+			*/
+			if(pa != NULL){
+				logi("btc scan name: %s\n", pscanning->name);
+				if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+					#ifdef BTC_SEARCH_RSSI
+					&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
+					#endif
+				){
+					*bt_scan_resultp = &(pa->scan);
+					logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
+				}
+			}else{
+				memset(bt_scan_resultp,0,sizeof(bt_evt_scan_t));
+			}
+            #endif
+			break;
+		case BT_EVT_SCAN_DIR:
+			bt_ctbp->sta = BT_STA_DIR_ADV;
+			break;
+		case BT_EVT_DISCONNECTED:
+			logd("btc(%d) disconnected...\n",bt);
+			api_bt_enable(id, bt,bt_ctbp->enable);
+
+			if(bt_ctbp->enable){
+				if(api_bt_is_bonded(id, bt)){
+					bt_ctbp->sta = BT_STA_DIR_SCAN;
+				}else{
+					bt_ctbp->sta = BT_STA_SCAN;
+				}
+			}else{
+				bt_ctbp->sta = BT_STA_IDLE;
+			}
+			break;
+		case BT_EVT_RX:
+			if(ERROR_UNSUPPORT == os_bt_rx(id, bt, (bt_evt_rx_t*)pa)){
+				api_bt_rx(id, bt, (bt_evt_rx_t*)pa);
+			}
+			break;
+		case BT_EVT_TX:
+			if(NULL != bt_ctbp->fifo_txp){
+				bt_tx_event_process(id, bt_ctbp->fifo_txp,(bt_evt_tx_t*)pa);
+			}
+			break;
+		case BT_EVT_TX_COMPLETE:
+			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
+			break;
+		default:
+			break;
+	}
+}
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:		true: 用户自定义处理, false: 会走通用处理	
+** Description: 蓝牙事件用户处理
+*******************************************************************/
+__WEAK bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
+{
+	return false;
+}
+
+
+void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
+{
+	if(api_bt_event_weak(id, bt, event, pa)){				//用于自定义处理
+		return;
+	}
+
+	if((BT_BLE | BT_EDR) & bt){
+		bt_event(id, bt, event, pa);
+	}else if((BT_BLEC | BT_EDRC) & bt){
+		btc_event(id, bt, event, pa);
+	}else{
+	}
+}
+
+static bool api_bt_ctb_init(void)
+{
+	uint8_t i;
+	bt_t bt_id;
+	api_bt_ctb_t* bt_ctbp;
+
+	for(i = 0; i < BT_MAX; i++){
+		bt_id = BIT(i);
+		if(bt_id){
+			bt_ctbp = api_bt_get_ctb(bt_id);
+			if(NULL != bt_ctbp){
+				memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
+				bt_ctbp->enable = true;
+				bt_ctbp->inteval = 12;
+
+				#if BT_SUPPORT & BIT_ENUM(TR_RF)
+				if(BT_RF == bt_id){
+					bt_ctbp->fifo_txp = &app_rf_tx;
+					bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
+				}
+				#endif
+				#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+				if(BT_RFC == bt_id){
+					bt_ctbp->fifo_txp = &app_rfc_tx;
+					bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
+				}
+				#endif
+			}
+		}
+	}
+	
+	return true;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 bool api_bt_init(void)
 {
-	bool ret = false;
+	uint8_t i;
 
-	#if APP_APP_BT_ENABLE & EXTERNAL_MODULE
-	bt_ex_stack_init_ok = false;
-	ret |= bt_driver_init();
-    #endif
+	api_bt_ctb_init();
+	for(i=0; i<BT_ID_MAX; i++){
+		if(i == BT_ID0)hal_bt_init(BT_ID0);
+		else bt_driver_init(i);
+	}
 
-	#if APP_APP_BT_ENABLE & INTER_MODULE
-	bt_stack_init_ok = false;
-	ret |= hal_bt_init();
-    #endif
-
-	return ret;
+	return true;
 }
 
-
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 bool api_bt_deinit(void)
 {
-	bool ret = false;
+	uint8_t i;
 
-	#if APP_APP_BT_ENABLE & EXTERNAL_MODULE
-	if(bt_ex_stack_init_ok){
-		bt_ex_stack_init_ok = false;
-		ret |= bt_driver_deinit();
+	for(i=0; i<BT_ID_MAX; i++){
+		if(i == BT_ID0)hal_bt_deinit(BT_ID0);
+		else bt_driver_deinit(i);
 	}
-    #endif
+	api_bt_ctb_init();
 
-	#if APP_APP_BT_ENABLE & INTER_MODULE
-	if(bt_stack_init_ok){
-		bt_stack_init_ok = false;
-		ret |= hal_bt_deinit();
-	}
-    #endif
-
-	return ret;
+	return true;
 }
 
-void api_bt_handler(void)
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_bt_handler(uint32_t period_10us)
 {
-	#if APP_BT_ENABLE & EXTERNAL_MODULE
-    bt_driver_handler();
-    #endif
-
-	#if APP_BT_ENABLE & INTER_MODULE
-    hal_bt_handler();
-    #endif
+	hal_bt_handler(period_10us);
+	bt_driver_handler(period_10us);
 }
 
 #endif

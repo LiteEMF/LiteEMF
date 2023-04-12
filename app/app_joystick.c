@@ -268,7 +268,7 @@ static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp,joystick_t
 
     
 
-static void joystick_cal_handler(joystick_t* adcp)
+static void joystick_do_cal(joystick_t* adcp)
 {
     uint8_t id;
     axis2i_t axis;
@@ -389,17 +389,17 @@ bool app_joystick_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_joystick_handler(void)
+void app_joystick_handler(uint32_t period_10us)
 {
     uint8_t id;
     joystick_t joystick_adc;
     static timer_t joystick_timer;
 
-    if(m_task_tick10us - joystick_timer >= 400){
+    if(m_task_tick10us - joystick_timer >= period_10us){
         joystick_timer =  m_task_tick10us;
 
         app_joystick_get_adc(&joystick_adc);
-        joystick_cal_handler(&joystick_adc);
+        joystick_do_cal(&joystick_adc);
         for(id = 0; id < APP_STICK_NUMS; id++){
             m_joystick.tarigger[id] = app_trigger_normalization(id,&joystick_adc);
             app_stick_normalization(id, &m_joystick.stick[id],&joystick_adc);

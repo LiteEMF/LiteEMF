@@ -12,15 +12,9 @@
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
-#include  "hw_config.h"
-#if APP_BATTERY_ENABLE
+#include  "nfc_driver.h"
 
-#include  "app/app_battery.h"
-#include  "app/app_key.h"
-#include  "api/api_tick.h"
-#if (ID_NULL != ADC_BATTERY_ID)
-#include  "api/api_adc.h"
-#endif
+#include "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -28,8 +22,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint8_t m_battery = 100;
-bat_state_t	m_battery_sta = BAT_NORMAL_STA;
+
 
 /******************************************************************************************************
 **	static Parameters
@@ -42,92 +35,96 @@ bat_state_t	m_battery_sta = BAT_NORMAL_STA;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-__WEAK bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol)
+
+/*******************************************************************
+** Description:	如果密码验证成功，返回2字节PACK+2字节的CRC，合计32bit
+	如果验证成功，返回的pack和传进来的pack应该是一样的，否则出错
+	ptPack设置NULL不检查pack
+** Parameters:		
+** Returns:			
+*******************************************************************/
+bool nfc_driver_auth(uint8_t *ptPwdData,uint8_t* ptPack)
 {
-	bat_state_t	state;
-	uint16_t protect_vol;
+	bool ret = false;
 
-	if(power_on){				//上电保护电源和工作保护电源不一样
-		protect_vol = BAT_POWERON_PROTECT_VOL;
-	}else{
-		protect_vol = BAT_PROTECT_VOL;
-	}
-
-	if (KEY_USB_DET || KEY_CHARGER){
-		if ((bat_vol >= 4200) || !KEY_CHARGER){
-			state = BAT_CHARGE_DONE_STA;
-		}else{
-			state = BAT_CHARGE_STA;
-		}
-	}else{
-		if(bat_vol <= protect_vol){
-			state = BAT_PROTECT_STA;
-		}else if(bat_vol <= BAT_LOW_POWER_VOL){
-			state = BAT_LOWPOWER_STA;
-		}else{
-			state = BAT_NORMAL_STA;
-		}
-	}
-
-	return state;
-}
-
-__WEAK uint16_t app_battery_vol(void)
-{
-	uint16_t adc,vol=4200;
-
-	#if (ID_NULL != ADC_BATTERY_ID)
-	adc = api_adc_value(ADC_BATTERY_ID);
-	vol = api_adc_to_voltage(adc)*BAT_R;
+	#ifdef MS52X_NFC
+	ret = !HXW_Ntag21x_PwdAuth(ptPwdData,ptPack);
 	#endif
 
-	return vol;
+	return ret;
 }
 
-uint8_t app_battery_percent(uint16_t vol)
+bool nfc_driver_polling(uint8_t *psn, uint8_t*psn_len, uint8_t *pversion, uint8_t*pversion_len)
 {
-	uint8_t battery;
+	bool ret = false;
 
-	if((BAT_CHARGE_DONE_STA == m_battery_sta) || (vol >= 4200)){
-		battery = 100;
-	}else if(vol <= BAT_PROTECT_VOL){
-		battery = 0;
-	}else{
-		battery = ((vol - BAT_PROTECT_VOL) * 100 / (4200 - BAT_PROTECT_VOL));
-	}
-	return battery;
+	#ifdef MS52X_NFC
+	ret = !HXW_APP_Ntag21xGetVersion(psn,psn_len,pversion,pversion_len);
+	#endif
+
+	return ret;
 }
 
-void app_battery_scan(bool power_on)
+bool nfc_driver_read(uint16_t addr, uint8_t *buf, uint16_t len)
 {
-	uint16_t vol;
-	bat_state_t	state;
+	bool ret = false;
 
-	static bat_state_t	s_state;
+	uint8_t i,read_len=0;
+	uint8_t read_buf[TAG_PAGE_SIZE];
+	uint8_t addrhl[2] = {0,TAG_PAGE_SIZE/4 -1};
 
-	vol = app_battery_vol();
-	state = app_battery_sta(power_on,vol);
+	#ifdef MS52X_NFC
+	// api_nfc_auth(key,NULL);		//激活
+    for(i=0;i<((len+TAG_PAGE_SIZE-1)/TAG_PAGE_SIZE);i++){
+		ret = !HXW_APP_Ntag21xNoAuthFastRead(addrhl,buf, &read_len);			
+		addrhl[0] += TAG_PAGE_SIZE/4;
+		addrhl[1] += TAG_PAGE_SIZE/4;
+		if(!ret){
+			logd("read pag%d,len=%d err!\n",i,read_len);dumpd(read_buf,16);
+			break;
+		}
+		if(len-i*TAG_PAGE_SIZE < read_len)  read_len = len-i*TAG_PAGE_SIZE; //防止溢出拷贝
+		memcpy(&buf[i*TAG_PAGE_SIZE],read_buf, read_len);
+    }
+	#endif
 
-	if(s_state != state){
-		s_state = state;
-	}else{
-		m_battery_sta = state;
-	}
-	m_battery = app_battery_percent(vol);
+	return ret;	
 }
 
+bool nfc_driver_write(uint16_t addr, uint8_t *buf, uint16_t len)
+{
+	bool ret = false;
+	uint8_t i,write_len;
+	uint8_t write_buf[TAG_PAGE_SIZE];
+
+   
+    for(i=0;i<((len+15)/TAG_PAGE_SIZE);i++){
+		memset(write_buf,0,sizeof(write_buf));
+		write_len = TAG_PAGE_SIZE;
+		if(len-i*TAG_PAGE_SIZE < TAG_PAGE_SIZE)  write_len = len-i*TAG_PAGE_SIZE; //防止溢出拷贝
+		memcpy(write_buf,&buf[i*TAG_PAGE_SIZE],write_len);
+		
+		// do write
+		if(!ret){
+			logd("write pag%d,len=%d err!\n",i,write_len);
+			ret = false;
+			break;
+		}
+    }
+
+	return ret;
+		
+}
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_battery_init(void)
+bool nfc_driver_init(void)
 {
-	uint8_t i;
-	for(i = 0; i < 6; i++){
-		app_battery_scan(false);
-		delay_ms(1);
-	}
+	#ifdef MS52X_NFC
+	HXW_Ms52x_Init();
+	#endif
 	return true;
 }
 
@@ -136,8 +133,11 @@ bool app_battery_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool app_battery_deinit(void)
+bool nfc_driver_deinit(void)
 {
+	#ifdef MS52X_NFC
+	HXW_CloseAntena();
+	#endif
 	return true;
 }
 
@@ -146,22 +146,11 @@ bool app_battery_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_battery_handler(uint32_t period_10us)
+void nfc_driver_handler(uint32_t period_10us)
 {
-	static timer_t battery_timer;
 
-	if ((m_task_tick10us - battery_timer) >= period_10us){
-    	battery_timer = m_task_tick10us;
-
-		app_battery_scan(false);
-	}
 }
 
-
-
-
-
-#endif
 
 
 

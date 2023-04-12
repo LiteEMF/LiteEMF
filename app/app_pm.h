@@ -58,7 +58,7 @@ void app_reset(void);
 void app_sleep(void);
 bool app_pm_init(void);
 bool app_pm_deinit(void);
-void app_pm_handler(void);
+void app_pm_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

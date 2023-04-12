@@ -15,7 +15,7 @@
 #include  "hw_config.h"
 #if APP_KM_ENABLE
 
-
+#include  "api/api_tick.h"
 #include  "app/app_km.h"
 #include  "app/io_keyboard.h"
 /******************************************************************************************************
@@ -54,14 +54,18 @@ __WEAK void app_km_event(void)
 }
 #endif
 
-void app_km_scan(void)
+void app_km_scan(uint32_t period_10us)
 {
 	uint8_t i;
     uint8_t key[8];
+	static timer_t kb_timer;
 
-	memset(&key,0,sizeof(key));
-    i = io_keyboard_scan(key,sizeof(key));
-    app_kb_vendor_scan(key,sizeof(key));
+	if(m_task_tick10us - kb_timer >= period_10us){
+		kb_timer = m_task_tick10us;
+		memset(&key,0,sizeof(key));
+		i = io_keyboard_scan(key,sizeof(key));
+		app_kb_vendor_scan(key,sizeof(key));
+	}
 }
 
 
@@ -90,9 +94,9 @@ bool app_km_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_km_handler(void)
+void app_km_handler(uint32_t period_10us)
 {
-
+	app_km_scan(period_10us);
 }
 
 

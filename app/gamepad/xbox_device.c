@@ -24,7 +24,7 @@
 #include "api/usb/device/usbd.h"
 #endif
 #if BT_ENABLE
-#include "app/app_bt.h"
+#include  "api/bt/api_bt.h"
 #endif
 
 #include  "api/api_log.h"
@@ -241,8 +241,10 @@ void get_xbox_info(xbox_info_t* infp)
 	uint8_t mac_buf[8]={0x7E, 0xED, 0x80, 0x76, 0xFF, 0x76};
 	memset(infp,0,sizeof(xbox_info_t));
 
-	#if EDR_ENABLE
-    app_bt_get_mac(BT_EDR,mac_buf);
+	#if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+	api_bt_get_mac(BT_ID0, BT_EDR, mac_buf);
+	#else 
+	api_bt_get_mac(BT_ID1, BT_EDR, mac_buf);
 	#endif
 
 	memcpy(infp->mac,mac_buf,sizeof(infp->mac));
@@ -454,8 +456,8 @@ bool x360_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 
 	x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;	
 	if (X360_RUMBLE_CMD == motorp->cmd){
-		app_rumble_set_duty(0, motorp->motor1, 10000);
-		app_rumble_set_duty(1, motorp->motor2, 10000);
+		app_rumble_set_duty(RUMBLE_L, motorp->motor1, 10000);
+		app_rumble_set_duty(RUMBLE_R, motorp->motor2, 10000);
 		ret = true;
 	}
 	

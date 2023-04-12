@@ -13,7 +13,7 @@
 #ifndef _api_transporte_h
 #define _api_transporte_h
 #include "emf_typedef.h"
-
+#include "hw_config.h"			//TODO
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -23,24 +23,43 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 
+#ifndef BLE_CMD_MTU
+#define BLE_CMD_MTU			48
+#endif
+#ifndef EDR_CMD_MTU
+#define EDR_CMD_MTU			64
+#endif
+#ifndef BLEC_CMD_MTU
+#define BLEC_CMD_MTU		48
+#endif
+#ifndef EDRC_CMD_MTU
+#define EDRC_CMD_MTU		64
+#endif
+#ifndef BLE_RF_CMD_MTU
+#define BLE_RF_CMD_MTU		48
+#endif
+#ifndef BLEC_RF_CMD_MTU
+#define BLEC_RF_CMD_MTU		48
+#endif
+#ifndef RF_CMD_MTU
+#define RF_CMD_MTU			32
+#endif
+#ifndef RFC_CMD_MTU
+#define RFC_CMD_MTU			32
+#endif
+#ifndef USBD_CMD_MAX
+#define USBD_CMD_MAX		64
+#endif
+#ifndef USBH_CMD_MAX
+#define USBH_CMD_MAX		64
+#endif
+#ifndef UART_CMD_MAX
+#define UART_CMD_MAX		64
+#endif
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
-typedef enum{
-	TR_BLE		= 0,
-	TR_EDR		= 1,
-	TR_BLEC		= 2,
-	TR_EDRC		= 3,
-	TR_BLE_RF	= 4,				//BLE模拟2.4G	
-	TR_BLEC_RF	= 5,
-	TR_RF		= 6,
-	TR_RFC		= 7,
-	TR_USBD		= 8,
-	TR_USBH		= 9,
-	TR_UART		= 10,
-}trp_t;
 
 typedef struct {
 	trp_t trp;
@@ -58,10 +77,10 @@ bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
 
 uint16_t api_get_transport_mtu(trp_handle_t* phandle);
-bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t size);
+bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len);
 bool api_trp_init(void);
 bool api_trp_deinit(void);
-void api_trp_handler(void);
+void api_trp_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

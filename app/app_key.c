@@ -138,41 +138,46 @@ __WEAK void app_key_event(void)
 }
 #endif
 
-void app_key_scan(void)
+void app_key_scan(uint32_t period_10us)
 {
     app_key_t app_key;
     uint32_t hw_key=0;
+    static timer_t key_timer;
+    
+	if((m_task_tick10us - key_timer) >= period_10us){
+        key_timer = m_task_tick10us;
 
-	memset(&app_key,0,sizeof(app_key));
-    app_key.key = io_key_scan();
+        memset(&app_key,0,sizeof(app_key));
+        app_key.key = io_key_scan();
 
-    #if APP_JOYSTICK_ENABLE
-    app_key.stick_l = m_joystick.stick[APP_STICK_L_ID];
-    app_key.stick_r = m_joystick.stick[APP_STICK_R_ID];
-    app_key.trigger.x = m_joystick.tarigger[APP_TRIGGER_L_ID];
-    app_key.trigger.y = m_joystick.tarigger[APP_TRIGGER_R_ID];
-    #endif
+        #if APP_JOYSTICK_ENABLE
+        app_key.stick_l = m_joystick.stick[APP_STICK_L_ID];
+        app_key.stick_r = m_joystick.stick[APP_STICK_R_ID];
+        app_key.trigger.x = m_joystick.tarigger[APP_TRIGGER_L_ID];
+        app_key.trigger.y = m_joystick.tarigger[APP_TRIGGER_R_ID];
+        #endif
 
-    app_key_vendor_scan(&app_key);	
-	app_key_trigger_check(&app_key);
+        app_key_vendor_scan(&app_key);	
+        app_key_trigger_check(&app_key);
 
-    #if APP_JOYSTICK_ENABLE
-    m_app_stick_key = get_stick_dir(&app_key.stick_l);
-    m_app_stick_key |= get_stick_dir(&app_key.stick_r)<<4;
-    #endif
+        #if APP_JOYSTICK_ENABLE
+        m_app_stick_key = get_stick_dir(&app_key.stick_l);
+        m_app_stick_key |= get_stick_dir(&app_key.stick_r)<<4;
+        #endif
 
-    #if APP_IMU_ENABLE
-    app_imu_get_val(&app_key.acc,&app_key.gyro);
-    #endif
+        #if APP_IMU_ENABLE
+        app_imu_get_val(&app_key.acc,&app_key.gyro);
+        #endif
 
-	if(m_app_key.key != app_key.key){
-		dump_key(app_key.key);
-	}
-	m_app_key = app_key;
+        if(m_app_key.key != app_key.key){
+            dump_key(app_key.key);
+        }
+        m_app_key = app_key;
+    }
 }
 
 
-void app_key_decode(void)
+void app_key_decode(uint32_t period_10us)
 {
 	bool ret = false;
     uint8_t i;
@@ -181,8 +186,8 @@ void app_key_decode(void)
 	static uint16_t key_cnt[32];
     static timer_t key_timer;
 
-    if((m_systick - key_timer) >= KEY_PERIOD_DEFAULT){
-        key_timer = m_systick;
+    if((m_task_tick10us - key_timer) >= period_10us){
+        key_timer = m_task_tick10us;
 		key = m_app_key.key;
 
         for(i = 0; i < 32; i++){
@@ -306,10 +311,10 @@ bool app_key_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_key_handler(void)
+void app_key_handler(uint32_t period_10us)
 {
-	app_key_scan();
-    app_key_decode();
+	app_key_scan(period_10us);
+    app_key_decode(KEY_PERIOD_DEFAULT);
 }
 
 

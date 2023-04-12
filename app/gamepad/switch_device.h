@@ -20,13 +20,13 @@
 #include "api/api_transport.h"
 #include "app/app_key.h"
 #include "app/app_rumble.h"
-#if APP_NFC_ENABLE
+#if API_NFC_ENABLE
 #include "app/gamepad/switch_nfc.h"
 #endif
 
 #include "app/gamepad/switch_typedef.h"
 
-#if APP_NFC_ENABLE
+#if API_NFC_ENABLE
 extern switch_nfc_t switch_dev_nfc;
 #endif
 extern switch_ctb_t switch_dev_ctb;

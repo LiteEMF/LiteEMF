@@ -20,7 +20,7 @@
 #if APP_BATTERY_ENABLE
 #include "app_battery.h"
 #endif
-#if APP_NFC_ENABLE
+#if API_NFC_ENABLE
 #include "app/gamepad/switch_nfc.h"
 #endif
 

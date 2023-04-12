@@ -336,8 +336,9 @@ bool api_command_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void api_command_handler(void)
+void api_command_handler(uint32_t period_10us)
 {
+	UNUSED_PARAMETER(period_10us);
 }
 
 
