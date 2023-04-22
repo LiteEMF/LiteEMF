@@ -21,11 +21,11 @@
 **	Hardware  Defined
 ********************************************************************************************************************/
 #define   XBOX_VID    		0X045E
-#define   XBOX_PID         	0X02EA		//0X02D1(不带3.5手柄)	0X0B00
-#define   XBOX_UAC_PID      0X02F6		//xbox/xboxx接音频后的PID
+#define   XBOX_PID         	0X02EA		/* 0X02D1(不带3.5手柄)	0X0B00 */
+#define   XBOX_UAC_PID      0X02F6		/* xbox/xboxx接音频后的PID */
 #define   X360_PID         	0X028E
-#define   XBOXX_PID         0X0B12		//0X02EA
-#define   XBOX_BT_PID		0X02E0		//0X02FD
+#define   XBOXX_PID         0X0B12		/* 0X02EA */
+#define   XBOX_BT_PID		0X02E0		/* 0X02FD */
 
 
 
@@ -114,7 +114,7 @@
 #define  XBOX_L2_POS					(16)
 #define  XBOX_R2_POS					(17)
 #define  XBOX_HOME_POS					(18)
-#define  XBOX_SHARE_POS					(19) 		//only xboxxs
+#define  XBOX_SHARE_POS					(19) 		/*only xboxxs */
 
 #define  XBOX_L_UP_POS					(24)
 #define  XBOX_L_DOWN_POS				(25)
@@ -156,27 +156,27 @@
 
 /*-----------------------ID和指令-------------------------------------------------*/
 //xbox bt 
-#define 	XBOX_BT_KEY_REP_CMD			(0x01)				//普通按键键 report cmd, 单独序号
-#define 	XBOX_BT_HOME_REP_CMD		(0x02)				//只有XBOX one模式下有效,xboxxs在button中发送
-#define 	XBOX_BT_RUMBLE_CMD			(0X03)				//设置马达, 单独序号
+#define 	XBOX_BT_KEY_REP_CMD			(0x01)				/*普通按键键 report cmd, 单独序号 */
+#define 	XBOX_BT_HOME_REP_CMD		(0x02)				/*只有XBOX one模式下有效,xboxxs在button中发送 */
+#define 	XBOX_BT_RUMBLE_CMD			(0X03)				/*设置马达, 单独序号 */
 //usb x360
 #define   X360_KEY_REP_CMD	SWAP16_L(0x1400)
 #define   X360_RUMBLE_CMD	SWAP16_L(0x0800)
 //USB xboxone 
 #define XBOX_NONE_CMD			(0x00)
-#define XBOX_ACK_CMD			(0x01)				//返回ACK(手柄输入数据的((data[1] & 0x30) == 0x30) 才需要ACK), index=in/out包中的index
-#define XBOX_INFO_CMD			(0x02)				//手柄信息(mac,PID,VID,version,other)	//index 从0x02开始, 是通用cmd_index/cmd_uac_index的开始
-#define XBOX_STATUS_CMD			(0X03)				//xbox手柄状态更新, 具体状态不清楚
-#define XBOX_UNKNOWN_04_CMD		(0x04)				// 0Xxx04未知
-#define XBOX_START_CMD			(0X05)				//开始 controller
-#define XBOX_SECURITY_CMD		(0X06)				//加密指令,必须要ACK val 0X01: SECURITY 加密成功	,index 单独存在
-#define XBOX_HOME_REP_CMD		(0x07)				//home键 report cmd	需要ACK
-#define XBOX_VOLUME_CTRL_CMD	(0X08)				//音量设置,设置音量在这里
-#define XBOX_RUMBLE_CMD			(0X09)				//设置马达, 单独序号
-#define XBOX_EN_LED_CMD			(0X0A)				//打开logo led
+#define XBOX_ACK_CMD			(0x01)				/*返回ACK(手柄输入数据的((data[1] & 0x30) == 0x30) 才需要ACK), index=in/out包中的index */
+#define XBOX_INFO_CMD			(0x02)				/*手柄信息(mac,PID,VID,version,other)	//index 从0x02开始, 是通用cmd_index/cmd_uac_index的开始 */
+#define XBOX_STATUS_CMD			(0X03)				/*xbox手柄状态更新, 具体状态不清楚 */
+#define XBOX_UNKNOWN_04_CMD		(0x04)				/* 0Xxx04未知 */
+#define XBOX_START_CMD			(0X05)				/*开始 controller */
+#define XBOX_SECURITY_CMD		(0X06)				/*加密指令,必须要ACK val 0X01: SECURITY 加密成功	,index 单独存在 */
+#define XBOX_HOME_REP_CMD		(0x07)				/*home键 report cmd	需要ACK */
+#define XBOX_VOLUME_CTRL_CMD	(0X08)				/*音量设置,设置音量在这里 */
+#define XBOX_RUMBLE_CMD			(0X09)				/*设置马达, 单独序号 */
+#define XBOX_EN_LED_CMD			(0X0A)				/*打开logo led */
 #define XBOX_UNKNOWN_0D_CMD		(0x0D)
-#define XBOX_SERIAL_CMD			(0X1E)				//必须要ACK 0x00, 0x01, 0x04三种信息, 0x04是serial numbe
-#define XBOX_KEY_REP_CMD		(0x20)				//普通按键键 report cmd, 单独序号
+#define XBOX_SERIAL_CMD			(0X1E)				/*必须要ACK 0x00, 0x01, 0x04三种信息, 0x04是serial numbe */
+#define XBOX_KEY_REP_CMD		(0x20)				/*普通按键键 report cmd, 单独序号 */
 //XBOX bctrl bit
 typedef enum{
 	XBOX_CTRL_UAC		= (0X01<<0),		//切换到音频设备(设备PID,MAC会修改)时候需要设置该位,如果手柄没有接耳机可以不回复信息给主机

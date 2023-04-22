@@ -22,49 +22,38 @@ void api_commander_test(void)
 {	
 	uint8_t i;
 	uint32_t cmd = 0xcc;
-	uint8c_t mtu = 10;
 	uint8_t test_buf[] = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c};
-	uint8_t packet[30];
+	uint8_t packet[30] = {			//text MTU = 10
+		0xa5, 0x0a, 0x03, 0xcc, 0x01, 0x02, 0x03, 0x04, 0x05, 0x8d,
+		0xa4, 0x0a, 0x02, 0xcc, 0x06, 0x07, 0x08, 0x09, 0x0a, 0xa4,
+		0xa4, 0x07, 0x01, 0xcc, 0x0b, 0x0c, 0x8f,
+	};
+	trp_handle_t handle={TR_UART, 0 ,0};
 
 
-	//pack
-	memset(&packet,0,sizeof(packet));
-	logd("\ncommander_test:\n");
+	//tx
+	logd("\ncommander_tx test:\n");
 	logd("buf:"); dumpd(test_buf,sizeof(test_buf));
-	api_command_pack(cmd, mtu, test_buf,sizeof(test_buf),packet, sizeof(packet));
-	logd("pack:");dumpd(packet,sizeof(packet));
+	api_command_tx(&handle, cmd, test_buf,sizeof(test_buf));
+	
+	logd("\ncommander arg tx test:\n");
+	api_command_arg_tx(&handle, cmd, 0xaabb, test_buf,sizeof(test_buf));
 
-	//unpack
-	command_stream_rx_t stream;
-	memset(&stream,0,sizeof(stream));
+	//rx
+	command_rx_t rx;
+	static uint8_t s_cmd_buf[UART_CMD_MTU];
+	static uint8_t s_cmd_len = 0;
+	memset(&rx, 0, sizeof(rx));
+	
+	logd("\ncommander_rx test:\n");
 	for(i=0; i<sizeof(packet); i++){
-		if(api_command_byte_unpack(&stream, mtu, packet[i])){
-			logd("unpack %d:",stream.rx.max_len);
-			dumpd(stream.rx.buf, stream.rx.len);
-			command_rx_free(&stream.rx);
+		if(api_command_rx_byte(&rx, UART_CMD_MTU, packet[i], s_cmd_buf, &s_cmd_len)){
+			logd("unpack %d:",rx.len); dumpd(rx.pcmd, rx.len);
+			command_rx_free(&rx);
 		}
 	}
 
-	//pack
-	memset(&packet,0,sizeof(packet));
-	logd("\ncommander arg test:\n");
-	logd("buf:"); dumpd(test_buf,sizeof(test_buf));
-	api_command_arg_pack(cmd, 0xaabb, mtu, test_buf,sizeof(test_buf),packet, sizeof(packet));
-	// packet[20] = 0xa5;
-	// packet[22] = 0x01;
-	logd("pack:");dumpd(packet,sizeof(packet));
-
-	//unpack
-	for(i=0; i<sizeof(packet); i++){
-		if(api_command_byte_unpack(&stream, mtu, packet[i])){
-			logd("unpack %d:",stream.rx.max_len);
-			dumpd(stream.rx.buf, stream.rx.len);
-			command_rx_free(&stream.rx);
-		}
-	}
 }
-
-
 
 
 

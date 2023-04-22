@@ -626,94 +626,90 @@ error_t usbh_class_deinit(uint8_t id)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_class_handler(uint32_t period_10us)
+void usbh_class_task(uint32_t dt_ms)
 {
 	error_t err = ERROR_NOT_FOUND;
 	uint8_t i,id = USBH_NULL;
 	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
 	usbh_class_t *pos;
-
-	static timer_t s_class_timer;
+	#if USBH_LOOP_IN_ENABLE
 	static timer_t s_tick;
+	s_tick += dt_ms;
+	#endif
 
-	if(m_task_tick10us - s_class_timer >= period_10us){
-		s_class_timer = m_task_tick10us;
-		s_tick++;
+	for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
+		list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
-		for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
-			list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
-				id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
-
-				#if USBH_LOOP_IN_ENABLE
-				if(0 == (s_tick % pos->endpin.interval)){
-					uint8_t buf[64];
-					uint16_t len = sizeof(buf);
-					err = usbh_in(id, &pos->endpin, buf, &len,0);
-					if((ERROR_SUCCESS == err) && len){
-						usbh_class_in_process(id, pos, buf, len);
-					}
+			#if USBH_LOOP_IN_ENABLE
+			if(0 == (s_tick % pos->endpin.interval)){
+				uint8_t buf[64];
+				uint16_t len = sizeof(buf);
+				err = usbh_in(id, &pos->endpin, buf, &len,0);
+				if((ERROR_SUCCESS == err) && len){
+					usbh_class_in_process(id, pos, buf, len);
 				}
-				#endif
+			}
+			#endif
 
-				switch(pos->dev_type){
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-				case DEV_TYPE_HID	:
-					usbh_hid_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-				case DEV_TYPE_AUDIO	:
-					usbh_audio_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-				case DEV_TYPE_PRINTER:
-					usbh_printer_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-				case DEV_TYPE_MSD	:
-					usbh_msd_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
-				case DEV_TYPE_HUB	:
-					usbh_hub_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-				case DEV_TYPE_CDC	:
-					usbh_cdc_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR)
-				case DEV_TYPE_VENDOR :
-					usbh_vendor_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB)
-				case DEV_TYPE_ADB	:
-					usbh_adb_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
-				case DEV_TYPE_AOA	:
-					usbh_aoa_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD)
-				case DEV_TYPE_USBMUXD:
-					usbh_usbmuxd_handler(id, pos);
-					break;
-				#endif
-				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-				case DEV_TYPE_IAP2	:
-					usbh_iap2_handler(id, pos);
-					break;
-				#endif
-				default:
-					break;
-				}
+			switch(pos->dev_type){
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+			case DEV_TYPE_HID	:
+				usbh_hid_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+			case DEV_TYPE_AUDIO	:
+				usbh_audio_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+			case DEV_TYPE_PRINTER:
+				usbh_printer_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
+			case DEV_TYPE_MSD	:
+				usbh_msd_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
+			case DEV_TYPE_HUB	:
+				usbh_hub_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+			case DEV_TYPE_CDC	:
+				usbh_cdc_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR)
+			case DEV_TYPE_VENDOR :
+				usbh_vendor_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB)
+			case DEV_TYPE_ADB	:
+				usbh_adb_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
+			case DEV_TYPE_AOA	:
+				usbh_aoa_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD)
+			case DEV_TYPE_USBMUXD:
+				usbh_usbmuxd_task(id, pos);
+				break;
+			#endif
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+			case DEV_TYPE_IAP2	:
+				usbh_iap2_task(id, pos);
+				break;
+			#endif
+			default:
+				break;
 			}
 		}
 	}

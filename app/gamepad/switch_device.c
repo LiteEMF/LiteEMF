@@ -253,48 +253,47 @@ static uint8c_t siwtch_motor_non_vibration[][4] = {        //switch不震动的�
     {0x07, 0x20, 0xB3, 0x40},\
     {0x81, 0x8C, 0x61, 0x80},\
 };  
-uint8_t switch_motor_decode(switch_motor_bit_t* pmotor_bit)
+uint8_t switch_rumble_decode(switch_rumble_bit_t* prumble_bit)
 {
     uint16_t lamp=0, hamp=0;
     uint8_t i;
 	// uint16_t h_freq,l_freq;
-	// h_freq = (uint16_t)(round)(pow(2.0,(pmotor_bit->hf/4+0x60)/32.0)*10);
-	// l_freq = (uint16_t)(round)(pow(2.0,(pmotor_bit->lf+0x40)/32.0)*10);
-    for(i=0;i<sizeof(siwtch_motor_non_vibration)/sizeof(switch_motor_bit_t);i++){//TODO 协议解析不适用,暂处理
-        if(0 == memcmp((uint8_t *)pmotor_bit, siwtch_motor_non_vibration[i],sizeof(switch_motor_bit_t))){
+	// h_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->hf/4+0x60)/32.0)*10);
+	// l_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->lf+0x40)/32.0)*10);
+    for(i=0;i<sizeof(siwtch_motor_non_vibration)/sizeof(switch_rumble_bit_t);i++){//TODO 协议解析不适用,暂处理
+        if(0 == memcmp((uint8_t *)prumble_bit, siwtch_motor_non_vibration[i],sizeof(switch_rumble_bit_t))){
             return 0;
         }
     }
-    if((pmotor_bit->lf_amp >= 0x80 && pmotor_bit->lf > 1) && pmotor_bit->hf > 0x03){
-        lamp = pmotor_bit->lf_amp-0x80;
-        hamp = pmotor_bit->hf_amp;
+    if((prumble_bit->lf_amp >= 0x80 && prumble_bit->lf > 1) && prumble_bit->hf > 0x03){
+        lamp = prumble_bit->lf_amp-0x80;
+        hamp = prumble_bit->hf_amp;
     }
     return remap(MAX(lamp, hamp), 0, 100, 0, 255);
 }
 
 
-uint16_t switch_normal_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t switch_normal_key_pack(trp_handle_t *phandle,const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
     switch_normal_report_t* switchp = (switch_normal_report_t*)buf;
 
     if(len < sizeof(switch_normal_report_t)) return 0;
 
-    phandle->index = U16(DEV_TYPE_HID,HID_TYPE_SWITCH);
 	switchp->id = SWITCH_NORMAL_REPORT_ID;
-	switchp->button = gpadp->key & 0xffff;
-	switchp->hat_switch = gamepad_key_to_hatswitch(gpadp->key);
-	switchp->lx = gpadp->stick_l.x;
-	switchp->ly = gpadp->stick_l.y;
-	switchp->rx = gpadp->stick_r.x;
-	switchp->ry = gpadp->stick_r.y;
+	switchp->button = keyp->key & 0xffff;
+	switchp->hat_switch = gamepad_key_to_hatswitch(keyp->key);
+	switchp->lx = keyp->stick_l.x;
+	switchp->ly = keyp->stick_l.y;
+	switchp->rx = keyp->stick_r.x;
+	switchp->ry = keyp->stick_r.y;
 
 	packet_len = sizeof(switch_normal_report_t);
 	return packet_len;
 }
 
 
-uint16_t switch_standard_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t switch_standard_key_pack(trp_handle_t *phandle,const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
     axis3i_t axis;
@@ -303,39 +302,38 @@ uint16_t switch_standard_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, 
     
     if(len < sizeof(switch_report_t)) return 0;
 
-    phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_SWITCH;
     switchp->id = SWITCH_STANDARD_REPORT_ID;
     switchp->battery = switch_battery_encode(phandle);
 
     if(switchp->battery & (0x01<<4)){
         switchp->buttonl = 0x8000;      //充电按键
     }
-    switchp->buttonl |= (gpadp->key & 0xffff);
-    switchp->buttonh = gpadp->key >> 16;
+    switchp->buttonl |= (keyp->key & 0xffff);
+    switchp->buttonh = keyp->key >> 16;
     switchp->buttonl = SWAP16_L( switchp->buttonl );
 
-    adc_x = (gpadp->stick_l.x + 0x8000)>>4;
-    adc_y = (gpadp->stick_l.y + 0x8000)>>4;
+    adc_x = (keyp->stick_l.x + 0x8000)>>4;
+    adc_y = (keyp->stick_l.y + 0x8000)>>4;
     int_to_bit12(switchp->l_xy, adc_x, adc_y);
 
-    adc_x = (gpadp->stick_r.x + 0x8000)>>4;
-    adc_y = (gpadp->stick_r.y + 0x8000)>>4;
+    adc_x = (keyp->stick_r.x + 0x8000)>>4;
+    adc_y = (keyp->stick_r.y + 0x8000)>>4;
     int_to_bit12(switchp->r_xy, adc_x, adc_y);
 
     switchp->index = (m_systick - swtich_report_timer)/5;
 
     if(switch_dev_ctb.imu_enable){
         //8G
-        axis.x = -gpadp->acc.x;
-        axis.y = gpadp->acc.y;
-        axis.z = gpadp->acc.z;
+        axis.x = -keyp->acc.x;
+        axis.y = keyp->acc.y;
+        axis.z = keyp->acc.z;
         axis3i_swapl(&axis);
         switchp->acc = axis;
 
         //2K
-        axis.x = gpadp->gyro.x;
-        axis.y = -gpadp->gyro.y;
-        axis.z = -gpadp->gyro.z;
+        axis.x = keyp->gyro.x;
+        axis.y = -keyp->gyro.y;
+        axis.z = -keyp->gyro.z;
         axis3i_swapl(&axis);
         switchp->gyro = axis;
         
@@ -359,14 +357,13 @@ uint16_t switch_standard_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, 
 }
 
 extern void switch_dump_nfc_data(switch_large_report_t* switchp,uint16_t len);
-uint16_t switch_large_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t switch_large_key_pack(trp_handle_t *phandle,const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
     switch_large_report_t* switchp = (switch_large_report_t*)buf;
 
     if(len < sizeof(switch_report_t)) return 0;         //注意 switch_large_report_t 长度是动态的,保证基本长度即可
-    switch_standard_key_pack(phandle,gpadp, buf,len);     //这里填充按键和体感数据
+    switch_standard_key_pack(phandle,keyp, buf,len);     //这里填充按键和体感数据
 
-    phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_SWITCH;
     switchp->id = SWITCH_LARGE_REPORT_ID;
     
     #if API_NFC_ENABLE
@@ -384,20 +381,20 @@ uint16_t switch_large_key_pack(trp_handle_t *phandle,const app_key_t *gpadp, uin
 ** 注意 switch蓝牙模式必须连接后0.5s后再发送数据
 ** Returns:			
 *******************************************************************/
-uint16_t switch_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t switch_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
     switch_report_t* switchp = (switch_report_t*)buf;
     memset(buf,0,len);
 
     if(TR_USBD == phandle->trp || SWITCH_STANDARD_REPORT_ID == switch_dev_ctb.report_mode){
-        packet_len = switch_standard_key_pack(phandle,gpadp,buf,len);
+        packet_len = switch_standard_key_pack(phandle,keyp,buf,len);
     #if (EDR_GAMEPAD_SUPPORT & BIT(DEV_TYPE_SWITCH))
     }else if(SWITCH_LARGE_REPORT_ID == m_switch_report_mode){
-        packet_len = switch_large_key_pack(phandle,gpadp,buf,len);
+        packet_len = switch_large_key_pack(phandle,keyp,buf,len);
     }else if(SWITCH_NORMAL_REPORT_ID == m_switch_report_mode){
         if(m_systick - m_switch_bt_timer > 500){
-            packet_len = switch_normal_key_pack(phandle,gpadp,buf,len);
+            packet_len = switch_normal_key_pack(phandle,keyp,buf,len);
         }
     #endif
     }
@@ -632,8 +629,6 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
     adc_y = (0x8000) >> 4;
     int_to_bit12(ctrl_replies.r_xy, adc_x, adc_y);
 
-    phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_SWITCH;
-
     if(TR_EDR == phandle->trp){
         ret = api_transport_tx(phandle,(uint8_t*)&ctrl_replies+1,49-1);     //蓝牙只发送48个字节
     }else{
@@ -685,7 +680,7 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 
     if (length != 0){
         switch_dump_cmd_in("dev:",replies,length);
-        phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_SWITCH;
+
         if(TR_EDR == phandle->trp){
             ret = api_transport_tx(phandle,replies,49-1);     //蓝牙只发送48个字节
         }else{
@@ -724,22 +719,22 @@ bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
         break;
     case SWITCH_MOTOR_ID:           //0X10
 	{
-        switch_motor_t *p = (switch_motor_t*)buf;
-        uint8_t motor1,motor2;
-        motor1 = switch_motor_decode(&p->motor1);
-        motor2 = switch_motor_decode(&p->motor2);
-        if(motor1 != s_motor.duty[0] || motor1 != 0){
-            s_motor.duty[0] = motor1;
-            motor1 = (uint8_t)(pow(motor1/255.0, 0.5)*255.0);
-            if(motor1){                                             //motor为0不做处理，防止马达震动数据下发太快导致不震动
-                app_rumble_set_duty(RUMBLE_L, motor1, 150);               //最后震动数据延时150ms 体验感最好
+        switch_rumble_t *p = (switch_rumble_t*)buf;
+        uint8_t motor_l,motor_r;
+        motor_l = switch_rumble_decode(&p->rumble_l);
+        motor_r = switch_rumble_decode(&p->rumble_r);
+        if(motor_l != s_motor.duty[RUMBLE_L] || motor_l != 0){
+            s_motor.duty[RUMBLE_L] = motor_l;
+            motor_l = (uint8_t)(pow(motor_l/255.0, 0.5)*255.0);
+            if(motor_l){                                             //motor为0不做处理，防止马达震动数据下发太快导致不震动
+                app_rumble_set_duty(RUMBLE_L, motor_l, 150);               //最后震动数据延时150ms 体验感最好
             }
         }
-        if(motor2 != s_motor.duty[1] || motor2 != 0){
-            s_motor.duty[1] = motor2 ;
-            motor2 = (uint8_t)(pow(motor2/255.0, 0.5)*255.0);
-            if(motor2){
-                app_rumble_set_duty(RUMBLE_R, motor2, 150);
+        if(motor_r != s_motor.duty[RUMBLE_R] || motor_r != 0){
+            s_motor.duty[RUMBLE_R] = motor_r ;
+            motor_r = (uint8_t)(pow(motor_r/255.0, 0.5)*255.0);
+            if(motor_r){
+                app_rumble_set_duty(RUMBLE_R, motor_r, 150);
             }
         }
         ret = true;
@@ -782,7 +777,7 @@ bool switch_device_deinit(trp_handle_t *phandle)
     return true;
 }
 
-void switch_device_handler(trp_handle_t *phandle)
+void switch_device_task(trp_handle_t *phandle)
 {
 
 }

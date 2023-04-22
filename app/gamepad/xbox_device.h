@@ -18,7 +18,7 @@
 #include "emf_typedef.h"
 #include "api/api_transport.h"
 #include "api/api_tick.h"
-#include "app/app_key.h"
+#include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 
 #include "app/gamepad/xbox_typedef.h"
@@ -31,7 +31,7 @@
 /*******************************************************************************************************************
 **	Functions
 ********************************************************************************************************************/
-uint16_t xbox_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len);
+uint16_t xbox_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len);
 
 void get_xbox_info(xbox_info_t* infp);
 bool xbox_earphone_enable(trp_handle_t *phandle,xbox_command_t* cmdp,bool enable);
@@ -39,7 +39,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len);
 
 void xbox_device_init(trp_handle_t *phandle);
 void xbox_device_deinit(trp_handle_t *phandle);
-void xbox_device_handler(trp_handle_t *phandle);
+void xbox_device_task(trp_handle_t *phandle);
 
 
 #endif

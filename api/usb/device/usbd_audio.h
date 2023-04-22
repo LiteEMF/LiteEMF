@@ -84,10 +84,9 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass,  us
 error_t usbd_audio_out_process(uint8_t id, usbd_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbd_audio_spk_en(uint8_t id,uint8_t en);
 error_t usbd_audio_mic_en(uint8_t id,uint8_t en);
-void 	usbd_audio_handler(uint8_t id);
 error_t usbd_audio_init(uint8_t id);
 error_t usbd_audio_deinit(uint8_t id);
-
+void usbd_audio_task(uint8_t id);
 
 #ifdef __cplusplus
 }

@@ -79,7 +79,6 @@ static uint8_t xbox_logo_key_pack(trp_handle_t *phandle,uint32_t key,xbox_logo_r
 
 	uint32_t change_key = xbox_key ^ key;
 
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_XBOX);
 	if(api_trp_is_usb(phandle->trp)){
 		if(change_key & XBOX_HOME){	// DOWN 6, UP 2
 
@@ -113,17 +112,15 @@ static uint8_t xbox_logo_key_pack(trp_handle_t *phandle,uint32_t key,xbox_logo_r
 
 
 
-static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	xbox_report_t* xboxp = (xbox_report_t*)buf;
 
 	if(len < sizeof(xbox_report_t)) return 0;
 
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_XBOX);
-
 	memset(xboxp,0,sizeof(xbox_report_t));
-	packet_len = xbox_logo_key_pack(phandle,gpadp->key,(xbox_logo_report_t*)xboxp);
+	packet_len = xbox_logo_key_pack(phandle,keyp->key,(xbox_logo_report_t*)xboxp);
 
 	if(0 == packet_len){
 		if(api_trp_is_usb(phandle->trp)){
@@ -131,17 +128,17 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, ui
 			usbd_dev_t *pdev = usbd_get_dev(phandle->id);
 
 			xboxp->id = XBOX_KEY_REP_CMD;
-			xboxp->button = SWAP16_L(gpadp->key);
+			xboxp->button = SWAP16_L(keyp->key);
 
-			xboxp->l2 = (uint16_t)((gpadp->trigger.x)<<2) + 3;
-			xboxp->r2 = (uint16_t)((gpadp->trigger.y)<<2) + 3;
+			xboxp->l2 = (uint16_t)((keyp->l2)<<2) + 3;
+			xboxp->r2 = (uint16_t)((keyp->r2)<<2) + 3;
 
 			xboxp->l2 = SWAP16_L(xboxp->l2);
 			xboxp->r2 = SWAP16_L(xboxp->r2);
-			xboxp->x = SWAP16_L(gpadp->stick_l.x);
-			xboxp->y = SWAP16_L(gpadp->stick_l.y);
-			xboxp->rx = SWAP16_L(gpadp->stick_r.x);
-			xboxp->ry = SWAP16_L(gpadp->stick_r.y);
+			xboxp->x = SWAP16_L(keyp->stick_l.x);
+			xboxp->y = SWAP16_L(keyp->stick_l.y);
+			xboxp->rx = SWAP16_L(keyp->stick_r.x);
+			xboxp->ry = SWAP16_L(keyp->stick_r.y);
 			if(0 == ++m_controller_index) m_controller_index = 1;
 			xboxp->index = m_controller_index;
 
@@ -150,7 +147,7 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, ui
 
 			if(XBOXX_PID == pdev->pid){
 				xboxp->button |= SWAP16_L( 1 );
-				if(gpadp->key & XBOX_SHARE){		//only xboxx
+				if(keyp->key & XBOX_SHARE){		//only xboxx
 					xboxp->res[4]=1;
 				}
 
@@ -165,22 +162,21 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, ui
 			#endif
 		}else{				//蓝牙
 			xbox_bt_report_t* bt_xboxp = (xbox_bt_report_t*)xboxp;
-			phandle->index = ((uint16_t)DEV_TYPE_HID <<8) | HID_TYPE_XBOX;
 
 			bt_xboxp->id = XBOX_BT_KEY_REP_CMD;
-			bt_xboxp->button = SWAP16_L(gpadp->key);
-			if(gpadp->key & GAMEPAD_SELECT)	bt_xboxp->back_share_key = 1;
-			bt_xboxp->hat_switch = (gamepad_key_to_hatswitch(gpadp->key)+1) & 0x0f;//从1开始
+			bt_xboxp->button = SWAP16_L(keyp->key);
+			if(keyp->key & GAMEPAD_SELECT)	bt_xboxp->back_share_key = 1;
+			bt_xboxp->hat_switch = (gamepad_key_to_hatswitch(keyp->key)+1) & 0x0f;//从1开始
 
-			bt_xboxp->l2 = (uint16_t)((gpadp->trigger.x)<<2) + 3;
-			bt_xboxp->r2 = (uint16_t)((gpadp->trigger.y)<<2) + 3;
+			bt_xboxp->l2 = (uint16_t)((keyp->l2)<<2) + 3;
+			bt_xboxp->r2 = (uint16_t)((keyp->r2)<<2) + 3;
 			bt_xboxp->l2 = SWAP16_L(bt_xboxp->l2);
 			bt_xboxp->r2 = SWAP16_L(bt_xboxp->r2);
 
-			bt_xboxp->x = gpadp->stick_l.x + 0x8000;
-			bt_xboxp->y = 0xFFFF - (gpadp->stick_l.y + 0x8000);
-			bt_xboxp->rx = gpadp->stick_r.x + 0x8000;
-			bt_xboxp->ry =  0xFFFF - (gpadp->stick_r.y + 0x8000);
+			bt_xboxp->x = keyp->stick_l.x + 0x8000;
+			bt_xboxp->y = 0xFFFF - (keyp->stick_l.y + 0x8000);
+			bt_xboxp->rx = keyp->stick_r.x + 0x8000;
+			bt_xboxp->ry =  0xFFFF - (keyp->stick_r.y + 0x8000);
 			bt_xboxp->x = SWAP16_L(bt_xboxp->x);
 			bt_xboxp->y = SWAP16_L(bt_xboxp->y);
 			bt_xboxp->rx = SWAP16_L(bt_xboxp->rx);
@@ -194,7 +190,7 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, ui
 
 
 
-static uint16_t x360_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+static uint16_t x360_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	x360_report_t* x360p = (x360_report_t*)buf;
@@ -202,16 +198,15 @@ static uint16_t x360_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uin
 	if(len < sizeof(x360_report_t)) return 0;
 	memset(x360p,0,sizeof(x360_report_t));
 
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_X360);
 	x360p->cmd =  X360_KEY_REP_CMD;
-	x360p->button = SWAP16_L(gpadp->key);
-	x360p->l2 = gpadp->trigger.x;
-    x360p->r2 = gpadp->trigger.y;
+	x360p->button = SWAP16_L(keyp->key);
+	x360p->l2 = keyp->l2;
+    x360p->r2 = keyp->r2;
 
-	x360p->x = SWAP16_L(gpadp->stick_l.x);
-	x360p->y = SWAP16_L(gpadp->stick_l.y);
-	x360p->rx = SWAP16_L(gpadp->stick_r.x);
-	x360p->ry = SWAP16_L(gpadp->stick_r.y);
+	x360p->x = SWAP16_L(keyp->stick_l.x);
+	x360p->y = SWAP16_L(keyp->stick_l.y);
+	x360p->rx = SWAP16_L(keyp->stick_r.x);
+	x360p->ry = SWAP16_L(keyp->stick_r.y);
 	packet_len = sizeof(x360_report_t);
 
 	return packet_len;
@@ -221,15 +216,15 @@ static uint16_t x360_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uin
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-uint16_t xbox_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t xbox_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	hid_type_t hid_type = phandle->index & 0XFF;
 
 	if(HID_TYPE_X360 == hid_type){
-		packet_len = x360_key_pack(phandle, gpadp, buf, len);
+		packet_len = x360_key_pack(phandle, keyp, buf, len);
 	}else if(HID_TYPE_XBOX == hid_type){
-		packet_len = xboxs_key_pack(phandle, gpadp, buf, len);
+		packet_len = xboxs_key_pack(phandle, keyp, buf, len);
 	}
 
 	return packet_len;
@@ -263,7 +258,7 @@ void xbox_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t  mic_buffer[64];
 	static uint8_t mic_head[]={0x60,0x21,0x00,0x32,0xc0,0x00};
-	uint32_t mic_frame_len = api_audio_get_mic_len(&usbd_audio_info);
+	uint32_t mic_frame_len = API_AUDIO_MIC_SIZE(&usbd_audio_info);
 
 	mic_head[2]++;
 	memset(mic_buffer,0,sizeof(mic_buffer));
@@ -369,10 +364,10 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 				case XBOX_RUMBLE_CMD:{
 					rumble_t motor;
 					xbox_motor_t *prumble =(xbox_motor_t*)rx_cmdp->pbuf;
-					motor.duty[0] = remap(prumble->motor1,0,100,0,255);			//Xbox马达范围0~100
-					motor.duty[1] = remap(prumble->motor2,0,100,0,255);
-					motor.duty[2] = remap(prumble->smotor1,0,100,0,255);		//Xbox马达范围0~100
-					motor.duty[3] = remap(prumble->smotor2,0,100,0,255);
+					motor.duty[RUMBLE_L] = remap(prumble->motor1,0,100,0,255);			//Xbox马达范围0~100
+					motor.duty[RUMBLE_R] = remap(prumble->motor2,0,100,0,255);
+					motor.duty[RUMBLE_SL] = remap(prumble->smotor1,0,100,0,255);		//Xbox马达范围0~100
+					motor.duty[RUMBLE_SR] = remap(prumble->smotor2,0,100,0,255);
 					app_set_rumble(&motor, prumble->duration*20);
 					ret = true;
 					break;
@@ -433,10 +428,10 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 			xbox_motor_t* motorp = (xbox_motor_t*)buf;
 			rumble_t motor;
 			// logd("out %x:",endp); dumpd(buf,len);
-			motor.duty[0] = remap(motorp->motor1,0,100,0,255);		//Xbox马达范围0~100
-			motor.duty[1] = remap(motorp->motor2,0,100,0,255);
-			motor.duty[2] = remap(motorp->smotor1,0,100,0,255);		//Xbox马达范围0~100
-			motor.duty[3] = remap(motorp->smotor2,0,100,0,255);
+			motor.duty[RUMBLE_L] = remap(motorp->motor1,0,100,0,255);		//Xbox马达范围0~100
+			motor.duty[RUMBLE_R] = remap(motorp->motor2,0,100,0,255);
+			motor.duty[RUMBLE_SL] = remap(motorp->smotor1,0,100,0,255);		//Xbox马达范围0~100
+			motor.duty[RUMBLE_SR] = remap(motorp->smotor2,0,100,0,255);
 			app_set_rumble(&motor, 20000);
 			ret = true;
 		}
@@ -481,9 +476,9 @@ void xbox_device_deinit(trp_handle_t *phandle)
 	xbox_command_free(&xbox_dev_cmd_tx);
 }
 
-void xbox_device_handler(trp_handle_t *phandle)
+void xbox_device_task(trp_handle_t *phandle)
 {
-	xbox_command_tx_handler(&xbox_dev_cmd_tx);
+	xbox_command_tx_process(&xbox_dev_cmd_tx);
 }
 
 

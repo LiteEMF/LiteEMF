@@ -14,8 +14,8 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #if APP_RGB_ENABLE
-
-#include  "app/rgb/app_rgb.h"
+#include "api/api_tick.h"
+#include "app/rgb/app_rgb.h"
 
 /******************************************************************************************************
 ** Defined
@@ -62,6 +62,18 @@ bool app_rgb_deinit(void)
 	return true;
 }
 
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void app_rgb_task(void* pa)
+{
+	UNUSED_PARAMETER(pa);
+}
+
+#if TASK_HANDLER_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -69,8 +81,13 @@ bool app_rgb_deinit(void)
 *******************************************************************/
 void app_rgb_handler(uint32_t period_10us)
 {
-	UNUSED_PARAMETER(period_10us);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_rgb_task(NULL);
+	}
 }
+#endif
 
 #endif
 

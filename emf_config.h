@@ -20,11 +20,17 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define ID_NULL   (0xff)
+#define ID_NULL   				(0xff)
 
 #ifndef VID_DEFAULT
 #define VID_DEFAULT				0X4353
 #endif
+
+#ifndef TASK_HANDLER_ENABLE
+#define TASK_HANDLER_ENABLE		1
+#endif
+
+
 //*********************************************************************************//
 //                          传输类型                               		//
 //*********************************************************************************//
@@ -52,6 +58,8 @@ typedef enum{
 	TR_USBD		= 8,
 	TR_USBH		= 9,
 	TR_UART		= 10,
+	TR_MAX,
+	TR_NULL = TR_MAX,
 }trp_t;
 
 //*********************************************************************************//
@@ -62,9 +70,9 @@ typedef enum{
 #define DEF_DEV_TYPE_HID				0
 #define DEF_DEV_TYPE_AUDIO     			1
 #define DEF_DEV_TYPE_PRINTER   			2
-#define DEF_DEV_TYPE_MSD   				3		//mass storage devices
+#define DEF_DEV_TYPE_MSD   				3		/*mass storage devices*/
 #define DEF_DEV_TYPE_HUB       			4
-#define DEF_DEV_TYPE_CDC				5		// Communications Device Class
+#define DEF_DEV_TYPE_CDC				5		/*Communications Device Class*/
 //6,7
 #define DEF_DEV_TYPE_VENDOR    			8
 #define DEF_DEV_TYPE_ADB          		9
@@ -72,7 +80,7 @@ typedef enum{
 #define DEF_DEV_TYPE_USBMUXD	   		11
 #define DEF_DEV_TYPE_IAP2				12
 #define DEF_DEV_TYPE_AUTO				15
-#define DEF_DEV_TYPE_NONE				16		//type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)
+#define DEF_DEV_TYPE_NONE				16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
 //dev type
 typedef enum{
 	DEV_TYPE_HID	=	DEF_DEV_TYPE_HID	,	
@@ -136,6 +144,7 @@ typedef struct{
 #define HID_SWITCH_MASK			BIT_ENUM(HID_TYPE_SWITCH)
 #define HID_PS_MASK				(BIT_ENUM(HID_TYPE_PS3) | BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5))
 #define HID_XBOX_MASK			(BIT_ENUM(HID_TYPE_X360) | BIT_ENUM(HID_TYPE_XBOX))
+#define HID_GAMEPAD_MASK		(HID_SWITCH_MASK | HID_PS_MASK | HID_XBOX_MASK | BIT_ENUM(HID_TYPE_GAMEPADE))
 
 
 /*------------------------dev type default-----------------------------*/
@@ -237,7 +246,7 @@ typedef struct{
 #define API_BT_ENABLE		(BT_ENABLE | BTC_ENABLE | API_RF_ENABLE)
 
 //*********************************************************************************//
-//                       	USB			                  						   //
+//                       		USB			                  					//
 //*********************************************************************************//
 #ifndef APP_USBD_ENABLE
 #define APP_USBD_ENABLE			1
@@ -247,9 +256,24 @@ typedef struct{
 #endif
 #define APP_USB_ENABLE		(APP_USBD_ENABLE | APP_USBH_ENABLE)
 
+// usb socket 用于手柄引导
+#ifndef USBD_SOCKET_ENABLE
+#define USBD_SOCKET_ENABLE		1
+#endif
+#ifndef USBH_SOCKET_ENABLED
+#define USBH_SOCKET_ENABLED		1
+#endif
+
+#ifndef SOCKET_HID_TYPE_SUPPORT
+#define SOCKET_HID_TYPE_SUPPORT		(BIT_DEF(HID_TYPE_XBOX) | BIT_DEF(HID_TYPE_X360) | BIT_DEF(HID_TYPE_PS4))
+#endif
+
 //*********************************************************************************//
 //                       	other API modules                  						//
 //*********************************************************************************//
+#ifndef API_SOFT_TIMER_ENABLE
+#define API_SOFT_TIMER_ENABLE			1
+#endif
 #ifndef API_NFC_ENABLE
 #define API_NFC_ENABLE			1
 #endif
@@ -262,16 +286,20 @@ typedef struct{
 #ifndef API_WIFI_ENABLE
 #define API_WIFI_ENABLE			1
 #endif
-#ifndef API_SOFT_TIMER_ENABLE
-#define API_SOFT_TIMER_ENABLE			1
-#endif
 #ifndef API_AUDIO_ENABLE
-#define API_AUDIO_ENABLE				1
+#define API_AUDIO_ENABLE		0
 #endif
+
 
 //*********************************************************************************//
 //                       	APP modules                  						   //
 //*********************************************************************************//
+#ifndef API_PM_ENABLE
+#define API_PM_ENABLE			1
+#endif
+#ifndef APP_BATTERY_ENABLE
+#define APP_BATTERY_ENABLE		1
+#endif
 #ifndef APP_KEY_ENABLE
 #define APP_KEY_ENABLE			1
 #endif
@@ -284,11 +312,8 @@ typedef struct{
 #ifndef APP_JOYSTICK_ENABLE
 #define APP_JOYSTICK_ENABLE		1
 #endif
-#ifndef APP_BATTERY_ENABLE
-#define APP_BATTERY_ENABLE		1
-#endif
-#ifndef APP_PM_ENABLE
-#define APP_PM_ENABLE			1
+#ifndef APP_GAMEAPD_ENABLE
+#define APP_GAMEAPD_ENABLE 		((HIDD_SUPPORT | HIDH_SUPPORT) & HID_GAMEPAD_MASK)
 #endif
 #ifndef APP_RUMBLE_ENABLE
 #define APP_RUMBLE_ENABLE		1
@@ -302,7 +327,9 @@ typedef struct{
 
 
 
-
+#ifndef APP_CMD_ENABLE
+#define APP_CMD_ENABLE			1
+#endif
 
 
 

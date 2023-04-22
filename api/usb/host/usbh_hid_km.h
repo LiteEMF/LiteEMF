@@ -63,13 +63,13 @@ typedef union{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void hid_km_items_init(void);
+void usbh_hid_km_pa_init(void);
 void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len);
 void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_hid_km_open( uint8_t id, usbh_class_t *pclass) ;
 error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo);
 error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_hid_km_handler(uint8_t id, usbh_class_t *pclass);
+void usbh_hid_km_task(uint8_t id, usbh_class_t *pclass);
 
 #ifdef __cplusplus
 }

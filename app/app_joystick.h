@@ -13,7 +13,7 @@
 #ifndef _app_joystick_h
 #define _app_joystick_h
 #include "emf_typedef.h"
-#include "emf_utils.h"
+#include "utils/emf_utils.h"
 #include "key_typedef.h"
 #include "api/api_adc.h"
 #ifdef __cplusplus
@@ -110,6 +110,7 @@ void app_trigger_deadzone(joystick_cfg_t* cfgp,uint16_t *valp);
 
 bool app_joystick_init(void);
 bool app_joystick_deinit(void);
+void app_joystick_task(void *pa);
 void app_joystick_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

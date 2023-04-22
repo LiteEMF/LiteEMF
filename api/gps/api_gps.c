@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #if API_GPS_ENABLE
-
+#include  "api/api_tick.h"
 #include  "api/gps/api_gps.h"
 
 /******************************************************************************************************
@@ -63,10 +63,26 @@ bool api_gps_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void api_gps_task(void* pa)
+{
+	UNUSED_PARAMETER(pa);
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void api_gps_handler(uint32_t period_10us)
 {
-	UNUSED_PARAMETER(period_10us);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_gps_task(NULL);
+	}
 }
+#endif
 
 #endif
 

@@ -148,8 +148,8 @@ void * pvPortMalloc( size_t xWantedSize )
          * initialisation to setup the list of free blocks. */
         if( pxEnd == NULL )
         {
-            logd("xHeapStructSize=%d,sizeof( BlockLink_t )=%d ,portBYTE_ALIGNMENT=%d,portBYTE_ALIGNMENT_MASK=%d,sizeof(size_t)=%d\n",
-                xHeapStructSize,sizeof( BlockLink_t ),portBYTE_ALIGNMENT,portBYTE_ALIGNMENT_MASK,sizeof(size_t));
+            //logd("xHeapStructSize=%d,sizeof( BlockLink_t )=%d ,portBYTE_ALIGNMENT=%d,portBYTE_ALIGNMENT_MASK=%d,sizeof(size_t)=%d\n",
+            //    xHeapStructSize,sizeof( BlockLink_t ),portBYTE_ALIGNMENT,portBYTE_ALIGNMENT_MASK,sizeof(size_t));
 
             prvHeapInit();
         }

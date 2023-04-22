@@ -43,7 +43,7 @@ error_t usbd_hid_vendor_suspend(uint8_t id);
 uint16_t usbd_hid_vendor_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_hid_vendor_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
 error_t usbd_hid_vendor_out_process(uint8_t id, usbd_class_t *pclass, uint8_t* buf, uint16_t len);
-void 	usbd_hid_vendor_handler(uint8_t id);
+void 	usbd_hid_vendor_task(uint8_t id);
 error_t usbd_hid_vendor_init(uint8_t id);
 error_t usbd_hid_vendor_deinit(uint8_t id);
 

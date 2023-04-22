@@ -1,0 +1,28 @@
+{
+	"files.associations": {
+		"Makefile": "makefile",
+		"api_log.h": "c",
+		"app_gamepad.h": "c",
+		"app_gamepad_key.h": "c",
+		"api_transport.h": "c",
+		"api_soft_timer.h": "c",
+		"limits": "c",
+		"type_traits": "c",
+		"api_storage.h": "c",
+		"hw_config.h": "c",
+		"api_tick.h": "c",
+		"usbd.h": "c",
+		"usbd_class.h": "c",
+		"usbd_audio.h": "c",
+		"api_audio.h": "c",
+		"app_imu.h": "c",
+		"ps_controller.h": "c",
+		"emf_command.h": "c",
+		"app_command.h": "c",
+		"usbd_socket.h": "c",
+		"template.h": "c",
+		"usbh.h": "c",
+		"emf_typedef.h": "c",
+		"usbh_socket.h": "c"
+	}
+}

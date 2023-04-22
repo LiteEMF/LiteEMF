@@ -522,7 +522,7 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbd_class_handler(uint8_t id)
+void usbd_class_task(uint8_t id)
 {
 	dev_type_t type;
 
@@ -545,37 +545,37 @@ void usbd_class_handler(uint8_t id)
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 			case DEV_TYPE_HID	:
-				usbd_hid_handler(id);
+				usbd_hid_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 			case DEV_TYPE_AUDIO	:
-				usbd_audio_handler(id);
+				usbd_audio_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
 			case DEV_TYPE_PRINTER:
-				usbd_printer_handler(id);
+				usbd_printer_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
 			case DEV_TYPE_MSD	:
-				usbd_msd_handler(id);
+				usbd_msd_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
 			case DEV_TYPE_CDC	:
-				usbd_cdc_handler(id);
+				usbd_cdc_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 			case DEV_TYPE_IAP2 :
-				usbd_iap2_handler(id);
+				usbd_iap2_task(id);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
 			case DEV_TYPE_AUTO :
-				usbd_auto_handler(id);
+				usbd_auto_task(id);
 				break;
 			#endif
 			default:

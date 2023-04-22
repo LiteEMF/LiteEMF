@@ -62,21 +62,21 @@ typedef enum{
 /**********************************************************
 **	link Packet Information
 **********************************************************/
-#define IAP2_LINK_VERSION  					0x01	 			//固定0x01
-#define MAX_NUM_OUTSTANDING_PACKET  		0x02			 	//最大未确认包数
-#define MAX_PACKET_LEN      				(64)				//最大接收包长度 64字节
-#define RETRANSMISSION_TIMEOUT 				0x03e8				//重传超时时间 1.5s
-#define CUMULATIVE_ACK_TIMEOUT 				0x64					//不发确认最大累积时间 100ms 
-#define MAX_NUM_RETRANSMISSION 				0x1E				//最大重传次数
-#define MAX_CUMULATIVE_ACK     				0x02				//最大累积ACK次数
+#define IAP2_LINK_VERSION  					0x01	 			/*固定0x01 */
+#define MAX_NUM_OUTSTANDING_PACKET  		0x02			 	/*最大未确认包数 */
+#define MAX_PACKET_LEN      				(64)				/*最大接收包长度 64字节 */
+#define RETRANSMISSION_TIMEOUT 				0x03e8				/*重传超时时间 1.5s */
+#define CUMULATIVE_ACK_TIMEOUT 				0x64				/*不发确认最大累积时间 100ms  */
+#define MAX_NUM_RETRANSMISSION 				0x1E				/*最大重传次数 */
+#define MAX_CUMULATIVE_ACK     				0x02				/*最大累积ACK次数 */
 	
-#define CONTROL_SESSION_ID     				0x01				//CONTROL_SESSION_ID
+#define CONTROL_SESSION_ID     				0x01				/*CONTROL_SESSION_ID */
 #define CONTROL_SESSION_TYPE   				Control_Session	
-#define CONTROL_SESSION_VERSION         	0x01				//version
+#define CONTROL_SESSION_VERSION         	0x01				/*version */
 	
 #define EXTERNAL_SESSION_ID           		0x02				
 #define EXTERNAL_SESSION_TYPE         		External_Accessory_Session
-#define EXTERNALSESSION_VERSION         	0x01				//version
+#define EXTERNALSESSION_VERSION         	0x01				/*version */
 
 
 /******************************************************************************************************
@@ -100,12 +100,11 @@ typedef enum
 /*******************************************************************************************************************
 **	Function
 ********************************************************************************************************************/
-void app_iap2_init(void);
-void app_iap2_handler(uint32_t period_10us);
 void app_iap2_in_process(uint8_t* buf,uint16_t len);
 bool app_iap2_hidreport(uint16_t index,uint8_t* report_buf,uint8_t len);
 void app_iap2_app_in_process(uint8_t* report_buf,uint8_t len);				//WEAK
-
+void app_iap2_init(void);
+void app_iap2_task(void* pa);
 
 
 #endif

@@ -227,7 +227,7 @@ error_t usbd_auto_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_auto_handler(uint8_t id)
+void usbd_auto_task(uint8_t id)
 {
     UNUSED_PARAMETER(id);
 }

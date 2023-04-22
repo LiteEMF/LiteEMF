@@ -343,9 +343,9 @@ bool bt_driver_deinit(uint8_t id)
     
     return ret;
 }
-void bt_driver_handler(uint32_t period_10us)
+void bt_driver_task(void* pa)
 {
-    UNUSED_PARAMETER(period_10us);
+    UNUSED_PARAMETER(pa);
 }
 
 

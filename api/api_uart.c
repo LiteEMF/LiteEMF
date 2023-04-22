@@ -223,22 +223,40 @@ void api_uarts_deinits(void)
 	}   
 }
 
-void api_uart_handler(uint32_t period_10us)
+void api_uart_tx_task(void* pa)
 {
 	#if UART_TX_FIFO_ENABLED
 	uint8_t id;
 	uint8_t buf[UART_TX_FIFO_MTU];
 	uint16_t len=UART_TX_FIFO_MTU;
-	static timer_t uart_tx_timer;
 
-	if(m_task_tick10us - uart_tx_timer >= period_10us){
-		for(id=0; id<m_uart_num; id++){
-			if(ERROR_SUCCESS == app_fifo_read(&uart_tx_fifo[id], (uint8_t*)&buf, &len)){
-				api_uart_tx(id,buf,len);
-			}
+	for(id=0; id<m_uart_num; id++){
+		if(ERROR_SUCCESS == app_fifo_read(&uart_tx_fifo[id], (uint8_t*)&buf, &len)){
+			api_uart_tx(id,buf,len);
 		}
 	}
+	UNUSED_PARAMETER(pa);
 	#endif
 }
+
+
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_uart_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_uart_tx_task(NULL);
+	}
+}
+#endif
+
+
 #endif
 

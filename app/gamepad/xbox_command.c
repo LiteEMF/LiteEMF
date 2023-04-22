@@ -281,7 +281,7 @@ bool xbox_command_free(xbox_command_t* cmdp)
 	emf_free_and_clear(cmdp->pbuf);
 }
 
-void xbox_command_tx_handler(xbox_command_t* tx_cmdp)	//发送 handler
+void xbox_command_tx_process(xbox_command_t* tx_cmdp)	//发送 handler
 {
 	if(tx_cmdp->bctrl & XBOX_CTRL_NEED_ACK){	//需要ACK
 		if(m_systick - tx_cmdp->timer >= 8*8){	//超时未接受到ack重新开始, 如果接收到ACK在ack中处理

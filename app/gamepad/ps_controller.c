@@ -63,14 +63,14 @@ static uint8_t mcontact_id[PS4_SLOT_MAX];			//for find contact id不能为0
 **	static Function
 ******************************************************************************************************/
 
-static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	axis3i_t axis;
 	ps4_report_t* ps4p;
 
 	memset(buf,0,len);
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_PS4);
+
 	if(api_trp_is_bt(phandle->trp)){           //蓝牙结构体长度(+id)
 		if(len < sizeof(ps4_large_report_t)) return 0;
 
@@ -110,36 +110,36 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint
     #else
         ps4p->battery = 0x1B;
     #endif
-	ps4p->lx = (gpadp->stick_l.x >> 8) + 0x80;
-	ps4p->ly = 0xFF - ((gpadp->stick_l.y >> 8) + 0x80);
-	ps4p->rx = (gpadp->stick_r.x >> 8) + 0x80;
-	ps4p->ry = 0xFF - ((gpadp->stick_r.y >> 8) + 0x80);
-	ps4p->buttonl = (gpadp->key&0xfff0) | ps4_key_to_hatswitch(gpadp->key);
-	ps4p->buttonh = gpadp->key>>16;
+	ps4p->lx = (keyp->stick_l.x >> 8) + 0x80;
+	ps4p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+	ps4p->rx = (keyp->stick_r.x >> 8) + 0x80;
+	ps4p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+	ps4p->buttonl = (keyp->key&0xfff0) | ps4_key_to_hatswitch(keyp->key);
+	ps4p->buttonh = keyp->key>>16;
 	ps4p->buttonl = SWAP16_L( ps4p->buttonl );
 
-	ps4p->l2 = gpadp->trigger.x;
-	ps4p->r2 = gpadp->trigger.y;
+	ps4p->l2 = keyp->l2;
+	ps4p->r2 = keyp->r2;
 
 	ps4p->time_index = SWAP16_L((m_systick&0xffff)*200);
 	ps4p->mark = 0x13;
 
-	axis.x = gpadp->acc.y;
-	axis.y = 0-gpadp->acc.z;
-	axis.z = 0-gpadp->acc.x;
+	axis.x = keyp->acc.y;
+	axis.y = 0-keyp->acc.z;
+	axis.z = 0-keyp->acc.x;
 	axis3i_swapl(&axis);
 	ps4p->acc = axis;
 
-	axis.x = gpadp->gyro.y;
-	axis.y = 0-gpadp->gyro.z;
-	axis.z = 0-gpadp->gyro.x;
+	axis.x = keyp->gyro.y;
+	axis.y = 0-keyp->gyro.z;
+	axis.z = 0-keyp->gyro.x;
 	axis3i_swapl(&axis);
 	ps4p->gyro = axis;
 
 	ps_report_index++;
 	ps4p->index = ps_report_index;
 
-	ps_touch_pack((app_key_t*)gpadp);
+	ps_touch_pack((app_gamepad_key_t*)keyp);
 
 	int_to_bit12(ps4p->touch_pad1, m_ps_touch[0].x, m_ps_touch[0].y);
 	int_to_bit12(ps4p->touch_pad2, m_ps_touch[1].x, m_ps_touch[1].y);
@@ -155,32 +155,32 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint
 	return packet_len;
 }
 
-static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	ps3_report_t* ps3p = (ps3_report_t*)buf;
 
 	if(len < sizeof(ps3_report_t)) return 0;
 	memset(ps3p,0,sizeof(ps3_report_t));
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_PS3);
-	ps3p->lx = (gpadp->stick_l.x >> 8) + 0x80;
-	ps3p->ly = 0xFF - ((gpadp->stick_l.y >> 8) + 0x80);
-	ps3p->rx = (gpadp->stick_r.x >> 8) + 0x80;
-	ps3p->ry = 0xFF - ((gpadp->stick_r.y >> 8) + 0x80);
-	ps3p->button = SWAP32_L(gpadp->key);
-	ps3p->l2 = gpadp->trigger.x;
-	ps3p->r2 = gpadp->trigger.y;
 
-	if(PS3_UP & gpadp->key)	ps3p->up = 0xff;
-	if(PS3_DOWN & gpadp->key)	ps3p->down = 0xff;
-	if(PS3_LEFT & gpadp->key)	ps3p->left = 0xff;
-	if(PS3_RIGHT & gpadp->key)	ps3p->right = 0xff;
-	if(PS3_L1 & gpadp->key) ps3p->l1 = 0xff;
-	if(PS3_R1 & gpadp->key) ps3p->r1 = 0xff;
-	if(PS3_TRIANGLE & gpadp->key) ps3p->bu = 0xff;
-	if(PS3_O & gpadp->key) ps3p->br = 0xff;
-	if(PS3_X & gpadp->key) ps3p->bd = 0xff;
-	if(PS3_SQUARE & gpadp->key) ps3p->bl = 0xff;
+	ps3p->lx = (keyp->stick_l.x >> 8) + 0x80;
+	ps3p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+	ps3p->rx = (keyp->stick_r.x >> 8) + 0x80;
+	ps3p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+	ps3p->button = SWAP32_L(keyp->key);
+	ps3p->l2 = keyp->l2;
+	ps3p->r2 = keyp->r2;
+
+	if(PS3_UP & keyp->key)	ps3p->up = 0xff;
+	if(PS3_DOWN & keyp->key)	ps3p->down = 0xff;
+	if(PS3_LEFT & keyp->key)	ps3p->left = 0xff;
+	if(PS3_RIGHT & keyp->key)	ps3p->right = 0xff;
+	if(PS3_L1 & keyp->key) ps3p->l1 = 0xff;
+	if(PS3_R1 & keyp->key) ps3p->r1 = 0xff;
+	if(PS3_TRIANGLE & keyp->key) ps3p->bu = 0xff;
+	if(PS3_O & keyp->key) ps3p->br = 0xff;
+	if(PS3_X & keyp->key) ps3p->bd = 0xff;
+	if(PS3_SQUARE & keyp->key) ps3p->bl = 0xff;
 
 	packet_len = sizeof(ps3_report_t);
 
@@ -188,22 +188,21 @@ static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint
 }
 
 
-static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	ps5_report_t* ps5p = (ps5_report_t*)buf;
 
 	if(len < sizeof(ps5_report_t)) return 0;
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_PS5);
 
 	memset(ps5p,0,sizeof(ps5_report_t));
-	ps5p->lx = (gpadp->stick_l.x >> 8) + 0x80;
-	ps5p->ly = 0xFF - ((gpadp->stick_l.y >> 8) + 0x80);
-	ps5p->rx = (gpadp->stick_r.x >> 8) + 0x80;
-	ps5p->ry = 0xFF - ((gpadp->stick_r.y >> 8) + 0x80);
-	ps5p->button = (gpadp->key&0xfffffff0) | ps4_key_to_hatswitch(gpadp->key);
-	ps5p->l2 = gpadp->trigger.x;
-	ps5p->r2 = gpadp->trigger.y;
+	ps5p->lx = (keyp->stick_l.x >> 8) + 0x80;
+	ps5p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+	ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
+	ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+	ps5p->button = (keyp->key&0xfffffff0) | ps4_key_to_hatswitch(keyp->key);
+	ps5p->l2 = keyp->l2;
+	ps5p->r2 = keyp->r2;
 
 	ps_report_index++;
 	ps5p->index = ps_report_index;
@@ -218,8 +217,8 @@ static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint
 
 static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[0];
-	uint8_t motor2 = prumble->duty[1];
+	uint8_t motor1 = prumble->duty[RUMBLE_L];
+	uint8_t motor2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
 		ps4_usb_effects_t effects;
 		memset(&effects,0,sizeof(effects));
@@ -259,8 +258,8 @@ static bool ps3_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 }
 bool ps5_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[0];
-	uint8_t motor2 = prumble->duty[1];
+	uint8_t motor1 = prumble->duty[RUMBLE_L];
+	uint8_t motor2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
 		ps5_usb_effects_t motor;
 		memset(&motor,0,sizeof(motor));
@@ -282,7 +281,7 @@ bool ps5_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 }
 
 
-static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	axis3i_t axis;
 	bool ret = false;
@@ -308,8 +307,8 @@ static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps4_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps4_inp->ry-0x80),-128,127,32767,-32768);
 
-		keyp->trigger.x = ps4_inp->l2;
-		keyp->trigger.y = ps4_inp->r2;
+		keyp->l2 = ps4_inp->l2;
+		keyp->r2 = ps4_inp->r2;
 
 		if(len > 10){
 			if(0 == (ps4_inp->touch_pad1_index & 0x80)){		//touch pad解析
@@ -360,7 +359,7 @@ static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 
 
 
-static bool ps3_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+static bool ps3_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key;
@@ -375,8 +374,8 @@ static bool ps3_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps3_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps3_inp->ry-0x80),-128,127,32767,-32768);
 
-		keyp->trigger.x = ps3_inp->l2;
-		keyp->trigger.y = ps3_inp->r2;
+		keyp->l2 = ps3_inp->l2;
+		keyp->r2 = ps3_inp->r2;
 		ret = true;
 	}
 
@@ -384,7 +383,7 @@ static bool ps3_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 }
 
 
-static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key;
@@ -401,8 +400,8 @@ static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
 		
-		keyp->trigger.x = ps5_inp->l2;
-		keyp->trigger.y = ps5_inp->r2;
+		keyp->l2 = ps5_inp->l2;
+		keyp->r2 = ps5_inp->r2;
 		ret = true;
 	}
 	return ret;
@@ -523,7 +522,7 @@ uint8_t ps_touch_find_slot(uint32_t id,uint8_t active)
 
 	if((PS4_SLOT_MAX == find_slot) && active){		//auto slot
 		for(i=0; i< PS4_SLOT_MAX; i++){
-			if(mcontact_id[i] == PS4_ID_NULL){
+			if(mcontact_id[i] == ID_NULL){
 				find_slot = i;
 				mcontact_id[i] = id;
 				m_ps_touch[i].id = touch_index++;
@@ -551,7 +550,7 @@ bool  ps_touch_event_fill_id(uint8_t id,uint8_t active,int16_t x, int16_t y)
 		// logd("id=0x%x find_slot=%x active=%d x=%d  y=%d",id,find_slot, active, x, y);
 
 		if(!active){
-			mcontact_id[find_slot] = PS4_ID_NULL;
+			mcontact_id[find_slot] = ID_NULL;
 		}else{
 			m_ps_touch[find_slot].x = x;
 			m_ps_touch[find_slot].y = y;
@@ -566,24 +565,24 @@ bool  ps_touch_event_fill_id(uint8_t id,uint8_t active,int16_t x, int16_t y)
 
 }
 
-__WEAK void ps_touch_pack(app_key_t *gpadp)
+__WEAK void ps_touch_pack(app_gamepad_key_t *keyp)
 {
-	if(gpadp->key & PS4_TOUCH_U){
+	if(keyp->key & PS4_TOUCH_U){
 		ps_touch_event_fill_id(0, 1, PS4_TOUCH_MAX_X/2 - 100,0);
 	}else{
 		ps_touch_event_fill_id(0, 0,0,0);
 	}
-	if(gpadp->key & PS4_TOUCH_D){
+	if(keyp->key & PS4_TOUCH_D){
 		ps_touch_event_fill_id(1, 1, PS4_TOUCH_MAX_X/2 + 100,PS4_TOUCH_MAX_Y);
 	}else{
 		ps_touch_event_fill_id(1, 0,0,0);
 	}
-	if(gpadp->key & PS4_TOUCH_L){
+	if(keyp->key & PS4_TOUCH_L){
 		ps_touch_event_fill_id(2, 1,0, PS4_TOUCH_MAX_Y/2 + 50);
 	}else{
 		ps_touch_event_fill_id(2, 0,0,0);
 	}
-	if(gpadp->key & PS4_TOUCH_R){
+	if(keyp->key & PS4_TOUCH_R){
 		ps_touch_event_fill_id(3, 1,PS4_TOUCH_MAX_X, PS4_TOUCH_MAX_Y/2 -50);
 	}else{
 		ps_touch_event_fill_id(3, 0,0,0);
@@ -628,17 +627,17 @@ bool ps_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 	}
 	return ret;
 }
-uint16_t ps_key_pack(trp_handle_t *phandle, const app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t ps_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	hid_type_t hid_type = phandle->index & 0XFF;
 
 	if(HID_TYPE_PS3 == hid_type){
-		packet_len = ps3_key_pack(phandle, gpadp, buf, len);
+		packet_len = ps3_key_pack(phandle, keyp, buf, len);
 	}else if(HID_TYPE_PS4 == hid_type){
-		packet_len = ps4_key_pack(phandle, gpadp, buf, len);
+		packet_len = ps4_key_pack(phandle, keyp, buf, len);
 	}else if(HID_TYPE_PS5 == hid_type){
-		packet_len = ps5_key_pack(phandle, gpadp, buf, len);
+		packet_len = ps5_key_pack(phandle, keyp, buf, len);
 	}
 	return packet_len;
 }
@@ -688,7 +687,7 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 
 
 
-bool ps_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+bool ps_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	hid_type_t hid_type = phandle->index & 0XFF;
@@ -703,6 +702,11 @@ bool ps_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*k
 	return ret;
 }
 
+bool ps_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
+{
+	return false;
+}
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:
@@ -713,7 +717,7 @@ void ps_controller_init(trp_handle_t *phandle)
 	#if (HIDD_SUPPORT & HID_PS_MASK)
 	m_ps_series = PS_SERIES_NONE;
 	m_ps_enhanced_mode = false;
-	memset(&mcontact_id, PS4_ID_NULL , sizeof(mcontact_id));
+	memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
 	memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
 	
 	#if PS_P2_ENCRYPT_ENABLED || PS_7105_ENCRYPT_ENABLED
@@ -733,7 +737,7 @@ void ps_controller_deinit(trp_handle_t *phandle)
 	#endif
 }
 
-void ps_controller_handler(trp_handle_t *phandle)
+void ps_controller_task(trp_handle_t *phandle)
 {
 }
 

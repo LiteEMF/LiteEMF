@@ -23,8 +23,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef IO_KB_ACTIVE				//io key
-#define IO_KB_ACTIVE 0  			//high level trigger , normal low level trigger
+#ifndef IO_KB_ACTIVE				//high level trigger , normal low level trigger
+#define IO_KB_ACTIVE 0  			
 #endif
 #ifndef MATRIX_KB_ACTIVE			//matrix key
 #define MATRIX_KB_ACTIVE	0
@@ -44,7 +44,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-uint8_t io_keyboard_scan(uint8_t* keyp, uint8_t len);
+uint8_t io_keyboard_scan(kb_bit_t* keyp);
 bool io_keyboard_init(void);
 bool io_keyboard_deinit(void);
 

@@ -36,6 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool api_gsm_init(void);
 bool api_gsm_deinit(void);
+void api_gsm_task(void* pa);
 void api_gsm_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

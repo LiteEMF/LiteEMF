@@ -47,13 +47,13 @@ void xbox_controller_deinit(trp_handle_t *phandle)
 	#endif
 }
 
-void xbox_controller_handler(trp_handle_t *phandle)
+void xbox_controller_task(trp_handle_t *phandle)
 {
 	#if (HIDD_SUPPORT & HID_XBOX_MASK)
-	xbox_device_handler(phandle);
+	xbox_device_task(phandle);
 	#endif
 	#if (HIDH_SUPPORT & HID_XBOX_MASK)
-	xbox_host_handler(phandle);
+	xbox_host_task(phandle);
 	#endif
 }
 

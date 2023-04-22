@@ -38,11 +38,11 @@ uint16_t m_usbd_types[USBD_NUM];
 uint16_t m_usbd_hid_types[USBD_NUM];
 
 usbd_dev_t m_usbd_dev[USBD_NUM];
-usbd_req_t m_usbd_req[USBD_NUM];
+
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-
+usbd_req_t m_usbd_req[USBD_NUM];
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -273,18 +273,10 @@ error_t usbd_set_address(uint8_t id, uint8_t address)
 *******************************************************************/
 #if WEAK_ENABLE
 
-#if USBD_HID_SUPPORT & HID_SWITCH_MASK
-#include  "app/gamepad/switch_controller.h"
+#if APP_GAMEAPD_ENABLE
+#include "app/gamepad/app_gamepad.h"
 #endif
-#if USBD_HID_SUPPORT & HID_PS_MASK
-#include  "app/gamepad/ps_controller.h"
-#endif
-#if USBD_HID_SUPPORT & HID_XBOX_MASK
-#include  "app/gamepad/xbox_controller.h"
-#endif
-#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-#include  "app/gamepad/gamepad_controller.h"
-#endif
+
 __WEAK char* usbd_user_get_string(uint8_t id, uint8_t index)
 {
 	char *pstr = NULL;
@@ -686,7 +678,7 @@ void usbd_setup_process( uint8_t id )
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_handler(uint32_t period_10us)
+void usbd_task(void*pa)
 {
 	uint8_t id;
 	usbd_dev_t *pdev;
@@ -715,7 +707,7 @@ void usbd_handler(uint32_t period_10us)
 		}
 
 		if(USB_STA_SUSPENDED == pdev->state){
-			usbd_class_handler(id);
+			usbd_class_task(id);
 		}
 	}
 }

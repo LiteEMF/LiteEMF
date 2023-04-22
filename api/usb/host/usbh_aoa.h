@@ -38,14 +38,14 @@ extern "C" {
 #define GOOGLE_PID_ACCESSORY_AUDIO_ADB 0x2D05
 
 
-#define ACCESSORY_GET_PROTOCOL_VERSION 51  			//0x33
-#define ACCESSORY_SEND_STRING          52			//0x34
-#define ACCESSORY_START                53			//0x35
-#define ACCESSORY_REGISTER_HID         54			//0x36
-#define ACCESSORY_UNREGISTER_HID       55			//0x37
-#define ACCESSORY_SET_HID_REDPORT_DESC 56			//0x38
-#define ACCESSORY_SEND_HID_EVENT       57			//0x39
-#define ACCESSORY_SET_AUDIO_MODE       58			//0x3A
+#define ACCESSORY_GET_PROTOCOL_VERSION 51  			/*0x33*/
+#define ACCESSORY_SEND_STRING          52			/*0x34*/
+#define ACCESSORY_START                53			/*0x35*/
+#define ACCESSORY_REGISTER_HID         54			/*0x36*/
+#define ACCESSORY_UNREGISTER_HID       55			/*0x37*/
+#define ACCESSORY_SET_HID_REDPORT_DESC 56			/*0x38*/
+#define ACCESSORY_SEND_HID_EVENT       57			/*0x39*/
+#define ACCESSORY_SET_AUDIO_MODE       58			/*0x3A*/
 
 
 /******************************************************************************************************
@@ -63,7 +63,7 @@ error_t usbh_match_aoa( uint8_t id, usbh_class_t *pclass);
 error_t usbh_aoa_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_aoa_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
 error_t usbh_aoa_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_aoa_handler( uint8_t id, usbh_class_t *pclass);
+void usbh_aoa_task( uint8_t id, usbh_class_t *pclass);
 
 #ifdef __cplusplus
 }

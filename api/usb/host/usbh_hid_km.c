@@ -27,7 +27,8 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-
+kb_t usbh_kb;
+app_mouse_t usbh_mouse;
 
 /******************************************************************************************************
 **	static Parameters
@@ -38,9 +39,11 @@ km_items_t m_km_items[MAX_KM_ITEMS_NUM];
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-void hid_km_items_init(void)
+void usbh_hid_km_pa_init(void)
 {
     memset(&m_km_items, 0, sizeof(m_km_items));
+    memset(&usbh_kb, 0, sizeof(usbh_kb));
+    memset(&usbh_mouse, 0, sizeof(usbh_mouse));
 }
 
 km_items_t* malloc_hid_km_items(void)
@@ -138,34 +141,35 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
 {
     km_items_t *pkm_items = (km_items_t*)pclass;
     hid_items_t *pitem;
-    uint8_t kb[8], i;
-    mouse_t mouse;
+    uint8_t i;
+    kb_t kb;
+    app_mouse_t mouse;
 
     if(NULL == pkm_items) return;
 
     if(HID_TYPE_KB == pclass->hid_type){
 
-        memset(kb,0, sizeof(kb));
+        memset(&kb,0, sizeof(kb));
 
         pitem = &pkm_items->items.kb.kb_fun;
         if((pitem->report_length == len) && ((pitem->report_id == 0) || (buf[0] == pitem->report_id))){
-            kb[0] = buf[pitem->bit_offset / 8];
+            kb.fn = buf[pitem->bit_offset / 8];
         }
         pitem = &pkm_items->items.kb.kb_normal;
-        i = kb_get_normal_key(pitem, kb+1, sizeof(kb)-1, buf, len);
+        i = kb_get_normal_key(pitem, kb.key+1, sizeof(kb.key), buf, len);
         pitem = &pkm_items->items.kb.kb2_normal;
-        kb_get_normal_key(pitem, kb+1+i, sizeof(kb)-1-i, buf, len);
+        kb_get_normal_key(pitem, kb.key+1+i, sizeof(kb.key)-i, buf, len);
 
         pitem = &pkm_items->items.kb.led;
         if((pitem->report_length == len) && ((pitem->report_id == 0) || (buf[0] == pitem->report_id))){
-            kb[0] = buf[pitem->bit_offset / 8];
+            kb.fn = buf[pitem->bit_offset / 8];
         }
 
-        logd("usbh kb in:");dumpd(kb,sizeof(kb));
+        usbh_kb = kb;
+        logd("usbh kb in:");dumpd(&kb,sizeof(kb));
     }else if(HID_TYPE_MOUSE == pclass->hid_type){
 
         memset(&mouse,0, sizeof(mouse));
-
         pitem = &pkm_items->items.mouse.button;
         if((pitem->report_length == len) && ((pitem->report_id == 0) || (buf[0] == pitem->report_id))){
             mouse.but = buf[pitem->bit_offset / 8];
@@ -190,6 +194,10 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
         if((pitem->report_length == len) && ((pitem->report_id == 0) || (buf[0] == pitem->report_id))){
             mouse.w = buf[pitem->bit_offset / 8];
         }
+        usbh_mouse.but = mouse.but;
+        usbh_mouse.x += mouse.x;
+        usbh_mouse.y += mouse.y;
+        usbh_mouse.w += mouse.w;
         logd("usbh mouse in:");dumpd(&mouse,sizeof(mouse));
     }
 }
@@ -338,6 +346,14 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
     if(NULL != pclass->pdata){
         if( ((uintptr_t)pclass->pdata >= (uintptr_t)&m_km_items[0]) 
             && ((uintptr_t)pclass->pdata <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
+            
+            if(HID_TYPE_KB == pclass->hid_type){
+                memset(&usbh_kb, 0, sizeof(usbh_kb));
+            }
+            if(HID_TYPE_MOUSE == pclass->hid_type){
+                memset(&usbh_mouse, 0, sizeof(usbh_mouse));
+            }
+
             memset(pclass->pdata, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
         }
     }
@@ -349,7 +365,7 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_hid_km_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_hid_km_task(uint8_t id, usbh_class_t *pclass)
 {
     UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

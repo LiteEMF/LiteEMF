@@ -50,17 +50,13 @@ __WEAK bool app_rumble_show(void)
 {
 	bool ret = false;
 	uint8_t id;
-	static timer_t show_timer = 0;
 
-	if(m_systick - show_timer >= 16){
-		show_timer = m_systick;
+    for (id = 0; id < RUMBLE_MAX; id++){
+        #ifdef HW_PWM_MAP
+        ret &= api_pwm_set_duty(id,  m_rumble.duty[id]);
+        #endif
+    }
 
-        for (id = 0; id < RUMBLE_MAX; id++){
-            #ifdef HW_PWM_MAP
-            ret &= api_pwm_set_duty(id,  m_rumble.duty[id]);
-            #endif
-        }
-	}
     return ret;
 }
 #endif
@@ -75,7 +71,7 @@ void app_rumble_set_pa(uint8_t id, uint8_t min,uint8_t percent)
 }
 
 
-void app_rumble_set_duty(uint8_t id,uint8_t duty,uint16_t timeout_ms)
+void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
 {
     bool ret = false;
 	uint8_t rumble_duty;
@@ -98,7 +94,7 @@ void app_rumble_set_duty(uint8_t id,uint8_t duty,uint16_t timeout_ms)
     }
 }
 
-void app_set_rumble(rumble_t *rumblep,uint16_t timeout_ms)
+void app_set_rumble(rumble_t *rumblep,uint32_t timeout_ms)
 {
     bool ret = false;
     uint8_t id;
@@ -143,31 +139,46 @@ bool app_rumble_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_rumble_handler(uint32_t period_10us)
+void app_rumble_task(uint32_t dt_ms)
 {
     uint8_t id;
-    static timer_t rumble_timer = 0;
-    if (m_systick - rumble_timer >= period_10us/100){
-        rumble_timer = m_systick;
 
-        for (id = 0; id < RUMBLE_MAX; id++){
-            if (rumble_ctb[id].timeout){
-				rumble_ctb[id].timeout -= period_10us/100;
-                if(rumble_ctb[id].timeout < 0){
-					rumble_ctb[id].timeout = 0;
-                    m_rumble.duty[id] = 0;
-                    m_rumble_sync =  APP_RUMBLE_SYNC_TIMES;
-                }
+    for (id = 0; id < RUMBLE_MAX; id++){
+        if (rumble_ctb[id].timeout > dt_ms){
+            rumble_ctb[id].timeout -= dt_ms;
+
+            if(rumble_ctb[id].timeout < dt_ms){
+                rumble_ctb[id].timeout = 0;
+                m_rumble.duty[id] = 0;
+                m_rumble_sync =  APP_RUMBLE_SYNC_TIMES;
             }
         }
     }
 
     if(m_rumble_sync){
-        if( app_rumble_show() ){
-            m_rumble_sync--;
-        }
+        if( app_rumble_show() ) m_rumble_sync--;
     }
+
 }
+
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void app_rumble_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+    uint32_t ms = period_10us/100;
+
+	if((m_systick - s_timer) >= ms){
+		s_timer = m_systick;
+		app_rumble_task(ms);
+	}
+}
+#endif
 
 #endif
 

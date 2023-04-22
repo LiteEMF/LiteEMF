@@ -118,11 +118,17 @@ error_t usbh_usbmuxd_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_usbmuxd_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_usbmuxd_task(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	if(USB_STA_CONFIGURED == pdev->state){
-		usbmuxd_handler(100*1000);
+		static timer_t muxd_t;
+		uint8_t err = ERROR_NOT_FOUND;
+		
+		if((m_systick - muxd_t) >= 1000){
+			muxd_t = m_systick;
+			usbmuxd_task(NULL);
+		}
 	}
 	UNUSED_PARAMETER(pclass);
 }

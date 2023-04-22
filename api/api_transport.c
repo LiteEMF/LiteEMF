@@ -27,6 +27,9 @@
 #ifdef HW_UART_MAP
 #include  "api/api_uart.h"
 #endif
+
+
+#include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -66,7 +69,7 @@ bool api_trp_is_bt(trp_t trp)
 	return (TR_RFC >= trp);
 }
 
-uint16_t api_get_transport_mtu(trp_handle_t* phandle)
+uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 {
 	switch(phandle->trp){
 	case TR_BLE		:
@@ -94,13 +97,13 @@ uint16_t api_get_transport_mtu(trp_handle_t* phandle)
 		return RFC_CMD_MTU;
 		break;
 	case TR_USBD	:
-		return USBD_CMD_MAX;
+		return USBD_CMD_MTU;
 		break;
 	case TR_USBH	:
-		return USBH_CMD_MAX;
+		return USBH_CMD_MTU;
 		break;
 	case TR_UART	:
-		return UART_CMD_MAX;
+		return UART_CMD_MTU;
 		break;
 	default:
 		break;
@@ -117,9 +120,11 @@ uint16_t api_get_transport_mtu(trp_handle_t* phandle)
 bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 {
 	bool ret = true;
+	static timer_t tx_timer;			//for test
 	if (len <= 0)			return false;
 	if (NULL == buf)		return false;
 
+	logd("trp(%d) id(%d) index(0x%x) dt=%d ret=%d:",phandle->trp, phandle->id,phandle->index,m_systick-tx_timer,ret); tx_timer = m_systick;dumpd(buf,len);
 	switch(phandle->trp){
 		#if API_BT_ENABLE
 		case TR_BLE	:
@@ -180,15 +185,7 @@ bool api_trp_deinit(void)
 	return true;
 }
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-void api_trp_handler(uint32_t period_10us)
-{
-	UNUSED_PARAMETER(period_10us);
-}
+
 
 
 

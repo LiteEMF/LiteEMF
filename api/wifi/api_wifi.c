@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #if API_WIFI_ENABLE
-
+#include  "api/api_tick.h"
 #include  "api/wifi/api_wifi.h"
 
 /******************************************************************************************************
@@ -58,6 +58,18 @@ bool api_wifi_deinit(void)
 	return true;
 }
 
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_wifi_task(void* pa)
+{
+	UNUSED_PARAMETER(pa);
+}
+
+#if TASK_HANDLER_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -65,8 +77,13 @@ bool api_wifi_deinit(void)
 *******************************************************************/
 void api_wifi_handler(uint32_t period_10us)
 {
-
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_wifi_task(NULL);
+	}
 }
+#endif
 
 #endif
 

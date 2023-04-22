@@ -15,8 +15,7 @@
 #if (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)) && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 
 #include "api/usb/device/usbd.h"
-#include "app/gamepad/xbox_controller.h"
-
+#include "app/gamepad/app_gamepad.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -144,7 +143,7 @@ error_t usbd_hid_xbox_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf
 {
 	trp_handle_t trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
 
-	xbox_dev_process(&trp_handle, buf,len);
+	app_gamepad_dev_process(&trp_handle, buf,len);
 
     return ERROR_SUCCESS;
 }
@@ -211,7 +210,7 @@ error_t usbd_hid_xbox_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_xbox_handler(uint8_t id)
+void usbd_hid_xbox_task(uint8_t id)
 {
 	UNUSED_PARAMETER(id);
 }

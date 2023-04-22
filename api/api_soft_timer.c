@@ -53,7 +53,6 @@ error_t soft_timer_register(soft_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t 
 	ptimer->timeout = timeout;
 	ptimer->pa = pa;
 	ptimer->cb = cb;
-	ptimer->timer = m_systick;
 	
 	list_add(&ptimer->list,&timer_head);
 	return ERROR_SUCCESS;
@@ -75,7 +74,6 @@ soft_timer_t* soft_timer_create(timer_cb_t cb,void *pa,timer_t timeout,soft_time
 	ptimer->timeout = timeout;
 	ptimer->pa = pa;
 	ptimer->cb = cb;
-	ptimer->timer = m_systick;
 	
 	list_add(&ptimer->list,&timer_head);
 	return ptimer;
@@ -98,6 +96,12 @@ error_t soft_timer_delete(soft_timer_t *ptimer)
 	return err;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	调用soft_timer_start后等待timeout后才调用回调函数
+				如果定时器已经启动, 再次调用相当于soft_timer_modify 重置定时器
+*******************************************************************/
 error_t soft_timer_start(soft_timer_t *ptimer)
 {
 	error_t err = ERROR_NOT_FOUND;
@@ -107,6 +111,30 @@ error_t soft_timer_start(soft_timer_t *ptimer)
 	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl |= TIMER_ACTIVE;
+			ptimer->timer = m_systick;
+			err = ERROR_SUCCESS;
+			break;
+		}
+	}
+	return err;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	更新定时器
+*******************************************************************/
+error_t soft_timer_modify(soft_timer_t *ptimer, uint32_t timeout)
+{
+	error_t err = ERROR_NOT_FOUND;
+	soft_timer_t *pos;
+
+	if(NULL == ptimer) return ERROR_NULL;
+	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+		if(pos == ptimer){
+			ptimer->ctrl |= TIMER_ACTIVE;
+			ptimer->timeout = timeout;
+			ptimer->timer = m_systick;
 			err = ERROR_SUCCESS;
 			break;
 		}
@@ -170,7 +198,7 @@ bool soft_timer_deinit(void)
 }
 
 
-void soft_timer_handler(uint32_t period_10us)
+void soft_timer_task(void *pa)
 {
 	soft_timer_t *pos, *n;
 
@@ -200,10 +228,25 @@ void soft_timer_handler(uint32_t period_10us)
 			}
 		}
 	}
-
-	UNUSED_PARAMETER(period_10us);
+	UNUSED_PARAMETER(pa);
 }
 
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void soft_timer_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		soft_timer_task(&timer_head);
+	}
+}
+#endif
 
 #endif
 

@@ -96,7 +96,7 @@ bool xbox_command_fill(trp_handle_t *phandle,xbox_command_t*tx_cmdp,xbox_cmd_ind
 bool xbox_command_send(xbox_command_t*tx_cmdp);
 bool xbox_get_ack(trp_handle_t *phandle, xbox_command_t *tx_cmdp, uint8_t* buf,uint8_t len);
 bool xbox_get_cmd(trp_handle_t *phandle, xbox_command_t* rx_cmdp, uint8_t* buf,uint8_t len);
-void xbox_command_tx_handler(xbox_command_t*cmdp);
+void xbox_command_tx_process(xbox_command_t*cmdp);
 
 #endif
 

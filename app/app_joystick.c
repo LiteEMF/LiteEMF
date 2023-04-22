@@ -389,23 +389,35 @@ bool app_joystick_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_joystick_handler(uint32_t period_10us)
+void app_joystick_task(void *pa)
 {
     uint8_t id;
     joystick_t joystick_adc;
-    static timer_t joystick_timer;
 
-    if(m_task_tick10us - joystick_timer >= period_10us){
-        joystick_timer =  m_task_tick10us;
-
-        app_joystick_get_adc(&joystick_adc);
-        joystick_do_cal(&joystick_adc);
-        for(id = 0; id < APP_STICK_NUMS; id++){
-            m_joystick.tarigger[id] = app_trigger_normalization(id,&joystick_adc);
-            app_stick_normalization(id, &m_joystick.stick[id],&joystick_adc);
-        }
+    app_joystick_get_adc(&joystick_adc);
+    joystick_do_cal(&joystick_adc);
+    for(id = 0; id < APP_STICK_NUMS; id++){
+        m_joystick.tarigger[id] = app_trigger_normalization(id,&joystick_adc);
+        app_stick_normalization(id, &m_joystick.stick[id],&joystick_adc);
     }
+
 }
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void app_joystick_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_joystick_task(NULL);
+	}
+}
+#endif
 
 #endif
 

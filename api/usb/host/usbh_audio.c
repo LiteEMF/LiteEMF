@@ -297,7 +297,7 @@ error_t usbh_audio_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_audio_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_audio_task(uint8_t id, usbh_class_t *pclass)
 {
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

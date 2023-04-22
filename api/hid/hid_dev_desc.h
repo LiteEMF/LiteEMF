@@ -50,11 +50,8 @@ enum {					//为了节省蓝牙服务通过宏定义枚举类型
 };
 
 
-#ifndef KB_MAX_NUM						//stadend keyboard report key num
-#define KB_MAX_NUM					6	
-#endif
 #ifndef KB_BIT_MAP_ENABLE		
-#define KB_BIT_MAP_ENABLE			1
+#define KB_BIT_MAP_ENABLE			0
 #endif
 
 #ifndef MT_CONTACT_NUM		

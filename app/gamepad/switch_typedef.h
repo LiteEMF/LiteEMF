@@ -37,14 +37,14 @@
 
 
 
-#define  SWITCH_Y_POS					(0 )		//SWITCH_NORMAL_REPORT_ID B
-#define  SWITCH_X_POS					(1 )		//SWITCH_NORMAL_REPORT_ID A
-#define  SWITCH_B_POS					(2 )		//SWITCH_NORMAL_REPORT_ID Y
-#define  SWITCH_A_POS					(3 )		//SWITCH_NORMAL_REPORT_ID X
-//#define  SWITCH_Z_POS 				(4 )		//SWITCH_NORMAL_REPORT_ID L1
-//#define  SWITCH_Z_POS 				(5 )		//SWITCH_NORMAL_REPORT_ID R1
-#define  SWITCH_R1_POS					(6 )		//SWITCH_NORMAL_REPORT_ID L2
-#define  SWITCH_R2_POS					(7 )		//SWITCH_NORMAL_REPORT_ID R2
+#define  SWITCH_Y_POS					(0 )		/*SWITCH_NORMAL_REPORT_ID B */
+#define  SWITCH_X_POS					(1 )		/*SWITCH_NORMAL_REPORT_ID A */
+#define  SWITCH_B_POS					(2 )		/*SWITCH_NORMAL_REPORT_ID Y */
+#define  SWITCH_A_POS					(3 )		/*SWITCH_NORMAL_REPORT_ID X */
+//#define  SWITCH_Z_POS 				(4 )		/*SWITCH_NORMAL_REPORT_ID L1 */
+//#define  SWITCH_Z_POS 				(5 )		/*SWITCH_NORMAL_REPORT_ID R1 */
+#define  SWITCH_R1_POS					(6 )		/*SWITCH_NORMAL_REPORT_ID L2 */
+#define  SWITCH_R2_POS					(7 )		/*SWITCH_NORMAL_REPORT_ID R2 */
 #define  SWITCH_MINUS_POS				(8 )
 #define  SWITCH_POSITIVE_POS			(9 )
 #define  SWITCH_R3_POS					(10)
@@ -107,13 +107,13 @@
 
 
 // SPI FLASH READ / WRIET Regions
-#define SWITCH_SERIAL_NUMBER_ADD				0X6000						//16
-#define SWITCH_FACTORY_IMU_CAL_ADD				0X6020						//24?
-#define SWITCH_FACTORY_STICK_CAL_ADD			0X603D						//18
-#define SWITCH_RGB_ADD							0X6050						//12
-#define SWITCH_FACTORY_IMU_STICK_PARA_ADD		0x6080						//6
-#define SWITCH_USER_JOYSTICK_CAL_ADD			0X8010						//48
-#define SWITCH_USER_IMU_CAL_ADD					0X8026						//48
+#define SWITCH_SERIAL_NUMBER_ADD				0X6000						/* 16 */
+#define SWITCH_FACTORY_IMU_CAL_ADD				0X6020						/* 24? */
+#define SWITCH_FACTORY_STICK_CAL_ADD			0X603D						/* 18 */
+#define SWITCH_RGB_ADD							0X6050						/* 12 */
+#define SWITCH_FACTORY_IMU_STICK_PARA_ADD		0x6080						/* 6 */
+#define SWITCH_USER_JOYSTICK_CAL_ADD			0X8010						/* 48 */
+#define SWITCH_USER_IMU_CAL_ADD					0X8026						/* 48 */
 
 #define SWITCH_SPI_MAGIC						SWAP16_L(0XA1B2)
 /*******************************************************************************************************************
@@ -128,10 +128,10 @@
 /******************************************************************************************************
 **									USB /UART CMD
 *******************************************************************************************************/
-#define SWITCH_USB_ID			 0x80		//USB 设备握手指令
-#define SWITCH_USB_REPLIES_ID	 0x81		//USB 设备握手回复指令
+#define SWITCH_USB_ID			 0x80		/*USB 设备握手指令 */
+#define SWITCH_USB_REPLIES_ID	 0x81		/*USB 设备握手回复指令 */
 // Sub-types of the 0x80 output report, used for initialization.
-typedef enum{								//设备HID 指令
+typedef enum{								/*设备HID 指令 */
 	SWITCH_USB_REQUEST_MAC = 0x01,
 	SWITCH_USB_HANDSHAKE = 0x02,
 	SWITCH_USB_BAUDRATE = 0x03,
@@ -140,9 +140,9 @@ typedef enum{								//设备HID 指令
 }switch_usb_cmd_t;
 
 
-typedef struct{								//USB 指令
-	uint8_t id;				//SWITCH_USB_REPLIES_ID
-	uint8_t sub_cmd;		//SWITCH_USB_REQUEST_MAC
+typedef struct{				/*USB 指令 */
+	uint8_t id;				/*SWITCH_USB_REPLIES_ID */
+	uint8_t sub_cmd;		/*SWITCH_USB_REQUEST_MAC */
 	uint8_t type;
 	uint8_t mac[6];
 }switch_usb_mac_replies_t;
@@ -172,14 +172,14 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint16_t hf_amp:7; //high frequency altitude
 	uint16_t lf:7; //low frequency
 	uint16_t lf_amp:9;
-}switch_motor_bit_t;	//4
+}switch_rumble_bit_t;	//4
 typedef struct
 {
 	uint8_t id;			//0x01/0x11	SWITCH_CTRL_ID/SWITCH_MCU_CTRL_ID
 	uint8_t index:4;	//index
 	uint8_t res:4;		//0x00;
-	switch_motor_bit_t	motor1;
-	switch_motor_bit_t	motor2;
+	switch_rumble_bit_t	motor1;
+	switch_rumble_bit_t	motor2;
 	uint8_t sub_cmd;			//11byte
 	uint8_t cmd_data[36];		//
 	uint8_t crc8;				//only SWITCH_MCU_CTRL_ID:cmd_data crc8
@@ -220,9 +220,9 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 {
 	uint8_t id;		//固定0x10	SWITCH_MOTOR_ID
 	uint8_t index;		//+1 0~0f
-	switch_motor_bit_t	motor1;
-	switch_motor_bit_t	motor2;
-}switch_motor_t;
+	switch_rumble_bit_t	rumble_l;
+	switch_rumble_bit_t	rumble_r;
+}switch_rumble_t;
 
 //*********************************************************************************//
 //                               SWITCH_CTRL_ID   -x01                            	//

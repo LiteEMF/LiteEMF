@@ -562,7 +562,7 @@ error_t usbd_hid_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_handler(uint8_t id)
+void usbd_hid_task(uint8_t id)
 {
     hid_type_t hid_type;
 
@@ -571,54 +571,54 @@ void usbd_hid_handler(uint8_t id)
 			switch(hid_type){
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
                 case HID_TYPE_VENDOR:
-                    usbd_hid_vendor_handler(id);
+                    usbd_hid_vendor_task(id);
                     break;
                 #endif
                 #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
                 case HID_TYPE_KB:
 				case HID_TYPE_MOUSE:
 				case HID_TYPE_CONSUMER:
-                    usbd_hid_km_handler(id);
+                    usbd_hid_km_task(id);
 					break;
                 #endif
 				#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
 				case HID_TYPE_MT:
-                    usbd_hid_mt_handler(id);
+                    usbd_hid_mt_task(id);
 					break;
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
 				case HID_TYPE_GAMEPADE:
-                    usbd_hid_gamepade_handler(id);
+                    usbd_hid_gamepade_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
 				case HID_TYPE_X360	:
-                    usbd_hid_x360_handler(id);
+                    usbd_hid_x360_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
 				case HID_TYPE_XBOX	:
-                    usbd_hid_xbox_handler(id);
+                    usbd_hid_xbox_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
 				case HID_TYPE_SWITCH:
-                    usbd_hid_switch_handler(id);
+                    usbd_hid_switch_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
 				case HID_TYPE_PS3	:
-                    usbd_hid_ps_handler(id);
+                    usbd_hid_ps_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 				case HID_TYPE_PS4	:
-                    usbd_hid_ps_handler(id);
+                    usbd_hid_ps_task(id);
 					break;
 				#endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
 				case HID_TYPE_PS5	:
-                    usbd_hid_ps_handler(id);
+                    usbd_hid_ps_task(id);
 					break;
                 #endif
 				default:

@@ -37,6 +37,7 @@ extern "C" {
 bool app_rgb_show(uint8_t* frame);			//__WEAK
 bool app_rgb_init(void);
 bool app_rgb_deinit(void);
+void app_rgb_task(void* pa);
 void app_rgb_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

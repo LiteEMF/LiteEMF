@@ -45,7 +45,7 @@ bool hal_uart_set_baud(uint8_t id, uint32_t baud)
 }
 bool hal_uart_tx(uint8_t id,void * buf,uint16_t len)
 {
-	return false;
+	return true;
 }
 bool hal_uart_init(uint8_t id,uint32_t baudrate)
 {

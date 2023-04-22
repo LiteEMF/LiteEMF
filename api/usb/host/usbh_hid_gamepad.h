@@ -15,7 +15,8 @@
 #include "emf_typedef.h"
 #include "api/usb/usb_typedef.h"
 #include "api/usb/host/usbh_core.h"
-#include  "api/hid/hid_desc_parser.h"
+#include "api/hid/hid_desc_parser.h"
+#include "app/gamepad/app_gamepad_key.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,6 +31,7 @@ extern "C" {
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+extern app_gamepad_key_t usbh_gamepad_key;	   				//手柄按键信息
 
 
 
@@ -40,7 +42,7 @@ void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf,
 error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass) ;
 error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo);
 error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_hid_gamepad_handler(uint8_t id, usbh_class_t *pclass);
+void usbh_hid_gamepad_task(uint8_t id, usbh_class_t *pclass);
 
 #ifdef __cplusplus
 }

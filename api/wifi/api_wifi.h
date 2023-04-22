@@ -36,6 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool api_wifi_init(void);
 bool api_wifi_deinit(void);
+void api_wifi_task(void* pa);
 void api_wifi_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #if API_GSM_ENABLE
-
+#include  "api/api_tick.h"
 #include  "api/gsm/api_gsm.h"
 
 /******************************************************************************************************
@@ -63,10 +63,26 @@ bool api_gsm_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void api_gsm_task(void* pa)
+{
+	UNUSED_PARAMETER(pa);
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void api_gsm_handler(uint32_t period_10us)
 {
-	UNUSED_PARAMETER(period_10us);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_gsm_task(NULL);
+	}
 }
+#endif
 
 
 #endif

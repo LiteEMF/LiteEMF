@@ -187,7 +187,7 @@ static imu_move_t imu_static_check(void)
 	return is_imu_move;
 }
 
-static void imu_cal_handle(void)
+static void imu_do_cal(void)
 {
 	bool is_static;
     static axis3l_t gyro_sum,acc_sum;
@@ -311,39 +311,53 @@ bool app_imu_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_imu_handler(uint32_t period_10us)
+void app_imu_task(void* pa)
 {
 	axis3i_t acc, gyro;
 	static timer_t imu_timer;
 	static timer_t atuo_cal_timer;
 
-	imu_driver_handler(period_10us);
+	imu_driver_task(pa);
 
-	if(m_task_tick10us - imu_timer >= period_10us){
-		imu_timer = m_task_tick10us;	
+	if(app_imu_get_raw(&acc, &gyro)){
+		#if IMU_FILTER_ENABLE
+		app_imu_filter(&acc, &gyro);
+		#else
+		m_gyro = gyro;
+		m_acc = acc;
+		#endif
 
-		if(app_imu_get_raw(&acc, &gyro)){
-			#if IMU_FILTER_ENABLE
-			app_imu_filter(&acc, &gyro);
-			#else
-			m_gyro = gyro;
-			m_acc = acc;
-			#endif
+		imu_static_check();
+		imu_do_cal();
 
-			imu_static_check();
-			imu_cal_handle();
-
-			if((IMU_CAL_NONE == imu_cal_sta) && IMU_MOVE_NONE == is_imu_move){
-				if(m_systick - atuo_cal_timer > 6000){
-					imu_cal_sta = IMU_CAL_START;
-					imu_auto_cal =  true;
-				}
-			}else{
-				atuo_cal_timer = m_systick;
+		//动态校准
+		if((IMU_CAL_NONE == imu_cal_sta) && IMU_MOVE_NONE == is_imu_move){
+			if(m_systick - atuo_cal_timer > 6000){
+				imu_cal_sta = IMU_CAL_START;
+				imu_auto_cal =  true;
 			}
+		}else{
+			atuo_cal_timer = m_systick;
 		}
 	}
 }
+
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void app_imu_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_imu_task(NULL);
+	}
+}
+#endif
 
 #endif
 

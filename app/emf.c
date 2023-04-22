@@ -12,7 +12,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#include "emf_utils.h"
+#include "utils/emf_utils.h"
 #include "api_tick.h"
 #include "api_storage.h"
 #include "api_transport.h"
@@ -46,6 +46,9 @@
 #if APP_KM_ENABLE
 #include "app_km.h"
 #endif
+#if APP_GAMEAPD_ENABLE
+#include "gamepad/app_gamepad_key.h"
+#endif
 #if APP_IMU_ENABLE
 #include "imu/app_imu.h"
 #endif
@@ -55,8 +58,8 @@
 #if APP_BATTERY_ENABLE
 #include "app_battery.h"
 #endif
-#if APP_PM_ENABLE
-#include "app_pm.h"
+#if API_PM_ENABLE
+#include "api_pm.h"
 #endif
 #if APP_RUMBLE_ENABLE
 #include "app_rumble.h"
@@ -131,6 +134,7 @@ int  main( int  argc,  char  *argv[])
 	// soft_timer_test();
 	// hid_desc_parser_test();
 	mem_test();
+	api_commander_test();
 
 	while(0){
 		i=0x400000;
@@ -163,21 +167,13 @@ void emf_init(void)
 
 	api_tick_init();
 	api_storage_init();
-	
+
 	#ifdef HW_UART_MAP
 	api_uarts_init();				
 	#endif
-
 	#ifdef HW_ADC_MAP
 	api_adcs_init();
 	#endif
-	#if APP_BATTERY_ENABLE
-	app_battery_init();
-	#endif
-	#if APP_PM_ENABLE
-	app_pm_init();
-	#endif
-
 	#ifdef HW_TIMER_MAP
 	api_timer_init();
 	#endif
@@ -191,27 +187,52 @@ void emf_init(void)
 	api_spis_init();
 	#endif
 	api_trp_init();
-	api_command_init();
 
-
-	#if APP_PM_ENABLE
-	app_pm_init();
+	#ifndef API_SOFT_TIMER_ENABLE
+	soft_timer_init();
+	#endif
+	#if API_PM_ENABLE
+	api_pm_init();
+	#endif
+	#ifndef API_NFC_ENABLE
+	api_nfc_init();
+	#endif
+	#ifndef API_GPS_ENABLE
+	api_gps_init();
+	#endif
+	#ifndef API_GSM_ENABLE
+	api_gsm_init();
+	#endif
+	#ifndef API_WIFI_ENABLE
+	api_wifi_init();
 	#endif
 
+	#if APP_BATTERY_ENABLE
+	app_battery_init();
+	#endif
 	#if APP_KEY_ENABLE
 	app_key_init();
 	#endif
 	#if APP_KM_ENABLE
 	app_km_init();
 	#endif
-	#if APP_LED_ENABLE
-	app_led_init();
+	#ifndef APP_IMU_ENABLE
+	app_imu_init();
+	#endif
+	#ifndef APP_JOYSTICK_ENABLE
+	app_joystick_init();
+	#endif
+	#if APP_GAMEAPD_ENABLE
+	app_gamepad_key_init();
 	#endif
 	#if APP_RUMBLE_ENABLE
 	app_rumble_init();
 	#endif
-	#if API_SOFT_TIMER_ENABLE
-	soft_timer_init();
+	#if APP_LED_ENABLE
+	app_led_init();
+	#endif
+	#ifndef APP_RGB_ENABLE
+	app_rgb_init();
 	#endif
 }
 
@@ -237,10 +258,29 @@ void emf_handler(uint32_t period_10us)
 	#ifdef HW_ADC_MAP
 	api_adc_handler(400);
 	#endif
-
 	#ifdef HW_UART_MAP
 	api_uart_handler(200);
 	#endif
+
+	#ifndef API_SOFT_TIMER_ENABLE
+	soft_timer_task(NULL);
+	#endif
+	#if API_PM_ENABLE
+	api_pm_handler(100*100);
+	#endif
+	#ifndef API_NFC_ENABLE
+	api_nfc_handler(10*100);
+	#endif
+	#ifndef API_GPS_ENABLE
+	api_gps_handler(100);
+	#endif
+	#ifndef API_GSM_ENABLE
+	api_gsm_handler(100);
+	#endif
+	#ifndef API_WIFI_ENABLE
+	api_wifi_handler(100);
+	#endif
+
 
 	#if APP_BATTERY_ENABLE
 	app_battery_handler(200*100);
@@ -251,25 +291,38 @@ void emf_handler(uint32_t period_10us)
 	#if APP_KM_ENABLE
 	app_km_handler(100);
 	#endif
-
-	#if APP_LED_ENABLE
-	app_led_handler(LED_PERIOD);
+	#ifndef APP_IMU_ENABLE
+	app_imu_handler(400);
 	#endif
+	#ifndef APP_JOYSTICK_ENABLE
+	app_joystick_init(400);
+	#endif
+	#if APP_GAMEAPD_ENABLE
+	app_gamepad_key_handler(400);
+	#endif
+
+	#if APP_GAMEAPD_ENABLE						//二选一
+	app_key_decode_handler(100,m_gamepad_key.key);
+	#elif APP_KEY_ENABLE
+    app_key_decode_handler(KEY_PERIOD_DEFAULT,m_key_scan);
+	#endif
+
 	#if APP_RUMBLE_ENABLE
 	app_rumble_handler(64*100);
 	#endif
+	#if APP_LED_ENABLE
+	app_led_handler(LED_SHOW_PERIOD);
+	#endif
+	#ifndef APP_RGB_ENABLE
+	app_rgb_handler(20*100);
+	#endif
+
 	#if API_SOFT_TIMER_ENABLE
 	soft_timer_handler(0);
 	#endif
-
-	api_trp_handler(0);
-	api_command_handler(0);
 	api_storage_handler(API_STORAGE_TIME);
+
 }
-
-
-
-
 
 
 

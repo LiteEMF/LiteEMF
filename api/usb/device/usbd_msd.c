@@ -120,7 +120,7 @@ error_t usbd_msd_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_msd_handler(uint8_t id)
+void usbd_msd_task(uint8_t id)
 {
     UNUSED_PARAMETER(id);
 }

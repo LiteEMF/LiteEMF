@@ -120,7 +120,7 @@ error_t usbd_hid_gamepade_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_gamepade_handler(uint8_t id)
+void usbd_hid_gamepade_task(uint8_t id)
 {
 	UNUSED_PARAMETER(id);
 }

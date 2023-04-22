@@ -14,8 +14,12 @@
 ************************************************************************************************************/
 #include  "api/api_commander.h"
 #include  "utils/emf_utils.h"
+#if API_SOFT_TIMER_ENABLE
+#include "api/api_soft_timer.h"
+#endif
 
 #include  "api/api_log.h"
+
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -32,146 +36,102 @@
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-
-/*******************************************************************
-** Parameters:	phandle: 传输句柄,如果为NULL则输出到packetp中
-				cmd: 指令CMD_ARG_EN_MASK表示是否指令带参数
-				mtu: 最大包长度
-				pack_index:当前包index, pack_num: 最大包数量
-				buf: 剩余要发送的数据
-				ppacket: 输出的包数据,只有handlep==NULL时有效
-** Returns:		true/false
-** Description: 指令帧打包
-*******************************************************************/
-static bool command_frame_pack(trp_handle_t* phandle, uint32_t cmd, uint8_t mtu, uint8_t *buf,uint16_t len,uint8_t *ppacket, uint16_t packet_len)
+static bool command_frame_tx(command_tx_t *txp)
 {
 	bool ret = false;
-	uint8_t data_mtu;
-	uint8_t sub_cmd_len = ((cmd&CMD_ARG_EN_MASK)? 2:0);
-	uint8_t pack_num,pack_index,pack_max_size;
+	uint8_t mtu,data_mtu;
+	uint8_t pack_num;
+	uint8_t sub_cmd_len = ((txp->cmd & CMD_ARG_EN_MASK)? 2:0);
 
 	uint8_t send_data_len;	
-	uint8_t cmd_len;
+	uint8_t index = 0;
 	uint8_t *cmd_buf;
 
+	if(txp->len <= txp->index) return ret;
+	if(NULL == txp->buf) return ret;
+
+	mtu = api_transport_get_mtu(txp->phandle);
 	data_mtu = mtu - 5;
-	pack_num = (len + sub_cmd_len + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
-	pack_max_size = len + sub_cmd_len + 5*pack_num;
-
-	if(NULL == phandle){
-		if(pack_max_size > packet_len){
-			loge("command pack buf overflow except %d but %d\n",pack_max_size , packet_len);
-			return false;
-		}
-	}
-
+	
 	cmd_buf = emf_malloc(mtu);
 	if(NULL == cmd_buf){
-		loge_r("command_frame_pack ERROR_NO_MEM!\n");
+		loge_r("command_frame_tx ERROR_NO_MEM!\n");
 		return false;
 	}
-	
-	for(pack_index = 0; pack_index < pack_num; pack_index++){
-		ret = false;
-		cmd_len = 0;
 
-		if(0 == pack_index){
-			cmd_buf[cmd_len++] = CMD_SHEAD;
-			cmd_buf[cmd_len++] = 0;							//len 占位
-			cmd_buf[cmd_len++] = pack_num;					//start packet
-		}else{
-			cmd_buf[cmd_len++] = CMD_HEAD;
-			cmd_buf[cmd_len++] = 0;							//len 占位
-			cmd_buf[cmd_len++] = pack_index;				//packet index
-		}			
-		
-		cmd_buf[cmd_len++] = (uint8_t)cmd;					//cmd
-
-		if(((cmd&CMD_ARG_EN_MASK)) && (0 == pack_index)){	//pack cmd arg
-			cmd_buf[cmd_len++] = (uint8_t)(cmd >> (CMD_ARG_POS+8));
-			cmd_buf[cmd_len++] = (uint8_t)(cmd >> CMD_ARG_POS);
-			send_data_len = MIN(data_mtu-2, len);
-		}else{
-			send_data_len = MIN(data_mtu, len);
-		}
-
-		memcpy(&cmd_buf[cmd_len], buf, send_data_len);		//data
-		cmd_len += send_data_len+1;
-		cmd_buf[1] = cmd_len;								//len
-		cmd_buf[cmd_len-1] = check_sum(cmd_buf,cmd_len-1);	//sum
-
-		// logd("cmd:");dumpd(cmd_buf,cmd_len);
-		if(NULL != phandle){
-			ret = api_transport_tx(phandle, cmd_buf,cmd_len);
-		}else if(NULL != ppacket){
-			memcpy(ppacket, cmd_buf,cmd_len);
-			ppacket += cmd_len;
-			ret = true;
-		}
-
-		if(ret){
-			buf += send_data_len;
-			len -= send_data_len;
-		}else{
-			break;
-		}
+	if(txp->index){
+		cmd_buf[index++] = CMD_HEAD;
+		pack_num = (txp->len - txp->index + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
+	}else{
+		cmd_buf[index++] = CMD_SHEAD;
+		pack_num = (txp->len + sub_cmd_len + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
 	}
+	cmd_buf[index++] = 0;								//len 占位
+	cmd_buf[index++] = pack_num;						//residue packet number
+	cmd_buf[index++] = (uint8_t)txp->cmd;				//cmd
+
+	if(sub_cmd_len && (0 == txp->index)){				//pack cmd arg
+		cmd_buf[index++] = (uint8_t)(txp->cmd >> (CMD_ARG_POS+8));
+		cmd_buf[index++] = (uint8_t)(txp->cmd >> CMD_ARG_POS);
+	}
+
+	send_data_len = MIN(mtu - index - 1, txp->len - txp->index);
+	memcpy(&cmd_buf[index], txp->buf+txp->index, send_data_len);	//data
+	index += send_data_len+1;
+	cmd_buf[1] = index;									//len
+	cmd_buf[index-1] = check_sum(cmd_buf,index-1);		//sum
+	// logd("cmd:");dumpd(cmd_buf,index);
+
+	ret = api_transport_tx(txp->phandle, cmd_buf,index);
+	if(ret){
+		txp->index += send_data_len;
+	}
+	
 	emf_free(cmd_buf);
 	return ret;
 }
 
-
-
-
 /*******************************************************************
-** Parameters:	pstream: 缓存接收到的指令帧
+** Parameters:	pcmd: 缓存接收到的指令帧, 必须是静态变量,size = mtu
 				mtu: 输入流mtu, 用于判断数据有效性, 如果忽略可以设置最大值0XFF
 				c : 输入的数据包字节数据
 ** Returns:	
 ** Description:	从输入流中通过字节包解包单帧
-		注意:pstream->buf 数据处理完后必须调用 free 释放内存!!!	
 *******************************************************************/
-static bool command_frame_unpack(command_stream_rx_t* pstream,uint8_t mtu,uint8_t c)
+static bool command_frame_rx(uint8_t mtu,uint8_t c, uint8_t *s_buf, uint8_t *s_plen)
 {	
 	bool ret = false;
 
-	if(0 == pstream->len){
+	if(0 == *s_plen){
 		if((CMD_HEAD == c) || (CMD_SHEAD == c)){
-			pstream->head = c;
-			pstream->len = 1;
+			s_buf[0] = c;
+			*s_plen = 1;
 		}
-	}else if(1 == pstream->len){
+	}else if(1 == *s_plen){
 		if(c > mtu){
 			if((CMD_HEAD == c) || (CMD_SHEAD == c)){
-				pstream->frame[0] = c;
-				pstream->len = 1;
+				s_buf[0] = c;
+				*s_plen = 1;
 			}else{
-				loge_r("cmd len err %x\n",(uint16_t)pstream->frame[1]);
-				pstream->len = 0;
+				loge_r("cmd len err %x\n",(uint16_t)c);
+				*s_plen = 0;
 			}
 		}else{
-			pstream->frame = emf_malloc(c);
-			if(NULL != pstream->frame){
-				pstream->frame[0] = pstream->head;
-				pstream->frame[pstream->len++] = c;
-			}else{
-				pstream->len = 0;
-				loge_r("command_frame_unpack ERROR_NO_MEM!\n");
-			}
+			s_buf[(*s_plen)++] = c;
 		}
 	}else{
-		pstream->frame[pstream->len++] = c;
-		if(pstream->len >= pstream->frame[1]){
-			uint8_t sum = check_sum(pstream->frame, pstream->len-1);
-			if(pstream->frame[pstream->len-1] == sum){
-				// logd("cmd in:");dumpd(pstream->frame, pstream->len);
+		s_buf[(*s_plen)++] = c;
+
+		if(*s_plen >= s_buf[1]){
+			uint8_t sum = check_sum(s_buf, *s_plen-1);
+			if(s_buf[*s_plen - 1] == sum){
+				// logd("cmd in:");dumpd(s_buf, *s_plen);
 				ret = true;
 			}else{
-				loge_r("cmd sum err except:%x but:%x\n",(uint16_t)pstream->frame[pstream->len-1],(uint16_t)sum);
-				dumpe(pstream->frame,pstream->len);
-				emf_free(pstream->frame);
-				pstream->frame = NULL;
-				pstream->len = 0;
+				loge_r("cmd sum err except:%x but:%x\n",(uint16_t)s_buf[*s_plen - 1],(uint16_t)sum);
+				dumpe(s_buf,*s_plen);
+				emf_free_and_clear(s_buf);
+				*s_plen = 0;
 			}
 		}
 	}
@@ -200,145 +160,187 @@ uint16_t api_command_pack_size(uint8_t mtu,uint16_t len)
 	return packet_len;
 }
 
+static void api_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint32_t cmd, uint8_t *buf,uint16_t len)
+{
+	txp->cmd = cmd;
+	txp->phandle = phandle;
+	txp->buf = buf;
+	txp->len = len;
+	txp->index = 0;
+}
+
+
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:	用于类似蓝牙大数据发送, 需要定时拆分发送数据包
+*******************************************************************/
+#if API_SOFT_TIMER_ENABLE
+static void api_command_timer_cb(command_tx_t *txp)
+{
+	if(NULL != txp->buf){
+		command_frame_tx(txp);
+
+		if(NULL == txp->buf || txp->index == txp->len){
+			emf_free_and_clear(txp->buf);
+			soft_timer_stop((soft_timer_t*)txp->ptimer);
+		}
+	}
+
+}
+
+
+bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms)
+{
+	bool ret = false;
+	soft_timer_t *tx_timer;
+	uint8_t *p;
+	uint8_t mtu = api_transport_get_mtu(phandle);
+
+	if(NULL != txp->buf) {
+		loge("txp buf is not NULL\n");
+		return ret;
+	}
+	
+	if(mtu >= len+5){									//短包直接发送
+		ret = api_command_tx(phandle,cmd, buf,len);
+	}else{
+		p = emf_malloc(len);
+		if(NULL == p) return ret;
+
+		memcpy(p, buf, len);
+		api_command_tx_fill(txp, phandle, cmd, p, len);
+
+		tx_timer = soft_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,TIMER_PERIODIC);
+		if(NULL != tx_timer){
+			txp->ptimer = tx_timer;
+			ret = !soft_timer_start(tx_timer);
+		}else{
+			emf_free_and_clear(txp->buf);
+		}
+	}
+	
+	return ret;
+}
+#endif
 
 /*******************************************************************
 ** Parameters:	
 ** Returns:	
 ** Description:	发送指令,可以带一个arg 用于嵌入式方便调用
 *******************************************************************/
-bool api_command_pack(uint8_t cmd, uint8_t mtu, uint8_t *buf,uint16_t len,uint8_t *ppacket, uint16_t packet_len)
-{
-	return command_frame_pack(NULL,cmd, mtu,buf,len,ppacket,packet_len);
-}
-bool api_command_arg_pack(uint8_t cmd, uint16_t arg, uint8_t mtu, uint8_t *buf,uint16_t len,uint8_t *ppacket, uint16_t packet_len)
-{
-	return command_frame_pack(NULL,cmd | CMD_ARG_EN_MASK | ((uint32_t)arg<<CMD_ARG_POS), mtu,buf,len,ppacket,packet_len);
-}
-
 bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len)
 {
-	uint8_t mtu = api_get_transport_mtu(phandle);
-	return command_frame_pack(phandle,cmd,mtu,buf,len,NULL,0);
+	bool ret = false;
+	command_tx_t tx;
+	uint8_t mtu = api_transport_get_mtu(phandle);
+
+	api_command_tx_fill(&tx, phandle, cmd, buf, len);
+	
+	while(tx.index < tx.len){
+		ret = command_frame_tx(&tx);
+		if(!ret) break;
+	}
+	return ret;
 }
 bool api_command_arg_tx(trp_handle_t* phandle,uint8_t cmd, uint16_t arg, uint8_t *buf,uint16_t len)
 {
-	uint8_t mtu = api_get_transport_mtu(phandle);
-	return command_frame_pack(phandle,cmd | CMD_ARG_EN_MASK | ((uint32_t)arg<<16),mtu,buf,len,NULL,0);
-} 
+	bool ret = false;
+	command_tx_t tx;
+	uint8_t mtu = api_transport_get_mtu(phandle);
 
-
-/*******************************************************************
-** Parameters:	rxp:接收数据缓存, 注意rxp缓存buf在接收数据后malloc动态分配内存
-				pcmd:输入指令包
-** Returns:	
-** Description:	从指令帧获取完整数据指令包
-		注意:rxp数据处理完后必须调用 command_rx_free 释放内存!!!
-*******************************************************************/
-bool api_command_unpack(command_rx_t* rxp,uint8_t* pcmd,uint8_t len)
-{
-	uint8_t ret = false;
-	if(len < pcmd[1]) return ret;									//保证数据完整
-	if(pcmd[pcmd[1]-1] != (uint8_t)check_sum(pcmd,pcmd[1]-1))	return ret;		//可以忽略这一步方便调试
-
-	if(CMD_SHEAD == pcmd[0]){										//start packet
-		emf_free(rxp->buf);
-		rxp->buf = NULL;
-
-		rxp->packet_num = pcmd[2];
-		rxp->packet_index = 0;
-		rxp->max_len = rxp->packet_num * pcmd[1]; 					//pcmd[1]为单包接收数据长度,可以做为mtu
-		rxp->buf = emf_malloc(rxp->max_len);			
-		if(NULL != rxp->buf){
-			rxp->buf[0] = pcmd[3];									//cmd
-			rxp->len = 1;
-		}else{
-			rxp->max_len = 0;
-			loge_r("api_command_unpack ERROR_NO_MEM!\n");
-		}
-	}
-
-	if(NULL != rxp->buf){
-		if((CMD_SHEAD == pcmd[0]) || ((rxp->buf[0] == pcmd[3]) && (rxp->packet_index == pcmd[2])) ){
-			if(rxp->len + len-5 <= rxp->max_len){
-				memcpy(rxp->buf+rxp->len,pcmd+4,len-5);
-				rxp->len += len-5;
-				rxp->packet_index++;
-			}
-
-			if(rxp->packet_num <= rxp->packet_index){				//end pack
-				ret = true;
-			}
-		}else{
-			loge_r("api_command_unpack ERROR_NO_MEM!\n");
-		}
-		
-		// if(ret) {logd("cmd in %d:",rxp->len);dumpd(rxp->buf,rxp->len);}
-	}else{
-		loge_r("command_unpack ERROR_NO_MEM!\n");
+	api_command_tx_fill(&tx, phandle, CMD_ARG_EN_MASK | ((uint32_t)arg<<16) | cmd, buf, len);
+	
+	while(tx.index < tx.len){
+		ret = command_frame_tx(&tx);
+		if(!ret) break;
 	}
 	return ret;
 }
 
-
-/*******************************************************************
-** Parameters:	pstream:接收数据缓存, 注意rxp缓存buf在接收数据后malloc动态分配内存
-				pfifo:输入fifo数据流
-** Returns:	
-** Description:	从输入流中通过字节包解包并获取完整数据指令包
-	注意:pstream->rx数据处理完后必须调用 command_rx_free 释放内存!!!
-*******************************************************************/
-bool api_command_byte_unpack(command_stream_rx_t* pstream, uint8_t mtu, uint8_t c)
-{	
-	uint8_t ret = false;
-
-	if(command_frame_unpack(pstream,mtu, c)){
-		ret = api_command_unpack(&pstream->rx,pstream->frame,pstream->len);
-		emf_free(pstream->frame);
-		pstream->frame = NULL;
-		pstream->len = 0;
-	}
-
-	return ret;
-}
 
 
 bool command_rx_free(command_rx_t *rxp)
 {
-	emf_free(rxp->buf);
+	emf_free(rxp->pcmd);
 	memset(rxp, 0, sizeof(command_rx_t));
 }
 
-
 /*******************************************************************
-** Parameters:		
+** Parameters:	rxp:接收数据缓存, 注意rxp必须初始化防止野指针
+				buf:输入指令包
 ** Returns:	
-** Description:		
+** Description:	从指令帧获取完整数据指令包
+		注意:rxp数据处理完后必须调用 command_rx_free 释放内存!!!
 *******************************************************************/
-bool api_command_init(void)
+bool api_command_rx(command_rx_t* rxp,uint8_t* buf,uint8_t len)
 {
-	return true;
+	uint8_t ret = false;
+	uint16_t cmd_max_len;
+	command_head_t *phead = (command_head_t*)buf;
+
+	if(len < buf[1]) return ret;								//保证数据完整
+	if(buf[buf[1]-1] != (uint8_t)check_sum(buf,buf[1]-1)){		//可以忽略这一步方便调试
+		return ret;		
+	}
+	
+	if(CMD_SHEAD == buf[0]){									//start packet
+		command_rx_free(rxp);									//防止数据未释放
+
+		cmd_max_len = (phead->pack_index) * phead->len;		//phead->len为单包接收数据长度,可以做为mtu
+		rxp->pcmd = emf_malloc(cmd_max_len);			
+		if(NULL != rxp->pcmd){
+			rxp->pcmd[0] = phead->cmd;							//cmd
+			memcpy(rxp->pcmd, buf, COM_HEAD_LEN);
+			rxp->len = COM_HEAD_LEN;
+		}else{
+			loge_r("command_rx ERROR_NO_MEM!\n");
+		}
+	}
+
+	if(NULL != rxp->pcmd){
+		if( (rxp->pcmd[3] == phead->cmd) 
+			&& (rxp->pcmd[2] == phead->pack_index)
+			&& (rxp->pcmd[1] >= phead->len) ){			//MTU保证buf不溢出
+
+			memcpy(rxp->pcmd+rxp->len, buf+4, len-5);
+			rxp->len += len-5;
+			rxp->pcmd[2]--;
+			
+			if(1 == phead->pack_index){
+				rxp->pcmd[rxp->len++] = 0;	//add sum len		
+				ret = true;
+			}
+		}else{
+			loge_r("command_rx cmd err!\n");
+		}
+		// if(ret) {logd("cmd in %d:",rxp->len);dumpd(rxp->pcmd,rxp->len);}
+	}else{
+		loge_r("command_rx buff err!\n");
+	}
+	return ret;
 }
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-bool api_command_deinit(void)
-{
-	return true;
-}
-
-
 
 /*******************************************************************
-** Parameters:		
+** Parameters:	rxp:接收数据缓存, 注意rxp缓存buf在接收数据后malloc动态分配内存
+				mtu:用于限制数据,防止内存溢出
+				c: 输入的字节
+				s_buf,s_plen : 零时缓存指令, 必须初始化 s_plen = 0
 ** Returns:	
-** Description:		
+** Description:	从输入流中通过字节包解包并获取完整数据指令包
+	注意:rx数据处理完后必须调用 command_rx_free 释放内存!!!
 *******************************************************************/
-void api_command_handler(uint32_t period_10us)
-{
-	UNUSED_PARAMETER(period_10us);
+bool api_command_rx_byte(command_rx_t *rxp, uint8_t mtu, uint8_t c, uint8_t *s_buf, uint8_t *s_plen)
+{	
+	uint8_t ret = false;
+
+	if(command_frame_rx(mtu, c,s_buf,s_plen)){
+		ret = api_command_rx(rxp,s_buf,*s_plen);
+		*s_plen = 0;
+	}
+
+	return ret;
 }
 
 

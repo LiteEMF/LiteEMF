@@ -82,8 +82,8 @@ bool api_adc_init(uint8_t id);
 bool api_adc_deinit(uint8_t id);
 void api_adcs_init(void);
 void api_adcs_deinit(void);
+void api_adc_scan_task(void* pa);
 void api_adc_handler(uint32_t period_10us);
-
 
 //hal
 uint16_t hal_adc_to_voltage(uint16_t adc);

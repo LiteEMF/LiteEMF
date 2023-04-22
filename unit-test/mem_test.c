@@ -52,20 +52,21 @@ void mem_test(void)
 
 	p1 = emf_malloc(0x80);
 	emf_mem_stats();
-
 	p2 = emf_malloc(0x100);
 	emf_mem_stats();
-
 	p3 = emf_malloc(0x200);
 	emf_mem_stats();	
 
 	emf_free(p2);
 	emf_mem_stats();
-
 	p2 = emf_malloc(0x200);
 	emf_mem_stats();
 
 	emf_free(p3);
+	emf_mem_stats();
+	emf_free(p2);
+	emf_mem_stats();
+	emf_free(p1);
 	emf_mem_stats();
 
 }

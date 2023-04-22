@@ -120,8 +120,6 @@ RF_EVT_TX事件接收后可以根据fifo长度来判断是否填充按键数据
 
 
 
-
-
 #ifndef RF_FIFO_LEN		
 #define RF_FIFO_LEN		(0x100)
 #endif
@@ -143,7 +141,7 @@ typedef enum {
 	BT_BLEC_RF 	= TR_BLEC_RF,	
 	BT_RF 		= TR_RF,			
 	BT_RFC 		= TR_RFC,	
-	BT_MAX 	= 8,
+	BT_MAX 		= 8,
 } bt_t;
 
 typedef enum {
@@ -308,6 +306,7 @@ extern api_bt_ctb_t m_rfc;
 ******************************************************************************************************/
 bt_evt_scan_t* api_bt_get_scan_result(bt_t bt);
 api_bt_ctb_t* api_bt_get_ctb(bt_t bt);
+bool api_bt_is_connected(bt_t bt);
 bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf );		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
 uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len );
 bool api_bt_is_bonded(uint8_t id,bt_t bt);
@@ -324,6 +323,7 @@ bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);
 bool api_bt_init(void);
 bool api_bt_deinit(void);
+void api_bt_task(void* pa);
 void api_bt_handler(uint32_t period_10us);
 
 
@@ -340,7 +340,7 @@ bool bt_driver_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
 bool bt_driver_hid_tx(uint8_t id,bt_t bt, uint8_t*buf, uint16_t len);
 bool bt_driver_init(uint8_t id);
 bool bt_driver_deinit(uint8_t id);
-void bt_driver_handler(uint32_t period_10us);
+void bt_driver_task(void* pa);
 
 bool hal_bt_get_mac(uint8_t id,bt_t bt, uint8_t *buf );		//这里高3byte buf[3]是public地址
 bool hal_bt_is_bonded(uint8_t id,bt_t bt);
@@ -351,10 +351,10 @@ bool hal_bt_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
 bool hal_bt_hid_tx(uint8_t id,bt_t bt, uint8_t*buf, uint16_t len);
 bool hal_bt_init(uint8_t id);
 bool hal_bt_deinit(uint8_t id);
-void hal_bt_handler(uint32_t period_10us);
+void hal_bt_task(void* pa);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif

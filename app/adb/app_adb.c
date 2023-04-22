@@ -243,13 +243,26 @@ bool app_adb_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void app_adb_task(void* pa)
+{
+
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void app_adb_handler(uint32_t period_10us)
 {
-    static timer_t adb_timer;
-
-	if(m_task_tick10us - adb_timer >= period_10us){
-    }
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_adb_task(NULL);
+	}
 }
+#endif
 
 #endif
 

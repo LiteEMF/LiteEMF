@@ -47,14 +47,14 @@ extern "C" {
 #ifndef RFC_CMD_MTU
 #define RFC_CMD_MTU			32
 #endif
-#ifndef USBD_CMD_MAX
-#define USBD_CMD_MAX		64
+#ifndef USBD_CMD_MTU
+#define USBD_CMD_MTU		64
 #endif
-#ifndef USBH_CMD_MAX
-#define USBH_CMD_MAX		64
+#ifndef USBH_CMD_MTU
+#define USBH_CMD_MTU		64
 #endif
-#ifndef UART_CMD_MAX
-#define UART_CMD_MAX		64
+#ifndef UART_CMD_MTU
+#define UART_CMD_MTU		10
 #endif
 
 /******************************************************************************************************
@@ -76,11 +76,10 @@ extern uint16_t m_trps;
 bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
 
-uint16_t api_get_transport_mtu(trp_handle_t* phandle);
+uint16_t api_transport_get_mtu(trp_handle_t* phandle);
 bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len);
 bool api_trp_init(void);
 bool api_trp_deinit(void);
-void api_trp_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

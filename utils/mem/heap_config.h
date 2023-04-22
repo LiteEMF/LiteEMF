@@ -47,12 +47,12 @@ heap_5 —— 如同 heap_4，能够跨越多个不相邻内存区域的堆。
 #endif
 
 #ifndef traceMALLOC
-    // #define traceMALLOC( pvAddress, uiSize )	
-    #define traceMALLOC( pvAddress, uiSize )	logd("malloc addr=%x, size=%d\n",pvAddress, uiSize)
+    #define traceMALLOC( pvAddress, uiSize )	
+    // #define traceMALLOC( pvAddress, uiSize )	logd("malloc addr=%x, size=%d\n",pvAddress, uiSize)
 #endif
 #ifndef traceFREE
-    // #define traceFREE( pvAddress, uiSize )	   
-    #define traceFREE( pvAddress, uiSize )	    logd("free addr=%x, size=%d\n",pvAddress, uiSize)
+    #define traceFREE( pvAddress, uiSize )	   
+    // #define traceFREE( pvAddress, uiSize )	    logd("free addr=%x, size=%d\n",pvAddress, uiSize)
 #endif
 
 

@@ -18,7 +18,7 @@
 #include "emf_typedef.h"
 #include "api/api_transport.h"
 #include "api/api_tick.h"
-#include "app/app_key.h"
+#include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 
 #include "app/gamepad/xbox_typedef.h"
@@ -40,13 +40,13 @@ extern uint8_t m_xbox_enum_step;
 //xbox device
 void xbox_spk_transfer(uint8_t id, usb_endp_t *endpp, uint8_t* buf, uint16_t frame_len);
 bool xbox_rumble_send(trp_handle_t *phandle, rumble_t const *prumble);
-bool xbox_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp);
+bool xbox_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp);
 bool xbox_in_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len);
-void xbox_enum_handler(trp_handle_t* phandle);
+void xbox_enum_process(trp_handle_t* phandle);
 
 void xbox_host_init(trp_handle_t *phandle);
 void xbox_host_deinit(trp_handle_t *phandle);
-void xbox_host_handler(trp_handle_t *phandle);
+void xbox_host_task(trp_handle_t *phandle);
 
 #endif
 

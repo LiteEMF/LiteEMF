@@ -111,7 +111,7 @@ error_t usbh_msd_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_msd_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_msd_task(uint8_t id, usbh_class_t *pclass)
 {
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

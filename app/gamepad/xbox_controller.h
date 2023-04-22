@@ -18,7 +18,7 @@
 #include "emf_typedef.h"
 #include "api/api_transport.h"
 #include "api/api_tick.h"
-#include "app/app_key.h"
+#include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 
 #include "app/gamepad/xbox_device.h"
@@ -39,7 +39,7 @@ extern uint8_t m_xbox_enum_step;
 
 void xbox_controller_init(trp_handle_t *phandle);
 void xbox_controller_deinit(trp_handle_t *phandle);
-void xbox_controller_handler(trp_handle_t *phandle);
+void xbox_controller_task(trp_handle_t *phandle);
 
 
 #endif

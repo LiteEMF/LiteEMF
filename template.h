@@ -36,6 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool template_init(void);
 bool template_deinit(void);
+void template_task(void* pa);
 void template_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

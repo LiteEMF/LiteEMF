@@ -16,7 +16,7 @@
 #if APP_BATTERY_ENABLE
 
 #include  "app/app_battery.h"
-#include  "app/app_key.h"
+#include  "key_typedef.h"
 #include  "api/api_tick.h"
 #if (ID_NULL != ADC_BATTERY_ID)
 #include  "api/api_adc.h"
@@ -146,18 +146,29 @@ bool app_battery_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void app_battery_handler(uint32_t period_10us)
+
+void app_battery_scan_task(void *pa)
 {
-	static timer_t battery_timer;
-
-	if ((m_task_tick10us - battery_timer) >= period_10us){
-    	battery_timer = m_task_tick10us;
-
-		app_battery_scan(false);
-	}
+	app_battery_scan(false);
+	UNUSED_PARAMETER(pa);
 }
 
 
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void app_battery_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_battery_scan_task(NULL);
+	}
+}
+#endif
 
 
 

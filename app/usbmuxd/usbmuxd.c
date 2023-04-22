@@ -704,39 +704,34 @@ bool usbmuxd_send_data(uint8_t index,uint8_t* buf,uint16_t len)
 
 
 
-void usbmuxd_handler(uint32_t period_10us)
+void usbmuxd_task(void* pa)
 {
-	static timer_t muxd_t;
 	uint8_t err = ERROR_NOT_FOUND;
 	
-	if((m_systick - muxd_t) >= period_10us/100){
-		muxd_t = m_systick;
-
-		if(MUXDEV_ACTIVE != mux_dev.state){
-			uint8_t id;
-			usbh_class_t *pcalss = NULL;
-			id = usbh_class_find_by_type_all(DEV_TYPE_AOA,0,&pcalss);
-			if(NULL != pcalss){
-				mux_conn.state = CONN_REFUSED;
-				device_add(&id);
-			}
-			return;
+	if(MUXDEV_ACTIVE != mux_dev.state){
+		uint8_t id;
+		usbh_class_t *pcalss = NULL;
+		id = usbh_class_find_by_type_all(DEV_TYPE_AOA,0,&pcalss);
+		if(NULL != pcalss){
+			mux_conn.state = CONN_REFUSED;
+			device_add(&id);
 		}
+		return;
+	}
 
-		if(PHONE_NONE == mux_phone){
-			if((MUXDEV_ACTIVE == mux_dev.state) && (CONN_REFUSED == mux_conn.state)){
-				logd("device_start_connect...%X\n",TCP_SYS_DPORT);
-				device_start_connect(DEVICE_ID, TCP_SYS_DPORT, NULL);		// add
-			}else if(CONN_CONNECTED == mux_conn.state){
-				send_tcp(&mux_conn, TH_ACK, (uint8_t*)plist_file,sizeof(plist_file)-1);
-			}
-		}else{
-			if((MUXDEV_ACTIVE == mux_dev.state) && (CONN_REFUSED == mux_conn.state)){
-				logd("device_start_connect...%X\n",TCP_APP_DPORT);
-				device_start_connect(DEVICE_ID, TCP_APP_DPORT, NULL);		// add
-			}else if(CONN_CONNECTED == mux_conn.state){
-				
-			}
+	if(PHONE_NONE == mux_phone){
+		if((MUXDEV_ACTIVE == mux_dev.state) && (CONN_REFUSED == mux_conn.state)){
+			logd("device_start_connect...%X\n",TCP_SYS_DPORT);
+			device_start_connect(DEVICE_ID, TCP_SYS_DPORT, NULL);		// add
+		}else if(CONN_CONNECTED == mux_conn.state){
+			send_tcp(&mux_conn, TH_ACK, (uint8_t*)plist_file,sizeof(plist_file)-1);
+		}
+	}else{
+		if((MUXDEV_ACTIVE == mux_dev.state) && (CONN_REFUSED == mux_conn.state)){
+			logd("device_start_connect...%X\n",TCP_APP_DPORT);
+			device_start_connect(DEVICE_ID, TCP_APP_DPORT, NULL);		// add
+		}else if(CONN_CONNECTED == mux_conn.state){
+			
 		}
 	}
 }

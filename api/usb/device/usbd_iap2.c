@@ -138,7 +138,7 @@ error_t usbd_iap2_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_iap2_handler(uint8_t id)
+void usbd_iap2_task(uint8_t id)
 {
     UNUSED_PARAMETER(id);
 }

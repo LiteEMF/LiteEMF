@@ -742,9 +742,14 @@ void app_iap2_in_process(uint8_t* buf, uint16_t len)
 
 }
 
+void app_iap2_init(void)
+{
+    sequence_number_sync = true;
+    m_iap2_stu = IAP2_STA_LINK;
+    iap_EA_session_id = 0x0001;
+}
 
-
-void app_iap2_handler(uint32_t period_10us)
+void app_iap2_task(void* pa)
 {
 	bool ret = true;
 	bool iap_retry = true;
@@ -807,11 +812,6 @@ void app_iap2_handler(uint32_t period_10us)
     iap2_auto_ack();
 }
 
-void app_iap2_init(void)
-{
-    sequence_number_sync = true;
-    m_iap2_stu = IAP2_STA_LINK;
-    iap_EA_session_id = 0x0001;
-}
+
 
 #endif

@@ -118,7 +118,7 @@ error_t usbh_adb_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_adb_handler( uint8_t id, usbh_class_t *pclass)
+void usbh_adb_task( uint8_t id, usbh_class_t *pclass)
 {
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

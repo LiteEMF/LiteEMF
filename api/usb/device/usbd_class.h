@@ -67,7 +67,7 @@ error_t usbd_class_suspend(uint8_t id);
 error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq);
 error_t usbd_class_out_process(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len);
 error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len);
-void 	usbd_class_handler(uint8_t id);
+void 	usbd_class_task(uint8_t id);
 error_t usbd_class_init(uint8_t id);
 error_t usbd_class_deinit(uint8_t id);
 

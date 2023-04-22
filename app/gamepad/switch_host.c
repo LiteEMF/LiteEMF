@@ -116,9 +116,9 @@ void switch_dump_cal(void)
 
 	默认高频320:0x100 低频160:0x80
 *********************************************************************************/
-switch_motor_bit_t switch_motor_encode(uint8_t duty)
+switch_rumble_bit_t switch_rumble_encode(uint8_t duty)
 {
-	switch_motor_bit_t motor_bit;
+	switch_rumble_bit_t motor_bit;
 	uint16_t encoded_hex_amp;
 	//uint16_t freq = 160;
 	//uint16_t encoded_hex_freq;
@@ -144,20 +144,20 @@ bool switch_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
     static uint8_t motor_index=0;
     
-    switch_motor_t motor;
-    uint8_t motor1 = prumble->duty[0];
-	uint8_t motor2 = prumble->duty[1];
-    motor.id = 0x10;
-    motor.index=motor_index++;
+    switch_rumble_t rumble;
+    uint8_t motor1 = prumble->duty[RUMBLE_L];
+	uint8_t motor2 = prumble->duty[RUMBLE_R];
+    rumble.id = 0x10;
+    rumble.index=motor_index++;
 
-    motor.motor1 = switch_motor_encode(motor1);
-    motor.motor2 = switch_motor_encode(motor2);
-    return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+    rumble.rumble_l = switch_rumble_encode(motor1);
+    rumble.rumble_r = switch_rumble_encode(motor2);
+    return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 }
 
 
 
-bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key=0;
@@ -173,8 +173,8 @@ bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key
 		key &= ~0x8000UL;
 		keyp->key = key;
     
-        keyp->trigger.y = (SWITCH_R2 & key)? 0xff : 0;
-        keyp->trigger.x = (SWITCH_L2 & key)? 0xff : 0;
+        keyp->r2 = (SWITCH_R2 & key)? 0xff : 0;
+        keyp->l2 = (SWITCH_L2 & key)? 0xff : 0;
 
 		bit12_to_uint(switch_inp->l_xy,&keyp->stick_l.x, &keyp->stick_l.y);
 
@@ -250,7 +250,7 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
             switch_ctrlp->index = switch_ctrl_index++;
             switch_ctrlp->sub_cmd =  enump->sub_cmd;
 
-            switch_ctrlp->motor1 = switch_motor_encode(0);
+            switch_ctrlp->motor1 = switch_rumble_encode(0);
             switch_ctrlp->motor2 = switch_ctrlp->motor1;
             switch_ctrlp->cmd_data[0] = enump->param & 0xff;
             switch_ctrlp->cmd_data[1] = (enump->param>>8) & 0xff;
@@ -647,7 +647,7 @@ bool switch_host_deinit(trp_handle_t *phandle)
     return true;
 }
 
-void switch_host_handler(trp_handle_t *phandle)
+void switch_host_task(trp_handle_t *phandle)
 {
 
 }

@@ -117,7 +117,7 @@ error_t usbd_hid_mt_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_mt_handler(uint8_t id)
+void usbd_hid_mt_task(uint8_t id)
 {
 	UNUSED_PARAMETER(id);
 }

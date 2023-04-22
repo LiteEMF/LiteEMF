@@ -15,6 +15,7 @@
 #include "hw_config.h"
 #if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 #include "api/usb/device/usbd.h"
+#include "api/api_tick.h"
 
 #include "api/api_log.h"
 
@@ -549,7 +550,7 @@ usbd_class_t *usbd_audio_mic_find(uint8_t id)
 void usbd_audio_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t  mic_buffer[64];
-	uint32_t mic_frame_len = api_audio_get_mic_len(&usbd_audio_info);
+	uint32_t mic_frame_len = API_AUDIO_MIC_SIZE(&usbd_audio_info);
 
 	memset(mic_buffer,0,sizeof(mic_buffer));
 
@@ -641,9 +642,11 @@ error_t usbd_audio_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_audio_handler(uint8_t id)
+void usbd_audio_task(uint8_t id)
 {
     UNUSED_PARAMETER(id);
 }
+
+
 
 #endif

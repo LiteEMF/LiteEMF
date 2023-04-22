@@ -163,6 +163,12 @@ bool api_storage_set_map(uint8_t index)
 	
 	return ret;
 }
+
+bool api_storage_sync_complete(void)
+{
+	return true;
+}
+
 bool api_storage_sync(void)
 {
 	bool ret = false;
@@ -171,12 +177,6 @@ bool api_storage_sync(void)
 	storage_timer = m_systick;
 	return ret;
 }
-bool api_storage_sync_complete(void)
-{
-	return true;
-}
-
-
 void api_storage_auto_sync(void)
 {
     storage_timer = m_systick;
@@ -195,17 +195,29 @@ bool api_storage_init(void)
 	}
 	return ret;
 }
-void api_storage_handler(uint32_t period_10us)
+
+
+
+void api_storage_sync_task(void* pa)
 {
-    if(is_stg_auto_sync){
-        if(m_systick - storage_timer >= period_10us/100){
-            if(api_storage_sync()){
-            	is_stg_auto_sync = false;
-			}
-        }
-    }
+	api_storage_sync();
 }
 
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_storage_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_systick - s_timer) >= period_10us/100){
+		s_timer = m_systick;
+		api_storage_sync_task(NULL);
+	}
+}
+#endif
 
 
 

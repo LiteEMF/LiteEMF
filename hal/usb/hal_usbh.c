@@ -69,7 +69,7 @@ error_t hal_usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,ui
 error_t hal_usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
 {
 }
-void hal_usbh_driver_handler(uint32_t period_10us)
+void hal_usbh_driver_task(uint32_t dt_ms)
 {
 }
 error_t hal_usbh_driver_init(uint8_t id)

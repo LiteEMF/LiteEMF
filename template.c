@@ -62,7 +62,17 @@ bool template_deinit(void)
 	return true;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void template_task(void* pa)
+{
+	UNUSED_PARAMETER(pa);
+}
 
+#if TASK_HANDLER_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -70,13 +80,12 @@ bool template_deinit(void)
 *******************************************************************/
 void template_handler(uint32_t period_10us)
 {
-	UNUSED_PARAMETER(period_10us);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		template_task(NULL);
+	}
 }
-
 #endif
 
-
-
-
-
-
+#endif

@@ -444,7 +444,7 @@ error_t usbh_init( uint8_t id )
 	
 	usbh_class_buf_init();
 	#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
-	hid_km_items_init();		//TODO 放一个合理的位置
+	usbh_hid_km_pa_init();		//TODO 放一个合理的位置
 	#endif
 
 	memset(&m_usbh_dev, 0 ,sizeof(m_usbh_dev));
@@ -471,11 +471,11 @@ error_t usbh_deinit( uint8_t id )
 }
 
 
-void usbh_handler(uint32_t period_10us)
+void usbh_task(uint32_t dt_ms)
 {
-	hal_usbh_driver_handler( period_10us );
-	usbh_class_handler( period_10us );
-	usbh_enum_all_device( 100 );
+	hal_usbh_driver_task( dt_ms );
+	usbh_class_task( dt_ms );
+	usbh_enum_all_device( 100*100 );		//TODO
 }
 
 

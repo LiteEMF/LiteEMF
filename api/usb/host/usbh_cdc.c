@@ -170,7 +170,7 @@ error_t usbh_cdc_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_cdc_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_cdc_task(uint8_t id, usbh_class_t *pclass)
 {
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

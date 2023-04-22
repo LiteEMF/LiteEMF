@@ -58,6 +58,7 @@ bool api_nfc_close(void);
 
 bool api_nfc_init(void);
 bool api_nfc_deinit(void);
+void api_nfc_task(void* pa);
 void api_nfc_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

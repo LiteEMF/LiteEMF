@@ -10,10 +10,12 @@
 */
 
 
-#ifndef _app_pm_h
-#define _app_pm_h
+#ifndef _app_gamepad_key_h
+#define _app_gamepad_key_h
 #include "emf_typedef.h"
-#include "api/api_pm.h"
+#include "key_typedef.h"
+#include "utils/emf_utils.h"
+#include "app/app_key.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,42 +25,35 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef DISCONNECTED_SLEEP_TIME
-#define DISCONNECTED_SLEEP_TIME    	(3*1000*60UL)		//ms
-#endif
-#ifndef CONNECTED_SLEEP_TIME
-#define CONNECTED_SLEEP_TIME    	(15*1000*60UL)		//ms
-#endif
-#ifndef KEY_POWERON_TIME
-#define KEY_POWERON_TIME    		(0)					//ms
-#endif
-
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-typedef enum _tgpad_sta{
-	PM_STA_NORMAL,
-	PM_STA_CHARG_NOT_WORK,
-	PM_STA_RESET,
-	PM_STA_SLEEP,
-}pm_sta_t;
+typedef struct {
+	uint32_t key;
+	axis2i_t stick_l;
+	axis2i_t stick_r;
+	int16_t l2;
+	int16_t r2;
+	axis3i_t acc;
+	axis3i_t gyro;	
+}app_gamepad_key_t;	//28
 
-extern pm_sta_t	m_pm_sta;
-
+extern uint8_t  m_app_stick_key;
+extern app_gamepad_key_t m_gamepad_key;
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_pm_sleep_hook(void);				//__WEAK 
-void app_pm_weakup_check(void);
-void app_boot(uint8_t index);
-void app_reset(void);
-void app_sleep(void);
-bool app_pm_init(void);
-bool app_pm_deinit(void);
-void app_pm_handler(uint32_t period_10us);
+void app_gamepad_key_vendor_scan(app_gamepad_key_t *keyp);		//__WEAK 
+void app_gamepad_trigger_check(app_gamepad_key_t* keyp);
+void app_gamepad_key_swapl(app_gamepad_key_t* keyp);
+
+bool app_gamepad_key_init(void);
+bool app_gamepad_key_deinit(void);
+void app_gamepad_key_scan_task(app_gamepad_key_t *pkey);
+void app_gamepad_key_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

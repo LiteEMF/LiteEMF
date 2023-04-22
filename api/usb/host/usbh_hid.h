@@ -53,7 +53,7 @@ error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
 error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_hid_handler(uint8_t id, usbh_class_t *pclass);
+void usbh_hid_task(uint8_t id, usbh_class_t *pclass);
 
 #ifdef __cplusplus
 }

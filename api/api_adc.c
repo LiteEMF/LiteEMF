@@ -99,22 +99,44 @@ void api_adcs_deinit(void)
 		api_adc_deinit(id);
 	}   
 }
+
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_adc_scan_task(void* pa)
+{
+	uint16_t adc_val;
+	uint8_t id;
+	for(id=0; id < m_adc_num; id++){
+		if(hal_adc_value(id,&adc_val)){
+			m_adc_val[id] = adc_val;
+		}
+	}
+	api_adc_start_scan();
+
+	UNUSED_PARAMETER(pa);
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void api_adc_handler(uint32_t period_10us)
 {
-	uint8_t id;
-	uint16_t adc_val;
-	static timer_t adc_timer=0;
-	if((m_task_tick10us - adc_timer) >= period_10us){
-        adc_timer = m_task_tick10us;
-
-		for(id=0; id < m_adc_num; id++){
-			if(hal_adc_value(id,&adc_val)){
-				m_adc_val[id] = adc_val;
-			}
-		}
-		api_adc_start_scan();
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_adc_scan_task(NULL);
 	}
 }
+#endif
+
 
 #endif
 

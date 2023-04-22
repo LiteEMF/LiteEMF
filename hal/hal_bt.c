@@ -343,9 +343,9 @@ bool hal_bt_deinit(uint8_t id)
     
     return ret;
 }
-void hal_bt_handler(uint32_t period_10us)
+void hal_bt_task(void* pa)
 {
-
+    UNUSED_PARAMETER(pa);
 }
 
 

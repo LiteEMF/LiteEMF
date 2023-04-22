@@ -15,7 +15,7 @@
 #include "hw_config.h"
 #if API_AUDIO_ENABLE
 #include "api/audio/api_audio.h"
-
+#include "api/api_tick.h"
 
 #include "api/api_log.h"
 
@@ -198,16 +198,6 @@ void api_audio_close_mic(uint8_t id,api_audio_t *paudio)
 }
 
 
-uint32_t api_audio_get_spk_len(api_audio_t *paudio)
-{
-	return API_AUDIO_SIZE(paudio->spk_sampel.rate, paudio->spk_sampel.resolution, paudio->spk_sampel.channel);
-}
-
-uint32_t api_audio_get_mic_len(api_audio_t *paudio)
-{
-    return API_AUDIO_SIZE(paudio->mic_sampel.rate, paudio->mic_sampel.resolution, paudio->mic_sampel.channel);
-}
-
 bool api_audio_init(api_audio_t *paudio)
 {
     memset(paudio, 0 , sizeof(api_audio_t));
@@ -253,10 +243,26 @@ bool api_audio_deinit(api_audio_t *paudio)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void api_audio_handler(api_audio_t *paudio)
+void api_audio_task(void* pa)
 {
 
 }
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void api_audio_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_audio_task(NULL);
+	}
+}
+#endif
 
 #endif
 

@@ -24,8 +24,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef KEY_ACTIVE				//io key
-#define KEY_ACTIVE 0  			//high level trigger , normal low level trigger
+#ifndef KEY_ACTIVE				//io key high level trigger , normal low level trigger
+#define KEY_ACTIVE 0  			
 #endif
 #ifndef MATRIX_KEY_ACTIVE		//matrix key
 #define MATRIX_KEY_ACTIVE	0

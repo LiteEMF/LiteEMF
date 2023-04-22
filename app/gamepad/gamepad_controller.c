@@ -139,31 +139,36 @@ uint32_t gamepad_hatswitch_to_key(uint8_t hat_switch)
 	return tmp;
 }
 
-uint16_t gamepad_key_pack(trp_handle_t *phandle,app_key_t *gpadp, uint8_t* buf,uint16_t len)
+uint16_t gamepad_key_pack(trp_handle_t *phandle,app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
 	gamepad_retport_t* preport = (gamepad_retport_t*)buf;
 	
-	phandle->index = U16(DEV_TYPE_HID,HID_TYPE_GAMEPADE);
 	if(len < sizeof(gamepad_retport_t)) return 0;
 	memset(preport,0,sizeof(gamepad_retport_t));
 	preport->id = GAMEPAD_REPORT_ID;
-	preport->button = gpadp->key & 0xffff;
-	preport->hat_switch = gamepad_key_to_hatswitch(gpadp->key);
-	preport->lx = (gpadp->stick_l.x >> 8) + 0x80;
-	preport->ly =(gpadp->stick_l.y >> 8) + 0x80;
-	preport->rx = (gpadp->stick_r.x >> 8) + 0x80;
-	preport->ry =(gpadp->stick_r.y >> 8) + 0x80;
+	preport->button = keyp->key & 0xffff;
+	preport->hat_switch = gamepad_key_to_hatswitch(keyp->key);
+	preport->lx = (keyp->stick_l.x >> 8) + 0x80;
+	preport->ly =(keyp->stick_l.y >> 8) + 0x80;
+	preport->rx = (keyp->stick_r.x >> 8) + 0x80;
+	preport->ry =(keyp->stick_r.y >> 8) + 0x80;
 
-	preport->l2 = gpadp->trigger.x;
-	preport->r2 = gpadp->trigger.y;
+	preport->l2 = keyp->l2;
+	preport->r2 = keyp->r2;
 
 	packet_len = sizeof(gamepad_retport_t);
 
 	return packet_len;
 }
 
-
+bool gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
+{
+	UNUSED_PARAMETER(phandle);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
+	return false;
+}
 
 bool gamepad_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
@@ -172,7 +177,7 @@ bool gamepad_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 
 
 
-bool gamepad_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+bool gamepad_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key;
@@ -190,8 +195,8 @@ bool gamepad_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_ke
 		keyp->stick_r.y = remap((int8_t)(dinput_inp->ry-0x80),-128,127,-32768,32767);
 
 		
-		keyp->trigger.x = dinput_inp->l2;
-		keyp->trigger.y = dinput_inp->r2;
+		keyp->l2 = dinput_inp->l2;
+		keyp->r2 = dinput_inp->r2;
 		ret = true;
 	}
 	return ret;
@@ -200,10 +205,6 @@ bool gamepad_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_ke
 bool gamepad_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 {
 	bool ret = false;
-
-	app_key_t key;
-	ret = gamepad_key_decode(phandle,buf, len, &key);
-
 	return ret;
 }
 /*******************************************************************
@@ -219,7 +220,7 @@ void gamepad_controller_deinit(trp_handle_t *phandle)
 {
 }
 
-void gamepad_controller_handler(trp_handle_t *phandle)
+void gamepad_controller_task(trp_handle_t *phandle)
 {
 }
 

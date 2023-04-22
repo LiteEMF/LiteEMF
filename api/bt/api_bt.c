@@ -27,6 +27,7 @@
 #include  "hw_config.h"
 #if API_BT_ENABLE
 #include  "api/bt/api_bt.h"
+#include  "api/api_tick.h"
 
 #include  "api/api_log.h"
 /******************************************************************************************************
@@ -93,7 +94,6 @@ static uint8_t rfc_tx_buf[RF_TX_LL_MTU];
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -123,6 +123,47 @@ bt_evt_scan_t* api_bt_get_scan_result(bt_t bt)
 			break;
 	}
 	return resultp;
+}
+
+static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
+{
+	memset(txp,0,sizeof(bt_tx_fifo_t));
+	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
+	txp->tx_mtu = mtu;
+	txp->tx_buf = tx_buf;
+
+	return true;
+}
+static bool api_bt_ctb_init(void)
+{
+	uint8_t id;
+	api_bt_ctb_t* bt_ctbp;
+
+	for(id = 0; id < BT_MAX; id++){
+		if(id){
+			bt_ctbp = api_bt_get_ctb(id);
+			if(NULL != bt_ctbp){
+				memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
+				bt_ctbp->enable = true;
+				bt_ctbp->inteval = 12;
+
+				#if BT_SUPPORT & BIT_ENUM(TR_RF)
+				if(BT_RF == id){
+					bt_ctbp->fifo_txp = &app_rf_tx;
+					bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
+				}
+				#endif
+				#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+				if(BT_RFC == id){
+					bt_ctbp->fifo_txp = &app_rfc_tx;
+					bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
+				}
+				#endif
+			}
+		}
+	}
+	
+	return true;
 }
 
 api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
@@ -176,6 +217,24 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 
 	return api_btp;
 }
+
+
+
+bool api_bt_is_connected(bt_t bt)
+{
+	bool ret = false;
+	api_bt_ctb_t* bt_ctbp;
+	
+	bt_ctbp = api_bt_get_ctb(bt);
+	if(NULL != bt_ctbp){
+		if(BT_STA_CONN <= bt_ctbp->sta){
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 /*******************************************************************
 ** Parameters: base_mac	:输入基地址
 ** Returns:		base_mac:输出计算后的地址
@@ -417,15 +476,8 @@ void api_bt_enable_all(bool en)
 	}
 }
 
-static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
-{
-	memset(txp,0,sizeof(bt_tx_fifo_t));
-	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
-	txp->tx_mtu = mtu;
-	txp->tx_buf = tx_buf;
 
-	return true;
-}
+
 void api_bt_tx_fifo_fush(bt_t bt)
 {
 	#if BT_SUPPORT & BIT_ENUM(TR_RF)
@@ -767,39 +819,6 @@ void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 	}
 }
 
-static bool api_bt_ctb_init(void)
-{
-	uint8_t i;
-	bt_t bt_id;
-	api_bt_ctb_t* bt_ctbp;
-
-	for(i = 0; i < BT_MAX; i++){
-		bt_id = BIT(i);
-		if(bt_id){
-			bt_ctbp = api_bt_get_ctb(bt_id);
-			if(NULL != bt_ctbp){
-				memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
-				bt_ctbp->enable = true;
-				bt_ctbp->inteval = 12;
-
-				#if BT_SUPPORT & BIT_ENUM(TR_RF)
-				if(BT_RF == bt_id){
-					bt_ctbp->fifo_txp = &app_rf_tx;
-					bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
-				}
-				#endif
-				#if BT_SUPPORT & BIT_ENUM(TR_RFC)
-				if(BT_RFC == bt_id){
-					bt_ctbp->fifo_txp = &app_rfc_tx;
-					bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
-				}
-				#endif
-			}
-		}
-	}
-	
-	return true;
-}
 
 /*******************************************************************
 ** Parameters:		
@@ -842,11 +861,27 @@ bool api_bt_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void api_bt_task(void* pa)
+{
+	hal_bt_task(pa);
+	bt_driver_task(pa);
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void api_bt_handler(uint32_t period_10us)
 {
-	hal_bt_handler(period_10us);
-	bt_driver_handler(period_10us);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_bt_task(NULL);
+	}
 }
+#endif
 
 #endif
 

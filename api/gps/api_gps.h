@@ -36,6 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool api_gps_init(void);
 bool api_gps_deinit(void);
+void api_gps_task(void* pa);
 void api_gps_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

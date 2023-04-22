@@ -19,12 +19,6 @@
 #include  "api/api_log.h"
 #include  "api/api_tick.h"
 
-#if APP_JOYSTICK_ENABLE
-#include  "app/app_joystick.h"
-#endif
-#if APP_IMU_ENABLE
-#include  "app/imu/app_imu.h"
-#endif
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -32,16 +26,8 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint8_t  m_app_stick_key;
-app_key_t m_app_key;
-
-uint32_t m_key_pressed;
-uint32_t m_key_short;
-uint32_t m_key_pressed_b;
-uint32_t m_key_long;
-uint32_t m_key_long_long;
-uint32_t m_key_double_b;		    
-uint32_t m_key_pre_double_b;			
+uint32_t m_key_scan;
+app_key_t m_app_key;			
 
 
 bool m_key_power_on = false;
@@ -53,7 +39,13 @@ bool m_key_power_on = false;
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-void dump_key(uint32_t key)
+
+
+
+/*****************************************************************************************************
+**  Function
+******************************************************************************************************/
+void app_key_dump(uint32_t key)
 {
     logd("key=%x:	",key);
     #if 1
@@ -93,188 +85,18 @@ void dump_key(uint32_t key)
     #endif
 }
 
-
-/*****************************************************************************************************
-**  Function
-******************************************************************************************************/
-
-void app_key_trigger_check(app_key_t* keyp)
-{
-	if((keyp->key & HW_KEY_L2) && (0 == keyp->trigger.x)){
-		keyp->trigger.x = 0xffff;
-	}
-	if((0 == keyp->key & HW_KEY_L2) && keyp->trigger.x){
-		keyp->key |= HW_KEY_L2;
-	}
-
-	if((keyp->key & HW_KEY_R2) && (0 == keyp->trigger.y)){
-		keyp->trigger.y = 0xffff;
-	}
-	if((0 == keyp->key & HW_KEY_R2) && keyp->trigger.y){
-		keyp->key |= HW_KEY_R2;
-	}
-}
-
-void app_key_swapl(app_key_t* keyp)
-{
-	keyp->key = SWAP32_L(keyp->key);
-	axis2i_swapl(&keyp->stick_l);
-	axis2i_swapl(&keyp->stick_r);
-	axis2i_swapl(&keyp->trigger);
-	axis3i_swapl(&keyp->acc);
-	axis3i_swapl(&keyp->gyro);
-}
-
 #if WEAK_ENABLE
-__WEAK void app_key_vendor_scan(app_key_t *keyp)
+__WEAK void app_key_vendor_scan(uint32_t *pkey)
 {
 	
 }
-#endif
-#if WEAK_ENABLE
+
 __WEAK void app_key_event(void)
 {
     
 }
 #endif
 
-void app_key_scan(uint32_t period_10us)
-{
-    app_key_t app_key;
-    uint32_t hw_key=0;
-    static timer_t key_timer;
-    
-	if((m_task_tick10us - key_timer) >= period_10us){
-        key_timer = m_task_tick10us;
-
-        memset(&app_key,0,sizeof(app_key));
-        app_key.key = io_key_scan();
-
-        #if APP_JOYSTICK_ENABLE
-        app_key.stick_l = m_joystick.stick[APP_STICK_L_ID];
-        app_key.stick_r = m_joystick.stick[APP_STICK_R_ID];
-        app_key.trigger.x = m_joystick.tarigger[APP_TRIGGER_L_ID];
-        app_key.trigger.y = m_joystick.tarigger[APP_TRIGGER_R_ID];
-        #endif
-
-        app_key_vendor_scan(&app_key);	
-        app_key_trigger_check(&app_key);
-
-        #if APP_JOYSTICK_ENABLE
-        m_app_stick_key = get_stick_dir(&app_key.stick_l);
-        m_app_stick_key |= get_stick_dir(&app_key.stick_r)<<4;
-        #endif
-
-        #if APP_IMU_ENABLE
-        app_imu_get_val(&app_key.acc,&app_key.gyro);
-        #endif
-
-        if(m_app_key.key != app_key.key){
-            dump_key(app_key.key);
-        }
-        m_app_key = app_key;
-    }
-}
-
-
-void app_key_decode(uint32_t period_10us)
-{
-	bool ret = false;
-    uint8_t i;
-	uint32_t key,bit;
-
-	static uint16_t key_cnt[32];
-    static timer_t key_timer;
-
-    if((m_task_tick10us - key_timer) >= period_10us){
-        key_timer = m_task_tick10us;
-		key = m_app_key.key;
-
-        for(i = 0; i < 32; i++){
-			bit = BIT(i);
-
-            if(key & bit){						//pressed
-                if(!(m_key_pressed & bit)){
-                    m_key_pressed |= bit;
-                    key_cnt[i] = 0;
-                    ret = true;
-                }
-
-                if(key_cnt[i] <= KEY_LONG_LONG_TIME){
-                    key_cnt[i] ++;
-
-					if(key_cnt[i] >= KEY_LONG_LONG_TIME){
-						if(!(m_key_long_long & bit)){
-							m_key_long_long |= bit;
-							logd("m_key_long_long: 0x%x\n", m_key_long_long);
-							ret = true;
-						}                
-					}else if(key_cnt[i] >= KEY_LONG_TIME){
-                        if(!(m_key_long & bit)){
-                            m_key_long |= bit;
-                            logd("m_key_long=%x\n",m_key_long);
-                            ret = true;
-                        }
-                    }else if(key_cnt[i] >= KEY_SHORT_TIME){
-                        if(!(m_key_short & bit)){
-                            m_key_short |= bit;
-                            ret = true;
-                        }
-                    }
-                }
-            }else{												//key up
-                if((m_key_pressed & bit)){
-                    if( 0 == ((m_key_pressed_b | m_key_double_b) & bit) ){
-                        if(key_cnt[i] < KEY_SHORT_TIME){
-                            if(m_key_pre_double_b & bit){
-                                m_key_double_b |= bit;
-                                m_key_pre_double_b &= ~bit;
-                            }else{
-                                m_key_pre_double_b |= bit;
-                            }
-                        }else{
-                            m_key_pre_double_b &= ~bit;
-                        }
-                    }
-
-                    m_key_pressed &= ~bit;
-                    m_key_short &= ~bit;
-                    m_key_long &= ~bit;
-                    m_key_long_long &= ~bit;
-                    ret = true;
-                    key_cnt[i] = 0;
-                }else if(m_key_pre_double_b & bit){
-                    key_cnt[i]++;
-                    if(key_cnt[i] >= KEY_DOUBLE_B_TIME){
-                        key_cnt[i] = 0;
-                        m_key_pre_double_b &= ~bit;
-                        m_key_pressed_b |= bit;
-                        //logd("m_key_pressed_b\n");
-                        ret = true;
-                    }
-                }else if(((m_key_pressed_b | m_key_double_b) & bit)){
-                    key_cnt[i]++;
-                    if(key_cnt[i] >= KEY_PRESSED_B_DELAY){
-                        key_cnt[i] = 0;
-                        m_key_pressed_b &= ~bit;
-                        m_key_double_b &= ~bit;
-                        ret = true;
-                    }
-                }
-            }
-        }
-
-        if(ret){
-            app_key_event();
-        }
-
-        if(!m_key_power_on){
-            if(!KEY_POWER && !((m_key_pressed_b|m_key_double_b) & HW_KEY_POWER)){
-                m_key_power_on = true;
-            }
-        }
-    }
-}
 
 /*******************************************************************
 ** Parameters:		
@@ -283,16 +105,9 @@ void app_key_decode(uint32_t period_10us)
 *******************************************************************/
 bool app_key_init(void)
 {
-    memset(&m_app_key, 0, sizeof(m_app_key));
     m_key_power_on = false;
-    m_app_stick_key = 0;
-    m_key_pressed = 0;
-    m_key_short = 0;
-    m_key_pressed_b = 0;
-    m_key_long = 0;
-    m_key_long_long = 0;
-    m_key_double_b = 0;		    
-    m_key_pre_double_b = 0;			
+    m_key_scan = 0;
+    memset(&m_app_key,0,sizeof(m_app_key));
 	return io_key_init();
 }
 
@@ -303,9 +118,127 @@ bool app_key_init(void)
 *******************************************************************/
 bool app_key_deinit(void)
 {
-	return io_key_deinit();
+	return app_key_init();
 }
 
+
+
+void app_key_scan_task(void *pa)
+{
+    uint32_t key;
+    
+    uint32_t hw_key=0;
+
+    key = 0;
+    key = io_key_scan();
+    app_key_vendor_scan(&key);	
+
+    if(m_key_scan != key){
+        m_key_scan = key;
+        app_key_dump(key);
+    }
+    
+}
+
+
+void app_key_decode_task(uint32_t key_scan)
+{
+	bool ret = false;
+    uint8_t i;
+	uint32_t key,bit;
+	static uint16_t key_cnt[32];
+
+    key = key_scan;
+    for(i = 0; i < 32; i++){
+        bit = BIT(i);
+
+        if(key & bit){						//pressed
+            if(!(m_app_key.pressed & bit)){
+                m_app_key.pressed |= bit;
+                key_cnt[i] = 0;
+                ret = true;
+            }
+
+            if(key_cnt[i] <= KEY_LONG_LONG_TIME){
+                key_cnt[i] ++;
+
+                if(key_cnt[i] >= KEY_LONG_LONG_TIME){
+                    if(!(m_app_key.long_long & bit)){
+                        m_app_key.long_long |= bit;
+                        logd("press_long_long: 0x%x\n", m_app_key.long_long);
+                        ret = true;
+                    }                
+                }else if(key_cnt[i] >= KEY_LONG_TIME){
+                    if(!(m_app_key.press_long & bit)){
+                        m_app_key.press_long |= bit;
+                        logd("press_long=%x\n",m_app_key.press_long);
+                        ret = true;
+                    }
+                }else if(key_cnt[i] >= KEY_SHORT_TIME){
+                    if(!(m_app_key.press_short & bit)){
+                        m_app_key.press_short |= bit;
+                        ret = true;
+                    }
+                }
+            }
+        }else{												//key up
+            if((m_app_key.pressed & bit)){
+                if( 0 == ((m_app_key.pressed_b | m_app_key.double_b) & bit) ){
+                    if(key_cnt[i] < KEY_SHORT_TIME){
+                        if(m_app_key.pre_double_b & bit){
+                            m_app_key.double_b |= bit;
+                            m_app_key.pre_double_b &= ~bit;
+                        }else{
+                            m_app_key.pre_double_b |= bit;
+                        }
+                    }else{
+                        m_app_key.pre_double_b &= ~bit;
+                    }
+                }
+
+                m_app_key.pressed &= ~bit;
+                m_app_key.press_short &= ~bit;
+                m_app_key.press_long &= ~bit;
+                m_app_key.long_long &= ~bit;
+                ret = true;
+                key_cnt[i] = 0;
+            }else if(m_app_key.pre_double_b & bit){
+                key_cnt[i]++;
+                if(key_cnt[i] >= KEY_DOUBLE_B_TIME){
+                    key_cnt[i] = 0;
+                    m_app_key.pre_double_b &= ~bit;
+                    m_app_key.pressed_b |= bit;
+                    //logd("m_app_key.pressed_b\n");
+                    ret = true;
+                }
+            }else if(((m_app_key.pressed_b | m_app_key.double_b) & bit)){
+                key_cnt[i]++;
+                if(key_cnt[i] >= KEY_PRESSED_B_DELAY){
+                    key_cnt[i] = 0;
+                    m_app_key.pressed_b &= ~bit;
+                    m_app_key.double_b &= ~bit;
+                    ret = true;
+                }
+            }
+        }
+    }
+
+    if(ret){
+        app_key_event();
+    }
+
+    if(!m_key_power_on){
+        if(!KEY_POWER && !((m_app_key.pressed_b|m_app_key.double_b) & HW_KEY_POWER)){
+            m_key_power_on = true;
+        }
+    }
+
+}
+
+
+
+
+#if TASK_HANDLER_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -313,11 +246,22 @@ bool app_key_deinit(void)
 *******************************************************************/
 void app_key_handler(uint32_t period_10us)
 {
-	app_key_scan(period_10us);
-    app_key_decode(KEY_PERIOD_DEFAULT);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_key_scan_task(NULL);
+	}
 }
 
-
+void app_key_decode_handler(uint32_t period_10us,uint32_t key_scan)
+{
+    static timer_t s_timer;
+    if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		app_key_decode_task(key_scan);
+	}
+}
+#endif
 
 
 

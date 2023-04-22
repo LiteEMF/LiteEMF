@@ -42,12 +42,12 @@ extern "C" {
 
 
 
-#define A_VERSION 0x01000000        // ADB protocol version
+#define A_VERSION 0x01000000        /* ADB protocol version */
 
-#define ADB_VERSION_MAJOR 1         // Used for help/version information
-#define ADB_VERSION_MINOR 0         // Used for help/version information
+#define ADB_VERSION_MAJOR 1         /* Used for help/version information */
+#define ADB_VERSION_MINOR 0         /* Used for help/version information */
 
-#define ADB_SERVER_VERSION    	31    // Increment this when we want to force users to start a new adb server
+#define ADB_SERVER_VERSION    	31    /* Increment this when we want to force users to start a new adb server */
 
 
 #define ADB_AUTH_TOKEN 			1
@@ -125,6 +125,7 @@ typedef struct {
 bool app_adb_run(void);
 bool app_adb_init(void);
 bool app_adb_deinit(void);
+void app_adb_task(void* pa);
 void app_adb_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

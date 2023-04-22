@@ -67,10 +67,10 @@ static bool xboxs_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
         }
     }
 
-	motor1 = remap(motor_data.duty[0],0,255,0,100);
-	motor2 = remap(motor_data.duty[1],0,255,0,100);
-	small_l = remap(motor_data.duty[2],0,255,0,100);
-	small_r = remap(motor_data.duty[3],0,255,0,100);
+	motor1 = remap(motor_data.duty[RUMBLE_L],0,255,0,100);
+	motor2 = remap(motor_data.duty[RUMBLE_R],0,255,0,100);
+	small_l = remap(motor_data.duty[RUMBLE_SL],0,255,0,100);
+	small_r = remap(motor_data.duty[RUMBLE_SR],0,255,0,100);
 	motor.bt_cmd = 0;
 	motor.rumble_mask = 0x0f;
 	motor.motor1 = motor1;
@@ -97,8 +97,8 @@ static bool xboxs_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 
 static bool x360_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[0];
-	uint8_t motor2 = prumble->duty[1];
+	uint8_t motor1 = prumble->duty[RUMBLE_L];
+	uint8_t motor2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
 		x360_usb_motor_t motor;
 		memset(&motor,0,sizeof(motor));
@@ -125,7 +125,7 @@ static bool x360_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 		如果是普通按键触发的, home按键是同样有效的
 ** Returns:			
 *******************************************************************/
-static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key=0;
@@ -145,11 +145,11 @@ static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, a
 			keyp->stick_l.y = SWAP16_L(xbox_inp->y);
 			keyp->stick_r.x = SWAP16_L(xbox_inp->rx);
 			keyp->stick_r.y = SWAP16_L(xbox_inp->ry);
-			keyp->trigger.x = SWAP16_L(xbox_inp->l2)>>2;
-			keyp->trigger.y = SWAP16_L(xbox_inp->r2)>>2;
+			keyp->l2 = SWAP16_L(xbox_inp->l2)>>2;
+			keyp->r2 = SWAP16_L(xbox_inp->r2)>>2;
 			
-			if(keyp->trigger.x) keyp->key |= XBOX_L2;
-			if(keyp->trigger.y) keyp->key |= XBOX_R2;
+			if(keyp->l2) keyp->key |= XBOX_L2;
+			if(keyp->r2) keyp->key |= XBOX_R2;
             xbox_host_key = keyp->key;
 			ret = true;
 		}else if(XBOX_HOME_REP_CMD == xbox_inp->id){
@@ -178,17 +178,17 @@ static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, a
 			keyp->stick_l.y = negative_int16(keyp->stick_l.y);			//取反
 			keyp->stick_r.y = negative_int16(keyp->stick_r.y);
 
-			keyp->trigger.x = SWAP16_L(bt_xboxp->l2)>>2;
-			keyp->trigger.y = SWAP16_L(bt_xboxp->r2)>>2;
-			if(keyp->trigger.x) keyp->key |= GAMEPAD_L2;
-			if(keyp->trigger.y) keyp->key |= GAMEPAD_R2;
+			keyp->l2 = SWAP16_L(bt_xboxp->l2)>>2;
+			keyp->r2 = SWAP16_L(bt_xboxp->r2)>>2;
+			if(keyp->l2) keyp->key |= GAMEPAD_L2;
+			if(keyp->r2) keyp->key |= GAMEPAD_R2;
 			ret = true;
 		}
 	}
 	return ret;
 }
 
-static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	uint32_t key;
@@ -202,10 +202,10 @@ static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, ap
 		keyp->stick_l.y = SWAP16_L(x360_inp->y);
 		keyp->stick_r.x = SWAP16_L(x360_inp->rx);
 		keyp->stick_r.y = SWAP16_L(x360_inp->ry);
-		keyp->trigger.x = x360_inp->l2;
-		keyp->trigger.y = x360_inp->r2;
-		if(keyp->trigger.x) keyp->key |= X360_L2;
-		if(keyp->trigger.y) keyp->key |= X360_R2;
+		keyp->l2 = x360_inp->l2;
+		keyp->r2 = x360_inp->r2;
+		if(keyp->l2) keyp->key |= X360_L2;
+		if(keyp->r2) keyp->key |= X360_R2;
 		ret = true;
 	}
 	return ret;
@@ -221,7 +221,7 @@ static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, ap
 void xbox_spk_transfer(uint8_t id, usb_endp_t *endpp, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t spk_buf[192+6];
-	uint32_t spk_frame_len = api_audio_get_spk_len(&usbh_audio_info);
+	uint32_t spk_frame_len = API_AUDIO_SPK_SIZE(&usbh_audio_info);
 	static uint8_t spk_head[]={0x60,0x21,0x00,0xc0,0x81,0x00};
 
 	spk_head[2]++;
@@ -249,7 +249,7 @@ bool xbox_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 	return ret;
 }
 
-bool xbox_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_key_t*keyp)
+bool xbox_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp)
 {
 	bool ret = false;
 	hid_type_t hid_type = phandle->index & 0XFF;
@@ -348,7 +348,7 @@ bool xbox_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 	return ret;
 }
 
-void xbox_enum_handler(trp_handle_t* phandle)		//xbox手柄枚举需要发送开始信号
+void xbox_enum_process(trp_handle_t* phandle)		//xbox手柄枚举需要发送开始信号
 {
 	xbox_command_t tx_cmd;
 	static timer_t xbox_enum_timer;
@@ -413,9 +413,9 @@ void xbox_host_deinit(trp_handle_t *phandle)
 	xbox_command_free(&xbox_host_cmd_rx);			//用于异常释放资源
 }
 
-void xbox_host_handler(trp_handle_t *phandle)
+void xbox_host_task(trp_handle_t *phandle)
 {
-	xbox_enum_handler(phandle);		//xbox手柄枚举需要发送开始信号
+	xbox_enum_process(phandle);		//xbox手柄枚举需要发送开始信号
 }
 
 

@@ -17,22 +17,8 @@
 
 #include "api/usb/host/usbh.h"
 
-#include "app/gamepad/gamepad_typedef.h"
-#include "app/gamepad/switch_typedef.h"
-#include "app/gamepad/xbox_typedef.h"
-#include "app/gamepad/ps_typedef.h"
-
-#if USBH_HID_SUPPORT & HID_SWITCH_MASK
-#include  "app/gamepad/switch_controller.h"
-#endif
-#if USBH_HID_SUPPORT & HID_PS_MASK
-#include  "app/gamepad/ps_controller.h"
-#endif
-#if USBH_HID_SUPPORT & HID_XBOX_MASK
-#include  "app/gamepad/xbox_controller.h"
-#endif
-#if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-#include  "app/gamepad/gamepad_controller.h"
+#if APP_GAMEAPD_ENABLE
+#include "app/gamepad/app_gamepad.h"
 #endif
 
 
@@ -45,7 +31,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-app_key_t usbh_gamepad_key;	   				//手柄按键信息
+app_gamepad_key_t usbh_gamepad_key;	   				//手柄按键信息
 
 
 /******************************************************************************************************
@@ -118,45 +104,10 @@ void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf,
 	logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 
     trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
-    
-    switch(pclass->hid_type){
-        #if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-        case HID_TYPE_GAMEPADE:
-            if(!gamepad_key_decode(&trp_handle,buf,len,&usbh_gamepad_key)){
-                gamepad_in_process(&trp_handle, buf, len);
-            }
-            break;
-        #endif
-        #if (HIDD_SUPPORT & HID_XBOX_MASK)
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-            if(!xbox_key_decode(&trp_handle,buf,len,&usbh_gamepad_key)){
-                xbox_in_process(&trp_handle, buf, len);
-            }
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_SWITCH_MASK
-        case HID_TYPE_SWITCH:
-            if(!switch_key_decode(&trp_handle,buf,len,&usbh_gamepad_key)){
-                switch_in_process(&trp_handle, buf, len);
-            }
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_PS_MASK
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            if(!ps_key_decode(&trp_handle,buf,len,&usbh_gamepad_key)){
-                // ps_in_process(&trp_handle, buf, len);
-            }
-            break;
-        #endif
-        default:
-            break;
-    }
+    app_gamepad_in_process(&trp_handle,&usbh_gamepad_key,buf,len);
 }
 
-error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass) 
+error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
 {
     error_t err = ERROR_SUCCESS;
     uint8_t buf[0X40];
@@ -300,33 +251,7 @@ error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNKNOW;
     trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
 
-    switch(pclass->hid_type){
-        #if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-        case HID_TYPE_GAMEPADE:
-            gamepad_controller_deinit(&trp_handle);
-            break;
-        #endif
-        #if (HIDD_SUPPORT & HID_XBOX_MASK)
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-            xbox_controller_deinit(&trp_handle);
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_SWITCH_MASK
-        case HID_TYPE_SWITCH:
-            switch_controller_deinit(&trp_handle);
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_PS_MASK
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            ps_controller_deinit(&trp_handle);
-            break;
-        #endif
-        default:
-            break;
-    }
+    app_gamepad_deinit(&trp_handle);
     
     UNUSED_PARAMETER(id);
 	return 0;
@@ -337,38 +262,10 @@ error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_hid_gamepad_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_hid_gamepad_task(uint8_t id, usbh_class_t *pclass)
 {
     trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
-
-    switch(pclass->hid_type){
-        #if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-        case HID_TYPE_GAMEPADE:
-            gamepad_controller_handler(&trp_handle);
-            break;
-        #endif
-        #if (HIDD_SUPPORT & HID_XBOX_MASK)
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-            xbox_controller_handler(&trp_handle);
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_SWITCH_MASK
-        case HID_TYPE_SWITCH:
-            switch_controller_handler(&trp_handle);
-            break;
-        #endif
-        #if USBH_HID_SUPPORT & HID_PS_MASK
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            ps_controller_handler(&trp_handle);
-            break;
-        #endif
-        default:
-            break;
-    }
-
+    app_gamepad_task(&trp_handle);
     UNUSED_PARAMETER(id);
 }
 

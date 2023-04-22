@@ -18,7 +18,7 @@
 
 #include "emf_typedef.h"
 #include "api/api_transport.h"
-#include "app/app_key.h"
+#include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 #if API_NFC_ENABLE
 #include "app/gamepad/switch_nfc.h"
@@ -33,15 +33,14 @@ extern switch_nfc_t switch_host_nfc;
 /*******************************************************************************************************************
 **	Functions
 ********************************************************************************************************************/
-bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_key_t*keyp);
-uint8_t switch_motor_decode(switch_motor_bit_t* pmotor_bit);
-
-
+bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gamepad_key_t*keyp);
+switch_rumble_bit_t switch_rumble_encode(uint8_t duty);
+bool switch_rumble_send(trp_handle_t *phandle, rumble_t const *prumble);
 bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len);
 
 bool switch_host_init(trp_handle_t *phandle);
 bool switch_host_deinit(trp_handle_t *phandle);
-void switch_host_handler(trp_handle_t *phandle);
+void switch_host_task(trp_handle_t *phandle);
 
 
 #endif

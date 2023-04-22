@@ -79,14 +79,14 @@ bool switch_controller_deinit(trp_handle_t *phandle)
     return true;
 }
 
-void switch_controller_handler(trp_handle_t *phandle)
+void switch_controller_task(trp_handle_t *phandle)
 {
     #if (HIDD_SUPPORT & HID_SWITCH_MASK)
-    switch_device_handler(phandle);
+    switch_device_task(phandle);
     #endif
 
     #if (HIDH_SUPPORT & HID_SWITCH_MASK)
-    switch_host_handler(phandle);
+    switch_host_task(phandle);
     #endif
 }
 

@@ -22,8 +22,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define TAG_SIZE_MAX		540		//NTAG215
-#define TAG_PAGE_SIZE		(60)	//NTAG215 page, 根据不同芯片不一样
+#define TAG_SIZE_MAX		540		/*NTAG215*/
+#define TAG_PAGE_SIZE		(60)	/*NTAG215 page, 根据不同芯片不一样*/
 
 
 
@@ -42,7 +42,7 @@ bool nfc_driver_read(uint16_t addr, uint8_t *buf, uint16_t len);
 bool nfc_driver_write(uint16_t addr, uint8_t *buf, uint16_t len);
 bool nfc_driver_init(void);
 bool nfc_driver_deinit(void);
-void nfc_driver_handler(uint32_t period_10us);
+void nfc_driver_task(void *pa);
 
 #ifdef __cplusplus
 }

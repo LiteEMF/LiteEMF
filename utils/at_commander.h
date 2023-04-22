@@ -36,6 +36,7 @@ extern "C" {
 ******************************************************************************************************/
 bool at_commander_init(void);
 bool at_commander_deinit(void);
+void at_commander_task(void* pa);
 void at_commander_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

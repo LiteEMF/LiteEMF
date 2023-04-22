@@ -80,7 +80,7 @@ uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class
 error_t usbh_class_in(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t* plen, uint16_t timeout_ms);
 error_t usbh_class_out(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t len);
 void usbh_class_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
-void usbh_class_handler(uint32_t period_10us);
+void usbh_class_task(uint32_t dt_ms);
 error_t  usbh_class_init(uint8_t id,usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
 error_t  usbh_class_open(uint8_t id);
 error_t  usbh_class_deinit(uint8_t id);

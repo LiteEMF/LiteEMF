@@ -102,101 +102,94 @@ bool ps_encrypt_start(uint8_t cmd_index)
 	return ret;
 }
 
-//RET: true: 处理过程, false:处理完成
-bool ps_encrypt_handler(uint32_t period_10us)
+void ps_encrypt_task(void *pa)
 {
-	bool ret = true;
 	uint16_t addr;
-	static timer_t ps_timer;
 
-	if(m_task_tick10us - ps_timer >= period_10us){
-		//logd("p2 setp=%d\n",ps_encrypt.step);
-		switch(ps_encrypt.step){
-		case PS_CHALLENGE:
+	//logd("p2 setp=%d\n",ps_encrypt.step);
+	switch(ps_encrypt.step){
+	case PS_CHALLENGE:
 
-			ps_encrypt.len = 0;
-			ps_encrypt.index = 0;
+		ps_encrypt.len = 0;
+		ps_encrypt.index = 0;
 
-			#if PS_P2_ENCRYPT_ENABLED
+		#if PS_P2_ENCRYPT_ENABLED
+		ps_encrypt.step = PS_WRITE_SECURITY;
+		logd("set PS_WRITE_SECURITY\n");
+		#elif PS_7105_ENCRYPT_ENABLED
+		if(nxp7105_write_encrypt(ps_encrypt.index,NULL,0)){
 			ps_encrypt.step = PS_WRITE_SECURITY;
 			logd("set PS_WRITE_SECURITY\n");
-			#elif PS_7105_ENCRYPT_ENABLED
-			if(nxp7105_write_encrypt(ps_encrypt.index,NULL,0)){
-				ps_encrypt.step = PS_WRITE_SECURITY;
-				logd("set PS_WRITE_SECURITY\n");
-			}
-			#endif
-			break;
-		case PS_WRITE_SECURITY:
-			if(ps_encrypt.len >= 256){
-				ps_encrypt.step = PS_READ_SECURITY;
-				ps_encrypt.index = 0;
-				ps_encrypt.len = 0;
-				logd("set PS_READ_SECURITY\n");
-			}else{
-				#if PS_P2_ENCRYPT_ENABLED
-				if(p2_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
-					ps_encrypt.len += 16;
-					ps_encrypt.index++;
-				}else{
-					logd("iic write %d err!\n",ps_encrypt.index);
-				}
-				#elif PS_7105_ENCRYPT_ENABLED
-				if(nxp7105_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],NXP7105_MTU)){
-					ps_encrypt.len += NXP7105_MTU;
-					ps_encrypt.index++;
-				}
-				#endif
-			}
-			break;
-		case PS_READ_SECURITY:
-			if(ps_encrypt.len >= PS_READ_SECURITY_LEN){
-				ps_encrypt.step = PS_CALCULATE_PHASE2;
-				ps_encrypt.index = 0;
-				ps_encrypt.len = 0;
-				logd("set PS_CALCULATE_PHASE2\n");
-			}else{
-				#if PS_P2_ENCRYPT_ENABLED
-				if(p2_read_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
-					ps_encrypt.len += 16;
-					ps_encrypt.index++;
-				}else{
-					logd("iic read %d err!\n",ps_encrypt.index);
-				}
-				#elif PS_7105_ENCRYPT_ENABLED
-				uint8_t len=0;
-				if(ps_encrypt.index){		//第一条指令是获取地址不读取数据
-					len = MIN(NXP7105_MTU, PS_READ_SECURITY_LEN - ps_encrypt.len);
-				}
-				if(nxp7105_read_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],len)){
-					ps_encrypt.len += len;
-					ps_encrypt.index++;
-				}
-				#endif
-			}
-			break;
-		case PS_CALCULATE_PHASE2:
-		{
-			#if PS_P2_ENCRYPT_ENABLED
-			extern int p2_test(void);
-			timer_t p2_time = m_systick;
-			logd("p2 start...");
-			//int ret = p2_test();
-			p2_doit(ps_encrypt_buf,ps_encrypt_buf);
-			logd("p2 t=%d...\n",m_systick-p2_time);
-			#endif
-
-			ps_encrypt.step = PS_ANSWER;
+		}
+		#endif
+		break;
+	case PS_WRITE_SECURITY:
+		if(ps_encrypt.len >= 256){
+			ps_encrypt.step = PS_READ_SECURITY;
 			ps_encrypt.index = 0;
-			logd("set PS_ANSWER\n");
-			break;
+			ps_encrypt.len = 0;
+			logd("set PS_READ_SECURITY\n");
+		}else{
+			#if PS_P2_ENCRYPT_ENABLED
+			if(p2_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
+				ps_encrypt.len += 16;
+				ps_encrypt.index++;
+			}else{
+				logd("iic write %d err!\n",ps_encrypt.index);
+			}
+			#elif PS_7105_ENCRYPT_ENABLED
+			if(nxp7105_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],NXP7105_MTU)){
+				ps_encrypt.len += NXP7105_MTU;
+				ps_encrypt.index++;
+			}
+			#endif
 		}
-		default:
-			ret = false;
-			break;
+		break;
+	case PS_READ_SECURITY:
+		if(ps_encrypt.len >= PS_READ_SECURITY_LEN){
+			ps_encrypt.step = PS_CALCULATE_PHASE2;
+			ps_encrypt.index = 0;
+			ps_encrypt.len = 0;
+			logd("set PS_CALCULATE_PHASE2\n");
+		}else{
+			#if PS_P2_ENCRYPT_ENABLED
+			if(p2_read_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
+				ps_encrypt.len += 16;
+				ps_encrypt.index++;
+			}else{
+				logd("iic read %d err!\n",ps_encrypt.index);
+			}
+			#elif PS_7105_ENCRYPT_ENABLED
+			uint8_t len=0;
+			if(ps_encrypt.index){		//第一条指令是获取地址不读取数据
+				len = MIN(NXP7105_MTU, PS_READ_SECURITY_LEN - ps_encrypt.len);
+			}
+			if(nxp7105_read_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],len)){
+				ps_encrypt.len += len;
+				ps_encrypt.index++;
+			}
+			#endif
 		}
+		break;
+	case PS_CALCULATE_PHASE2:
+	{
+		#if PS_P2_ENCRYPT_ENABLED
+		extern int p2_test(void);
+		timer_t p2_time = m_systick;
+		logd("p2 start...");
+		//int ret = p2_test();
+		p2_doit(ps_encrypt_buf,ps_encrypt_buf);
+		logd("p2 t=%d...\n",m_systick-p2_time);
+		#endif
+
+		ps_encrypt.step = PS_ANSWER;
+		ps_encrypt.index = 0;
+		logd("set PS_ANSWER\n");
+		break;
 	}
-	return ret;
+	default:
+		break;
+	}
 }
 
 

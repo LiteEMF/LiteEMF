@@ -299,15 +299,15 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_hid_handler(uint8_t id, usbh_class_t *pclass)
+void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
 {
     switch(pclass->hid_type){
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
-            usbh_hid_km_handler(id, pclass);
+            usbh_hid_km_task(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
-            usbh_hid_gamepad_handler(id, pclass);
+            usbh_hid_gamepad_task(id, pclass);
             break;
         default:
             break;

@@ -22,7 +22,6 @@
 **	public Parameters
 *******************************************************************************************************/
 
-
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -30,7 +29,7 @@
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-#if defined(MATRIX_KB_IN_GPIO) && defined(MATRIX_KB_OUT_GPIO)	&& defined(MATRIX_KB)	
+#if defined(MATRIX_KB_IN_GPIO) && defined(MATRIX_KB_OUT_GPIO)	&& defined(MATRIX_KB)	 
 //[IN],[OUT]
 static uint8c_t matrix_kb_in_gpio[] = MATRIX_KB_IN_GPIO; 
 static uint8c_t matrix_kb_out_gpio[] = MATRIX_KB_OUT_GPIO; 
@@ -61,12 +60,11 @@ static void matrix_kb_init(void)
 ** Returns:		keyboard scan key num
 ** Description:		
 *******************************************************************/
-static uint8_t matrix_kb_scan(uint8_t* keyp, uint8_t len)
+static uint8_t matrix_kb_scan(kb_bit_t* keyp)
 {
 	uint8_t out;
 	uint8_t in;
 	uint8_t key;
-	uint8_t k=0;
 	for(out = 0; out < countof(matrix_kb_out_gpio); out++){
 		//out 
 		api_gpio_dir(matrix_kb_out_gpio[out], PIN_OUT, 0);
@@ -76,9 +74,13 @@ static uint8_t matrix_kb_scan(uint8_t* keyp, uint8_t len)
 			if(MATRIX_KB_ACTIVE == BOOL_SET(api_gpio_in( matrix_kb_in_gpio[in])) ){
 				key = matrix_kb[out][in];
 				if(key){
-					if(k < len) {			
-						keyp[k++] = key;
+					if(key & 0XE0 == 0XE0) {
+						keyp->fn |= 0X01 << (key-0xE0);
 					}else{
+						uint8_t index = key / 8;
+						if(index < sizeof(keyp->key)){
+							keyp->key[index] |= 0X01 << (key % 8);
+						}
 						break;
 					}
 				}
@@ -120,17 +122,21 @@ static void iokb_init(void)
 ** Returns:		keyboard scan key num
 ** Description:		
 *******************************************************************/
-static uint8_t iokb_scan(uint8_t* keyp, uint8_t len)
+static uint8_t iokb_scan(kb_bit_t* keyp)
 {
 	uint8_t key;
-	uint8_t i,k=0;
+	uint8_t i;
 	for(i = 0; i < countof(io_kb_gpio); i++){
 		if(IO_KB_ACTIVE == BOOL_SET(api_gpio_in(io_kb_gpio[i])) ){
 			key = io_kb[i];
 			if(key){
-				if(k < len) {			
-					keyp[k++] = key;
+				if(key & 0XE0 == 0XE0) {
+					keyp->fn |= 0X01 << (key-0xE0);
 				}else{
+					uint8_t index = key / 8;
+					if(index < sizeof(keyp->key)){
+						keyp->key[index] |= 0X01 << (key % 8);
+					}
 					break;
 				}
 			}
@@ -151,7 +157,7 @@ static uint8_t iokb_scan(uint8_t* keyp, uint8_t len)
 ** Returns:		keyboard scan key num
 ** Description:		
 *******************************************************************/
-uint8_t io_keyboard_scan(uint8_t* keyp, uint8_t len)
+uint8_t io_keyboard_scan(kb_bit_t* keyp)
 {
 	uint8_t i = 0;
 	

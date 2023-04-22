@@ -15,7 +15,7 @@
 	& (BIT_ENUM(HID_TYPE_PS3) | BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5)) )
 
 #include "api/usb/device/usbd.h"
-#include "app/gamepad/ps_controller.h"
+#include "app/gamepad/app_gamepad.h"
 
 
 #include "api/api_log.h"
@@ -199,7 +199,7 @@ error_t usbd_hid_ps_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, 
 {
 	trp_handle_t trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
 
-	ps_dev_process(&trp_handle, buf,len);
+	app_gamepad_dev_process(&trp_handle, buf,len);
 
     return ERROR_SUCCESS;
 }
@@ -232,7 +232,7 @@ error_t usbd_hid_ps_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_ps_handler(uint8_t id)
+void usbd_hid_ps_task(uint8_t id)
 {
 	UNUSED_PARAMETER(id);
 }

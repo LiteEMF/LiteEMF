@@ -200,37 +200,53 @@ bool api_nfc_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void api_nfc_task(void* pa)
+{
+	switch(m_api_nfc_sta){
+	case NFC_IDLE:
+		break;
+	case NFC_POLLING:
+		if(api_nfc_polling()){
+			m_api_nfc_sta = NFC_GET_TAG_SN;
+			logd("m_api_nfc_sta=%d\n",m_api_nfc_sta);
+		}
+		break;
+	case NFC_NTAG_READ:
+		if(api_nfc_read(0,m_nfc_buf, sizeof(m_nfc_buf))){
+			m_api_nfc_sta = NFC_NTAG_READ_FINLSH;
+		}
+		break;
+	case NFC_NTAG_WRITE:
+		break;
+	case NFC_CLOSE:
+		/*关闭天线以及休眠卡*/
+		api_nfc_deinit(); 
+		m_api_nfc_sta = NFC_CLOSE;
+		break;
+	default:
+		break;
+	}
+	UNUSED_PARAMETER(pa);
+}
+
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void api_nfc_handler(uint32_t period_10us)
 {
-	static timer_t nfc_timer;
-
-	if(m_task_tick10us - nfc_timer >= period_10us){
-		switch(m_api_nfc_sta){
-		case NFC_IDLE:
-			break;
-		case NFC_POLLING:
-			if(api_nfc_polling()){
-				m_api_nfc_sta = NFC_GET_TAG_SN;
-				logd("m_api_nfc_sta=%d\n",m_api_nfc_sta);
-			}
-			break;
-		case NFC_NTAG_READ:
-			if(api_nfc_read(0,m_nfc_buf, sizeof(m_nfc_buf))){
-				m_api_nfc_sta = NFC_NTAG_READ_FINLSH;
-			}
-			break;
-		case NFC_NTAG_WRITE:
-			break;
-		case NFC_CLOSE:
-			/*关闭天线以及休眠卡*/
-			api_nfc_deinit(); 
-			m_api_nfc_sta = NFC_CLOSE;
-			break;
-		default:
-			break;
-		}
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		api_nfc_task(NULL);
 	}
 }
+#endif
+
+
 #endif
 
 

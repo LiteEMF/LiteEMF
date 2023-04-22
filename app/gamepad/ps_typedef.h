@@ -29,28 +29,27 @@
 
 
 //第三方ps4手柄手柄
-#define  COOVE_VID			0x7545				//coovelite 	dongle
+#define  COOVE_VID			0x7545				/*coovelite 	dongle*/ 
 #define  COOVELITE_PID		0x1073
 
 
 #define PS4_TOUCH_MAX_X		1920
 #define PS4_TOUCH_MAX_Y		900
 #define PS4_SLOT_MAX		2
-#define PS4_ID_NULL			0XFF	//id
 
-#ifndef PS_S2_SPK_RATE							//PS4_SERIES2
+#ifndef PS_S2_SPK_RATE							/*PS4_SERIES2 */
 #define PS_S2_SPK_RATE           32000
 #endif
 #ifndef PS_S2_MIC_RATE
 #define PS_S2_MIC_RATE           16000
 #endif
-#ifndef PS_S1_SPK_RATE							//PS4_SERIES1
+#ifndef PS_S1_SPK_RATE							/*PS4_SERIES1 */
 #define PS_S1_SPK_RATE           48000
 #endif
 #ifndef PS_S1_MIC_RATE
 #define PS_S1_MIC_RATE           24000
 #endif
-#ifndef PS_P3_SPK_RATE							//PS4_PARTY3,默认自定义修改的手柄
+#ifndef PS_P3_SPK_RATE							/*PS4_PARTY3,默认自定义修改的手柄 */
 #define PS_P3_SPK_RATE           48000
 #endif
 #ifndef PS_P3_MIC_RATE
@@ -104,15 +103,15 @@ typedef enum {
 #define  PS3_UP						(0x01UL<<PS3_UP_POS		 )
 #define  PS3_RIGHT					(0x01UL<<PS3_RIGHT_POS	 )
 #define  PS3_DOWN					(0x01UL<<PS3_DOWN_POS	 )
-#define  PS3_LEFT					(0x01UL<<PS3_LEFT_POS	)	// HAT SWITCH
+#define  PS3_LEFT					(0x01UL<<PS3_LEFT_POS	)	/* HAT SWITCH */
 #define  PS3_L2						(0x01UL<<PS3_L2_POS		 )
 #define  PS3_R2						(0x01UL<<PS3_R2_POS		 )
 #define  PS3_L1						(0x01UL<<PS3_L1_POS		 )
 #define  PS3_R1						(0x01UL<<PS3_R1_POS		 )
-#define  PS3_TRIANGLE				(0x01UL<<PS3_TRIANGLE_POS)	//三角形
-#define  PS3_O						(0x01UL<<PS3_O_POS		)	//圆
-#define  PS3_X						(0x01UL<<PS3_X_POS		)	//X形
-#define  PS3_SQUARE					(0x01UL<<PS3_SQUARE_POS	)	//方
+#define  PS3_TRIANGLE				(0x01UL<<PS3_TRIANGLE_POS)	/*三角形 */
+#define  PS3_O						(0x01UL<<PS3_O_POS		)	/*圆 */
+#define  PS3_X						(0x01UL<<PS3_X_POS		)	/*X形 */
+#define  PS3_SQUARE					(0x01UL<<PS3_SQUARE_POS	)	/*方 */
 #define  PS3_PS						(0x01UL<<PS3_PS_POS		 )
 //#define  PS3_Z					(0x01UL<<  PS3_Z		 )
 #define  PS3_L_UP					(0x01UL<<PS3_L_UP_POS	 )
@@ -128,7 +127,7 @@ typedef enum {
 #define  PS4_UP_POS						(0 )
 #define  PS4_RIGHT_POS					(1 )
 #define  PS4_DOWN_POS					(2 )
-#define  PS4_LEFT_POS					(3 ) 		// HAT SWITCH
+#define  PS4_LEFT_POS					(3 ) 		/* HAT SWITCH */
 #define  PS4_SQUARE_POS					(4 )
 #define  PS4_X_POS						(5 )
 #define  PS4_O_POS						(6 )
@@ -145,10 +144,10 @@ typedef enum {
 #define  PS4_TOUCH_KEY_POS				(17)
 										//(18)						
 
-#define  PS4_TOUCH_U_POS				(20)	//touch面板上约12-1点钟方向的区域(为了兼容rewasd平台)
-#define  PS4_TOUCH_D_POS				(21)	//touch面板上约6-1点钟方向的区域		
-#define  PS4_TOUCH_L_POS				(22)	//touch面板上约9-1点钟方向的区域
-#define  PS4_TOUCH_R_POS	    		(23)	//touch面板上约3-1点钟方向的区域
+#define  PS4_TOUCH_U_POS				(20)	/*touch面板上约12-1点钟方向的区域(为了兼容rewasd平台) */
+#define  PS4_TOUCH_D_POS				(21)	/*touch面板上约6-1点钟方向的区域 */		
+#define  PS4_TOUCH_L_POS				(22)	/*touch面板上约9-1点钟方向的区域 */
+#define  PS4_TOUCH_R_POS	    		(23)	/*touch面板上约3-1点钟方向的区域 */
 #define  PS4_L_UP_POS					(24)
 #define  PS4_L_DOWN_POS					(25)
 #define  PS4_L_LEFT_POS					(26)
@@ -161,7 +160,7 @@ typedef enum {
 #define  PS4_UP						(0x01UL<<PS4_UP_POS			)
 #define  PS4_RIGHT					(0x01UL<<PS4_RIGHT_POS		)
 #define  PS4_DOWN					(0x01UL<<PS4_DOWN_POS		)
-#define  PS4_LEFT					(0x01UL<<PS4_LEFT_POS		)// HAT SWITCH
+#define  PS4_LEFT					(0x01UL<<PS4_LEFT_POS		)/* HAT SWITCH */
 #define  PS4_SQUARE					(0x01UL<<PS4_SQUARE_POS		)
 #define  PS4_X						(0x01UL<<PS4_X_POS			)
 #define  PS4_O						(0x01UL<<PS4_O_POS			)
@@ -193,13 +192,13 @@ typedef enum {
 
 
 
-#define PS4_USB_EFFECTS_ID			 	0x05		//USB 马达指令
-#define PS4_BT_EFFECTS_ID				0x11		//蓝牙协议 马达指令
+#define PS4_USB_EFFECTS_ID			 	0x05		/*USB 马达指令 */
+#define PS4_BT_EFFECTS_ID				0x11		/*蓝牙协议 马达指令 */
 
 
 #define PS4_REPORT_ID			 		0x01
-#define PS4_BT_LARGE_REPORT_ID			0x11		//蓝牙协议发送完整数据,
-#define PS4_BT_LARGE_REPORT1_ID			0x12		//0x11~0X1A都是
+#define PS4_BT_LARGE_REPORT_ID			0x11		/*蓝牙协议发送完整数据, */
+#define PS4_BT_LARGE_REPORT1_ID			0x12		/*0x11~0X1A都是 */
 #define PS4_BT_LARGE_REPORT2_ID			0x13		
 #define PS4_BT_LARGE_REPORT3_ID			0x14		
 #define PS4_BT_LARGE_REPORT4_ID			0x15		
@@ -209,12 +208,12 @@ typedef enum {
 #define PS4_BT_LARGE_REPORT8_ID			0x1A
 
 
-#define PS_CHALLENGE_CMD				0xF0			//256	byte
-#define PS_CALCULATE_CHECK_CMD			0xF2			//doing: F2 index 00 , complete:F2 index 10
-#define PS_ANSWE_CMD					0xF1			//1040
+#define PS_CHALLENGE_CMD				0xF0			/*256	byte */
+#define PS_CALCULATE_CHECK_CMD			0xF2			/*doing: F2 index 00 , complete:F2 index 10 */
+#define PS_ANSWE_CMD					0xF1			/*1040 */
 
-#define PS5_USB_EFFECTS_ID			 	0x02		//USB 马达指令
-#define PS5_BT_EFFECTS_ID				0x31		//蓝牙协议 马达指令
+#define PS5_USB_EFFECTS_ID			 	0x02		/*USB 马达指令 */
+#define PS5_BT_EFFECTS_ID				0x31		/*蓝牙协议 马达指令 */
 
 /*******************************************************************************************************************
 **	Parameters

@@ -117,29 +117,31 @@ void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep)
 ** Returns:	
 ** Description:		fir filter
 *******************************************************************/
-void fir_fiter_init(firf_t *firp,float* imp)
+void fir_fiter_init(firf_t *firp,float* imp,uint8_t imp_size)
 {
 	uint8_t i; 
 	memset(firp,0,sizeof(firf_t));
+	firp->imp_size = MIN(imp_size,FIR_FILTER_MAX_LENGTH);
+
 	#if !SAMPLE_FIR_FILTER
-	for(i=0; i<FIR_FILTER_LENGTH; i++){			//for default value
-		fir->impulse_response[i] = 1/FIR_FILTER_LENGTH;
+	for(i=0; i<firp->imp_size; i++){			//for default value
+		fir->impulse_response[i] = 1/firp->imp_size;
 	}
 	if(NULL != imp){
-		memcpy(fir->impulse_response,imp,sizeof(fir->impulse_response));
+		memcpy(fir->impulse_response,imp,firp->imp_size);
 	}
 	#endif
 }
-void fir_axis2f_fiter_init(firf_axis2f_t *firp,float* imp)
+void fir_axis2f_fiter_init(firf_axis2f_t *firp,float* imp,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,imp);
-	fir_fiter_init(&firp->y,imp);
+	fir_fiter_init(&firp->x,imp,imp_size);
+	fir_fiter_init(&firp->y,imp,imp_size);
 }
-void fir_axis3f_fiter_init(firf_axis3f_t *firp,float* imp)
+void fir_axis3f_fiter_init(firf_axis3f_t *firp,float* imp,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,imp);
-	fir_fiter_init(&firp->y,imp);
-	fir_fiter_init(&firp->z,imp);
+	fir_fiter_init(&firp->x,imp,imp_size);
+	fir_fiter_init(&firp->y,imp,imp_size);
+	fir_fiter_init(&firp->z,imp,imp_size);
 }
 void fir_fiter(firf_t *firp, int32_t measure)
 {
@@ -148,13 +150,13 @@ void fir_fiter(firf_t *firp, int32_t measure)
 
 	#if SAMPLE_FIR_FILTER
 		firp->sum += measure - firp->buf[firp->index];
-		firp->out = firp->sum / FIR_FILTER_LENGTH;
+		firp->out = firp->sum / firp->imp_size;
 	#endif
 	
 	/* Store latest sample in buffer */
 	firp->buf[firp->index] = measure;
 	firp->index++;
-	if (firp->index == FIR_FILTER_LENGTH) {
+	if (firp->index == firp->imp_size) {
 		firp->index = 0;
 	}
 
@@ -163,19 +165,15 @@ void fir_fiter(firf_t *firp, int32_t measure)
 		fir->sum = 0;
 		sum_index = fir->index;
 
-		for ( n = 0; n < FIR_FILTER_LENGTH; n++) {
+		for ( n = 0; n < firp->imp_size; n++) {
 			/* Decrement index and wrap if necessary */
 			if (sum_index > 0) {
 				sum_index--;
 			} else {
-				sum_index = FIR_FILTER_LENGTH - 1;
+				sum_index = firp->imp_size - 1;
 			}
 			/* Multiply impulse response with shifted input sample and add to output */
-			#ifdef IMPULSE_RESPONSE_DEFAULT
-			fir->sum += s_impulse_response[n] * fir->buf[sum_index];
-			#else
 			fir->sum += fir->impulse_response[n] * fir->buf[sum_index];
-			#endif
 		}
 		fir->out = fir->sum;
     #endif

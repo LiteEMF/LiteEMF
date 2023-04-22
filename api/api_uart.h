@@ -16,7 +16,7 @@
 #include "hw_config.h"
 #include "hal/hal_uart.h"
 #include "api/api_gpio.h"
-#include "emf_utils.h"
+#include "utils/emf_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,6 +94,7 @@ bool api_uart_init(uint8_t id);
 bool api_uart_deinit(uint8_t id);
 void api_uarts_init(void);
 void api_uarts_deinits(void);
+void api_uart_tx_task(void* pa);
 void api_uart_handler(uint32_t period_10us);
 
 //hal

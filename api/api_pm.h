@@ -13,7 +13,7 @@
 #ifndef _api_pm_h
 #define _api_pm_h
 #include "emf_typedef.h"
-#include "hw_config.h"
+#include "api/api_tick.h"
 #include "hal/hal_pm.h"
 
 #ifdef __cplusplus
@@ -24,6 +24,15 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef DISCONNECTED_SLEEP_TIME							//ms
+#define DISCONNECTED_SLEEP_TIME    	(3*1000*60UL)
+#endif
+#ifndef CONNECTED_SLEEP_TIME
+#define CONNECTED_SLEEP_TIME    	(15*1000*60UL)
+#endif
+#ifndef KEY_POWERON_TIME
+#define KEY_POWERON_TIME    		(0)
+#endif
 
 
 
@@ -40,17 +49,36 @@ typedef enum{
 }pm_reson_t;
 
 
+
+
+typedef enum{
+	PM_STA_NORMAL,
+	PM_STA_CHARG_NOT_WORK,
+	PM_STA_RESET,
+	PM_STA_SLEEP,
+}pm_sta_t;
+
 extern pm_reson_t m_reset_reson;
+extern pm_sta_t	m_pm_sta;
+extern timer_t m_pm_sleep_timer;								//休眠定时器
+extern uint32_t m_pm_sleep_timerout;	//休眠超时时间
+extern bool app_pm_key_sleep;		
+
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void api_weakup_init(void);
+bool api_pm_sleep_hook(void);				//__WEAK 
+void api_pm_weakup_check(void);
 void api_boot(uint8_t index);
 void api_reset(void);
 void api_sleep(void);
 bool api_pm_init(void);
+bool api_pm_deinit(void);
+void api_pm_task(void*pa);
+void api_pm_handler(uint32_t period_10us);
 
-//hal
+
+//hal 
 void hal_weakup_init(void);
 pm_reson_t hal_get_reset_reson(void);
 void hal_boot(uint8_t index);

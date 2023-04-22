@@ -60,11 +60,26 @@ bool at_commander_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void at_commander_handler(uint32_t period_10us)
+void at_commander_task(void* pa)
 {
-	UNUSED_PARAMETER(period_10us);
+	UNUSED_PARAMETER(pa);
 }
 
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void at_commander_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		at_commander_task(NULL);
+	}
+}
+#endif
 
 
 

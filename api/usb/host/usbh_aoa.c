@@ -254,7 +254,7 @@ error_t usbh_aoa_deinit( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void usbh_aoa_handler( uint8_t id, usbh_class_t *pclass)
+void usbh_aoa_task( uint8_t id, usbh_class_t *pclass)
 {
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);

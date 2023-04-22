@@ -52,6 +52,7 @@ typedef enum{
 bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop);
 bool imu_driver_init(acc_range_t acc_range,gyro_range_t gyro_range);
 bool imu_driver_deinit(void);
+void imu_driver_task(void* pa);
 void imu_driver_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

@@ -49,7 +49,7 @@ typedef struct
 
 typedef struct
 {   
-    int16_t timeout;         
+    uint32_t timeout;         
     uint8_t percent;
     uint8_t min;
 } rumble_ctb_t;
@@ -60,10 +60,11 @@ extern rumble_t	m_rumble;
 ******************************************************************************************************/
 bool app_rumble_show(void);                      //__WEAK
 void app_rumble_set_pa(uint8_t id, uint8_t min,uint8_t percent);
-void app_rumble_set_duty(uint8_t id,uint8_t duty,uint16_t timeout_ms);
-void app_set_rumble(rumble_t *rumblep,uint16_t timeout_ms);
+void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms);
+void app_set_rumble(rumble_t *rumblep,uint32_t timeout_ms);
 bool app_rumble_init(void);
 bool app_rumble_deinit(void);
+void app_rumble_task(uint32_t dt_ms);
 void app_rumble_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

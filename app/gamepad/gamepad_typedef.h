@@ -33,13 +33,13 @@
 #define GAMEPAD_R1_POS 			(7)
 #define GAMEPAD_L2_POS 			(8)
 #define GAMEPAD_R2_POS 			(9)
-#define GAMEPAD_SELECT_POS 		(10)		//XBOX_BT_MENU_POS
-#define GAMEPAD_START_POS 		(11)		//XBOX_BT_MAP_POS
+#define GAMEPAD_SELECT_POS 		(10)		/*XBOX_BT_MENU_POS */
+#define GAMEPAD_START_POS 		(11)		/*XBOX_BT_MAP_POS */
 #define GAMEPAD_HOME_POS 		(12)
 #define GAMEPAD_L3_POS 			(13)
 #define GAMEPAD_R3_POS 			(14)
 #define GAMEPAD_RES_POS 		(15)
-#define GAMEPAD_BACK_POS		(16) 		//only xbox back or share
+#define GAMEPAD_BACK_POS		(16) 		/*only xbox back or share */
 
 
 #define GAMEPAD_UP_POS 			(20)

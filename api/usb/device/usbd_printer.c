@@ -119,7 +119,7 @@ error_t usbd_printer_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_printer_handler(uint8_t id)
+void usbd_printer_task(uint8_t id)
 {
     UNUSED_PARAMETER(id);
 }

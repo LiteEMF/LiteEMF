@@ -61,22 +61,22 @@ extern "C" {
 #define    KB_9			0X26
 #define    KB_0			0X27
 #define    KB_RETURN	0X28
-#define    KB_ESC		0X29				//Esc
-#define    KB_BACKSPACE	0X2A				//Backspace
+#define    KB_ESC		0X29		
+#define    KB_BACKSPACE	0X2A
 #define    KB_TAB		0X2B
 #define    KB_SPACE		0X2C
-#define	   KB_SUB		0X2D				//- _
-#define    KB_PLUS		0X2E				//=  +
-#define    KB_LBRACE	0X2F				//[
-#define    KB_RBRACE	0X30  			//]
-#define    KB_BSLASH	0X31			//\ |
+#define	   KB_SUB		0X2D				/*  - _ */
+#define    KB_PLUS		0X2E				/*  = + */
+#define    KB_LBRACE	0X2F				/*  [   */
+#define    KB_RBRACE	0X30  		        /*  ]   */
+#define    KB_BSLASH	0X31			    /*  \ | */
 #define    KB_NON_US	0x32
-#define    KB_COLON		0X33				//: ;
-#define    KB_DSPOT		0X34				//'
-#define    KB_USPOT		0X35				//`
-#define    KB_SPOT		0X36				//,
-#define    KB_DOT		0X37				//.
-#define    KB_SLASH		0X38				// / ?
+#define    KB_COLON		0X33				/*  : ;  */
+#define    KB_DSPOT		0X34				/*  '   */
+#define    KB_USPOT		0X35				/*  `   */
+#define    KB_SPOT		0X36				/*  ,   */
+#define    KB_DOT		0X37				/*  .   */
+#define    KB_SLASH		0X38				/*  / ? */
 #define    KB_CAP_LOCK	0X39
 #define    KB_F1		0X3A
 #define    KB_F2		0X3B
@@ -124,14 +124,14 @@ extern "C" {
 
 #define    KB_APP 		0X65
 #define    KB_POWER 	0X66
-#define    KB_EQU 		0X67		//=
+#define    KB_EQU 		0X67		/*  =   */
 #define    KB_F13 		0X68
 #define    KB_F14 		0X69
 #define    KB_F15 		0X6A
 #define    KB_F16 		0X6B
 #define    KB_F17 		0X6C
 #define    KB_F18 		0X6D
-#define    KB_F19 		0X6E		//hide mouse key
+#define    KB_F19 		0X6E		/*hide mouse key*/
 #define    KB_F20 		0X6F
 #define    KB_F21 		0X70
 #define    KB_F22 		0X71
@@ -152,6 +152,10 @@ extern "C" {
 #define    KB_MUTE 		0X7F
 #define    KB_VOL_UP 	0X80
 #define    KB_VOL_DOWN 	0X81
+// #define    KB_LOCK_CAPS 	0X82
+// #define    KB_LOCK_NUM 	   0X83
+// #define    KB_LOCK_SCROLL   0X84
+
 
 
 //0X84 ~ 0XDF  used for user vendor 92
@@ -180,12 +184,12 @@ extern "C" {
 #define    KB_RALT			0XE6
 #define    KB_RWIN			0XE7
 
-#define    KB_FN 	  		0XE8		//vendor
-#define    KB_M1	  		0XE9		//vendor
-#define    KB_M2 			0XEA		//vendor
-#define    KB_M3			0XEB		//vendor
-#define    KB_M4			0XEC		//vendor
-#define    KB_M5			0XED		//vendor
+#define    KB_FN 	  		0XE8		/*vendor*/
+#define    KB_M1	  		0XE9		/*vendor*/
+#define    KB_M2 			0XEA		/*vendor*/
+#define    KB_M3			0XEB		/*vendor*/
+#define    KB_M4			0XEC		/*vendor*/
+#define    KB_M5			0XED		/*vendor*/
 
 
 //0XF0~FF
@@ -223,7 +227,9 @@ extern "C" {
 
 
 
-
+#ifndef PRAGMA_PACK_IGNORED
+#pragma pack(1)
+#endif
 typedef struct 
 {
     uint8_t id;
@@ -232,12 +238,24 @@ typedef struct
 	int16_t y;	
 	int8_t w;	
 } mouse_t;
+#ifndef PRAGMA_PACK_IGNORED
+#pragma pack(0)
+#endif
 
 typedef struct 
 {
     uint8_t id;
-	uint8_t key[8];
+    uint8_t fn;
+    uint8_t res;
+	uint8_t key[6];
 } kb_t;
+
+typedef struct 
+{
+    uint8_t id;
+    uint8_t fn;
+	uint8_t key[16];     /*0~128*/
+} kb_bit_t;
 
 typedef union{
     struct{

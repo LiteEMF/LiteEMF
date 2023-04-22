@@ -146,9 +146,9 @@ bool nfc_driver_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void nfc_driver_handler(uint32_t period_10us)
+void nfc_driver_task(void* pa)
 {
-
+	UNUSED_PARAMETER(pa);
 }
 
 
