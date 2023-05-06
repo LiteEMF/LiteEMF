@@ -13,6 +13,7 @@
 #ifndef _usbh_socket_h
 #define _usbh_socket_h
 #include "emf_typedef.h"
+#include "api/api_transport.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,16 +29,16 @@ extern "C" {
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
+extern trp_handle_t usbh_socket_trp;
+extern bool usbh_socket_configured;
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool template_init(void);
-bool template_deinit(void);
-void template_task(void* pa);
-void template_handler(uint32_t period_10us);
+bool usbh_socket_art_cmd(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
+bool usbh_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
+void usbh_socket_init(trp_handle_t* phandle, uint16_t dev_type);
 
 #ifdef __cplusplus
 }

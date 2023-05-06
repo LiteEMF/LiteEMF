@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #if APP_BATTERY_ENABLE
-
+#include  "utils/emf_utils.h"
 #include  "app/app_battery.h"
 #include  "key_typedef.h"
 #include  "api/api_tick.h"
@@ -88,12 +88,14 @@ uint8_t app_battery_percent(uint16_t vol)
 {
 	uint8_t battery;
 
-	if((BAT_CHARGE_DONE_STA == m_battery_sta) || (vol >= 4200)){
-		battery = 100;
-	}else if(vol <= BAT_PROTECT_VOL){
-		battery = 0;
+	// LiPo batteries have a differnt dischargin curve, see https://www.geogebra.org/calculator/y9ctueps
+	// https://blog.ampow.com/lipo-voltage-chart/
+	if(vol < 3690){
+		battery = remap(vol,BAT_PROTECT_VOL,3690,0,10);
+	}else if(vol < 3850){
+		battery = remap(vol,3690,3850,10,55);
 	}else{
-		battery = ((vol - BAT_PROTECT_VOL) * 100 / (4200 - BAT_PROTECT_VOL));
+		battery = remap(vol,3850,4200,55,100);
 	}
 	return battery;
 }

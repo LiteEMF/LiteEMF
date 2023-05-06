@@ -36,7 +36,7 @@
 	uint8c_t m_led_active_map[countof(m_led_map)] = HW_LED_ACTIVE_MAP;
 	led_ctb_t led_ctb[countof(m_led_map)];
 	uint8_t led_frame[countof(m_led_map)];
-#else						//not used io led
+#else						//used driver ic or other
 	#ifndef HW_LED_NUM		//for default
 	#define HW_LED_NUM	3
 	#endif
@@ -69,15 +69,23 @@ __WEAK bool app_led_show(uint8_t* frame)
 	return ret;
 }
 #endif
-
-
+	
+/*******************************************************************
+** Parameters:	id: led id	
+				period: led period as LED_OFF,LED_FAST,LED_SLOW,LED_ON
+				times: LED_FOREVER or no zero
+** Returns:	
+** Description:		
+*******************************************************************/
 bool app_set_led(uint8_t id, uint8_t period,uint8_t times)
 {
 	uint8_t i;
 	if (id >= m_led_num) return false;
 
-	//sync
-	if((led_ctb[id].period != period) && (period != LED_ON) && (period != LED_OFF)){
+	
+	if(times){			//设置第默认灭灯,保证完整的闪烁周期
+		led_ctb[id].turn = 0;
+	}else if((led_ctb[id].period != period) && (period != LED_ON) && (period != LED_OFF)){		//sync
 		for(i=0; i< m_led_num; i++){
 			if(i == id) continue;
 			if (period == led_ctb[i].period){
@@ -144,15 +152,20 @@ bool app_led_deinit(void)
 
 void app_led_show_task(void *pa)
 {	
-	static uint32_t	led_tick=0;		//50ms
+	static uint32_t	led_tick=0;		// APP_LED_SLICE
 	int8_t i = 0;
 
 	led_tick++;
-	
 	for(i=0; i< m_led_num; i++){
-		if(0 != led_ctb[i].period){
+		//show 
+		if(LED_ON == led_ctb[i].period){
+			led_frame[i] = true;
+		}else if(LED_OFF == led_ctb[i].period){
+			led_frame[i] = false;
+		}else {		//blink
 			if (0 == (led_tick % led_ctb[i].period)){
 				led_ctb[i].turn = !led_ctb[i].turn;	
+
 				if(led_ctb[i].turn && led_ctb[i].times) {
 					led_ctb[i].times--;
 					if(0 == led_ctb[i].times){
@@ -160,14 +173,7 @@ void app_led_show_task(void *pa)
 					}
 				}
 			}
-		}
 		
-		//show 
-		if(LED_ON == led_ctb[i].period){
-			led_frame[i] = true;
-		}else if(LED_OFF == led_ctb[i].period){
-			led_frame[i] = false;
-		}else {
 			#ifdef HW_LED_MAP
 			led_frame[i] = !(led_ctb[i].turn ^ m_led_active_map[i]);
 			#else

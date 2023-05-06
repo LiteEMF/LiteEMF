@@ -50,7 +50,7 @@ typedef struct
 	int8_t res;		//占位
 
     uint8_t fn;
-    uint8_t res;
+    uint8_t key_res;
 	uint8_t key[6];
 } app_km_t;
 

@@ -41,6 +41,7 @@ void hid_desc_parser_test(void);
 void list_test(void);
 bool protobuf_test(void);
 void mem_test(void);
+void app_rgb_test(void);
 
 #ifdef __cplusplus
 }

@@ -14,11 +14,13 @@
 ************************************************************************************************************/
 #include "hw_config.h"
 #if USBH_SOCKET_ENABLED
-#include "usbh_socket.h"
-#include "api/api_transport.h"
+#include "api/usb/usbh_socket.h"
+#include "api/usb/host/usbh.h"
 #include "api/usb/host/usbh.h"
 #include "apP/app_command.h"
-
+#if USBD_SOCKET_ENABLED		//共享内存方式通讯
+#include "api/usb/usbd_socket.h"
+#endif
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -59,7 +61,7 @@ bool usbh_socket_art_cmd(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uin
 		ret = usbd_socket_arg_decode(phandle,cmd,dev_type,buf,len);
 		#endif
 	}else{
-		ret = app_send_arg_command(phandle,cmd,dev_type,buf,len);
+		ret = api_command_arg_tx(phandle,cmd,dev_type,buf,len);
 	}
 	return ret;
 }
@@ -89,10 +91,10 @@ bool usbh_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,
 			if(USB_DIR_IN == preq->bmRequestType.bit.direction){
 				req_buf = emf_malloc(preq->wLength);
 				if(NULL != req_buf){
-					err = usbh_ctrl_transfer( id, buf, req_buf, &req_len);
+					err = usbh_ctrl_transfer( id, preq, req_buf, &req_len);
 				}
 			}else{
-				err = usbh_ctrl_transfer( id, preq, buf+8, len);
+				err = usbh_ctrl_transfer( id, preq, buf+8, NULL);
 			}
 			
 			if ( err == ERROR_SUCCESS ){

@@ -14,10 +14,14 @@
 ************************************************************************************************************/
 #include "hw_config.h"
 #if USBD_SOCKET_ENABLE
-#include "usbd_socket.h"
-#include "api/api_transport.h"
+#include "api/usb/usbd_socket.h"
+#include "api/usb/device/usbd.h"
 #include "api/usb/device/usbd.h"
 #include "apP/app_command.h"
+
+#if USBH_SOCKET_ENABLED		//共享内存方式通讯
+#include "api/usb/usbh_socket.h"
+#endif
 
 #include "api/api_log.h"
 // usb socket 用于手柄引导
@@ -52,15 +56,16 @@ bool usbd_socket_art_cmd(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uin
 		ret = usbh_socket_arg_decode(phandle,cmd,dev_type,buf,len);
 		#endif
 	}else{
-		ret = app_send_arg_command(phandle,cmd,dev_type,buf,len);
+		ret = api_command_arg_tx(phandle,cmd,dev_type,buf,len);
 	}
+	
 	return ret;
 }
 
 
 bool usbd_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len)
 {
-	uint8_t err;
+	uint8_t err = ERROR_FAILE;
 	uint8_t id = 0;			//TODO
 	usbd_class_t *pclass;
 	switch(cmd){

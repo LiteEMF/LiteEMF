@@ -101,7 +101,7 @@ b(high): if x is greater than b.
 #define CONSTRAIN(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x))) 
 #endif
 #ifndef REMAP
-#define REMAP(x, in_min, in_max, out_min, out_max) ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
+#define REMAP(x, in_min, in_max, out_min, out_max) (((x) - (in_min)) * ((out_max) - (out_min)) / ((in_max) - (in_min)) + (out_min))
 #endif
 #ifndef VAL2FLD
 #define VAL2FLD(field_str, value) (((uint32_t)(value) << (field_str##_POS)) & (field_str##_MASK))
@@ -174,7 +174,7 @@ typedef struct _bytes_array_t {
 #endif
 
 #ifndef UNUSED_VARIABLE
-	#define UNUSED_VARIABLE(X)  ((void)(X))
+#define UNUSED_VARIABLE(X)  ((void)(X))
 #endif
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(X) UNUSED_VARIABLE(X)

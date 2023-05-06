@@ -133,8 +133,9 @@ int  main( int  argc,  char  *argv[])
 	// crc_test();
 	// soft_timer_test();
 	// hid_desc_parser_test();
-	mem_test();
-	api_commander_test();
+	// mem_test();
+	// api_commander_test();
+	app_rgb_test();
 
 	while(0){
 		i=0x400000;
@@ -231,7 +232,7 @@ void emf_init(void)
 	#if APP_LED_ENABLE
 	app_led_init();
 	#endif
-	#ifndef APP_RGB_ENABLE
+	#if APP_RGB_ENABLE
 	app_rgb_init();
 	#endif
 }
@@ -311,10 +312,10 @@ void emf_handler(uint32_t period_10us)
 	app_rumble_handler(64*100);
 	#endif
 	#if APP_LED_ENABLE
-	app_led_handler(LED_SHOW_PERIOD);
+	app_led_handler(APP_LED_SLICE);
 	#endif
-	#ifndef APP_RGB_ENABLE
-	app_rgb_handler(20*100);
+	#if APP_RGB_ENABLE
+	app_rgb_handler(APP_RGB_SLICE*100);
 	#endif
 
 	#if API_SOFT_TIMER_ENABLE

@@ -100,7 +100,7 @@ __WEAK void app_imu_event(imu_cal_sta_t event)
 #if IMU_FILTER_ENABLE
 static void app_imu_filter_init(void)
 {
-	fir_axis3f_fiter_init(&gyro_filter,NULL);
+	fir_axis3f_fiter_init(&gyro_filter,NULL,0);
 	#if ACC_FILTER_KALMAN
 	kalman_axis3f_filter_init(&acc_filter,ACC_KALMAN_Q,ACC_KALMAN_R);
 	#endif

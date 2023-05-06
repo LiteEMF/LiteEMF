@@ -23,6 +23,25 @@
 		"template.h": "c",
 		"usbh.h": "c",
 		"emf_typedef.h": "c",
-		"usbh_socket.h": "c"
+		"usbh_socket.h": "c",
+		"emf_math.h": "c",
+		"color_palette.h": "c",
+		"color_utils.h": "c",
+		"cmath": "cpp",
+		"cstdarg": "cpp",
+		"cstdint": "cpp",
+		"cstdio": "cpp",
+		"cstdlib": "cpp",
+		"*.tcc": "cpp",
+		"typeinfo": "cpp",
+		"app_rgb.h": "c",
+		"emf_mem.h": "c",
+		"emf_utils.h": "c",
+		"emf_config.h": "c",
+		"hw_board.h": "c",
+		"stddef.h": "c",
+		"math.h": "c",
+		"app_battery.h": "c",
+		"key_typedef.h": "c"
 	}
 }

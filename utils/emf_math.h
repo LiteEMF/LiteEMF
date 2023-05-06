@@ -9,11 +9,9 @@
 * 
 */
 
-
-#ifndef _usbd_socket_h
-#define _usbd_socket_h
+#ifndef _emf_math_h
+#define _emf_math_h
 #include "emf_typedef.h"
-#include "api/api_transport.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,22 +21,24 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
+#ifndef SIN8_TABLE_ENABLE
+#define SIN8_TABLE_ENABLE		0
+#endif
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-extern trp_handle_t usbd_socket_trp;
-extern bool usbd_socket_configured;
+
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool usbd_socket_art_cmd(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
-bool usbd_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
-void usbd_socket_init(trp_handle_t* phandle, uint16_t dev_type);
+int8_t sin8( uint8_t theta);
+int8_t cos8( uint8_t theta);
+int16_t sin16( uint16_t theta);
+int16_t cos16( uint16_t theta);
 
 #ifdef __cplusplus
 }

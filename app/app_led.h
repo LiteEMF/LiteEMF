@@ -22,14 +22,20 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef		LED_SHOW_PERIOD
-#define 	LED_SHOW_PERIOD	(50*100)	/*50ms*/
+#ifndef		APP_LED_SLICE
+#define 	APP_LED_SLICE	(50*100)	/*10us 单位*/
 #endif
-#define 	LED_OFF		0
-#define 	LED_QUICK	2			/*100ms*/
-#define 	LED_SLOW	12			/*100ms*/
-#define 	LED_ON		0XFF		
-#define 	LED_ALWAYS	0			/*times*/
+
+#define LED_OFF		0
+#define LED_ON		0XFF		
+#ifndef	LED_FAST
+#define LED_FAST	2			/* 单位 APP_LED_SLICE*2 */
+#endif
+#ifndef	LED_SLOW
+#define LED_SLOW	12			/* 单位 APP_LED_SLICE*2 */
+#endif
+
+#define LED_FOREVER	0			/* times */
 
 
 

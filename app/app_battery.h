@@ -22,16 +22,16 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef BAT_R		//(R1+R2)/R1
-#define	BAT_R     	(2/1)
+#ifndef BAT_R		//(R1+R2)/R1, do not used bracket
+#define	BAT_R     	2/1
 #endif
-#ifndef	BAT_PROTECT_VOL					//mv
+#ifndef	BAT_PROTECT_VOL					//mv must > 3690
 #define	BAT_PROTECT_VOL     			3350
 #endif
 #ifndef	BAT_POWERON_PROTECT_VOL
 #define	BAT_POWERON_PROTECT_VOL			3400     
 #endif
-#ifndef	BAT_LOW_POWER_VOL
+#ifndef	BAT_LOW_POWER_VOL				//约 3%
 #define	BAT_LOW_POWER_VOL            	3450
 #endif
 
