@@ -9,12 +9,11 @@
 * 
 */
 
-
-#ifndef _api_spi_h
-#define _api_spi_h
+#ifndef _api_spi_host_h
+#define _api_spi_host_h
 #include "emf_typedef.h"
 #include "hw_config.h"
-#include "hal/hal_spi.h"
+#include "hal/hal_spi_host.h"
 #include "api/api_gpio.h"
 #include "api/api_tick.h"
 
@@ -79,18 +78,18 @@ extern uint8c_t m_spi_num;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool api_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool api_spi_init(uint8_t id);
-bool api_spi_deinit(uint8_t id);
+bool api_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool api_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool api_spi_host_init(uint8_t id);
+bool api_spi_host_deinit(uint8_t id);
 void api_spis_init(void);
 void api_spis_deinit(void);
 
 //hal
-bool hal_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool hal_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool hal_spi_init(uint8_t id);
-bool hal_spi_deinit(uint8_t id);
+bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool hal_spi_host_init(uint8_t id);
+bool hal_spi_host_deinit(uint8_t id);
 
 #ifdef __cplusplus
 }

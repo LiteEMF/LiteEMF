@@ -11,12 +11,12 @@
 
 #include "hw_config.h"
 
-#ifdef HW_SPI_MAP
+#ifdef HW_SPI_HOST_MAP
 
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
-#include  "api/api_spi.h"
+#include  "api/api_spi_host.h"
 
 /******************************************************************************************************
 ** Defined
@@ -29,7 +29,7 @@ static volatile bool os_spi_busy = true;			//used for os
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-const_t spi_map_t m_spi_map[] = HW_SPI_MAP;          
+const_t spi_map_t m_spi_map[] = HW_SPI_HOST_MAP;          
 uint8c_t m_spi_num = countof(m_spi_map);
 /*****************************************************************************************************
 **	static Function
@@ -83,7 +83,7 @@ static uint8_t spi_read(uint8_t id)
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
+bool api_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 {
     bool ret = false;
 	uint8_t i;
@@ -93,7 +93,7 @@ bool api_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 	api_gpio_out(m_spi_map[id].cs, 0);			//cs select
 
 	#if !SPI_SOFT_ENABLE
-		ret = hal_spi_write(addr,buf,len);
+		ret = hal_spi_host_write(addr,buf,len);
 	#else
 		if(addr >> 8){
 			spi_write(id,addr >> 8);
@@ -112,7 +112,7 @@ bool api_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 }
 
 
-bool api_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
+bool api_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 {
     bool ret = false;
 	uint8_t i;
@@ -127,7 +127,7 @@ bool api_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 		addr |= SPI_READ_ADDR(id);
 	}
 	#if !SPI_SOFT_ENABLE
-		ret = hal_spi_read(addr,buf,len);
+		ret = hal_spi_host_read(addr,buf,len);
 	#else
 		if(addr >> 8){
 			spi_write(id,addr >> 8);
@@ -147,7 +147,7 @@ bool api_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 
 
 
-bool api_spi_init(uint8_t id)
+bool api_spi_host_init(uint8_t id)
 {
 	bool ret = true;
 	api_gpio_out(m_spi_map[id].clk, 0);
@@ -158,28 +158,28 @@ bool api_spi_init(uint8_t id)
 	api_gpio_dir(m_spi_map[id].cs,  PIN_OUT, 0);
 	api_gpio_dir(m_spi_map[id].miso,  PIN_IN,PIN_PULLUP);
 	#if !SPI_SOFT_ENABLE
-	ret = hal_spi_init(id);
+	ret = hal_spi_host_init(id);
 	#endif
 	os_spi_busy = false;
 	return ret;
 }
 
-bool api_spi_deinit(uint8_t id)
+bool api_spi_host_deinit(uint8_t id)
 {
-	return hal_spi_deinit(id);
+	return hal_spi_host_deinit(id);
 }
 void api_spis_init(void)
 {
 	uint8_t id;
 	for(id=0; id<m_spi_num; id++){
-		api_spi_init(id);
+		api_spi_host_init(id);
 	}   
 }
 void api_spis_deinit(void)
 {
 	uint8_t id;
 	for(id=0; id<m_spi_num; id++){
-		api_spi_deinit(id);
+		api_spi_host_deinit(id);
 	}   
 }
 

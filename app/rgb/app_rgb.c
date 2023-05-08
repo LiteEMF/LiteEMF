@@ -16,6 +16,7 @@
 #if APP_RGB_ENABLE
 #include "api/api_tick.h"
 #include "app/rgb/app_rgb.h"
+#include "app/rgb/rgb_driver.h"
 #include "utils/emf_math.h"
 /******************************************************************************************************
 ** Defined
@@ -168,20 +169,6 @@ static bool app_rgb_rainbow(uint8_t id, uint16_t step)
 ******************************************************************************************************/
 
 #if WEAK_ENABLE
-__WEAK bool app_rgb_show_cb(uint8_t* frame, uint8_t size)
-{
-	bool ret = false;
-	uint8_t i;
-	
-	for(i=0; i<size; i++){
-		//show frame[i];
-		//ret = true;
-	}
-
-	return ret;
-}
-
-
 __WEAK void app_rgb_finished_cb(uint8_t id)
 {
 
@@ -292,6 +279,7 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 
 
 
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -299,6 +287,8 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 *******************************************************************/
 bool app_rgb_init(void)
 {
+	rgb_driver_init();
+
 	memset(m_pixels, 0, sizeof(m_pixels[APP_RGB_NUMS*3]));
 	memset(m_rgb_cbt, 0, sizeof(m_rgb_cbt[APP_RGB_NUMS]));
 	m_brightness = 255;
@@ -314,7 +304,9 @@ bool app_rgb_init(void)
 bool app_rgb_deinit(void)
 {
 	app_rgb_init();
-	app_rgb_show_cb(m_pixels,sizeof(m_pixels));
+	rgb_driver_show(m_pixels,sizeof(m_pixels));
+
+	rgb_driver_deinit();
 	return true;
 }
 
@@ -380,7 +372,7 @@ void app_rgb_task(void *pa)
 	}
 
 	if(ret || rgb_show){
-		rgb_show = !app_rgb_show_cb(m_pixels,sizeof(m_pixels));
+		rgb_show = !rgb_driver_show(m_pixels,sizeof(m_pixels));
 	}
 }
 

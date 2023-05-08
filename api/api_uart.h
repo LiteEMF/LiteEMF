@@ -34,37 +34,20 @@ extern "C" {
 #endif
 
 
-#ifndef UART0_BADU
-#define UART0_BADU			1000000
+#ifndef UART_BADU_DEFAULT
+#define UART_BADU_DEFAULT        1000000
 #endif
-#ifndef UART0_TX_FIFO_LEN
-#define UART0_TX_FIFO_LEN	0
+#ifndef UART0_PA
+#define UART0_PA	{UART_BADU_DEFAULT,	0,	0X100}
 #endif
-#ifndef UART0_RX_FIFO_LEN
-#define UART0_RX_FIFO_LEN	0
+#ifndef UART1_PA
+#define UART1_PA	{UART_BADU_DEFAULT,	0,	0X100}
 #endif
-
-#ifndef UART1_BADU
-#define UART1_BADU			1000000
-#endif
-#ifndef UART1_TX_FIFO_LEN
-#define UART1_TX_FIFO_LEN	0
-#endif
-#ifndef UART1_RX_FIFO_LEN
-#define UART1_RX_FIFO_LEN	0
+#ifndef UART2_PA
+#define UART2_PA	{UART_BADU_DEFAULT,	0,	0X100}
 #endif
 
-#ifndef UART2_BADU
-#define UART2_BADU			1000000
-#endif
-#ifndef UART2_TX_FIFO_LEN
-#define UART2_TX_FIFO_LEN	0
-#endif
-#ifndef UART2_RX_FIFO_LEN
-#define UART2_RX_FIFO_LEN	0
-#endif
-
-#ifndef UART_DEBUG_ID
+#ifndef UART_DEBUG_ID							//debug uart 单独初始化
 #define UART_DEBUG_ID		0
 #endif
 /******************************************************************************************************
@@ -72,8 +55,6 @@ extern "C" {
 *******************************************************************************************************/
 typedef struct{
 	uint32_t baudrate;
-	uint8_t *tx_buf;
-	uint8_t *rx_buf;
 	uint16_t tx_buf_len;
 	uint16_t rx_buf_len;
 }uart_pa_t;

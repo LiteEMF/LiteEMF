@@ -10,13 +10,12 @@
 */
 
 
-
 #include "hw_config.h"
 #ifdef HW_IIC_MAP
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
-#include  "api/api_iic.h"
+#include  "api/api_iic_host.h"
 #include  "api/api_log.h"
 
 /******************************************************************************************************
@@ -153,7 +152,7 @@ static bool write_dev_addr(uint8_t id,uint8_t addr)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool api_iic_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len)
+bool api_iic_host_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len)
 {
 	uint8_t i;
     bool ret = false;
@@ -190,7 +189,7 @@ _err:
     return ret;
 }
 
-bool api_iic_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len)
+bool api_iic_host_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len)
 {
 	uint8_t i;
     bool ret = false;
@@ -229,7 +228,7 @@ _err:
 	return ret;
 }
 
-bool api_iic_scan(uint8_t id) 
+bool api_iic_host_scan(uint8_t id) 
 {
 	uint8_t addr;
 	bool ret = false;
@@ -250,7 +249,7 @@ bool api_iic_scan(uint8_t id)
 	return ret;
 }
 
-bool api_iic_init(uint8_t id)
+bool api_iic_host_init(uint8_t id)
 {
 	bool ret = true;
 
@@ -268,7 +267,7 @@ bool api_iic_init(uint8_t id)
 	return ret;
 }
 
-bool api_iic_deinit(uint8_t id)
+bool api_iic_host_deinit(uint8_t id)
 {
 	return hal_iic_deinit(id);
 }
@@ -276,14 +275,14 @@ void api_iics_init(void)
 {
 	uint8_t id;
 	for(id = 0; id < m_iic_num; id++){
-		api_iic_init(id);
+		api_iic_host_init(id);
 	}   
 }
 void api_iics_deinit(void)
 {
 	uint8_t id;
 	for(id = 0; id < m_iic_num; id++){
-		api_iic_deinit(id);
+		api_iic_host_deinit(id);
 	}   
 }
 

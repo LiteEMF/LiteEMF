@@ -16,7 +16,7 @@
 #if (HIDD_SUPPORT & HID_PS_MASK) && (PS_P2_ENCRYPT_ENABLED || PS_7105_ENCRYPT_ENABLED)
 #include  "ps_controller.h"
 #include  "api/api_tick.h"
-#include "api/api_iic.h"
+#include "api/api_iic_host.h"
 
 #include "api/api_log.h"
 

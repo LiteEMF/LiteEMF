@@ -9,12 +9,11 @@
 * 
 */
 
-
-#ifndef _api_iic_h
-#define _api_iic_h
+#ifndef _api_iic_host_h
+#define _api_iic_host_h
 #include "emf_typedef.h"
 #include "hw_config.h"
-#include "hal/hal_iic.h"
+#include "hal/hal_iic_host.h"
 #include "api/api_gpio.h"
 #include "api/api_tick.h"
 
@@ -74,11 +73,11 @@ extern uint8c_t m_iic_num;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_iic_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
-bool api_iic_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
-bool api_iic_scan(uint8_t id);
-bool api_iic_init(uint8_t id);
-bool api_iic_deinit(uint8_t id);
+bool api_iic_host_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
+bool api_iic_host_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
+bool api_iic_host_scan(uint8_t id);
+bool api_iic_host_init(uint8_t id);
+bool api_iic_host_deinit(uint8_t id);
 void api_iics_init(void);
 void api_iics_deinit(void);
 

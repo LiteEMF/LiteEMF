@@ -31,28 +31,19 @@ uint8c_t m_uart_num = countof(m_uart_map);
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-#if UART0_RX_FIFO_LEN
-uint8_t uart0_rx_buf[UART0_RX_FIFO_LEN];
-#endif
-#if UART1_RX_FIFO_LEN
-uint8_t uart1_rx_buf[UART1_RX_FIFO_LEN];
-#endif
-#if UART2_RX_FIFO_LEN
-uint8_t uart2_rx_buf[UART2_RX_FIFO_LEN];
-#endif
-app_fifo_t uart_rx_fifo[countof(m_uart_map)];
+static const_t uart_pa_t uart_pa[] = {
+	UART0_PA,
+	UART1_PA,
+	UART2_PA
+};
 
+bool uart_fifo_init = false;		//fifo init only ones
+
+app_fifo_t uart_rx_fifo[countof(m_uart_map)];
+static uint8_t* uart_rx_buf[countof(m_uart_map)];
 #if UART_TX_FIFO_ENABLED
-#if UART0_TX_FIFO_LEN
-uint8_t uart0_tx_buf[UART0_TX_FIFO_LEN];
-#endif
-#if UART1_TX_FIFO_LEN
-uint8_t uart1_tx_buf[UART1_TX_FIFO_LEN];
-#endif
-#if UART2_TX_FIFO_LEN
-uint8_t uart2_tx_buf[UART2_TX_FIFO_LEN];
-#endif
 app_fifo_t uart_tx_fifo[countof(m_uart_map)];
+static uint8_t* uart_tx_buf[countof(m_uart_map)];
 #endif
 /*****************************************************************************************************
 **	static Function
@@ -89,7 +80,7 @@ bool api_uart_fifo_tx(uint8_t id,void * buf,uint16_t len)
 	if(id >= m_uart_num) return false;
 
 	#if UART_TX_FIFO_ENABLED
-	if(ERROR_SUCCESS == app_fifo_write(&uart_tx_fifo[id], buf, &fifo_len)){
+	if(ERROR_SUCCESS == app_fifo_write(&uart_rx_fifo[id], buf, &fifo_len)){
 		ret = true;
 	}
 	#endif
@@ -99,11 +90,10 @@ __WEAK bool api_uart_rx_hook(uint8_t id,uint8_t* buf,uint16_t len)
 {
 	uint8_t err;
 	uint16_t fifo_len = len;
-	app_fifo_t* fifop;
+	app_fifo_t* fifop = &uart_rx_fifo[id];
 
 	if(id >= m_uart_num) return false;
 	
-	fifop = &uart_rx_fifo[id];
 	err = app_fifo_write(fifop,buf,&fifo_len);
 	if((ERROR_SUCCESS != err) || (fifo_len != len) ){
 		logd("uo\n");
@@ -125,67 +115,41 @@ app_fifo_t* api_uart_get_rx_fifo(uint8_t id)
 	return NULL;
 }
 
-
-bool uart_get_pa(uint8_t id,uart_pa_t *pa)
-{
-	bool ret = false;
-
-	if(id >= m_uart_num) return false;
-	switch(id){
-	case 0:
-		pa->baudrate = UART0_BADU;
-		pa->tx_buf_len = UART0_TX_FIFO_LEN;
-		pa->rx_buf_len = UART0_RX_FIFO_LEN;
-		#if UART0_RX_FIFO_LEN
-		pa->tx_buf = uart0_rx_buf;
-		#endif
-		#if UART0_TX_FIFO_LEN
-		pa->rx_buf = uart0_tx_buf;
-		#endif
-		ret = true;
-		break;
-	case 1:
-		pa->baudrate = UART1_BADU;
-		pa->tx_buf_len = UART1_TX_FIFO_LEN;
-		pa->rx_buf_len = UART1_RX_FIFO_LEN;
-		#if UART1_RX_FIFO_LEN
-		pa->tx_buf = uart1_rx_buf;
-		#endif
-		#if UART1_TX_FIFO_LEN
-		pa->rx_buf = uart1_tx_buf;
-		#endif
-		ret = true;
-		break;
-	case 2:
-		pa->baudrate = UART2_BADU;
-		pa->tx_buf_len = UART2_TX_FIFO_LEN;
-		pa->rx_buf_len = UART2_RX_FIFO_LEN;
-		#if UART2_RX_FIFO_LEN
-		pa->tx_buf = uart2_rx_buf;
-		#endif
-		#if UART2_TX_FIFO_LEN
-		pa->rx_buf = uart2_tx_buf;
-		#endif
-		ret = true;
-		break;
-	}
-	return ret;
-}
 bool api_uart_init(uint8_t id)
 {
-	bool ret;
-	uart_pa_t uart_pa;
-
+	bool ret = false;
 	if(id >= m_uart_num) return false;
 
-	uart_get_pa(id,&uart_pa);
-	app_fifo_init(&uart_rx_fifo[id], (uint8_t*)uart_pa.rx_buf, uart_pa.rx_buf_len);
+	if(!uart_fifo_init){			//fifo init only ones
+		uart_fifo_init = true;
+		memset(uart_rx_fifo,0,sizeof(uart_rx_fifo));
+		memset(uart_rx_buf,0,sizeof(uart_rx_buf));
+		#if UART_TX_FIFO_ENABLED
+		memset(uart_tx_fifo,0,sizeof(uart_tx_fifo));
+		memset(uart_tx_buf,0,sizeof(uart_tx_buf));
+		#endif
+	}
+
+	if(uart_pa[id].rx_buf_len){				//rx fifo init
+		if(NULL == uart_rx_buf[id]) {		//uart buf only malloc ones
+			uart_rx_buf[id] = emf_malloc(uart_pa[id].rx_buf_len);		/*attention: 这里串口上电申请一次内存不释放*/
+		}else{
+			loge("uart malloc faile\n");
+		}
+		ret = app_fifo_init(&uart_rx_fifo[id], (uint8_t*)uart_rx_buf, uart_pa[id].rx_buf_len);
+	}
 	#if UART_TX_FIFO_ENABLED
-	app_fifo_init(&uart_tx_fifo[id], (uint8_t*)uart_pa.tx_buf, uart_pa.tx_buf_len);
+	if(uart_pa[id].tx_buf_len){				//tx fifo init
+		if(NULL == uart_tx_buf[id]) {		//uart buf only malloc ones
+			uart_tx_buf[id] = emf_malloc(uart_pa[id].tx_buf_len);
+		}else{
+			loge("uart malloc faile\n");
+		}
+		ret = app_fifo_init(&uart_tx_fifo[id], (uint8_t*)uart_tx_buf, uart_pa[id].tx_buf_len);
+	}
 	#endif
-
-	ret = hal_uart_init(id,uart_pa.baudrate);
-
+	
+	ret &= hal_uart_init(id,uart_pa[id].baudrate);
 	return ret;
 }
 

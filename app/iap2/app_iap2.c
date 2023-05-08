@@ -13,7 +13,7 @@
 #if (USBH_TYPE_SUPPORT | USBD_TYPE_SUPPORT) & BIT_ENUM(DEV_TYPE_IAP2)
 #include "api/api_tick.h"
 #include "api/api_transport.h"
-#include "api/api_iic.h"
+#include "api/api_iic_host.h"
 #include "api/hid/hid_dev_desc.h"
 #include "api/usb/device/usbd.h"
 #include "api/usb/host/usbh.h"
@@ -152,7 +152,7 @@ bool cp_read_data(uint8_t reg, uint8_t* buf, uint16_t len)
     uint8_t i;
     #ifdef HW_IIC_MAP
     for (i = 0; i < 6; i++) {
-        if (api_iic_read(CP_IIC_ID,CP_ENCRYPTION_ADDR, reg, buf, len)) {
+        if (api_iic_host_read(CP_IIC_ID,CP_ENCRYPTION_ADDR, reg, buf, len)) {
             // logd("cp_read %x\n",(uint16_t)(reg));//dumpd(buf,len);
             return true;
         }
@@ -168,7 +168,7 @@ bool cp_wite_data(uint8_t reg, uint8_t* buf, uint16_t len)
     uint8_t i;
     #ifdef HW_IIC_MAP
     for (i = 0; i < 6; i++) {
-        if (api_iic_read(CP_IIC_ID,CP_ENCRYPTION_ADDR, reg, buf, len)) {
+        if (api_iic_host_read(CP_IIC_ID,CP_ENCRYPTION_ADDR, reg, buf, len)) {
             logd("cp_write %x\n", (uint16_t)(reg)); // dumpd(buf,len);
             return true;
         }

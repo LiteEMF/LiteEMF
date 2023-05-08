@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _hal_spi_h
-#define _hal_spi_h
+#ifndef _hal_spi_host_h
+#define _hal_spi_host_h
 #include "emf_typedef.h"
 
 #ifdef __cplusplus

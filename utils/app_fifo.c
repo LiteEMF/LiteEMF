@@ -57,6 +57,7 @@ static __INLINE void fifo_get(app_fifo_t * p_fifo, uint8_t * p_byte)
 uint8_t app_fifo_init(app_fifo_t * p_fifo, uint8_t * p_buf, uint16_t buf_size)
 {
 	if(p_fifo == NULL) return ERROR_NULL;
+    if(p_buf == NULL) return ERROR_NULL;
 
     if(buf_size){
         p_fifo->p_buf         = p_buf;

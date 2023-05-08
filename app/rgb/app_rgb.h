@@ -81,7 +81,6 @@ typedef enum{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_rgb_show_cb(uint8_t* frame, uint8_t size);		//__WEAK
 void app_rgb_finished_cb(uint8_t id);					//__WEAK 
 bool app_rgb_vendor_mode(uint8_t id, uint16_t step);	//__WEAK 
 bool set_pixel_color(uint8_t id, uint32_t color);

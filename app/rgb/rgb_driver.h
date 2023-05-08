@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _hal_system_h
-#define _hal_system_h
+#ifndef _rgb_driver_h
+#define _rgb_driver_h
 #include "emf_typedef.h"
 
 #ifdef __cplusplus
@@ -22,21 +22,27 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef HAL_SYS_FREQ
-#define HAL_SYS_FREQ			(48 * 1000000L)			//系统时钟
+#ifndef WS2811_HIGH				//demo
+#define	WS2811_HIGH  0xFE	
 #endif
-
-#ifndef API_ENTER_CRITICAL
-#define API_ENTER_CRITICAL()
+#ifndef WS2811_LOW
+#define WS2811_LOW 	 0xE0
 #endif
-#ifndef API_EXIT_CRITICAL
-#define API_EXIT_CRITICAL()
-#endif
-
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+
+
+
+/*****************************************************************************************************
+**  Function
+******************************************************************************************************/
+void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_buf, uint8_t spi_size);
+
+bool rgb_driver_show(uint8_t* frame, uint8_t size);	//__WEAK 	
+bool rgb_driver_init(void);							//__WEAK 	
+bool rgb_driver_deinit(void);						//__WEAK 		
 
 
 

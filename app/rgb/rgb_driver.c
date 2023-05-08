@@ -9,21 +9,28 @@
 * 
 */
 
+
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
-#include  "api/api_spi.h"
+#include "hw_config.h"
+#if APP_RGB_ENABLE
+#include "app/rgb/rgb_driver.h"
+#include "app/rgb/app_rgb.h"
+
+#include "api/api_log.h"
 
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
 
 /******************************************************************************************************
-**	static Parameters
+**	public Parameters
 *******************************************************************************************************/
 
+
 /******************************************************************************************************
-**	public Parameters
+**	static Parameters
 *******************************************************************************************************/
 
 /*****************************************************************************************************
@@ -34,30 +41,61 @@
 **  Function
 ******************************************************************************************************/
 
+
+/*******************************************************************
+** Parameters:	frame, size: rgb 显示缓存
+			spi_buf,spi_size: spi 发送串行控制显示存, spi_buf是 frame的8倍
+** Returns:	
+** Description:		
+*******************************************************************/
+void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_buf, uint8_t spi_size)
+{
+    uint8_t id, i;
+	
+	for(id=0; id<size; id++){
+		for(id=0, i=0; i<8; i++){
+			if(frame[i] & (0x80>>i)){
+				spi_buf[id*8 + i] = WS2811_HIGH;
+			}else{
+				spi_buf[id*8 + i] = WS2811_LOW;
+			}
+		}
+	}
+}
+
+#if WEAK_ENABLE
+__WEAK bool rgb_driver_show(uint8_t* frame, uint8_t size)
+{
+	bool ret = false;
+	uint8_t i;
+	
+	for(i=0; i<size; i++){
+		//show frame[i];
+		//ret = true;
+	}
+
+	return ret;
+}
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool hal_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
+__WEAK bool rgb_driver_init(void)
 {
-	return false;
-}
-bool hal_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
-{
-	return false;
-}
-bool hal_spi_init(uint8_t id)
-{
-	return false;
-}
-bool hal_spi_deinit(uint8_t id)
-{
-	return false;
+	return true;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+__WEAK bool rgb_driver_deinit(void)
+{
+	return true;
+}
+#endif
 
-
-
-
-
+#endif

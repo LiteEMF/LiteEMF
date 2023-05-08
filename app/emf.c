@@ -32,10 +32,10 @@
 #include "api_pwm.h"
 #endif
 #ifdef HW_IIC_MAP
-#include "api_iic.h"
+#include "api_iic_host.h"
 #endif
-#ifdef HW_SPI_MAP
-#include "api_spi.h"
+#ifdef HW_SPI_HOST_MAP
+#include "api_spi_host.h"
 #endif
 
 //app
@@ -184,7 +184,7 @@ void emf_init(void)
 	#ifdef HW_IIC_MAP
 	api_iics_init();
 	#endif
-	#ifdef HW_SPI_MAP
+	#ifdef HW_SPI_HOST_MAP
 	api_spis_init();
 	#endif
 	api_trp_init();
