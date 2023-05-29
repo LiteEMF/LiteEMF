@@ -61,6 +61,10 @@ extern "C" {
         #define DEFAULT_NAME			       	"win32"
         #define DEFAULT_MODEL					"win32"
 
+
+		#define APP_USBD_ENABLE			1
+		#define APP_USBH_ENABLE			1
+
 		#define USBH_TYPE_SUPPORT		0XFFFF
 		#define USBD_TYPE_SUPPORT		0XFFFF
 		#define USBD_HID_SUPPORT		0XFFFF

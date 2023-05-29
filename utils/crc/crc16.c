@@ -17,9 +17,9 @@
 
 #include "hw_config.h"
 #include "crc.h"
-#if  CRC16_TABLE_EANBLE
+#if  CRC16_EANBLE
 
-#if !CRC16_TABLE16_EANBLE
+#if CRC16_TABLE16_EANBLE
 static const_t uint16_t crc16tab[256]= {
     0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
     0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
@@ -100,3 +100,4 @@ uint16_t crc16(const void* buf, uint32_t len)
 #endif
 
 #endif
+

@@ -31,7 +31,7 @@
 #ifndef _USB_HID_TYPEDEFH_
 #define _USB_HID_TYPEDEFH_
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
  extern "C" {

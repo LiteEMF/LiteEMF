@@ -13,7 +13,7 @@
 
 #ifndef _hid_desc_parser_h
 #define _hid_desc_parser_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/hid/hid_typedef.h"
 
 #ifdef __cplusplus
@@ -152,7 +152,7 @@ typedef struct{
            uint8_t             ItemSize :2;        // Numeric expression specifying size of data
            uint8_t             ItemType :2;        // This field identifies type of item(Main, Global or Local)
            uint8_t             ItemTag  :4;        // This field specifies the function of the item
-       };
+       }bit;
        uint8_t                 val;                // to access the data in byte format
     }ItemDetails;
     union{

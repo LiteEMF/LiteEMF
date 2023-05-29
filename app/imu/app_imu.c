@@ -64,6 +64,7 @@ bool imu_auto_cal;
 *******************************************************************************************************/
 #if IMU_FILTER_ENABLE
 	static firf_axis3f_t gyro_filter;
+
 	#if ACC_FILTER_KALMAN
 	static kalman_axis3f_t acc_filter;
 	#else
@@ -71,8 +72,11 @@ bool imu_auto_cal;
 	#endif
 #endif
 
-
+#if API_STORAGE_ENABLE
 imu_cal_t *const imu_calp = (imu_cal_t*)(m_storage.imu_cal);
+#else
+imu_cal_t *const imu_calp = NULL;
+#endif
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -81,7 +85,7 @@ imu_cal_t *const imu_calp = (imu_cal_t*)(m_storage.imu_cal);
 **  Function
 ******************************************************************************************************/
 #if WEAK_ENABLE
-__WEAK bool app_imu_get_raw(axis3i_t* accp,axis3i_t* gyrop)
+__WEAK bool app_imu_get_raw(axis3i_t* accp,axis3i_t* gyrop)	//这里可以根据工程调整imu方向
 {
 	bool ret = false;
    	ret = imu_driver_get_raw(accp,gyrop);
@@ -100,7 +104,7 @@ __WEAK void app_imu_event(imu_cal_sta_t event)
 #if IMU_FILTER_ENABLE
 static void app_imu_filter_init(void)
 {
-	fir_axis3f_fiter_init(&gyro_filter,NULL,0);
+	fir_axis3f_fiter_init(&gyro_filter,NULL,4);
 	#if ACC_FILTER_KALMAN
 	kalman_axis3f_filter_init(&acc_filter,ACC_KALMAN_Q,ACC_KALMAN_R);
 	#endif
@@ -226,10 +230,11 @@ static void imu_do_cal(void)
 				axis3l_div(&acc_sum,s_count);
 				acc_sum.z -= 4096;		//TODO
 
-
 				AXIS3_COPY(&(imu_calp->gyro),&gyro_sum);
 				AXIS3_COPY(&(imu_calp->acc),&acc_sum);
+				#if API_STORAGE_ENABLE
 				if(!imu_auto_cal) api_storage_auto_sync();
+				#endif
 				imu_cal_sta = IMU_CAL_SUCCEED;
 			}
 		}else{
@@ -259,15 +264,24 @@ void app_imu_cal_start(void)
 
 bool app_imu_get_val(axis3i_t *accp, axis3i_t *gyrop)
 {
-	if (accp != NULL){
-		accp->x = constrain_int16((int32_t)m_acc.x - imu_calp->acc.x);
-        accp->y = constrain_int16((int32_t)m_acc.y - imu_calp->acc.y);
-        accp->z = constrain_int16((int32_t)m_acc.z - imu_calp->acc.z);
-	}
-	if (gyrop != NULL){
-		gyrop->x = constrain_int16((int32_t)m_gyro.x - imu_calp->gyro.x);
-        gyrop->y = constrain_int16((int32_t)m_gyro.y - imu_calp->gyro.y);
-        gyrop->z = constrain_int16((int32_t)m_gyro.z - imu_calp->gyro.z);
+	if(NULL != imu_calp){
+		if (accp != NULL){
+			accp->x = constrain_int16((int32_t)m_acc.x - imu_calp->acc.x);
+			accp->y = constrain_int16((int32_t)m_acc.y - imu_calp->acc.y);
+			accp->z = constrain_int16((int32_t)m_acc.z - imu_calp->acc.z);
+		}
+		if (gyrop != NULL){
+			gyrop->x = constrain_int16((int32_t)m_gyro.x - imu_calp->gyro.x);
+			gyrop->y = constrain_int16((int32_t)m_gyro.y - imu_calp->gyro.y);
+			gyrop->z = constrain_int16((int32_t)m_gyro.z - imu_calp->gyro.z);
+		}
+	}else{
+		if (accp != NULL){
+			*accp = m_acc;
+		}
+		if (gyrop != NULL){
+			*gyrop = m_gyro;
+		}
 	}
     
 	return true;
@@ -282,7 +296,7 @@ bool app_imu_get_val(axis3i_t *accp, axis3i_t *gyrop)
 *******************************************************************/
 bool app_imu_init(void)
 {
-	imu_driver_init(GYRO_RANGE_2000,ACC_RANGE_8G);
+	imu_driver_init(ACC_RANGE_8G,GYRO_RANGE_2000);
 	#if IMU_FILTER_ENABLE
 	app_imu_filter_init();
 	#endif
@@ -314,12 +328,10 @@ bool app_imu_deinit(void)
 void app_imu_task(void* pa)
 {
 	axis3i_t acc, gyro;
-	static timer_t imu_timer;
 	static timer_t atuo_cal_timer;
 
-	imu_driver_task(pa);
-
 	if(app_imu_get_raw(&acc, &gyro)){
+
 		#if IMU_FILTER_ENABLE
 		app_imu_filter(&acc, &gyro);
 		#else
@@ -327,6 +339,8 @@ void app_imu_task(void* pa)
 		m_acc = acc;
 		#endif
 
+				
+		// logd("imu: %d, %d, %d, %d, %d, %d\n",acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z );
 		imu_static_check();
 		imu_do_cal();
 

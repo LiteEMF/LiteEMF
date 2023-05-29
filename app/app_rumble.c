@@ -48,12 +48,12 @@ uint8_t m_rumble_sync;
 #if WEAK_ENABLE
 __WEAK bool app_rumble_show(void)
 {
-	bool ret = false;
+	bool ret = true;
 	uint8_t id;
 
     for (id = 0; id < RUMBLE_MAX; id++){
         #ifdef HW_PWM_MAP
-        ret &= api_pwm_set_duty(id,  m_rumble.duty[id]);
+        api_pwm_set_duty(id,  m_rumble.duty[id]);
         #endif
     }
 
@@ -73,7 +73,6 @@ void app_rumble_set_pa(uint8_t id, uint8_t min,uint8_t percent)
 
 void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
 {
-    bool ret = false;
 	uint8_t rumble_duty;
 
 	if(id >= RUMBLE_MAX) return;
@@ -90,13 +89,12 @@ void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
     if(m_rumble.duty[id] || rumble_duty){
         m_rumble_sync =  APP_RUMBLE_SYNC_TIMES;
         m_rumble.duty[id] = rumble_duty;
-        logi("rumble[%d]=%d",id,rumble_duty);
+        logi("rumble[%d]=%d\n",id,rumble_duty);
     }
 }
 
 void app_set_rumble(rumble_t *rumblep,uint32_t timeout_ms)
 {
-    bool ret = false;
     uint8_t id;
 
     for (id = 0; id < RUMBLE_MAX; id++){
@@ -150,7 +148,7 @@ void app_rumble_task(uint32_t dt_ms)
             if(rumble_ctb[id].timeout < dt_ms){
                 rumble_ctb[id].timeout = 0;
                 m_rumble.duty[id] = 0;
-                m_rumble_sync =  APP_RUMBLE_SYNC_TIMES;
+                m_rumble_sync = APP_RUMBLE_SYNC_TIMES;
             }
         }
     }

@@ -18,6 +18,11 @@
 #include "app/rgb/app_rgb.h"
 #include "app/rgb/rgb_driver.h"
 #include "utils/emf_math.h"
+
+
+#define DEBUG_LOG_ENABLE     	1
+#include "api/api_log.h"
+
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -65,7 +70,7 @@ static bool app_rgb_static(uint8_t id, uint16_t step)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	注意: period/2 必须是APP_RGB_SLICE的倍数		
 *******************************************************************/
 static bool app_rgb_blink(uint8_t id, uint16_t step)
 {
@@ -74,9 +79,10 @@ static bool app_rgb_blink(uint8_t id, uint16_t step)
 	uint32_t c;
 	rgb_cbt_t *pcbt = &m_rgb_cbt[id];
 
-	if(0 == (2 * step) & 0xff){			// (2*step) & 0xff == APP_RGB_SLICE*rgb_tick%(pcbt->period/2);
+	if(0 == ((2 * step) & 0xff)){			// (2*step) & 0xff == APP_RGB_SLICE*rgb_tick%(pcbt->period/2);
 		/*这里通过tikc的最后一位来判断闪烁开关,同时用于同步,但是亮灯时间不可控	*/
-		if(0 == (step>>7) & 0x01){	// (step>>7) == APP_RGB_SLICE*rgb_tick/(pcbt->period/2) 
+		if(0 == ((step>>7) & 0x01)){	// (step>>7) == APP_RGB_SLICE*rgb_tick/(pcbt->period/2) 
+
 			if(NULL != pcbt->palette){
 				index = pcbt->offset + (step>>8) * pcbt->palette_step;
 				c = color_from_palette(index, 0XFF, NOBLEND, pcbt->palette, pcbt->palette_size);
@@ -86,6 +92,8 @@ static bool app_rgb_blink(uint8_t id, uint16_t step)
 		}else{
 			c = 0x00;
 		}
+
+		// logd("bl%d, step=%x, c=%x, %d,%d\n",id,step,c,((2 * step) & 0xff),((step>>7) & 0x01));
 		ret = set_pixel_color(id, c);
 	}
 	return ret;
@@ -192,20 +200,24 @@ bool set_pixel_color(uint8_t id, uint32_t color)
 
 	if (id < APP_RGB_NUMS) {
 		color_rgb(color, &rgb);
+
 		if (255 != m_brightness) { 		// See notes in setBrightness()
 			rgb.rgb.r = SCALE8(rgb.rgb.r , m_brightness);
 			rgb.rgb.g = SCALE8(rgb.rgb.g , m_brightness);
 			rgb.rgb.b = SCALE8(rgb.rgb.b , m_brightness);
 		}
+
 		p = &m_pixels[id * 3];     		// 3 bytes per pixel
 
-		if(memcmp(p,rgb.val,3)){
+		if(memcmp(p, rgb.val, 3)){
 			p[0] = rgb.rgb.r;		   // R,G,B always stored
 			p[1] = rgb.rgb.g;
 			p[2] = rgb.rgb.b;
+			// logd("f:");dumpd(m_pixels,sizeof(m_pixels));
 			ret = true;
 		}
 	}
+
 	return ret;
 }
 
@@ -222,7 +234,7 @@ uint8_t app_rgb_get_brightness(void)
 ** Parameters:	period: 周期单位ms, times:次数 0~126
 			RGB_STATIC_MODE 模式下 period*times 相当于亮灯延时时间
 ** Returns:	
-** Description:		
+** Description: 注意: period/2 必须是APP_RGB_SLICE的倍数		
 *******************************************************************/
 bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t period, uint8_t times)
 {
@@ -232,6 +244,8 @@ bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t peri
 
 	pcbt = &m_rgb_cbt[id];
 	memset(pcbt, 0, sizeof(rgb_cbt_t));
+
+	period = (period / (APP_RGB_SLICE*2)) * (APP_RGB_SLICE*2);	//period/2 必须是APP_RGB_SLICE的倍数
 
 	pcbt->mode = mode;
     pcbt->brightness = 0xff;
@@ -321,7 +335,7 @@ void app_rgb_task(void *pa)
 	bool ret = false;
 	rgb_cbt_t *pcbt;
 	int8_t i;
-	uint16_t step;				//rgb period step * 256 (放大256倍,低8位为小数)
+	uint16_t step;						//rgb period step * 256 (放大256倍,低8位为小数)
 
 	static bool rgb_show = false;		//if rgb hw show led faile retry show
 
@@ -329,9 +343,10 @@ void app_rgb_task(void *pa)
 	for(i=0; i< APP_RGB_NUMS; i++){
 		pcbt = &m_rgb_cbt[i];
 		step = 256 * APP_RGB_SLICE * rgb_tick / pcbt->period;
-
+		
+		// logd("rgb%d, mode=%d,step=%x\n", i, pcbt->mode, step);
 		if(pcbt->times){						//定时显示次数
-			if(0 == step & 0XFF){				//切换一个完整周期
+			if(0 == (step & 0XFF)){				//切换一个完整周期
 				if(pcbt->tick_synk){			//强制同步, 第一个周期不亮灯
 					pcbt->tick_synk = 0;
 				}else{
@@ -364,7 +379,7 @@ void app_rgb_task(void *pa)
 			case RGB_RAINBOW_MODE:	//彩红
 				ret |= app_rgb_rainbow(i,step);
 				break;	
-			default:					//自定义
+			default:				//自定义
 				ret |= app_rgb_vendor_mode(i,step);
 				break;
 			}

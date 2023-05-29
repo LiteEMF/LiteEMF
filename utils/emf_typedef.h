@@ -11,7 +11,7 @@
 #ifndef	_EMF_TYPEDEF_H
 #define	_EMF_TYPEDEF_H
 #include "compiler_abstraction.h"
-#include "hal/hal_typedef.h"
+#include "hal_typedef.h"
 //std include
 #include <stdint.h>
 #include <stdbool.h>
@@ -109,6 +109,9 @@ b(high): if x is greater than b.
 #ifndef FLD2VAL
 #define FLD2VAL(field_str, value) (((uint32_t)(value)&(field_str##_MASK)) >> (field_str##_POS))
 #endif
+
+
+
 
 #ifndef U16
 #define U16(msb,lsb)	( ((uint16_t)(msb) << 8) | (uint16_t)(lsb) )

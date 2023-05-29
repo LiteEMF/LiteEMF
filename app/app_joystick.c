@@ -43,7 +43,15 @@ joystick_cal_sta_t joystick_cal_sta;
 const_t axis2_t stick_active[] = APP_STICK_ACTIVE;
 const_t uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;
 
+
+#if API_STORAGE_ENABLE
 joystick_cal_t *const joystick_calp = (joystick_cal_t*)m_storage.joystick_cal;
+#else
+joystick_cal_t joystick_cal_default = {{{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX},ADC_RES_MAX}};
+joystick_cal_t *const joystick_calp = NULL;
+#endif
+
+
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -193,6 +201,7 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
     if(id >= APP_TRIGGER_NUMS) return ret;
 
     adc = adcp->tarigger[id];
+
     adc_min = joystick_calp->min.tarigger[id];
     adc_max = joystick_calp->max.tarigger[id];
 
@@ -339,9 +348,14 @@ static void joystick_do_cal(joystick_t* adcp)
                 s_cal.min.tarigger[id] += r.tarigger[id] * TRIGGER_CAL_DEADZONE / 100;
                 s_cal.max.tarigger[id] -= r.tarigger[id] * TRIGGER_CAL_SIDE_DEADZONE / 100;
             }
+            #if API_STORAGE_ENABLE
             *joystick_calp = s_cal;
+            #endif
+
             joystick_cal_sta = JOYSTICK_CAL_SUCCEED;
+            #if API_STORAGE_ENABLE
             api_storage_auto_sync();
+            #endif
         }
 
         cal_timer = m_systick;

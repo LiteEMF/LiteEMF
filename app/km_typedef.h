@@ -12,7 +12,7 @@
 
 #ifndef _km_typedef_h
 #define _km_typedef_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {
@@ -239,7 +239,7 @@ typedef struct
 	int8_t w;	
 } mouse_t;
 #ifndef PRAGMA_PACK_IGNORED
-#pragma pack(0)
+#pragma pack()
 #endif
 
 typedef struct 

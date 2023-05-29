@@ -62,6 +62,7 @@ INCLUDES = \
 	-I $(ROOT_DIR)/utils\
 	-I $(ROOT_DIR)/api \
 	-I $(ROOT_DIR)/unit-test \
+	-I $(ROOT_DIR)/sample \
 	-I $(ROOT_DIR)/hal 
 
 #源文件目录
@@ -70,6 +71,7 @@ SRC_DIR = \
 	$(ROOT_DIR)/utils \
 	$(ROOT_DIR)/api \
 	$(ROOT_DIR)/unit-test \
+	$(ROOT_DIR)/sample \
 	$(ROOT_DIR)/hal 
 
 #export 编译器compile

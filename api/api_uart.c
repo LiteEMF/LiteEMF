@@ -10,7 +10,9 @@
 */
 
 #include "hw_config.h"
+#include "hw_board.h"
 #ifdef HW_UART_MAP
+
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
@@ -25,17 +27,12 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-const_t pin_map_t m_uart_map[] = HW_UART_MAP;
+const_t uart_map_t m_uart_map[] = HW_UART_MAP;
 uint8c_t m_uart_num = countof(m_uart_map);
 
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-static const_t uart_pa_t uart_pa[] = {
-	UART0_PA,
-	UART1_PA,
-	UART2_PA
-};
 
 bool uart_fifo_init = false;		//fifo init only ones
 
@@ -84,18 +81,28 @@ bool api_uart_fifo_tx(uint8_t id,void * buf,uint16_t len)
 		ret = true;
 	}
 	#endif
+	
+	UNUSED_VARIABLE(fifo_len);
 	return ret;
 }
-__WEAK bool api_uart_rx_hook(uint8_t id,uint8_t* buf,uint16_t len)
-{
-	uint8_t err;
-	uint16_t fifo_len = len;
-	app_fifo_t* fifop = &uart_rx_fifo[id];
 
-	if(id >= m_uart_num) return false;
-	
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	用于需要在uart中断处理中调用改函数	
+*******************************************************************/
+__WEAK void api_uart_rx_hook(uint8_t id,uint8_t* buf,uint16_t len)
+{
+	uint8_t err = ERROR_SUCCESS;
+	uint16_t fifo_len = len;
+	app_fifo_t* fifop;
+
+	if(id >= m_uart_num) return;
+
+	fifop = &uart_rx_fifo[id];
+
 	err = app_fifo_write(fifop,buf,&fifo_len);
-	if((ERROR_SUCCESS != err) || (fifo_len != len) ){
+	if( (ERROR_SUCCESS != err) || (fifo_len != len) ){
 		logd("uo\n");
 		// if(ERROR_SUCCESS == err){
 		//     logd("write:%d %d,fifo:%d %d %d %d\n",fifo_len, len,
@@ -105,8 +112,8 @@ __WEAK bool api_uart_rx_hook(uint8_t id,uint8_t* buf,uint16_t len)
 		//         fifop->fifo_stu);
 		// }
 	}
-	return (ERROR_SUCCESS == err);
 }
+
 app_fifo_t* api_uart_get_rx_fifo(uint8_t id)
 {
 	if(id < m_uart_num){
@@ -118,6 +125,8 @@ app_fifo_t* api_uart_get_rx_fifo(uint8_t id)
 bool api_uart_init(uint8_t id)
 {
 	bool ret = false;
+	uint32_t baud;
+
 	if(id >= m_uart_num) return false;
 
 	if(!uart_fifo_init){			//fifo init only ones
@@ -130,26 +139,30 @@ bool api_uart_init(uint8_t id)
 		#endif
 	}
 
-	if(uart_pa[id].rx_buf_len){				//rx fifo init
-		if(NULL == uart_rx_buf[id]) {		//uart buf only malloc ones
-			uart_rx_buf[id] = emf_malloc(uart_pa[id].rx_buf_len);		/*attention: 这里串口上电申请一次内存不释放*/
+	if(m_uart_map[id].rx_buf_len){				//rx fifo init
+		if(NULL == uart_rx_buf[id]) {			//uart buf only malloc ones
+			uart_rx_buf[id] = emf_malloc(m_uart_map[id].rx_buf_len);		/*attention: 这里串口上电申请一次内存不释放*/
 		}else{
 			loge("uart malloc faile\n");
 		}
-		ret = app_fifo_init(&uart_rx_fifo[id], (uint8_t*)uart_rx_buf, uart_pa[id].rx_buf_len);
+		ret = !app_fifo_init(&uart_rx_fifo[id], uart_rx_buf[id], m_uart_map[id].rx_buf_len);
+		logd("init rx fifo%d,len=%d\n",id,m_uart_map[id].rx_buf_len);
 	}
 	#if UART_TX_FIFO_ENABLED
-	if(uart_pa[id].tx_buf_len){				//tx fifo init
-		if(NULL == uart_tx_buf[id]) {		//uart buf only malloc ones
-			uart_tx_buf[id] = emf_malloc(uart_pa[id].tx_buf_len);
+	if(m_uart_map[id].tx_buf_len){				//tx fifo init
+		if(NULL == uart_tx_buf[id]) {			//uart buf only malloc ones
+			uart_tx_buf[id] = emf_malloc(m_uart_map[id].tx_buf_len);
 		}else{
 			loge("uart malloc faile\n");
 		}
-		ret = app_fifo_init(&uart_tx_fifo[id], (uint8_t*)uart_tx_buf, uart_pa[id].tx_buf_len);
+		ret = !app_fifo_init(&uart_tx_fifo[id], uart_tx_buf[id], m_uart_map[id].tx_buf_len);
 	}
 	#endif
-	
-	ret &= hal_uart_init(id,uart_pa[id].baudrate);
+
+	baud = UART_BAUD_ATT(id);
+	if(0 == baud) baud = UART_BADU_DEFAULT;
+
+	ret &= hal_uart_init(id,baud);
 	return ret;
 }
 
@@ -187,31 +200,33 @@ void api_uarts_deinits(void)
 	}   
 }
 
+#if UART_TX_FIFO_ENABLED
 void api_uart_tx_task(void* pa)
 {
-	#if UART_TX_FIFO_ENABLED
 	uint8_t id;
 	uint8_t buf[UART_TX_FIFO_MTU];
 	uint16_t len=UART_TX_FIFO_MTU;
 
 	for(id=0; id<m_uart_num; id++){
-		if(ERROR_SUCCESS == app_fifo_read(&uart_tx_fifo[id], (uint8_t*)&buf, &len)){
-			api_uart_tx(id,buf,len);
+		if(NULL != uart_tx_fifo){
+			if(ERROR_SUCCESS == app_fifo_read(&uart_tx_fifo[id], (uint8_t*)&buf, &len)){
+				api_uart_tx(id,buf,len);
+			}
 		}
 	}
 	UNUSED_PARAMETER(pa);
-	#endif
 }
+#endif
 
 
 
-#if TASK_HANDLER_ENABLE
+#if TASK_HANDLER_ENABLE && UART_TX_FIFO_ENABLED
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void api_uart_handler(uint32_t period_10us)
+void api_uart_tx_handler(uint32_t period_10us)
 {
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){

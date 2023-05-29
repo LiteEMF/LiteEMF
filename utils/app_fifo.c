@@ -11,7 +11,7 @@
  */
  
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/app_fifo.h"
 
 /**@brief Put one byte to the FIFO. */
@@ -128,10 +128,9 @@ uint8_t app_fifo_read(app_fifo_t * p_fifo, uint8_t * p_byte_array, uint16_t * p_
     uint16_t       index         = 0;
     uint16_t       read_size     = MIN(requested_len, byte_count);
 	
-	//VERIFY_PARAM_NOT_NULL(p_fifo);
-    //VERIFY_PARAM_NOT_NULL(p_size);
-	
+	if(p_fifo == NULL) return ERROR_NULL;
 	if(p_fifo->p_buf == NULL) return ERROR_NULL;
+    if(p_size == NULL) return ERROR_NULL;
 	
     (*p_size) = byte_count;
 
@@ -166,10 +165,9 @@ uint8_t app_fifo_write(app_fifo_t * p_fifo, uint8_t const * p_byte_array, uint16
     uint16_t       index           = 0;
     uint16_t       write_size      = MIN(requested_len, available_count);
 	
-	//VERIFY_PARAM_NOT_NULL(p_fifo);
-    //VERIFY_PARAM_NOT_NULL(p_size);
-
+	if(p_fifo == NULL) return ERROR_NULL;
 	if(p_fifo->p_buf == NULL) return ERROR_NULL;
+    if(p_size == NULL) return ERROR_NULL;
 	
     (*p_size) = available_count;
 

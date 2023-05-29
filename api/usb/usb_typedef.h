@@ -12,7 +12,7 @@
 
 #ifndef _usb_typedef_h
 #define _usb_typedef_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/usb/usb_hub_typedef.h"
 #include "api/hid/hid_typedef.h"
 #include "api/usb/usb_cdc_typedef.h"
@@ -403,7 +403,7 @@ typedef struct {
 	} bmAttributes;
 
 	uint8_t bAttributes;
-  };
+  }att;
 
   uint16_t wDetachTimeOut;
   uint16_t wTransferSize;

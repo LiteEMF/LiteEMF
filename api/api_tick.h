@@ -12,10 +12,10 @@
 
 #ifndef _api_tick_h
 #define _api_tick_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
 #include "api/api_system.h"
-#include "hal/hal_tick.h"
+#include "hal_tick.h"
 
 #ifdef __cplusplus
 extern "C" {

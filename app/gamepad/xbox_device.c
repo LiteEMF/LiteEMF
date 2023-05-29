@@ -362,6 +362,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 				logd("xbox cmd out:%x\n",rx_cmdp->cmd);
 				switch(rx_cmdp->cmd) {
 				case XBOX_RUMBLE_CMD:{
+					#if APP_RUMBLE_ENABLE
 					rumble_t motor;
 					xbox_motor_t *prumble =(xbox_motor_t*)rx_cmdp->pbuf;
 					motor.duty[RUMBLE_L] = remap(prumble->motor1,0,100,0,255);			//Xbox马达范围0~100
@@ -369,6 +370,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 					motor.duty[RUMBLE_SL] = remap(prumble->smotor1,0,100,0,255);		//Xbox马达范围0~100
 					motor.duty[RUMBLE_SR] = remap(prumble->smotor2,0,100,0,255);
 					app_set_rumble(&motor, prumble->duration*20);
+					#endif
 					ret = true;
 					break;
 				}
@@ -425,6 +427,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 		#endif
 	}else {
 		if(XBOX_BT_RUMBLE_CMD == buf[0]){
+			#if APP_RUMBLE_ENABLE
 			xbox_motor_t* motorp = (xbox_motor_t*)buf;
 			rumble_t motor;
 			// logd("out %x:",endp); dumpd(buf,len);
@@ -433,6 +436,8 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 			motor.duty[RUMBLE_SL] = remap(motorp->smotor1,0,100,0,255);		//Xbox马达范围0~100
 			motor.duty[RUMBLE_SR] = remap(motorp->smotor2,0,100,0,255);
 			app_set_rumble(&motor, 20000);
+			#endif
+			
 			ret = true;
 		}
 	}
@@ -448,11 +453,12 @@ bool x360_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 	rumble_t motor;
 
     if ( 0 ==  len) return false;
-
 	x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;	
 	if (X360_RUMBLE_CMD == motorp->cmd){
+		#if APP_RUMBLE_ENABLE
 		app_rumble_set_duty(RUMBLE_L, motorp->motor1, 10000);
 		app_rumble_set_duty(RUMBLE_R, motorp->motor2, 10000);
+		#endif
 		ret = true;
 	}
 	

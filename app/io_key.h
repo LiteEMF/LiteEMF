@@ -12,9 +12,9 @@
 
 #ifndef _io_key_h
 #define _io_key_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "key_typedef.h"
-#include "hal/hal_gpio.h"
+#include "hal_gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef KEY_ACTIVE				//io key high level trigger , normal low level trigger
-#define KEY_ACTIVE 0  			
+#define KEY_ACTIVE 			0  			
 #endif
 #ifndef MATRIX_KEY_ACTIVE		//matrix key
 #define MATRIX_KEY_ACTIVE	0
@@ -129,25 +129,25 @@ extern "C" {
 #ifndef KEY_M1_GPIO
 #define KEY_M1_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M2_GPI	
+#ifndef KEY_M2_GPIO	
 #define KEY_M2_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M3_GPI	
+#ifndef KEY_M3_GPIO	
 #define KEY_M3_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M4_GPI	
+#ifndef KEY_M4_GPIO	
 #define KEY_M4_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M5_GPI	
+#ifndef KEY_M5_GPIO	
 #define KEY_M5_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M6_GPI	
+#ifndef KEY_M6_GPIO	
 #define KEY_M6_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M7_GPI	
+#ifndef KEY_M7_GPIO	
 #define KEY_M7_GPIO       	PIN_NULL
 #endif	
-#ifndef KEY_M8_GPI	
+#ifndef KEY_M8_GPIO	
 #define KEY_M8_GPIO       	PIN_NULL
 #endif
 /******************************************************************************************************

@@ -12,7 +12,7 @@
 
 #ifndef _app_command_h
 #define _app_command_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include  "api/api_commander.h"
 #ifdef __cplusplus
 extern "C" {

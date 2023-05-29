@@ -15,7 +15,7 @@
 #ifndef	_xbox_controller_H
 #define	_xbox_controller_H
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_transport.h"
 #include "api/api_tick.h"
 #include "app/gamepad/app_gamepad_key.h"

@@ -13,8 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-
-#ifdef HW_TIMER_MAP
+#include "hw_board.h"
+#if	defined HW_TIMER_MAP && API_TIMER_ENABLE
 #include  "api/api_timer.h"
 
 /******************************************************************************************************
@@ -30,7 +30,7 @@
 *******************************************************************************************************/
 
 const_t timer_map_t m_timer_map[] = HW_TIMER_MAP;          
-uint8c_t m_timer_num = countof(timer_map_t);
+uint8c_t m_timer_num = countof(m_timer_map);
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -62,7 +62,7 @@ void api_timers_init(void)
 {
 	uint8_t id;
 	for(id=0; id<m_timer_num; id++){
-		api_timer_init(id,m_timer_map[id].period);
+		api_timer_init(id,m_timer_map[id].peripheral);
 	}   
 }
 void api_timers_deinit(void)

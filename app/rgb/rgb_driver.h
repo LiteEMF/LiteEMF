@@ -12,7 +12,7 @@
 
 #ifndef _rgb_driver_h
 #define _rgb_driver_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +38,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_buf, uint8_t spi_size);
+void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_tx_buf, uint8_t spi_size);
 
 bool rgb_driver_show(uint8_t* frame, uint8_t size);	//__WEAK 	
 bool rgb_driver_init(void);							//__WEAK 	

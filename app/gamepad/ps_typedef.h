@@ -16,7 +16,7 @@
 #ifndef	_ps_typedef_h
 #define	_ps_typedef_h
 #include "hw_config.h"
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 /*******************************************************************************************************************
 **	Hardware  Defined

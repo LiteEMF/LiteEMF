@@ -208,97 +208,97 @@ static uint32_t iokey_scan(void)
 	uint32_t value=0;
 
 	#if PIN_NULL != KEY_A_GPIO
-	if(api_gpio_in(KEY_A_GPIO))	value |= HW_KEY_A;
+	if(KEY_ACTIVE == api_gpio_in(KEY_A_GPIO))	value |= HW_KEY_A;
 	#endif
 	#if PIN_NULL != KEY_B_GPIO
-	if(api_gpio_in(KEY_B_GPIO))	value |= HW_KEY_B;
+	if(KEY_ACTIVE == api_gpio_in(KEY_B_GPIO))	value |= HW_KEY_B;
 	#endif
 	#if PIN_NULL != KEY_C_GPIO
-	if(api_gpio_in(KEY_C_GPIO))	value |= HW_KEY_C;
+	if(KEY_ACTIVE == api_gpio_in(KEY_C_GPIO))	value |= HW_KEY_C;
 	#endif
 	#if PIN_NULL != KEY_X_GPIO
-	if(api_gpio_in(KEY_X_GPIO))	value |= HW_KEY_X;
+	if(KEY_ACTIVE == api_gpio_in(KEY_X_GPIO))	value |= HW_KEY_X;
 	#endif
 	#if PIN_NULL != KEY_Y_GPIO
-	if(api_gpio_in(KEY_Y_GPIO))	value |= HW_KEY_Y;
+	if(KEY_ACTIVE == api_gpio_in(KEY_Y_GPIO))	value |= HW_KEY_Y;
 	#endif
 	#if PIN_NULL != KEY_Z_GPIO
-	if(api_gpio_in(KEY_Z_GPIO))	value |= HW_KEY_Z;
+	if(KEY_ACTIVE == api_gpio_in(KEY_Z_GPIO))	value |= HW_KEY_Z;
 	#endif
 	#if PIN_NULL != KEY_L1_GPIO
-	if(api_gpio_in(KEY_L1_GPIO))	value |= HW_KEY_L1;
+	if(KEY_ACTIVE == api_gpio_in(KEY_L1_GPIO))	value |= HW_KEY_L1;
 	#endif
 	#if PIN_NULL != KEY_R1_GPIO
-	if(api_gpio_in(KEY_R1_GPIO))	value |= HW_KEY_R1;
+	if(KEY_ACTIVE == api_gpio_in(KEY_R1_GPIO))	value |= HW_KEY_R1;
 	#endif
 	#if PIN_NULL != KEY_L2_GPIO
-	if(api_gpio_in(KEY_L2_GPIO))	value |= HW_KEY_L2;
+	if(KEY_ACTIVE == api_gpio_in(KEY_L2_GPIO))	value |= HW_KEY_L2;
 	#endif
 	#if PIN_NULL != KEY_R2_GPIO
-	if(api_gpio_in(KEY_R2_GPIO))	value |= HW_KEY_R2;
+	if(KEY_ACTIVE == api_gpio_in(KEY_R2_GPIO))	value |= HW_KEY_R2;
 	#endif
 	#if PIN_NULL != KEY_SELECT_GPIO
-	if(api_gpio_in(KEY_SELECT_GPIO))	value |= HW_KEY_SELECT;
+	if(KEY_ACTIVE == api_gpio_in(KEY_SELECT_GPIO))	value |= HW_KEY_SELECT;
 	#endif
 	#if PIN_NULL != KEY_START_GPIO
-	if(api_gpio_in(KEY_START_GPIO))	value |= HW_KEY_START;
+	if(KEY_ACTIVE == api_gpio_in(KEY_START_GPIO))	value |= HW_KEY_START;
 	#endif
 	#if PIN_NULL != KEY_HOME_GPIO
-	if(api_gpio_in(KEY_HOME_GPIO))	value |= HW_KEY_HOME;
+	if(KEY_ACTIVE == api_gpio_in(KEY_HOME_GPIO))	value |= HW_KEY_HOME;
 	#endif
 	#if PIN_NULL != KEY_L3_GPIO
-	if(api_gpio_in(KEY_L3_GPIO))	value |= HW_KEY_L3;
+	if(KEY_ACTIVE == api_gpio_in(KEY_L3_GPIO))	value |= HW_KEY_L3;
 	#endif
 	#if PIN_NULL != KEY_R3_GPIO
-	if(api_gpio_in(KEY_R3_GPIO))	value |= HW_KEY_R3;
+	if(KEY_ACTIVE == api_gpio_in(KEY_R3_GPIO))	value |= HW_KEY_R3;
 	#endif
 	#if PIN_NULL != KEY_CAPTURE_GPIO
-	if(api_gpio_in(KEY_CAPTURE_GPIO))	value |= HW_KEY_CAPTURE;
+	if(KEY_ACTIVE == api_gpio_in(KEY_CAPTURE_GPIO))	value |= HW_KEY_CAPTURE;
 	#endif
 	#if PIN_NULL != KEY_UP_GPIO
-	if(api_gpio_in(KEY_UP_GPIO))	value |= HW_KEY_UP;
+	if(KEY_ACTIVE == api_gpio_in(KEY_UP_GPIO))	value |= HW_KEY_UP;
 	#endif
 	#if PIN_NULL != KEY_DOWN_GPIO
-	if(api_gpio_in(KEY_DOWN_GPIO))	value |= HW_KEY_DOWN;
+	if(KEY_ACTIVE == api_gpio_in(KEY_DOWN_GPIO))	value |= HW_KEY_DOWN;
 	#endif
 	#if PIN_NULL != KEY_LEFT_GPIO
-	if(api_gpio_in(KEY_LEFT_GPIO))	value |= HW_KEY_LEFT;
+	if(KEY_ACTIVE == api_gpio_in(KEY_LEFT_GPIO))	value |= HW_KEY_LEFT;
 	#endif
 	#if PIN_NULL != KEY_RIGHT_GPIO
-	if(api_gpio_in(KEY_RIGHT_GPIO))	value |= HW_KEY_RIGHT;
+	if(KEY_ACTIVE == api_gpio_in(KEY_RIGHT_GPIO))	value |= HW_KEY_RIGHT;
 	#endif
 	#if PIN_NULL != KEY_MENU_GPIO
-	if(api_gpio_in(KEY_MENU_GPIO))	value |= HW_KEY_MENU;
+	if(KEY_ACTIVE == api_gpio_in(KEY_MENU_GPIO))	value |= HW_KEY_MENU;
 	#endif
 	#if PIN_NULL != KEY_MODE_GPIO
-	if(api_gpio_in(KEY_MODE_GPIO))	value |= HW_KEY_MODE;
+	if(KEY_ACTIVE == api_gpio_in(KEY_MODE_GPIO))	value |= HW_KEY_MODE;
 	#endif
 	#if PIN_NULL != KEY_FN_GPIO
-	if(api_gpio_in(KEY_FN_GPIO))	value |= HW_KEY_FN;
+	if(KEY_ACTIVE == api_gpio_in(KEY_FN_GPIO))	value |= HW_KEY_FN;
 	#endif
 	#if PIN_NULL != KEY_M1_GPIO
-	if(api_gpio_in(KEY_M1_GPIO))	value |= HW_KEY_M1;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M1_GPIO))	value |= HW_KEY_M1;
 	#endif
 	#if PIN_NULL != KEY_M2_GPIO
-	if(api_gpio_in(KEY_M2_GPIO))	value |= HW_KEY_M2;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M2_GPIO))	value |= HW_KEY_M2;
 	#endif
 	#if PIN_NULL != KEY_M3_GPIO
-	if(api_gpio_in(KEY_M3_GPIO))	value |= HW_KEY_M3;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M3_GPIO))	value |= HW_KEY_M3;
 	#endif
 	#if PIN_NULL != KEY_M4_GPIO
-	if(api_gpio_in(KEY_M4_GPIO))	value |= HW_KEY_M4;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M4_GPIO))	value |= HW_KEY_M4;
 	#endif
 	#if PIN_NULL != KEY_M5_GPIO
-	if(api_gpio_in(KEY_M5_GPIO))	value |= HW_KEY_M5;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M5_GPIO))	value |= HW_KEY_M5;
 	#endif
 	#if PIN_NULL != KEY_M6_GPIO
-	if(api_gpio_in(KEY_M6_GPIO))	value |= HW_KEY_M6;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M6_GPIO))	value |= HW_KEY_M6;
 	#endif
 	#if PIN_NULL != KEY_M7_GPIO
-	if(api_gpio_in(KEY_M7_GPIO))	value |= HW_KEY_M7;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M7_GPIO))	value |= HW_KEY_M7;
 	#endif
 	#if PIN_NULL != KEY_M8_GPIO
-	if(api_gpio_in(KEY_M8_GPIO))	value |= HW_KEY_M8;
+	if(KEY_ACTIVE == api_gpio_in(KEY_M8_GPIO))	value |= HW_KEY_M8;
 	#endif
 
 	return value;

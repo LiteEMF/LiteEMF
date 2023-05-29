@@ -11,7 +11,7 @@
 
 #ifndef _victor_h
 #define _victor_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "math.h"
 
 #ifdef __cplusplus

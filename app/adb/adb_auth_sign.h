@@ -13,7 +13,7 @@
 
 #ifndef _adb_auth_sign_h
 #define _adb_auth_sign_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

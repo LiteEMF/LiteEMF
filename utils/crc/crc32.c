@@ -84,3 +84,4 @@ uint32_t crc32(const void* buf, uint32_t len)
     return crc32val ^ 0xFFFFFFFF;
 }
 #endif
+

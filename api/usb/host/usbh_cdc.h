@@ -12,7 +12,7 @@
 
 #ifndef _usbh_cdc_h
 #define _usbh_cdc_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/usb/usb_typedef.h"
 
 #ifdef __cplusplus

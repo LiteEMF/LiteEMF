@@ -12,9 +12,9 @@
 
 #ifndef _api_pm_h
 #define _api_pm_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_tick.h"
-#include "hal/hal_pm.h"
+#include "hal_pm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,12 +68,13 @@ extern bool app_pm_key_sleep;
 **  Function
 ******************************************************************************************************/
 bool api_pm_sleep_hook(void);				//__WEAK 
+bool api_pm_sleep_deinit(void);				//__WEAK
+
 void api_pm_weakup_check(void);
 void api_boot(uint8_t index);
 void api_reset(void);
 void api_sleep(void);
 bool api_pm_init(void);
-bool api_pm_deinit(void);
 void api_pm_task(void*pa);
 void api_pm_handler(uint32_t period_10us);
 

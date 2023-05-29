@@ -21,6 +21,7 @@
 **	static Parameters
 *******************************************************************************************************/
 
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -33,7 +34,7 @@ void emf_mem_init(void)
 		static uint8x_t s_mempoll[EMF_MEMPOLL_SIZE];
 		init_mempoll(&s_mempoll,sizeof(mempoll));
 		#endif
-	#else
+	#elif HEAP_ID
 		vPortInitialiseBlocks();
 	#endif
 }
@@ -45,14 +46,28 @@ void emf_mem_init(void)
 void* emf_malloc(uint32_t size)
 {
 	void* p = NULL;
+	#if HEAP_ID
 	p = pvPortMalloc(size);
+	#else
+	p = hal_malloc(size);
+	#endif
 	EMF_ASSERT(NULL != p);
 	return p;
 }
 void emf_free(void* p)
 {
+	#if HEAP_ID
 	vPortFree(p);
+	#else
+	hal_free(p);
+	#endif
 }
+
+
+
+
+
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -67,10 +82,12 @@ void emf_mem_stats(void)
 	logd("emf mem stats heap(%d) free size=%d\n",EMF_MEMPOLL_SIZE,xHeapStats.xAvailableHeapSpaceInBytes);
 	logd("	free size: largest=%d,smallest=%d, num=%d\n",xHeapStats.xSizeOfLargestFreeBlockInBytes,xHeapStats.xSizeOfSmallestFreeBlockInBytes,xHeapStats.xNumberOfFreeBlocks);
 	logd("	malloc times=%d, free times=%d\n",xHeapStats.xNumberOfSuccessfulAllocations,xHeapStats.xNumberOfSuccessfulFrees);
-	#elif (3 != HEAP_ID )
+	#elif (1 == HEAP_ID ) || (2 == HEAP_ID )
 	uint32_t heap_free_size;
 	heap_free_size = xPortGetFreeHeapSize();
 	logd("emf heap(%d) free size=%d\n",EMF_MEMPOLL_SIZE,heap_free_size);
+	#else
+	hal_mem_stats();
 	#endif
 }
 

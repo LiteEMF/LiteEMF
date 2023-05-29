@@ -21,7 +21,7 @@
 	|storage_map[2] | storage_map[3]	|
 ************************************************************************************************************/
 #include "hw_config.h"
-
+#if API_STORAGE_ENABLE
 #include  "api/api_storage.h"
 #include  "api/api_tick.h"
 #include  "api/api_log.h"
@@ -155,7 +155,7 @@ uint8_t api_storage_map_index(void)
 bool api_storage_set_map(uint8_t index)
 {
 	bool ret = false;
-	ret = api_storage_sync();
+	// ret = api_storage_sync();	//TODO
 	if(ret){
 		ret = api_flash_read(STORAGE_MAP_ADDR(index),m_storage_map, sizeof(m_storage_map));
 		s_map_index = index;
@@ -172,13 +172,17 @@ bool api_storage_sync_complete(void)
 bool api_storage_sync(void)
 {
 	bool ret = false;
+
+	logd("api_storage_sync\n");
     ret = api_storage_write_map(s_map_index, m_storage_map, sizeof(m_storage_map));
 	is_stg_auto_sync = !ret;
 	storage_timer = m_systick;
 	return ret;
 }
+
 void api_storage_auto_sync(void)
 {
+	logd("api_storage_auto_sync\n");
     storage_timer = m_systick;
 	is_stg_auto_sync = true;
 }
@@ -186,8 +190,10 @@ void api_storage_auto_sync(void)
 bool api_storage_init(void)
 {
 	bool ret;
+
     s_map_index = 0;
 	is_stg_auto_sync = false;
+
 	ret = api_flash_read(0,(uint8_t*)&m_storage,sizeof(m_storage));
 	ret &= api_flash_read(STORAGE_MAP_ADDR(0),m_storage_map, sizeof(m_storage_map) );		//default map index 0
 	if(!ret){
@@ -200,7 +206,10 @@ bool api_storage_init(void)
 
 void api_storage_sync_task(void* pa)
 {
-	api_storage_sync();
+	if(is_stg_auto_sync){
+		logd("api_storage_sync_task =%d\n",is_stg_auto_sync);
+		api_storage_sync();
+	}
 }
 
 #if TASK_HANDLER_ENABLE
@@ -211,16 +220,15 @@ void api_storage_sync_task(void* pa)
 *******************************************************************/
 void api_storage_handler(uint32_t period_10us)
 {
-	static timer_t s_timer;
-	if((m_systick - s_timer) >= period_10us/100){
-		s_timer = m_systick;
+	if((m_systick - storage_timer) >= period_10us/100){
+		storage_timer = m_systick;
 		api_storage_sync_task(NULL);
 	}
 }
 #endif
 
 
-
+#endif
 
 
 

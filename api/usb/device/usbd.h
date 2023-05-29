@@ -12,13 +12,13 @@
 
 #ifndef _usbd_h
 #define _usbd_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/emf_utils.h"
 // #include "utils/list.h"
 #include "api/usb/device/usbd_core.h"
 #include "api/usb/device/usbd_class.h"
 
-#include "hal/usb/hal_usbd.h"
+#include "usb/hal_usbd.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

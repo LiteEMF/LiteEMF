@@ -16,7 +16,7 @@
 #ifndef	_switch_typedef_h
 #define	_switch_typedef_h
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/emf_utils.h"
 
 /*******************************************************************************************************************

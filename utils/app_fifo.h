@@ -21,7 +21,7 @@
 
 #ifndef __app_fifo__
 #define __app_fifo__
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

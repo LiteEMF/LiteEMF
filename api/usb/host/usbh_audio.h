@@ -12,7 +12,7 @@
 
 #ifndef _usbh_audio_h
 #define _usbh_audio_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/usb/usb_typedef.h"
 #include "api/usb/usb_audio_typedef.h"
 

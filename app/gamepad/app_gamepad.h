@@ -12,7 +12,7 @@
 
 #ifndef _app_gamepad_h
 #define _app_gamepad_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_transport.h"
 #include "app/gamepad/app_gamepad_key.h"
 

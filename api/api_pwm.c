@@ -12,6 +12,7 @@
 
 
 #include "hw_config.h"
+#include "hw_board.h"
 #ifdef HW_PWM_MAP
 
 /************************************************************************************************************
@@ -19,9 +20,14 @@
 ************************************************************************************************************/
 #include  "api/api_pwm.h"
 
+#include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+
+
+
+
 
 
 /******************************************************************************************************
@@ -47,14 +53,17 @@ static uint8_t pwm_duty[countof(m_pwm_map)];          //0~255
 bool api_pwm_set_duty(uint16_t id, uint8_t duty)
 {
 	bool ret = false;
+
     if(id >= m_pwm_num) return ret;
     if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
 	pwm_duty[id] = duty;
-	if(PWM_ACTIVE_ATT(id)) {
-		duty = 0xff- pwm_duty[id];
+	if(0 == PWM_ACTIVE_ATT(id)) {
+		duty = 0xff - pwm_duty[id];
 	}
+
     hal_pwm_set_duty(id, duty);
+
     return true;
 }
 
@@ -96,7 +105,7 @@ bool api_pwm_init(uint16_t id)
 
 	if((pin_t)PIN_NULL == m_pwm_map[id].pin) return false;
 
-    if(PWM_ACTIVE_ATT(id)) {
+    if(0 == PWM_ACTIVE_ATT(id)) {
 		duty = 0xff - pwm_duty[id];
 	}
     hal_pwm_init(id,duty);

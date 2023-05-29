@@ -11,9 +11,9 @@
 
 #ifndef _api_iic_host_h
 #define _api_iic_host_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
-#include "hal/hal_iic_host.h"
+#include "hal_iic_host.h"
 #include "api/api_gpio.h"
 #include "api/api_tick.h"
 
@@ -26,7 +26,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef IIC_SOFT_ENABLE
-#define  IIC_SOFT_ENABLE  		1
+#define  IIC_SOFT_ENABLE  		0
 #endif
 
 #define IIC_BADU_POS		(0)
@@ -34,19 +34,29 @@ extern "C" {
 #define IIC_RES_POS			(16)
 #define IIC_RES_MASK		0XFFFF0000
 
+#ifndef IIC_BADU_ATT			//api layout fix do not fix in hal_pwm
+#define IIC_BADU_ATT(id)  	(FLD2VAL(IIC_BADU, m_iic_map[id].att))
+#endif
+
+
 #ifndef IIC_DELAY			//TODO check 是否优化代码
-#define  IIC_DELAY(id)  	(1000000/2/FLD2VAL(IIC_BADU, m_iic_map[id].att) - 250) 	//ns, 约400KHZ, use offset for code run delay
+#define  IIC_DELAY(id)  	delay_ns(1000000/2/IIC_BADU_ATT(id)) 	//ns, 约400KHZ, use offset for code run delay
 #endif
 
 #ifndef IIC_RETRY
-#define  IIC_RETRY  3
+#define  IIC_RETRY  		3
 #endif
 #define IIC_ACK_TIMEOUT		5	//应答超时,us
 
 
 #ifndef IIC_SDA_DIR
-#define IIC_SDA_DIR(id,dir)     api_gpio_dir(m_iic_map[id].sda,dir,PIN_PULLUP) 
+	#if GPIO_OD_EN
+	#define IIC_SDA_DIR(id,dir)		if(PIN_IN==dir) api_gpio_out(m_iic_map[id].sda,1)
+	#else
+	#define IIC_SDA_DIR(id,dir)     api_gpio_dir(m_iic_map[id].sda,dir,PIN_PULLUP) 
+	#endif
 #endif
+
 #ifndef IIC_SDA_IN
 #define IIC_SDA_IN(id)        !!api_gpio_in(m_iic_map[id].sda)
 #endif
@@ -75,6 +85,10 @@ extern uint8c_t m_iic_num;
 ******************************************************************************************************/
 bool api_iic_host_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
 bool api_iic_host_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
+bool api_iic_host_isr_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
+bool api_iic_host_isr_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
+void api_iic_host_isr_hook(uint8_t id,error_t err);			//__WEAK
+
 bool api_iic_host_scan(uint8_t id);
 bool api_iic_host_init(uint8_t id);
 bool api_iic_host_deinit(uint8_t id);
@@ -86,6 +100,8 @@ void api_iics_deinit(void);
 //hal
 bool hal_iic_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
 bool hal_iic_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
+bool hal_iic_isr_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
+bool hal_iic_isr_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
 bool hal_iic_init(uint8_t id);
 bool hal_iic_deinit(uint8_t id);
 

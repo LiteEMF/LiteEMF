@@ -249,19 +249,19 @@ typedef struct{
 //                       		USB			                  					//
 //*********************************************************************************//
 #ifndef APP_USBD_ENABLE
-#define APP_USBD_ENABLE			1
+#define APP_USBD_ENABLE			0
 #endif
 #ifndef APP_USBH_ENABLE
-#define APP_USBH_ENABLE			1
+#define APP_USBH_ENABLE			0
 #endif
 #define APP_USB_ENABLE		(APP_USBD_ENABLE | APP_USBH_ENABLE)
 
 // usb socket 用于手柄引导
 #ifndef USBD_SOCKET_ENABLE
-#define USBD_SOCKET_ENABLE		1
+#define USBD_SOCKET_ENABLE		0
 #endif
 #ifndef USBH_SOCKET_ENABLED
-#define USBH_SOCKET_ENABLED		1
+#define USBH_SOCKET_ENABLED		0
 #endif
 
 #ifndef SOCKET_HID_TYPE_SUPPORT
@@ -271,64 +271,73 @@ typedef struct{
 //*********************************************************************************//
 //                       	other API modules                  						//
 //*********************************************************************************//
+#ifndef API_TIMER_SUPPORT			// 打开哪些硬件定时器BIT(0) | BIT(2)
+#define API_TIMER_SUPPORT		0
+#endif
+#ifndef API_TIMER_ENABLE
+#define API_TIMER_ENABLE		API_TIMER_SUPPORT
+#endif
 #ifndef API_SOFT_TIMER_ENABLE
-#define API_SOFT_TIMER_ENABLE			1
+#define API_SOFT_TIMER_ENABLE	0
 #endif
 #ifndef API_NFC_ENABLE
-#define API_NFC_ENABLE			1
+#define API_NFC_ENABLE			0
 #endif
 #ifndef API_GPS_ENABLE
-#define API_GPS_ENABLE			1
+#define API_GPS_ENABLE			0
 #endif
 #ifndef API_GSM_ENABLE
-#define API_GSM_ENABLE			1
+#define API_GSM_ENABLE			0
 #endif
 #ifndef API_WIFI_ENABLE
-#define API_WIFI_ENABLE			1
+#define API_WIFI_ENABLE			0
 #endif
 #ifndef API_AUDIO_ENABLE
 #define API_AUDIO_ENABLE		0
 #endif
-
+#ifndef API_WDT_ENABLE
+#define API_WDT_ENABLE		0
+#endif
+#ifndef API_STORAGE_ENABLE	
+#define API_STORAGE_ENABLE		1
+#endif
+#ifndef API_PM_ENABLE
+#define API_PM_ENABLE			0
+#endif
 
 //*********************************************************************************//
 //                       	APP modules                  						   //
 //*********************************************************************************//
-#ifndef API_PM_ENABLE
-#define API_PM_ENABLE			1
-#endif
 #ifndef APP_BATTERY_ENABLE
-#define APP_BATTERY_ENABLE		1
+#define APP_BATTERY_ENABLE		0
 #endif
 #ifndef APP_KEY_ENABLE
-#define APP_KEY_ENABLE			1
+#define APP_KEY_ENABLE			0
 #endif
 #ifndef APP_KM_ENABLE
-#define APP_KM_ENABLE			1
+#define APP_KM_ENABLE			0
 #endif
 #ifndef APP_IMU_ENABLE
-#define APP_IMU_ENABLE			1
+#define APP_IMU_ENABLE			0
 #endif
 #ifndef APP_JOYSTICK_ENABLE
-#define APP_JOYSTICK_ENABLE		1
+#define APP_JOYSTICK_ENABLE		0
 #endif
 #ifndef APP_GAMEAPD_ENABLE
 #define APP_GAMEAPD_ENABLE 		((HIDD_SUPPORT | HIDH_SUPPORT) & HID_GAMEPAD_MASK)
 #endif
 #ifndef APP_RUMBLE_ENABLE
-#define APP_RUMBLE_ENABLE		1
+#define APP_RUMBLE_ENABLE		0
 #endif
 #ifndef APP_LED_ENABLE
-#define APP_LED_ENABLE			1
+#define APP_LED_ENABLE			0
 #endif
 #ifndef APP_RGB_ENABLE
-#define APP_RGB_ENABLE			1
+#define APP_RGB_ENABLE			0
 #endif
 
-
-
 #ifndef APP_CMD_ENABLE
-#define APP_CMD_ENABLE			1
+#define APP_CMD_ENABLE			0
 #endif
 
 

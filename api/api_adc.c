@@ -10,6 +10,7 @@
 */
 
 #include "hw_config.h"
+#include "hw_board.h"
 #ifdef HW_ADC_MAP
 /************************************************************************************************************
 **	Description:	
@@ -29,7 +30,7 @@
 *******************************************************************************************************/
 const_t pin_map_t m_adc_map[] = HW_ADC_MAP;          
 uint8c_t m_adc_num = countof(m_adc_map);
-uint16_t m_adc_val[countof(m_adc_map)];
+uint16_t m_adc_val[countof(m_adc_map)];		//滤波后adc值
 
 /*****************************************************************************************************
 **	static Function
@@ -65,39 +66,18 @@ bool api_adc_start_scan(void)
 {
     return hal_adc_start_scan();
 }
-bool api_adc_init(uint8_t id)
-{
-	return hal_adc_init(id);
-}
 
-bool api_adc_deinit(uint8_t id)
-{
-	return hal_adc_deinit(id);
-}
 void api_adcs_init(void)
 {
-	uint8_t id;
-	uint16_t adc_val;
 	memset(m_adc_val,0,sizeof(m_adc_val));
-	for(id=0; id < m_adc_num; id++){
-		api_adc_init(id);
-	}   
+	hal_adc_init();
 
-
-	//get val
-	for(id=0; id < m_adc_num; id++){
-		if(hal_adc_value(id,&adc_val)){
-			m_adc_val[id] = adc_val;
-		}
-	}
-	api_adc_start_scan();
+	//start adc
+	api_adc_scan_task(NULL);
 }
 void api_adcs_deinit(void)
 {
-	uint8_t id;
-	for(id=0; id<m_adc_num; id++){
-		api_adc_deinit(id);
-	}   
+	hal_adc_deinit();  
 }
 
 

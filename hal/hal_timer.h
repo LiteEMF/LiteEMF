@@ -12,7 +12,7 @@
 
 #ifndef _hal_timer_h
 #define _hal_timer_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

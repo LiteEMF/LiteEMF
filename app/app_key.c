@@ -47,9 +47,9 @@ bool m_key_power_on = false;
 ******************************************************************************************************/
 void app_key_dump(uint32_t key)
 {
-    logd("key=%x:	",key);
+    logd("key=%x:",key);
     #if 1
-    if(key & HW_KEY_A 		) logd("	A,");
+    if(key & HW_KEY_A 		) logd("    A,");
     if(key & HW_KEY_B 		) logd("	B,");
     if(key & HW_KEY_C 		) logd("	C,");
     if(key & HW_KEY_X 		) logd("	X,");
@@ -81,8 +81,8 @@ void app_key_dump(uint32_t key)
     if(key & HW_KEY_M7 		) logd("	M7,");
     if(key & HW_KEY_M8 		) logd("	M8,");
     if(key & HW_KEY_POWER 	) logd("	POWER,");
-    if(key 	) logd("\n");
     #endif
+    logd("\n");
 }
 
 #if WEAK_ENABLE
@@ -127,8 +127,6 @@ void app_key_scan_task(void *pa)
 {
     uint32_t key;
     
-    uint32_t hw_key=0;
-
     key = 0;
     key = io_key_scan();
     app_key_vendor_scan(&key);	

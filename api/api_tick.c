@@ -61,8 +61,12 @@ void delay_ms(uint32_t ms)
 
 void api_tick_init(void)
 {
+	#ifndef m_task_tick10us
 	m_task_tick10us = 0;	//10us
+	#endif
+	#ifndef m_systick
 	m_systick = 0;				//1ms
+	#endif
     hal_tick_init();
 }
 

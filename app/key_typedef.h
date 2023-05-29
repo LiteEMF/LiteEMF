@@ -12,7 +12,7 @@
 
 #ifndef _key_typedef_h
 #define _key_typedef_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
 #include "api/api_gpio.h"
 #ifdef __cplusplus

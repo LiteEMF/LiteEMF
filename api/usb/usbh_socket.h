@@ -12,7 +12,7 @@
 
 #ifndef _usbh_socket_h
 #define _usbh_socket_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_transport.h"
 
 #ifdef __cplusplus

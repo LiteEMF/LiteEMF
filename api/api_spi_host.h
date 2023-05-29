@@ -11,9 +11,9 @@
 
 #ifndef _api_spi_host_h
 #define _api_spi_host_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
-#include "hal/hal_spi_host.h"
+#include "hal_spi_host.h"
 #include "api/api_gpio.h"
 #include "api/api_tick.h"
 
@@ -26,32 +26,30 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef SPI_SOFT_ENABLE
-#define SPI_SOFT_ENABLE    1
+#define SPI_SOFT_ENABLE    0
 #endif
 
 
 #define SPI_BADU_POS		(0)
-#define SPI_BADU_MASK		0X0000FFFF		//kHZ
-#define SPI_READ_BIT_POS	(16)
-#define SPI_READ_BIT_MASK	0X00FF0000		//0~7, spi read addr bit 
-#define SPI_RES_POS			(24)
-#define SPI_RES_MASK			0XFF000000
+#define SPI_BADU_MASK		0X0000FFFF		//KHZ
+#define SPI_RES_POS			(16)
+#define SPI_RES_MASK		0XFFFF0000
 
 
-#ifndef SPI_DELAY
-#define SPI_DELAY(id)  		(1000000/2/FLD2VAL(SPI_BADU, m_spi_map[id].att) - 100) 	//ns, 约400KHZ, use offset for code run delay
+#ifndef SPI_BADU_ATT		//api layout fix do not fix in hal_pwm
+#define SPI_BADU_ATT(id)  	(FLD2VAL(SPI_BADU, m_spi_map[id].att))
 #endif
 
-#ifndef SPI_READ_ADDR
-#define SPI_READ_ADDR(id)  	(BIT(FLD2VAL(SPI_READ_BIT, m_spi_map[id].att)))
+#ifndef SPI_DELAY			//ns
+#define SPI_DELAY(id)  		delay_ns(1000000/2/SPI_BADU_ATT(id)) 	
 #endif
 
 
 #ifndef SPI_SCLK
-#define SPI_SCLK(id,x)    api_gpio_out(m_spi_map[id].clk ,x) 	//output
+#define SPI_SCLK(id,x)    api_gpio_out(m_spi_map[id].clk ,x) 	
 #endif
 #ifndef SPI_MOSI
-#define SPI_MOSI(id,x)    api_gpio_out(m_spi_map[id].mosi,x)	//output
+#define SPI_MOSI(id,x)    api_gpio_out(m_spi_map[id].mosi,x)
 #endif
 #ifndef SPI_MISO
 #define SPI_MISO(id)      api_gpio_in(m_spi_map[id].miso)
@@ -78,16 +76,22 @@ extern uint8c_t m_spi_num;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool api_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool api_spi_host_write(uint8_t id,uint16_t addr, uint8_t *buf, uint16_t len);
+bool api_spi_host_read(uint8_t id,uint16_t addr, uint8_t *buf, uint16_t len);
+bool api_spi_host_isr_write(uint8_t id,uint16_t addr, uint8_t *buf, uint16_t len);
+bool api_spi_host_isr_read(uint8_t id,uint16_t addr, uint8_t *buf, uint16_t len);
+void api_spi_host_isr_hook(uint8_t id,error_t err);			//__WEAK
+
 bool api_spi_host_init(uint8_t id);
 bool api_spi_host_deinit(uint8_t id);
 void api_spis_init(void);
 void api_spis_deinit(void);
 
 //hal
-bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
-bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len);
+bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len);
+bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len);
+bool hal_spi_host_isr_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len);
+bool hal_spi_host_isr_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len);
 bool hal_spi_host_init(uint8_t id);
 bool hal_spi_host_deinit(uint8_t id);
 

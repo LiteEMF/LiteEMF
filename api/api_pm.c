@@ -32,36 +32,12 @@
 #if APP_BATTERY_ENABLE
 #include "app/app_battery.h"
 #endif
-#if APP_RUMBLE_ENABLE
-#include "app/app_rumble.h"
-#endif
-#if APP_LED_ENABLE
-#include "app/app_led.h"
-#endif
-#if APP_RGB_ENABLE
-#include "app/rgb/app_rgb.h"
-#endif
-#if API_NFC_ENABLE
-#include "api/nfc/api_nfc.h"
-#endif
-#if API_GPS_ENABLE
-#include "api/gps/api_gps.h"
-#endif
-#if API_GSM_ENABLE
-#include "api/gsm/api_gsm.h"
-#endif
-#if API_WIFI_ENABLE
-#include "api/wifi/api_wifi.h"
-#endif
-#if APP_USB_ENABLE
-#include "api/usb/device/usbd.h"
-#endif
 #if API_BT_ENABLE
 #include "api/bt/api_bt.h"
 #endif
 
 
-#include "emf.h"
+#include "app/emf.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -93,6 +69,35 @@ __WEAK bool api_pm_sleep_hook(void)
 {
 	return false;
 }
+
+__WEAK bool api_pm_sleep_deinit(void)
+{
+	if(PM_STA_SLEEP == m_pm_sta){
+		#ifdef HW_ADC_MAP
+		api_adcs_deinit();
+		#endif
+		#if APP_LED_ENABLE
+		app_led_deinit();
+		#endif
+		#if APP_RGB_ENABLE
+		app_rgb_deinit();
+		#endif
+	}
+
+	#if APP_RUMBLE_ENABLE
+	app_rumble_deinit();
+	#endif
+	#if API_BT_ENABLE
+	api_bt_enable_all(0);
+	#endif
+	#if API_STORAGE_ENABLE
+	api_storage_sync();
+	#endif
+	
+	user_vender_deinit();
+
+	return true;
+}
 #endif
 
 
@@ -100,8 +105,10 @@ void api_pm_weakup_check(void)
 {
 	uint16_t i;
 
+	#if APP_BATTERY_ENABLE
 	app_battery_init();
 	if(BAT_PROTECT_STA == m_battery_sta) hal_sleep();
+	#endif
 
 	// 首次上电池不开机
 	#if (APP_BATTERY_ENABLE) && (KEY_POWER_GPIO)
@@ -154,15 +161,21 @@ void api_weakup_init(void)
 void api_sleep(void)
 {
     //充电状态下休眠
+	s_pm_timer = m_systick;
+
+	#if APP_BATTERY_ENABLE
 	if((BAT_CHARGE_STA == m_battery_sta) || (BAT_CHARGE_DONE_STA == m_battery_sta)){
 		logd_r("charge notwork mode...\n");
 		m_pm_sta = PM_STA_CHARG_NOT_WORK;
-		api_pm_deinit();
-	}else{									//无充电，直接休眠
+	}
+	else
+	#endif
+	{									//无充电，直接休眠
 		logd_r("sleep...\n");
 		m_pm_sta = PM_STA_SLEEP;
-		api_pm_deinit();
 	}
+
+	api_pm_sleep_deinit();
 }
 
 
@@ -180,43 +193,17 @@ bool api_pm_init(void)
 	app_pm_key_sleep = 0;		
 	
 	m_reset_reson = hal_get_reset_reson();
+	
+	#if API_STORAGE_ENABLE
 	if(SOFT_RESET_MASK == m_storage.reset_reson){
 		m_reset_reson = PM_RESON_SOFT;
 	}
+	#endif
+
     return true;
 }
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-bool api_pm_deinit(void)
-{
-	s_pm_timer = m_systick;
 
-	if(PM_STA_SLEEP == m_pm_sta){
-		#ifdef HW_ADC_MAP
-		api_adcs_deinit();
-		#endif
-		#if APP_LED_ENABLE
-		app_led_deinit();
-		#endif
-		#if APP_RGB_ENABLE
-		app_rgb_deinit();
-		#endif
-	}
-
-	#if APP_RUMBLE_ENABLE
-	app_rumble_deinit();
-	#endif
-	#if API_BT_ENABLE
-	api_bt_enable_all(0);
-	#endif
-	api_storage_sync();
-
-	return true;
-}
 
 /*******************************************************************
 ** Parameters:		
@@ -233,21 +220,28 @@ void api_pm_task(void*pa)
 			api_sleep();	
 		}
 
+		#if APP_BATTERY_ENABLE
 		if(BAT_PROTECT_STA == m_battery_sta) api_sleep();		//低电保护休眠
+		#endif
+
 		break;
 	case PM_STA_CHARG_NOT_WORK:
+		#if APP_BATTERY_ENABLE
 		if((BAT_CHARGE_STA != m_battery_sta) && (BAT_CHARGE_DONE_STA != m_battery_sta)){
 			api_sleep();
 		}
+		#endif
+
 		break;
 	case PM_STA_RESET:
 	case PM_STA_SLEEP:
 		if(api_pm_sleep_hook()) return;
 
-		#if STORAGE_ENABLED
+		#if API_STORAGE_ENABLE
 		api_storage_sync();
 		if (!api_storage_sync_complete()) return;
 		#endif
+
 
 		#if API_BT_ENABLE
 		if(1){		//蓝牙需要正常断开连接
@@ -265,7 +259,10 @@ void api_pm_task(void*pa)
 		if(PM_STA_RESET == m_pm_sta)
 		{
 			logd_r("reset...\n\n");
+			#if API_STORAGE_ENABLE
 			m_storage.reset_reson = SOFT_RESET_MASK;
+			#endif
+
 			hal_reset();
 		}else{
 			#if POWER_SWITCH_KEY

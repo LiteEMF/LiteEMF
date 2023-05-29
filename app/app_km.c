@@ -96,12 +96,11 @@ bool app_km_deinit(void)
 
 void app_kb_scan_task(void*pa)
 {
-	uint8_t i;
     kb_bit_t key_bit;
 
 	memset(&key_bit,0,sizeof(key_bit));
 	
-	i = io_keyboard_scan(&key_bit);
+	io_keyboard_scan(&key_bit);
 	app_kb_vendor_scan(&key_bit);
 	app_bit_kb = key_bit;
 	app_get_std_kb(&key_bit,&app_std_kb);		//获取标准键盘
@@ -110,7 +109,6 @@ void app_kb_scan_task(void*pa)
 
 void app_mouse_scan_task(void*pa)
 {
-	uint8_t i;
     app_mouse_t mouse;
 
 	memset(&mouse,0,sizeof(mouse));

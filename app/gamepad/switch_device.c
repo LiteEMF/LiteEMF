@@ -719,6 +719,7 @@ bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
         break;
     case SWITCH_MOTOR_ID:           //0X10
 	{
+        #if APP_RUMBLE_ENABLE
         switch_rumble_t *p = (switch_rumble_t*)buf;
         uint8_t motor_l,motor_r;
         motor_l = switch_rumble_decode(&p->rumble_l);
@@ -737,6 +738,7 @@ bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                 app_rumble_set_duty(RUMBLE_R, motor_r, 150);
             }
         }
+        #endif
         ret = true;
         break;
 	}

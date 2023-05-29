@@ -11,9 +11,9 @@
 
 #ifndef _api_log_h
 #define _api_log_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
-#include "hal/hal_log.h"
+#include "hal_log.h"
 
 
 #ifdef __cplusplus
@@ -73,10 +73,10 @@ extern "C" {
 	#define logd_g        logd
 	#define logd_b        logd
 	#define logd_y        logd
-	#define loge_r        logi
-	#define loge_g        logi
-	#define loge_b        logi
-	#define loge_y        logi
+	#define loge_r        loge
+	#define loge_g        loge
+	#define loge_b        loge
+	#define loge_y        loge
 #else
 	#if INFO_LOG_ENABLE && LOG_ENABLE
 		#define logi(format, ...)       HAL_PRINTF(format , ## __VA_ARGS__)
@@ -103,32 +103,42 @@ extern "C" {
 	#endif
 
 	#if ( __CC_ARM )
-		#define logi_r(x, ...)  logi("\x1B[2;31m" x "\x1B[0m", ## __VA_ARGS__)
-		#define logi_g(x, ...)  logi("\x1B[2;32m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logi_b(x, ...)  logi("\x1B[2;34m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logi_y(x, ...)  logi("\x1B[2;33m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logd_r(x, ...)  logd("\e[31m\e[1m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logd_g(x, ...)  logd("\x1B[2;32m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logd_b(x, ...)  logd("\x1B[2;34m"x"\x1B[0m", ## __VA_ARGS__)
-		#define logd_y(x, ...)  logd("\x1B[2;33m"x"\x1B[0m", ## __VA_ARGS__)
-		#define loge_r(x, ...)  loge("\e[31m\e[1m"x"\x1B[0m", ## __VA_ARGS__)
-		#define loge_g(x, ...)  loge("\x1B[2;32m"x"\x1B[0m", ## __VA_ARGS__)
-		#define loge_b(x, ...)  loge("\x1B[2;34m"x"\x1B[0m", ## __VA_ARGS__)
-		#define loge_y(x, ...)  loge("\x1B[2;33m"x"\x1B[0m", ## __VA_ARGS__)
+		// ANSI控制字符定义
+		#define ANSI_RESET          "\x1b[0m"
+		#define ANSI_BOLD           "\x1b[1m"
+		#define ANSI_RED            "\x1b[31m"
+		#define ANSI_GREEN          "\x1b[32m"
+		#define ANSI_YELLOW         "\x1b[33m"
+		#define ANSI_BLUE           "\x1b[34m"
+		#define ANSI_MAGENTA        "\x1b[35m"
+		#define ANSI_CYAN           "\x1b[36m"
+		#define ANSI_WHITE          "\x1b[37m"
 	#else
-		#define logi_r(x, ...)  logi("\e[31m\e[1m" x "\e[0m", ## __VA_ARGS__)
-		#define logi_g(x, ...)  logi("\e[32m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logi_b(x, ...)  logi("\e[34m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logi_y(x, ...)  logi("\e[33m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logd_r(x, ...)  logd("\e[31m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logd_g(x, ...)  logd("\e[32m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logd_b(x, ...)  logd("\e[34m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define logd_y(x, ...)  logd("\e[33m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define loge_r(x, ...)  loge("\e[31m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define loge_g(x, ...)  loge("\e[32m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define loge_b(x, ...)  loge("\e[34m\e[1m"x"\e[0m", ## __VA_ARGS__)
-		#define loge_y(x, ...)  loge("\e[33m\e[1m"x"\e[0m", ## __VA_ARGS__)
+		// ANSI控制字符定义
+		#define ANSI_RESET          "\e[0m"
+		#define ANSI_BOLD           "\e[30m\e[1m"
+		#define ANSI_RED            "\e[31m\e[1m"
+		#define ANSI_GREEN          "\e[32m\e[1m"
+		#define ANSI_YELLOW         "\e[33m\e[1m"
+		#define ANSI_BLUE           "\e[34m\e[1m"
+		#define ANSI_MAGENTA        "\e[35m\e[1m"
+		#define ANSI_CYAN           "\e[36m\e[1m"
+		#define ANSI_WHITE          "\e[37m\e[1m"
 	#endif
+
+	#define logi_r(x, ...)  logi(ANSI_RED x ANSI_RESET, 	## __VA_ARGS__)
+	#define logi_g(x, ...)  logi(ANSI_GREEN x ANSI_RESET, 	## __VA_ARGS__)
+	#define logi_b(x, ...)  logi(ANSI_BLUE x ANSI_RESET, 	## __VA_ARGS__)
+	#define logi_y(x, ...)  logi(ANSI_YELLOW x ANSI_RESET, 	## __VA_ARGS__)
+	#define logd_r(x, ...)  logd(ANSI_RED x ANSI_RESET, 	## __VA_ARGS__)
+	#define logd_g(x, ...)  logd(ANSI_GREEN x ANSI_RESET, 	## __VA_ARGS__)
+	#define logd_b(x, ...)  logd(ANSI_BLUE x ANSI_RESET, 	## __VA_ARGS__)
+	#define logd_y(x, ...)  logd(ANSI_YELLOW x ANSI_RESET, 	## __VA_ARGS__)
+	#define loge_r(x, ...)  loge(ANSI_RED x ANSI_RESET, 	## __VA_ARGS__)
+	#define loge_g(x, ...)  loge(ANSI_GREEN x ANSI_RESET, 	## __VA_ARGS__)
+	#define loge_b(x, ...)  loge(ANSI_BLUE x ANSI_RESET, 	## __VA_ARGS__)
+	#define loge_y(x, ...)  loge(ANSI_YELLOW x ANSI_RESET, 	## __VA_ARGS__)
+
 #endif
 
 
@@ -145,6 +155,8 @@ extern void api_dump(void const *buf, uint16_t len);				//WEAK
 
 //hal
 extern bool hal_dump(void const *buf, uint16_t len);
+
+
 #ifdef __cplusplus
 }
 #endif

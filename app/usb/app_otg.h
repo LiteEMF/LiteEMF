@@ -12,7 +12,7 @@
 
 #ifndef _app_otg_h
 #define _app_otg_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

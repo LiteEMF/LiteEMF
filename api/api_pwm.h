@@ -12,9 +12,9 @@
 
 #ifndef _hal_pwm_h
 #define _hal_pwm_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
-#include "hal/hal_pwm.h"
+#include "hal_pwm.h"
 #include "api/api_gpio.h"
 #ifdef __cplusplus
 extern "C" {
@@ -25,13 +25,13 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #define PWM_FREQ_POS		(0)
-#define PWM_FREQ_MASK		0X0000FFFF		//HZ
-#define PWM_CH_POS			(16)
-#define PWM_CH_MASK			0X00FF0000		//0~7, spi read addr bit 
-#define PWM_ACTIVE_POS		(24)
-#define PWM_ACTIVE_MASK		0X01000000
-#define PWM_RES_POS			(25)
-#define PWM_RES_MASK			0X01000000
+#define PWM_FREQ_MASK		0X000FFFFF		/* HZ  max 1M*/
+#define PWM_CH_POS			(20)
+#define PWM_CH_MASK			0X0FF00000
+#define PWM_ACTIVE_POS		(28)
+#define PWM_ACTIVE_MASK		0X10000000
+#define PWM_RES_POS			(29)
+#define PWM_RES_MASK		0XE0000000
 
 #ifndef PWM_FREQ_ATT
 #define PWM_FREQ_ATT(id)  		(FLD2VAL(PWM_FREQ, m_pwm_map[id].att))
@@ -39,10 +39,9 @@ extern "C" {
 #ifndef PWM_CH_ATT
 #define PWM_CH_ATT(id)  		(FLD2VAL(PWM_CH, m_pwm_map[id].att))
 #endif
-#ifndef PWM_ACTIVE_ATT		//api layout fix do not fix in hal_pwm
+#ifndef PWM_ACTIVE_ATT			//api layout fix do not fix in hal_pwm
 #define PWM_ACTIVE_ATT(id)  	(FLD2VAL(PWM_ACTIVE, m_pwm_map[id].att))
 #endif
-
 
 #ifndef PWM_FREQ_DEFAULT
 #define PWM_FREQ_DEFAULT 1000
@@ -53,7 +52,6 @@ extern "C" {
 *******************************************************************************************************/
 extern const_t pin_map_t m_pwm_map[];          
 extern uint8c_t m_pwm_num;
-
 
 /*****************************************************************************************************
 **  Function

@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include  "hw_config.h"
 #include  "api/api_transport.h"
-
+#include  "api/api_tick.h"
 #if API_BT_ENABLE
 #include  "api/bt/api_bt.h"
 #endif
@@ -74,37 +74,26 @@ uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 	switch(phandle->trp){
 	case TR_BLE		:
 		return BLE_CMD_MTU;
-		break;
 	case TR_EDR		:
 		return EDR_CMD_MTU;
-		break;
 	case TR_BLEC	:
 		return BLEC_CMD_MTU;
-		break;
 	case TR_EDRC	:
 		return EDRC_CMD_MTU;
-		break;
 	case TR_BLE_RF	:
 		return BLE_RF_CMD_MTU;
-		break;
 	case TR_BLEC_RF	:
 		return BLEC_RF_CMD_MTU;
-		break;
 	case TR_RF		:
 		return RF_CMD_MTU;
-		break;
 	case TR_RFC		:
 		return RFC_CMD_MTU;
-		break;
 	case TR_USBD	:
 		return USBD_CMD_MTU;
-		break;
 	case TR_USBH	:
 		return USBH_CMD_MTU;
-		break;
 	case TR_UART	:
 		return UART_CMD_MTU;
-		break;
 	default:
 		break;
 	}

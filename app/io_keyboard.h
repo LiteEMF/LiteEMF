@@ -12,7 +12,7 @@
 
 #ifndef _io_keyboard_h
 #define _io_keyboard_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_gpio.h"
 #include "km_typedef.h"
 #ifdef __cplusplus

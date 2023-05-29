@@ -16,6 +16,8 @@
 
 #include "hw_config.h"
 #include "crc.h"
+
+
 #if  CRC8_TABLE_EANBLE
 
 static const_t uint8_t  crc8tab[256] = {
@@ -48,3 +50,4 @@ uint8_t crc8(const void *buf, uint32_t len)
 }
 
 #endif
+

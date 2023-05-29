@@ -21,6 +21,10 @@ extern "C" {
 #define ERR_RF          0x40   
 #define ERR_VENDOR      0x80
 
+#ifndef ASSER_EN
+#define ASSER_EN        0
+#endif
+
 
 typedef enum{
   ERROR_SUCCESS     = 0 ,     //< Successful command
@@ -42,14 +46,16 @@ typedef enum{
 }error_t;
 
 
-
+#if ASSER_EN
 #define EMF_ASSERT(expr)                                 \
-do {                                                     \
-    if (!(expr)) {                                       \
-        emf_assert_internal(#expr, __FILE__, __LINE__);  \
-    }                                                    \
-} while (0)
-
+  do {                                                     \
+      if (!(expr)) {                                       \
+          emf_assert_internal(#expr, __FILE__, __LINE__);  \
+      }                                                    \
+  } while (0)
+#else
+#define EMF_ASSERT(expr)  
+#endif
 
 /*****************************************************************************************************
 **  Function

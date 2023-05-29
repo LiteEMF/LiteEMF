@@ -12,7 +12,7 @@
 
 #ifndef _usbd_hid_x360_h
 #define _usbd_hid_x360_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/usb/device/usbd_core.h"
 #include "api/hid/hid_dev_desc.h"
 

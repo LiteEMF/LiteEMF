@@ -12,9 +12,9 @@
 
 #ifndef _api_wdt_h
 #define _api_wdt_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"
-#include "hal/hal_wdt.h"
+#include "hal_wdt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,8 +24,9 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
-
+#ifndef API_WDT_TIME		//wdt timeout time us
+#define API_WDT_TIME	4000	
+#endif
 
 /******************************************************************************************************
 **	Parameters
@@ -36,6 +37,11 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+void api_wdt_feed(void);
+bool api_wdt_init(uint32_t ms);
+bool api_wdt_deinit(void);
+
+//hal
 void hal_wdt_feed(void);
 bool hal_wdt_init(uint32_t ms);
 bool hal_wdt_deinit(void);

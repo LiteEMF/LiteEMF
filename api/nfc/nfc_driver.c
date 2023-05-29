@@ -68,12 +68,13 @@ bool nfc_driver_polling(uint8_t *psn, uint8_t*psn_len, uint8_t *pversion, uint8_
 bool nfc_driver_read(uint16_t addr, uint8_t *buf, uint16_t len)
 {
 	bool ret = false;
-
+	
+	#ifdef MS52X_NFC
 	uint8_t i,read_len=0;
 	uint8_t read_buf[TAG_PAGE_SIZE];
 	uint8_t addrhl[2] = {0,TAG_PAGE_SIZE/4 -1};
 
-	#ifdef MS52X_NFC
+	
 	// api_nfc_auth(key,NULL);		//激活
     for(i=0;i<((len+TAG_PAGE_SIZE-1)/TAG_PAGE_SIZE);i++){
 		ret = !HXW_APP_Ntag21xNoAuthFastRead(addrhl,buf, &read_len);			

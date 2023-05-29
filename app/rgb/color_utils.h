@@ -12,7 +12,7 @@
 
 #ifndef _colors_utils_h
 #define _colors_utils_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,8 +42,8 @@ extern "C" {
 
 #define RGB32(r,g,b) 		U32(0,r,g,b)
 #define R(c) 				((uint8_t)(c))
-#define B(c) 				((uint8_t)((c) >> 16))
 #define G(c) 				((uint8_t)((c) >> 8))
+#define B(c) 				((uint8_t)((c) >> 16))
 #define W(c) 				((uint8_t)((c) >> 24))
 
 

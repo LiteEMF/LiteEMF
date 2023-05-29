@@ -11,10 +11,21 @@
 
 #ifndef _pinmap_h
 #define _pinmap_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+
+/* Private macro -------------------------------------------------------------*/
+/* 消除waring: #1296-D:extended constant initialiser used*/
+/* Suppress warning messages */
+#if defined(__CC_ARM)
+// Suppress warning message: extended constant initialiser used
+#pragma diag_suppress 1296
+#elif defined(__ICCARM__)
+#elif defined(__GNUC__)
 #endif
 
 
@@ -148,6 +159,7 @@ typedef enum{
     PIN_PULLNONE = 0,
     PIN_PULLUP,
 	PIN_PULLDOWN,
+    PIN_PULL_OD,     //open drain开漏输出, 只有GPIO作为输出有效
 }pin_pull_t;
 
 typedef enum {

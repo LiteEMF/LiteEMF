@@ -32,7 +32,7 @@
 #ifndef _NETINET_TCP_H
 #define _NETINET_TCP_H  1
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #if (!defined SMALL_ENDIAN) && (!defined BIG_ENDIAN)    //TODO  fix for build
 #define SMALL_ENDIAN       

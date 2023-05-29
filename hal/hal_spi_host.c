@@ -12,7 +12,12 @@
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
+#include "hw_config.h"
+#include "hw_board.h"
+#ifdef HW_SPI_HOST_MAP
+
 #include  "api/api_spi_host.h"
+#include  "api/api_gpio.h"
 
 /******************************************************************************************************
 ** Defined
@@ -39,11 +44,19 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
+bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
 	return false;
 }
-bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
+bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
+{
+	return false;
+}
+bool hal_spi_host_isr_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
+{
+	return false;
+}
+bool hal_spi_host_isr_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
 	return false;
 }
@@ -56,7 +69,7 @@ bool hal_spi_host_deinit(uint8_t id)
 	return false;
 }
 
-
+#endif
 
 
 

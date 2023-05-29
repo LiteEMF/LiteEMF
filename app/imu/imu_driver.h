@@ -12,8 +12,11 @@
 
 #ifndef _imu_driver_h
 #define _imu_driver_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/emf_utils.h"
+#include "hw_config.h"
+#include "hw_board.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,6 +25,10 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef IMU_ISR_READ_ENABLE				//中断方式读取imu数据
+#define IMU_ISR_READ_ENABLE				1
+#endif
+
 
 typedef enum{
 	ACC_RANGE_1G = 0,

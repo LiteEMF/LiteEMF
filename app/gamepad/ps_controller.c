@@ -655,27 +655,31 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 	
     switch (buf[0]){
      case PS4_BT_EFFECTS_ID:{           //0x11
+	 	#if APP_RUMBLE_ENABLE
 		ps4_bt_effects_t *peffects;
         peffects = (ps4_bt_effects_t*)buf;
 		app_rumble_set_duty(RUMBLE_L,peffects->effects.rumble_l,10000);
 		app_rumble_set_duty(RUMBLE_R,peffects->effects.rumble_r,10000);		
+		#endif
 		m_ps_enhanced_mode =  true;		//蓝牙手柄模式接收到马达/led后可以切换到large_report模式
         ret = true;
         break;
 	 }
     case PS4_USB_EFFECTS_ID:{           //0X05
-		#if USBD_HID_SUPPORT & HID_PS_MASK
+		#if APP_RUMBLE_ENABLE
 		ps4_usb_effects_t *peffects;
         peffects = (ps4_usb_effects_t*)buf;
         app_rumble_set_duty(RUMBLE_L,peffects->effects.rumble_l,10000);
 		app_rumble_set_duty(RUMBLE_R,peffects->effects.rumble_r,10000);
+
 		#if API_AUDIO_ENABLE
 		if(peffects->effects.volume_l || peffects->effects.volume_r){
 			api_audio_spk_set_vol(0, &usbd_audio_info,peffects->effects.volume_l, peffects->effects.volume_r);
 		}
 		#endif
-        ret = true;
 		#endif
+		
+        ret = true;
         break;
 	}
     default:

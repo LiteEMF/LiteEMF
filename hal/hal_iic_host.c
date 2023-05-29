@@ -12,7 +12,12 @@
 /************************************************************************************************************
 **	Description:	
 ************************************************************************************************************/
+#include "hw_config.h"
+#include "hw_board.h"
+#ifdef HW_IIC_MAP
+
 #include  "api/api_iic_host.h"
+#include  "api/api_gpio.h"
 
 /******************************************************************************************************
 ** Defined
@@ -47,6 +52,14 @@ bool hal_iic_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint1
 {
 	return false;
 }
+bool hal_iic_isr_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len)
+{
+	return false;
+}
+bool hal_iic_isr_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len)
+{
+	return false;
+}
 bool hal_iic_init(uint8_t id)
 {
 	return false;
@@ -56,7 +69,7 @@ bool hal_iic_deinit(uint8_t id)
 	return false;
 }
 
-
+#endif
 
 
 

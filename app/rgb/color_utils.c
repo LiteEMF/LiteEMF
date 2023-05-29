@@ -224,7 +224,7 @@ uint32_t color_rgbc(rgb_t *prgb)
 void color_rgb(uint32_t c, rgb_t *prgb)
 {
 	prgb->rgb.r = R(c);
-	prgb->rgb.b = G(c);
+	prgb->rgb.g = G(c);
 	prgb->rgb.b = B(c);
 }
 
@@ -591,10 +591,10 @@ uint32_t color_from_palette(uint8_t index, uint8_t brightness, blend_type_t blen
 
     step = 256/palette_size;
 	if ( blend_type == LINEARBLEND_NOWRAP) {
-		REMAP( index, 0, 255, 0, step * palette_size -1);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+		index = REMAP( index, 0, 255, 0, step * palette_size -1);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
 	}
     
-    hi4 = hi4 = index / step;           //通过调色板颜色数量找到颜色区间,调色板数组下标
+    hi4 = index / step;           //通过调色板颜色数量找到颜色区间,调色板数组下标
     if( hi4 >= palette_size ) hi4 = 0;
     lo4 = index & step;                 //余数用于细分颜色值
     
@@ -657,7 +657,7 @@ uint32_t color_from_palette_hsv(uint8_t index, uint8_t brightness, blend_type_t 
 		index = REMAP(index, 0, 255, 0, step * palette_size -1);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
 	}
     
-    hi4 = hi4 = index / step;           //通过调色板颜色数量找到颜色区间,调色板数组下标
+    hi4 = index / step;           //通过调色板颜色数量找到颜色区间,调色板数组下标
     if( hi4 >= palette_size ) hi4 = 0;
     lo4 = index & step;                 //余数用于细分颜色值
     color_rgb(palette[hi4], (rgb_t*)&entry);

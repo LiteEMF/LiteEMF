@@ -16,7 +16,7 @@
 #ifndef	_switch_nfc_h
 #define	_switch_nfc_h
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "app/gamepad/switch_typedef.h"
 #include "api/nfc/api_nfc.h"
 

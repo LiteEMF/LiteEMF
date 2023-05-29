@@ -41,12 +41,15 @@
 *******************************************************************/
 void hal_delay_ns(uint32_t ns)
 {
+
 }
 void hal_delay_us(uint32_t us)
 {
+	hal_delay_ns(1000*us);
 }
 void hal_delay_ms(uint32_t ms)
 {
+	hal_delay_us(1000*ms);
 }
 void hal_tick_init(void)
 {	

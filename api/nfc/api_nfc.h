@@ -12,7 +12,7 @@
 
 #ifndef _api_nfc_h
 #define _api_nfc_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "nfc_driver.h"
 #ifdef __cplusplus
 extern "C" {

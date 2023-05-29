@@ -12,7 +12,7 @@
 
 #ifndef _api_transporte_h
 #define _api_transporte_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "hw_config.h"			//TODO
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ extern "C" {
 #define USBH_CMD_MTU		64
 #endif
 #ifndef UART_CMD_MTU
-#define UART_CMD_MTU		10
+#define UART_CMD_MTU		64
 #endif
 
 /******************************************************************************************************

@@ -33,7 +33,7 @@
 #ifndef _USB_AUDIO_TYPEDEF_H__
 #define _USB_AUDIO_TYPEDEF_H__
 
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

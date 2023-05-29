@@ -12,8 +12,9 @@
 
 #ifndef _emf_mem_h
 #define _emf_mem_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
+#include "hal_mem.h" 
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,6 +40,12 @@ void emf_mem_init(void);
 void* emf_malloc(uint32_t size);
 void emf_free(void* p);
 void emf_mem_stats(void);
+
+
+//hal
+void* hal_malloc(uint32_t size);
+void hal_free(void* p);
+void hal_mem_stats(void);
 
 #ifdef __cplusplus
 }

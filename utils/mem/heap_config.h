@@ -15,9 +15,9 @@
 
 #ifndef _heap_config_h
 #define _heap_config_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/mem/emf_mem.h"
-#include  "api/api_system.h"
+#include "api/api_system.h"
 
 #include "api/api_log.h"
 #ifdef __cplusplus
@@ -29,6 +29,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 /*
+HEAP_ID=0   —— 使用系统SDK接口
 heap_1 —— 最简单，不允许释放内存。
 heap_2—— 允许释放内存，但不会合并相邻的空闲块。
 heap_3 —— 简单包装了标准 malloc() 和 free()，以保证线程安全。
@@ -39,9 +40,12 @@ heap_5 —— 如同 heap_4，能够跨越多个不相邻内存区域的堆。
 #define HEAP_ID			4					/* used heap_n file*/
 #endif
 
+
+#if HEAP_ID
+
 /* Memory allocation related definitions. */
 #define configSUPPORT_DYNAMIC_ALLOCATION 	1				/* must always 1 */
-#define configTOTAL_HEAP_SIZE 				EMF_MEMPOLL_SIZE
+#define configTOTAL_HEAP_SIZE 								EMF_MEMPOLL_SIZE
 #ifndef configAPPLICATION_ALLOCATED_HEAP
 #define configAPPLICATION_ALLOCATED_HEAP 	0				/* ucHeap defined by project */
 #endif
@@ -126,6 +130,8 @@ size_t xPortGetMinimumEverFreeHeapSize( void );
 void vPortGetHeapStats( HeapStats_t * pxHeapStats );
 void vPortInitialiseBlocks( void );
 size_t xPortGetFreeHeapSize( void );
+
+#endif
 
 #ifdef __cplusplus
 }

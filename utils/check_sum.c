@@ -60,6 +60,7 @@ uint32_t check_sum_negative(const void *buf, uint32_t len)
 	uint32_t sum;
 	sum = check_sum(buf, len);
 	sum = (~sum) + 1;		//取反+1
+	return sum;
 }
 
 

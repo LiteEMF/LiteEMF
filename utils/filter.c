@@ -120,8 +120,10 @@ void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep)
 void fir_fiter_init(firf_t *firp,float* imp,uint8_t imp_size)
 {
 	uint8_t i; 
+
 	memset(firp,0,sizeof(firf_t));
 	firp->imp_size = MIN(imp_size,FIR_FILTER_MAX_LENGTH);
+	if(0 == firp->imp_size) firp->imp_size = FIR_FILTER_MAX_LENGTH;	 //防止imp_size为0
 
 	#if !SAMPLE_FIR_FILTER
 	for(i=0; i<firp->imp_size; i++){			//for default value
@@ -131,6 +133,8 @@ void fir_fiter_init(firf_t *firp,float* imp,uint8_t imp_size)
 		memcpy(fir->impulse_response,imp,firp->imp_size);
 	}
 	#endif
+	
+	UNUSED_VARIABLE(i);
 }
 void fir_axis2f_fiter_init(firf_axis2f_t *firp,float* imp,uint8_t imp_size)
 {
@@ -147,7 +151,10 @@ void fir_fiter(firf_t *firp, int32_t measure)
 {
 	uint8_t n;
 	uint8_t sum_index;
-
+	
+	UNUSED_VARIABLE(n);
+	UNUSED_VARIABLE(sum_index);
+	
 	#if SAMPLE_FIR_FILTER
 		firp->sum += measure - firp->buf[firp->index];
 		firp->out = firp->sum / firp->imp_size;

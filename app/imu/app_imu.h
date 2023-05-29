@@ -12,8 +12,8 @@
 
 #ifndef _app_imu_h
 #define _app_imu_h
-#include "emf_typedef.h"
-#include "imu_driver.h"
+#include "utils/emf_typedef.h" 
+#include "app/imu/imu_driver.h"
 
 #ifdef __cplusplus
 extern "C" {

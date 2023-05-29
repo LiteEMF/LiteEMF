@@ -16,7 +16,7 @@
 #ifndef	_ps_controller_h
 #define	_ps_controller_h
 #include "hw_config.h"
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "api/api_transport.h"
 #include "app/app_rumble.h"
 #include "app/gamepad/app_gamepad_key.h"

@@ -12,7 +12,7 @@
 
 #ifndef _hal_flash_h
 #define _hal_flash_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,9 +26,11 @@ extern "C" {
 #define API_FLASH_PAGE_NUM		2
 #endif
 #ifndef API_FLASH_PAGE_SIZE
-#define API_FLASH_PAGE_SIZE		0x1000
+#define API_FLASH_PAGE_SIZE		0x100
 #endif
-
+#ifndef API_FLASH_ADDRESS
+#define API_FLASH_ADDRESS		(0x08010000 - API_FLASH_PAGE_SIZE*API_FLASH_PAGE_NUM)
+#endif
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/

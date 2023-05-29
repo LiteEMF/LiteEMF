@@ -12,7 +12,7 @@
 
 #ifndef _app_key_h
 #define _app_key_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "key_typedef.h"
 #include "io_key.h"
 #include "utils/emf_utils.h"
@@ -24,23 +24,23 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef KEY_PERIOD_DEFAULT					//*10us
-#define KEY_PERIOD_DEFAULT 			(10*100)			
+#ifndef KEY_PERIOD_DEFAULT					//*ms
+#define KEY_PERIOD_DEFAULT 			(10)			
 #endif
-#ifndef KEY_LONG_LONG_TIME					//*(KEY_PERIOD_DEFAULT/100)ms
-#define KEY_LONG_LONG_TIME 			(5000 / ( KEY_PERIOD_DEFAULT/100) )
+#ifndef KEY_LONG_LONG_TIME					//*(KEY_PERIOD_DEFAULT)ms
+#define KEY_LONG_LONG_TIME 			(5000 / ( KEY_PERIOD_DEFAULT) )
 #endif
 #ifndef KEY_LONG_TIME
-#define KEY_LONG_TIME 				(2000 / ( KEY_PERIOD_DEFAULT/100) )		
+#define KEY_LONG_TIME 				(2000 / ( KEY_PERIOD_DEFAULT) )		
 #endif
 #ifndef KEY_SHORT_TIME						//short and pressed_b limte time	
-#define KEY_SHORT_TIME 	    		(1000 / ( KEY_PERIOD_DEFAULT/100) )				
+#define KEY_SHORT_TIME 	    		(1000 / ( KEY_PERIOD_DEFAULT) )				
 #endif
 #ifndef KEY_DOUBLE_B_TIME					//double_b time, pressed_b event delay time
-#define KEY_DOUBLE_B_TIME			(200 / ( KEY_PERIOD_DEFAULT/100) )			
+#define KEY_DOUBLE_B_TIME			(200 / ( KEY_PERIOD_DEFAULT) )			
 #endif
 #ifndef KEY_PRESSED_B_DELAY
-#define KEY_PRESSED_B_DELAY 		(60 / ( KEY_PERIOD_DEFAULT/100) )
+#define KEY_PRESSED_B_DELAY 		(60 / ( KEY_PERIOD_DEFAULT) )
 #endif
 
 

@@ -12,7 +12,7 @@
 
 #ifndef _app_joystick_h
 #define _app_joystick_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "utils/emf_utils.h"
 #include "key_typedef.h"
 #include "api/api_adc.h"
@@ -74,6 +74,8 @@ typedef struct {
     axis2i_t stick[APP_STICK_NUMS];
 	int16_t tarigger[APP_TRIGGER_NUMS];
 } joystick_t;           //12
+
+
 
 typedef struct {    
     joystick_t min;

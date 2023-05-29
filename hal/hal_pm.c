@@ -30,6 +30,7 @@
 void hal_weakup_init(void)
 {
 }
+
 pm_reson_t hal_get_reset_reson(void)
 {
 	return PM_RESON_POR;

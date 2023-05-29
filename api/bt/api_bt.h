@@ -15,7 +15,7 @@
 #include "bt_typedef.h"
 #include "api/hid/hid_dev_desc.h"
 #include "api/bt/bt_driver.h"
-#include "hal/hal_bt.h"
+#include "hal_bt.h"
 #include "utils/emf_utils.h"
 
 #ifdef __cplusplus

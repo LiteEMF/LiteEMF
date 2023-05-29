@@ -264,6 +264,7 @@ bool command_rx_free(command_rx_t *rxp)
 {
 	emf_free(rxp->pcmd);
 	memset(rxp, 0, sizeof(command_rx_t));
+	return true;
 }
 
 /*******************************************************************

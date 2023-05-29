@@ -44,20 +44,20 @@
 
 /*******************************************************************
 ** Parameters:	frame, size: rgb 显示缓存
-			spi_buf,spi_size: spi 发送串行控制显示存, spi_buf是 frame的8倍
+			spi_tx_buf,spi_size: spi 发送串行控制显示存, spi_buf是 frame的8倍
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_buf, uint8_t spi_size)
+void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_tx_buf, uint8_t spi_size)
 {
     uint8_t id, i;
 	
 	for(id=0; id<size; id++){
 		for(id=0, i=0; i<8; i++){
 			if(frame[i] & (0x80>>i)){
-				spi_buf[id*8 + i] = WS2811_HIGH;
+				spi_tx_buf[id*8 + i] = WS2811_HIGH;
 			}else{
-				spi_buf[id*8 + i] = WS2811_LOW;
+				spi_tx_buf[id*8 + i] = WS2811_LOW;
 			}
 		}
 	}

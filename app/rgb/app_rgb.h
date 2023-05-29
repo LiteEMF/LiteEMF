@@ -12,7 +12,7 @@
 
 #ifndef _app_rgb_h
 #define _app_rgb_h
-#include "emf_typedef.h"
+#include "utils/emf_typedef.h" 
 #include "app/rgb/color_utils.h"
 #ifdef __cplusplus
 extern "C" {
@@ -90,7 +90,7 @@ uint8_t app_rgb_get_brightness(void);
 bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t period, uint8_t times);
 bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint32_t *palette, uint8_t palette_size, uint16_t period, uint8_t times);
 #define app_rgb_set_static(id,color,period) 	app_rgb_set_mode(id,RGB_STATIC_MODE,color,period,0)
-#define app_rgb_set_blink(id,color,period)  	app_rgb_set_mode(id,RGB_BLINK_MODE,color,period)
+#define app_rgb_set_blink(id,color,period)  	app_rgb_set_mode(id,RGB_BLINK_MODE, color,period,0)
 #define app_rgb_set_breath(id,color,period) 	app_rgb_set_mode(id,RGB_BREATH_MODE,color,period,0)
 #define app_rgb_set_rainbow(id,color,period) 	app_rgb_set_mode(id,RGB_RAINBOW_MODE,color,period,0)
 #define app_rgb_set_pal_static(id,offset,palette,palette_size,period) 	app_rgb_set_palette_mode(id,RGB_STATIC_MODE,offset,palette,palette_size,period0)
