@@ -22,7 +22,7 @@
 		"usbd_socket.h": "c",
 		"template.h": "c",
 		"usbh.h": "c",
-		"utils/emf_typedef.h" : "c",
+		"utils/emf_typedef.h": "c",
 		"usbh_socket.h": "c",
 		"emf_math.h": "c",
 		"color_palette.h": "c",
@@ -42,6 +42,8 @@
 		"stddef.h": "c",
 		"math.h": "c",
 		"app_battery.h": "c",
-		"key_typedef.h": "c"
+		"key_typedef.h": "c",
+		"api_gps.h": "c",
+		"emf.h": "c"
 	}
 }

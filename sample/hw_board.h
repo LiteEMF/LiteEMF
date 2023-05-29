@@ -80,16 +80,6 @@ extern "C" {
 			uint8_t led_sta[5]
 	#elif DEMO_WIN32
 		
-		#define HW_UART_MAP {\
-			{PA_00,0,0},	\
-			{PA_01,0,0}		\
-			}
-
-		//IIC
-		#define HW_IIC_MAP {	\
-			{PIN_NULL,0,0,0,0},	\
-			{PIN_NULL,0,0,0,0}		\
-			}
 
 	#else
 

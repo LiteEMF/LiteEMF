@@ -40,7 +40,7 @@ bool m_imu_init = false;    //imu初始化完成,大部分sensor 初始化画的
 **	static Parameters
 *******************************************************************************************************/
 static timer_t imu_init_timer;          //imu定时器
-static uint16_t imu_delay_time;                 //imu上电延时时间
+static uintptr_t imu_delay_time;                 //imu上电延时时间
 
 /*****************************************************************************************************
 **	static Function

@@ -79,7 +79,7 @@ bool emf_api_init(void)
 
 	hw_user_vender_init();
 
-	#if API_STORAGE_ENABLE
+	#if API_WDT_ENABLE
 	api_wdt_init(API_WDT_TIME);
 	#endif
 
@@ -247,7 +247,7 @@ void emf_handler(uint32_t period_10us)
 	app_gamepad_key_handler(400);
 	#endif
 
-	#if APP_GAMEAPD_ENABLE						//二选一
+	#if APP_GAMEAPD_ENABLE && APP_KEY_ENABLE	 					//二选一
 	app_key_decode_handler(100,m_gamepad_key.key);
 	#elif APP_KEY_ENABLE
     app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_key_scan);

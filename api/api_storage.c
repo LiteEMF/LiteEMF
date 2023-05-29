@@ -14,11 +14,11 @@
 	|storage flash map:						|
 	|------------------page1----------------|
 	|m_storage		| storage_map[0]		|
-	|storage_map[1]						|
+	|storage_map[1]							|
 	|------------------page2----------------|
-	|storage_map[1] | storage_map[2]	|
+	|storage_map[1] | storage_map[2]		|
 	|------------------page3----------------|
-	|storage_map[2] | storage_map[3]	|
+	|storage_map[2] | storage_map[3]		|
 ************************************************************************************************************/
 #include "hw_config.h"
 #if API_STORAGE_ENABLE

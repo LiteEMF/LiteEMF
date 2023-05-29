@@ -37,7 +37,7 @@
 
 
 /*******************************************************************
-** Parameters:		
+** Parameters:		outp: 注意必须传入上一次的输出值
 ** Returns:	
 ** Description:		First-order low-pass filter
 					used LPF_1ST_FACTOR(deltaT, Fcut) get lpf_factor

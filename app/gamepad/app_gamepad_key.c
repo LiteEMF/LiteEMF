@@ -114,7 +114,9 @@ void app_gamepad_key_scan_task(app_gamepad_key_t *pkey)
     uint32_t hw_key=0;
 
     memset(&app_key,0,sizeof(app_key));
+    #if APP_KEY_ENABLE
     app_key.key = m_key_scan;
+    #endif
 
     #if APP_JOYSTICK_ENABLE
     app_key.stick_l = m_joystick.stick[APP_STICK_L_ID];
@@ -135,9 +137,12 @@ void app_gamepad_key_scan_task(app_gamepad_key_t *pkey)
     app_imu_get_val(&app_key.acc,&app_key.gyro);
     #endif
 
+    #if APP_KEY_ENABLE
     if(pkey->key != app_key.key){
         app_key_dump(app_key.key);
     }
+    #endif
+    
     *pkey = app_key;
 }
 

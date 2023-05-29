@@ -53,7 +53,7 @@
 #include "api/nfc/api_nfc.h"
 #endif
 #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB)
-#include "api/adb/app_adb.h"
+#include "app/adb/app_adb.h"
 #endif
 #if API_GPS_ENABLE
 #include "api/gps/api_gps.h"

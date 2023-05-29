@@ -189,7 +189,11 @@ static void api_command_timer_cb(command_tx_t *txp)
 
 }
 
-
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	注意: 使用到了软件定时器, 该接口不适用于51平台
+*******************************************************************/
 bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms)
 {
 	bool ret = false;
