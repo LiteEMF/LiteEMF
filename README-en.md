@@ -32,14 +32,23 @@ Welcome to the LiteEMF open source project, please refer to the detailed API int
 
 ## 编译
 
-### Window 编译
+### Window compilation
 LiteEMF can be compiled directly on the Windows platform, which can be used for code testing and Windows platform APP development. Note that the embedded hardware interface in the API layer cannot be called under the Windows platform. 
 
-Migration steps:
+makefile compilation:
 * download [MinGW for windows](https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/)
 * To install MinGW, it is recommended to install in the C:/MinGW" directory by default, if you install to other directories, you need to set environment variables. Modify MinGW gcc compiler directory[c_cpp_properties.json](.vscode/c_cpp_properties.json) and[launch.json](.vscode/launch.json) at the same time.
 * vscode to open the code, select Terminal --Run Task --make, or Command Line to execute the make command
 * Run the generated LiteEMF.exe
+
+cmake compilation:
+* Download [MinGW for windows] (https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/)
+* Terminal run instructions
+```
+mkdir build; cd build
+cmake .. -G "Unix Makefiles"
+make
+```
 
 ### Embedded platform compilation
 LiteEMF is ported and runs in embedded platforms

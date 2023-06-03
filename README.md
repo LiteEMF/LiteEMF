@@ -36,16 +36,23 @@ LiteEMF项目的目标是能搭建一个框架, 这个框架能够很方便的�
 ### Window 编译
 LiteEMF 可以在windows平台上直接编译, 可以用于代码测试和windows平台APP开发. 注意windows平台下无法调用api层中的嵌入式硬件接口. 
 
-移植步骤:
+makefile编译:
 * 下载 [MinGW for windows](https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/)
 * 安装 MinGW 建议默认安装到C:/MinGW"目录下, 如果安装到其他目录需要设置环境变量. 同时修改 [c_cpp_properties.json](.vscode/c_cpp_properties.json) 和[launch.json](.vscode/launch.json) 文件中MinGW gcc编译器目录
 * vscode打开代码, 选择终端--运行任务--make,或 命令行 执行make 指令
 * 运行生成的LiteEMF.exe
 
+cmake 编译:
+* 下载 [MinGW for windows](https://sourceforge.net/projects/mingw-w64/files/mingw-w64/mingw-w64-release/)
+* 终端运行指令
+```
+mkdir build; cd build
+cmake .. -G "Unix Makefiles"
+make
+```
+
 ### 嵌入式平台编译
 LiteEMF 在嵌入式平台中移植和运行
-
-移植步骤:
 
 * 下载LiteEMF到你的芯片SDK中,推荐使用 `git submodule`方式
 * 将LiteEMF中的hal/目录拷贝到芯片SDK中,并且重新命名为xxx_hal/ (LiteEMF/hal/目录下文件是一个参考文件, 每一个平台的hal层都需要单独适配)  
