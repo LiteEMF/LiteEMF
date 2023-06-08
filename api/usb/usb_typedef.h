@@ -226,7 +226,7 @@ typedef struct
 
 typedef struct
 {
-	uint8_t  if_num;
+	uint8_t  if_num;				//interface 
 	uint8_t  if_alt;				//bAlternateSetting
 	uint8_t  num_endp;
 	uint8_t  if_cls;

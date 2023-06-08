@@ -70,7 +70,7 @@ uint16_t usbd_iap2_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pde
 
     if (desc_len <= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, iap2_itf_desc_tab, len);
-        usbd_reset_configuration_desc(id, DEV_TYPE_IAP2, 0, pindex, pdesc + *pdesc_index, len);
+        usbd_assign_configuration_desc(id, DEV_TYPE_IAP2, 0, pindex, pdesc + *pdesc_index, len);
         
         for(hid_type=0; hid_type<16; hid_type++){
             if (usbd_iap_hid_types[id] & (0X01UL<<hid_type)){
@@ -93,11 +93,7 @@ error_t usbd_iap2_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
 	
     if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bit.recipient) return err;
 
-    if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
-        if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
-           err = ERROR_SUCCESS;
-		}
-	}else if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
+    if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
 
     }
     return err;

@@ -98,7 +98,7 @@ uint16_t usbd_hid_xbox_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t*
 	len = sizeof(xbox_itf_desc_tab);
 	if (desc_len <= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, xbox_itf_desc_tab, len);
-		usbd_reset_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_GAMEPADE, pindex, pdesc + *pdesc_index, len);
+		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_GAMEPADE, pindex, pdesc + *pdesc_index, len);
 	}
 	*pdesc_index += len;
 

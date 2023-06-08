@@ -74,6 +74,7 @@ void usbh_class_buf_init(void);
 usbh_class_t* malloc_usbh_class(void);
 void free_usbh_class(usbh_class_t* pclass);
 usbh_class_t* get_usbh_class(uint8_t class_id);
+void usbh_class_itf_alt_select(uint8_t id,usbh_class_t* pclass);			//__WEAK 
 dev_type_t usbh_match_class( uint8_t id, usbh_class_t *pclass);
 usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_type);
 uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class_t **ppcalss);

@@ -60,7 +60,7 @@ extern usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];
 usbd_class_t *usbd_class_find_by_ep(uint8_t id, uint8_t ep);
 usbd_class_t *usbd_class_find_by_itf(uint8_t id, uint8_t itf);
 usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_type);
-error_t usbd_reset_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len);
+error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len);
 uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_class_reset(uint8_t id);
 error_t usbd_class_suspend(uint8_t id);

@@ -44,7 +44,8 @@ usbh_class_t usbh_dev_class[8];
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	usbh_dev_class 采样动态分配的方式,枚举一个接口类分配一个
+	这样最节省内存,避免使用 malloc 导致内存碎片问题
 *******************************************************************/
 void usbh_class_buf_init(void)
 {
@@ -138,6 +139,29 @@ uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class
 	return id;
 }
 
+
+#if WEAK_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	遇到一个接口有多个有效的alt(接口中没有端点为无效alt)需要用户选择
+	1. free_usbh_class(pclass)	丢弃当前class
+	2. free_usbh_class(pos)		使用当前class
+*******************************************************************/
+__WEAK void usbh_class_itf_alt_select(uint8_t id,usbh_class_t* pclass)
+{
+	usbh_dev_t* pdev = get_usbh_dev(id);
+	usbh_class_t *pos;
+
+	list_for_each_entry(pos,&pdev->class_list, usbh_class_t, list){
+		if(pos->itf.if_num == pclass->itf.if_num){
+			free_usbh_class(pclass);			//默认使用alt 0
+			// free_usbh_class(pos);
+			continue;				
+		}
+	}
+}
+#endif
 /*******************************************************************
 ** Parameters:		
 ** Returns:	

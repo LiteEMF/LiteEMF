@@ -85,7 +85,7 @@ uint16_t usbd_hid_km_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
 		len = sizeof(kb_itf_desc_tab);
 		if (desc_len <= *pdesc_index + len) {
 			memcpy(pdesc + *pdesc_index, kb_itf_desc_tab, len);
-			usbd_reset_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_KB, pindex, pdesc + *pdesc_index, len);
+			usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_KB, pindex, pdesc + *pdesc_index, len);
 
 			rep_desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_KB, NULL);
 			pdesc[*pdesc_index + 16] = rep_desc_len&0xff;            //set hid report desc
@@ -101,7 +101,7 @@ uint16_t usbd_hid_km_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
 		len = sizeof(mouse_itf_desc_tab);
 		if (desc_len <= *pdesc_index + len) {
 			memcpy(pdesc + *pdesc_index, mouse_itf_desc_tab, len);
-			usbd_reset_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_MOUSE, pindex, pdesc + *pdesc_index, len);
+			usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_MOUSE, pindex, pdesc + *pdesc_index, len);
 
 			rep_desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_MOUSE, NULL);
 			pdesc[*pdesc_index + 16] = rep_desc_len&0xff;            //set hid report desc
@@ -117,7 +117,7 @@ uint16_t usbd_hid_km_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
 		len = sizeof(consumer_itf_desc_tab);
 		if (desc_len <= *pdesc_index + len) {
 			memcpy(pdesc + *pdesc_index, consumer_itf_desc_tab, len);
-			usbd_reset_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_CONSUMER, pindex, pdesc + *pdesc_index, len);
+			usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_CONSUMER, pindex, pdesc + *pdesc_index, len);
 
 			rep_desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_CONSUMER, NULL);
 			pdesc[*pdesc_index + 16] = rep_desc_len&0xff;            //set hid report desc

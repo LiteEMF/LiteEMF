@@ -95,7 +95,7 @@ uint16_t usbd_hid_ps_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
 	len = sizeof(ps_gamepade_itf_desc_tab);
 	if (desc_len <= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, ps_gamepade_itf_desc_tab, len);
-		usbd_reset_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_PS4, pindex, pdesc + *pdesc_index, len);
+		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_PS4, pindex, pdesc + *pdesc_index, len);
 
 		rep_desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_PS4, NULL);
 		pdesc[*pdesc_index + 16] = rep_desc_len&0xff;            //set hid report desc

@@ -63,7 +63,7 @@ uint16_t usbd_msd_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
 
     if (desc_len <= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, msd_itf_desc_tab, len);
-        usbd_reset_configuration_desc(id, DEV_TYPE_MSD, 0, pindex, pdesc + *pdesc_index, len);
+        usbd_assign_configuration_desc(id, DEV_TYPE_MSD, 0, pindex, pdesc + *pdesc_index, len);
     }
     *pdesc_index += len;
 
@@ -77,11 +77,7 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 	
     if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bit.recipient) return err;
 
-    if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
-        if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
-           err = ERROR_SUCCESS;
-		}
-	}else if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
+    if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
 
     }
     return err;

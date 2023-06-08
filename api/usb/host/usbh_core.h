@@ -47,7 +47,7 @@ extern "C" {
 *******************************************************************************************************/
 typedef struct 
 {
-	uint8_t		id;				//0: free, 非0: used
+	uint8_t		id;				//USBH_NULL: free, 非 USBH_NULL: used
 	dev_type_t 	dev_type;
 	hid_type_t 	hid_type;
 

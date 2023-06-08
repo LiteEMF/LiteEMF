@@ -518,7 +518,7 @@ static error_t usbd_control_request_process(uint8_t id)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	usbd_control_request_cb(id,preq);
+	usbd_control_request_cb(id,preq);				//Use on special dev
 
     if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
 		switch (preq->req.bmRequestType.bit.recipient) {

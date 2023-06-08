@@ -267,7 +267,6 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 }
 
 
-
 static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf,uint16_t len)
 {
 	uint8_t err = ERROR_UNSUPPORT;
@@ -280,7 +279,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 	err = usbh_set_configuration(id,cfg);			//set configuration
 	if(err) return err;
 
-	for ( i = 0; i < len; i += l ){            // 搜索中断端点描述符,跳过配置描述符和接口描述符
+	for ( i = 0; i < len; i += l ){            		// 搜索中断端点描述符,跳过配置描述符和接口描述符
 		l = buf[i];
 		if(0 == l) break;
 
@@ -306,16 +305,9 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 				}
 
 				pclass->dev_type = usbh_match_class(id,pclass);
-				if(pclass->itf.if_alt){				//only support one intfact alternate setting
-					list_for_each_entry(pos,&pdev->class_list, usbh_class_t, list){
-						if(pos->itf.if_num == pclass->itf.if_num){
-							free_usbh_class(pclass);		//free pclass
-							continue;				
-						}
-					}
-				}
+				usbh_class_itf_alt_select(id,pclass);			//user select
 
-				if(DEV_TYPE_NONE != pclass->dev_type){
+				if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
 					err = usbh_class_init(id, pclass, buf + i, len - i);
 					if(ERROR_SUCCESS == err){
 						list_add(&pclass->list, &pdev->class_list);

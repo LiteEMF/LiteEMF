@@ -119,7 +119,12 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 	return NULL;
 }
 
-error_t usbd_reset_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type,itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len)
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	重新设配置描述符, 同时分配接口号好端点	
+*******************************************************************/
+error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type,itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len)
 {
 	error_t err = ERROR_UNKNOW;
     uint8_t ep,inf_num=0;
@@ -429,7 +434,7 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 			}
 		}
 
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)	//自动识别需要
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)		//自动识别设备特殊处理
 		if(m_usbd_types[id] == BIT(DEV_TYPE_AUTO)){
 			pclass = usbd_class_find_by_type(id, DEV_TYPE_AUTO, 0);
 			usbd_auto_control_request_process(id,pclass,preq);
