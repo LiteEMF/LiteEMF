@@ -73,22 +73,48 @@ typedef struct
 	list_head_t class_list;
 } usbh_dev_t;
 
+extern usbh_dev_t m_usbh_dev[USBH_MAX_PORTS][HUB_MAX_PORTS+1];
+
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-error_t usbh_get_device_desc(uint8_t id, uint8_t* buf, uint16_t *plen);  
-error_t usbh_get_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uint16_t *plen);  
-error_t usbh_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen);  
-error_t usbh_set_addr(uint8_t id, uint8_t addr);  
-error_t usbh_get_status(uint8_t id, uint8_t* pstatus);  
-error_t usbh_get_configuration(uint8_t id, uint8_t* pcfg);  
-error_t usbh_set_configuration(uint8_t id, uint8_t cfg);  
-error_t usbh_get_intercace(uint8_t id, uint8_t inf, uint8_t *palt);  
-error_t usbh_set_intercace(uint8_t id, uint8_t inf, uint8_t alt);  
-error_t usbh_endp_get_status(uint8_t id, uint8_t endp, uint8_t* pstatus);  
-error_t usbh_endp_clean_feature(uint8_t id, uint8_t endp); 
-error_t usbh_endp_set_feature(uint8_t id, uint8_t endp, usb_request_feature_selector_t feature);  
+ 
+error_t usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen);
+error_t usbh_req_get_device_desc(uint8_t id, uint8_t* buf, uint16_t *plen);  
+error_t usbh_req_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uint16_t *plen);  
+error_t usbh_req_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen);  
+error_t usbh_req_set_addr(uint8_t id, uint8_t addr);  
+error_t usbh_req_get_status(uint8_t id, uint8_t* pstatus);  
+error_t usbh_req_get_configuration(uint8_t id, uint8_t* pcfg);  
+error_t usbh_req_set_configuration(uint8_t id, uint8_t cfg);  
+error_t usbh_req_get_itf(uint8_t id, uint8_t inf, uint8_t *palt);  
+error_t usbh_req_set_itf(uint8_t id, uint8_t inf, uint8_t alt);  
+error_t usbh_req_get_endp_status(uint8_t id, uint8_t endp, uint8_t* pstatus);  
+error_t usbh_req_clean_endp_feature(uint8_t id, uint8_t endp); 
+error_t usbh_req_set_endp_feature(uint8_t id, uint8_t endp, usb_request_feature_selector_t feature);  
+
+usbh_dev_t* get_usbh_dev(uint8_t id);  
+error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);
+error_t usbh_endp_register(uint8_t id,usb_endp_t *endpp);
+error_t usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms);
+error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len);
+
+error_t usbh_core_init( uint8_t id );
+error_t usbh_core_deinit( uint8_t id );
+
+//hal
+error_t hal_usbh_port_disable(uint8_t id);		//用于关闭usb口,防止多个设备在地址状态!!!
+error_t hal_usbh_port_reset(uint8_t id);
+error_t hal_usbh_set_addr(uint8_t id,uint8_t addr);
+error_t hal_usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen);
+error_t hal_usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);
+error_t hal_usbh_endp_register(uint8_t id,usb_endp_t *endpp);
+error_t hal_usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms);
+error_t hal_usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len);
+void 	hal_usbh_driver_task(uint32_t dt_ms);
+error_t hal_usbh_driver_init(uint8_t id);
+error_t hal_usbh_driver_deinit(uint8_t id);
 
 
 #ifdef __cplusplus

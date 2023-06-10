@@ -86,7 +86,7 @@ bool emf_api_init(void)
 	#ifdef HW_ADC_MAP
 	api_adcs_init();
 	#endif
-	#if	defined HW_TIMER_MAP && API_TIMER_ENABLE
+	#if	defined HW_TIMER_MAP && API_TIMER_BIT_ENABLE
 	api_timers_init();
 	#endif
 	#ifndef API_SOFT_TIMER_ENABLE
@@ -163,6 +163,14 @@ bool emf_init(void)
 	#if APP_RGB_ENABLE
 	app_rgb_init();
 	#endif
+
+	#if API_USBD_BIT_ENABLE
+	usbds_init();
+	#endif
+	#if API_USBH_BIT_ENABLE
+	usbhs_init();
+	#endif
+
 
 	user_vender_init();
 
@@ -269,10 +277,15 @@ void emf_handler(uint32_t period_10us)
 	api_storage_handler(API_STORAGE_TIME);
 	#endif
 
+	#if API_USBD_BIT_ENABLE
+	usbd_handler(100);
+	#endif
+	#if API_USBH_BIT_ENABLE
+	usbh_handler(100);
+	#endif
+
 	user_vender_handler();
 }
-
-
 
 #if 0
 int  main( int  argc,  char  *argv[])  

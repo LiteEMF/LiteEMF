@@ -34,8 +34,6 @@ extern "C" {
 
 
 
-extern usbh_dev_t m_usbh_dev[USBH_MAX_PORTS][HUB_MAX_PORTS+1];
-
 
 extern uint16_t m_usbh_types;
 extern uint16_t m_usbh_hid_types;
@@ -47,19 +45,13 @@ extern uint16_t usbh_iap_hid_types;
 void usbh_det_event(uint8_t id, uint8_t attached );
 error_t usbh_disconnect(uint8_t id);
 error_t usbh_reset(uint8_t id);
-error_t usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen);
-error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);
-error_t usbh_endp_register(uint8_t id,usb_endp_t *endpp);
-error_t usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms);
-error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len);
-
-usbh_dev_t* get_usbh_dev(uint8_t id);   
+error_t usbh_set_address(uint8_t id,uint8_t addr);
 uint8_t usbh_find_by_status(uint8_t usb_stas);   
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr) ; 
 error_t usbh_init( uint8_t id );
 error_t usbh_deinit(uint8_t id);
 void usbh_task(uint32_t dt_ms);
-
+void usbh_handler(uint32_t period_10us);
 
 //hal
 error_t hal_usbh_port_disable(uint8_t id);		//用于关闭usb口,防止多个设备在地址状态!!!

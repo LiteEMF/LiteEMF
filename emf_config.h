@@ -231,7 +231,7 @@ typedef struct{
 //                                 蓝牙配置                                   	  //
 //*********************************************************************************//
 // 默认: id: 0:芯片自带蓝牙, 1: 外部蓝牙模块, ID_NULL: 无 
-// 蓝牙上层目前不支持自带蓝牙和外部蓝牙相同模块同时支持,项目需要可以调整 api_bt_ctb_t 来支持
+// 蓝牙上层目前不支持自带蓝牙和外部蓝牙相同模块同时支持,项目可以调整 api_bt_ctb_t 来支持
 #ifndef BT0_SUPPORT
 #define BT0_SUPPORT 		0
 #endif
@@ -248,13 +248,13 @@ typedef struct{
 //*********************************************************************************//
 //                       		USB			                  					//
 //*********************************************************************************//
-#ifndef APP_USBD_ENABLE
-#define APP_USBD_ENABLE			0
+#ifndef API_USBD_BIT_ENABLE				//used BIT(n);
+#define API_USBD_BIT_ENABLE			0
 #endif
-#ifndef APP_USBH_ENABLE
-#define APP_USBH_ENABLE			0
+#ifndef API_USBH_BIT_ENABLE
+#define API_USBH_BIT_ENABLE			0
 #endif
-#define APP_USB_ENABLE		(APP_USBD_ENABLE | APP_USBH_ENABLE)
+#define APP_USB_ENABLE		(API_USBD_BIT_ENABLE | API_USBH_BIT_ENABLE)
 
 // usb socket 用于手柄引导
 #ifndef USBD_SOCKET_ENABLE
@@ -271,14 +271,11 @@ typedef struct{
 //*********************************************************************************//
 //                       	other API modules                  						//
 //*********************************************************************************//
-#ifndef API_TIMER_SUPPORT			// 打开哪些硬件定时器BIT(0) | BIT(2)
-#define API_TIMER_SUPPORT		0
-#endif
-#ifndef API_TIMER_ENABLE
-#define API_TIMER_ENABLE		API_TIMER_SUPPORT
+#ifndef API_TIMER_BIT_ENABLE		// 打开哪些硬件定时器BIT(0) | BIT(2)
+#define API_TIMER_BIT_ENABLE		0
 #endif
 #ifndef API_SOFT_TIMER_ENABLE
-#define API_SOFT_TIMER_ENABLE	0
+#define API_SOFT_TIMER_ENABLE		0
 #endif
 #ifndef API_NFC_ENABLE
 #define API_NFC_ENABLE			0

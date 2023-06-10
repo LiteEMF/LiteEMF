@@ -39,9 +39,13 @@ bool m_imu_init = false;    //imu初始化完成,大部分sensor 初始化画的
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-static timer_t imu_init_timer;          //imu定时器
-static uintptr_t imu_delay_time;                 //imu上电延时时间
+typedef struct {
+	timer_t timer;          //imu定时器
+	timer_t timeout;		//imu上电延时时间
+	uint8_t retry;
+}imu_init_ctb_t;
 
+static imu_init_ctb_t imu_init_ctb;
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -88,13 +92,15 @@ bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop)
 bool imu_driver_init(acc_range_t acc_range,gyro_range_t gyro_range)	//TODO 待优化接口
 {
 	m_imu_init = false;
-	imu_init_timer = m_systick;          //imu定时器
+
+	imu_init_ctb.timer = m_systick;	//imu定时器
+	imu_init_ctb.retry = 3;
 
 	#if	defined IMU_SH3001_ID
-    imu_delay_time = 300;
+    imu_init_ctb.timeout = 300;
     #endif
     #if defined IMU_QMI8658_ID
-    imu_delay_time = 2000;
+    imu_init_ctb.timeout = 2000;
     #endif
 
 	return true;
@@ -119,12 +125,15 @@ bool imu_driver_deinit(void)
 *******************************************************************/
 void imu_driver_task(void* pa)
 {
+	imu_init_ctb_t *ctbp = (imu_init_ctb_t*)pa;
 
 	if(m_imu_init) return;
+	if(0 == ctbp->retry) return;
 
-    if(m_systick - imu_init_timer >= (uintptr_t)pa){
-        imu_init_timer = m_systick;
-	
+    if(m_systick - ctbp->timer >= ctbp->timeout){
+        ctbp->timer = m_systick;
+
+		ctbp->retry--;
         #if	defined IMU_SH3001_ID
         m_imu_init = SH3001_init(ACC_RANGE_8G, GYRO_RANGE_2000);
         #endif
@@ -154,7 +163,7 @@ void imu_driver_handler(uint32_t period_10us)
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){
 		s_timer = m_task_tick10us;
-		imu_driver_task((void*)imu_delay_time);
+		imu_driver_task(&imu_init_ctb);
 	}
 }
 #endif

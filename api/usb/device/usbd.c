@@ -13,9 +13,10 @@
 **	Description:
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_USBD_ENABLE
+#if API_USBD_BIT_ENABLE
 #include "utils/emf_utils.h"
 #include "api/usb/device/usbd.h"
+#include "api/api_tick.h"
 
 #include "api/api_log.h"
 
@@ -26,7 +27,7 @@ char const* usbd_string_desc[4] =
 {
 	"\x09\x04",  					// 0: is supported language is English (0x0409)
 	"LiteEMF",                		// 1: Manufacturer
-	"usb dev",         			// 2: Product
+	"usb dev",         				// 2: Product
 	"123456789012",           		// 3: Serials, should use chip ID
 };
 
@@ -37,234 +38,18 @@ char const* usbd_string_desc[4] =
 uint16_t m_usbd_types[USBD_NUM];
 uint16_t m_usbd_hid_types[USBD_NUM];
 
-usbd_dev_t m_usbd_dev[USBD_NUM];
 
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-usbd_req_t m_usbd_req[USBD_NUM];
+
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-static error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
-{
-	error_t err = ERROR_SUCCESS;
 
-	if(preq->setup_buf){					//防止出错内存未释放
-		emf_free(preq->setup_buf);
-		logd("usbd malloc err,please note it!!!");
-	}
-	preq->setup_index = 0;
-	if(preq->req.wLength){
-		preq->setup_len = 0;
-		preq->setup_buf = emf_malloc(preq->req.wLength);
-		if(NULL == preq->setup_buf){
-			loge("usbd setup no memory!\n");
-			err = ERROR_NO_MEM;
-		}
-	}else{
-		preq->setup_len = 0;
-		preq->setup_buf = NULL;
-	}
-	UNUSED_PARAMETER(id);
-	return err;
-}
-static error_t usbd_free_setup_buffer(usbd_req_t *preq)
-{
-	if(preq->setup_buf){
-		emf_free(preq->setup_buf);
-	}
-	preq->setup_len = 0;
-	preq->setup_index = 0;
-	preq->setup_buf = NULL;
-	return ERROR_SUCCESS;
-}
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-usbd_dev_t *usbd_get_dev(uint8_t id)
-{
-	usbd_dev_t *pdev = NULL;
-	if(id < USBD_NUM){
-		pdev = &m_usbd_dev[USBD_NUM];
-	}
-	return pdev;
-} 
-
-usbd_req_t *usbd_get_req_buf(uint8_t id)
-{
-	usbd_req_t *preq = NULL;
-	if(id < USBD_NUM){
-		preq = &m_usbd_req[USBD_NUM];
-	}
-	return preq;
-} 
-
-
-error_t usbd_endp_open(uint8_t id, uint8_t ep)
-{
-	if(id > USBD_NUM) return ERROR_PARAM;
-    return hal_usbd_endp_open(id, ep);
-}
-
-error_t usbd_endp_close(uint8_t id, uint8_t ep)
-{
-	if(id > USBD_NUM) return ERROR_PARAM;
-    return hal_usbd_endp_close(id, ep);
-}
-error_t usbd_endp_nak(uint8_t id, uint8_t ep)
-{
-	if(id > USBD_NUM) return ERROR_PARAM;
-    return hal_usbd_endp_nak(id, ep);
-}
-error_t usbd_clear_endp_stall(uint8_t id, uint8_t ep)
-{
-	error_t err = ERROR_SUCCESS;
-	uint8_t dir;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	dir = (ep & USB_DIR_MASK)? 1:0;
-	ep &= ~USB_DIR_MASK;
-
-	if ( pdev->ep_status[ep][dir].stalled ){
-		err = hal_usbd_clear_endp_stall(id, ep);
-		pdev->ep_status[ep][dir].stalled = false;
-		pdev->ep_status[ep][dir].busy = false;
-  	}
-	
-    return err;
-}
-error_t usbd_endp_stall(uint8_t id, uint8_t ep)
-{
-	error_t err = ERROR_SUCCESS;
-	uint8_t dir;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	dir = (ep & USB_DIR_MASK)? 1:0;
-	ep &= ~USB_DIR_MASK;
-
-	if ( !pdev->ep_status[ep][dir].stalled ){
-		err = hal_usbd_endp_stall(id, ep);
-		pdev->ep_status[ep][dir].stalled = true;
-		pdev->ep_status[ep][dir].busy = true;
-  	}
-	
-    return err;
-}
-bool usbd_get_endp_stalled(uint8_t id, uint8_t ep)
-{
-	uint8_t dir;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	dir = (ep & USB_DIR_MASK)? 1:0;
-	ep &= ~USB_DIR_MASK;
-    return pdev->ep_status[ep][dir].stalled;
-}
-void* usbd_get_endp_buffer(uint8_t id, uint8_t ep)
-{
-	if(id > USBD_NUM) return NULL;
-    return hal_usbd_get_endp_buffer(id, ep);
-}
-
-error_t usbd_cfg_endp_all(uint8_t id)
-{
-    uint8_t i;
-	usb_endp_t 	endp0;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	memset(pdev->ep_status, 0, sizeof(pdev->ep_status));
-	memset(&endp0, 0, sizeof(usb_endp_t));					//配置端点0
-	endp0.mtu =  USBD_ENDP0_MTU;
-	hal_usbd_cfg_endp(id, &endp0);
-
-	for(i=0; i<USBD_MAX_ITF_NUM; i++){						//非0 端点
-		usbd_class_t *pclass = &m_usbd_class[id][i];
-
-		if( pdev->itf_alt[pclass->itf.if_num] != pclass->itf.if_alt) continue;		//选择itf alt
-		if(pclass->endpin.addr){
-			hal_usbd_cfg_endp(id, &pclass->endpin);
-		}
-		if(pclass->endpout.addr){
-			hal_usbd_cfg_endp(id, &pclass->endpout);
-		}
-	}
-}
-
-
-/*******************************************************************
-** Parameters:
-** Returns:
-** Description: 注意: 端点0发送完成后必须使用 usbd_free_setup_buffer 释放内存
-*******************************************************************/
-error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
-{
-	error_t err;
-	usbd_class_t *pclass;
-	
-	pclass = usbd_class_find_by_ep(id, ep);
-	if(NULL == pclass) return ERROR_PARAM;
-
-	err = hal_usbd_in(id, &pclass->endpin, buf, len);
-
-	if(0 == ep & ~USB_DIR_MASK){						//端点0发送完成释放内存
-		usbd_req_t *preq = usbd_get_req_buf(id);
-		if((ERROR_SUCCESS == err) && (preq->setup_index == preq->setup_len)){
-			usbd_free_setup_buffer(preq);
-		}
-	}
-    return err;
-}
-error_t usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
-{
-	error_t err;
-	usbd_class_t *pclass;
-	
-	pclass = usbd_class_find_by_ep(id, ep);
-	if(NULL == pclass) return ERROR_PARAM;
-
-    return hal_usbd_out(id, &pclass->endpout, buf, plen);
-}
-error_t usbd_reset(uint8_t id)
-{
-	error_t err;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_req_t *preq = usbd_get_req_buf(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	usbd_free_setup_buffer(preq);
-	memset(preq, 0, sizeof(usbd_req_t));
-	memset(pdev, 0, sizeof(usbd_dev_t));
-	pdev->state = USB_STA_DEFAULT;
-	usbd_class_reset(id);
-	usbd_cfg_endp_all(id);
-
-	err = hal_usbd_reset(id);
-    return err;
-}
-error_t usbd_set_address(uint8_t id, uint8_t address)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	if(NULL == pdev) return ERROR_PARAM;
-
-	pdev->address = address;
-	pdev->state = USB_STA_ADDRESSING;
-
-    return hal_usbd_set_address(id, address);
-}
-
-
-
-
 
 /*******************************************************************
 ** Parameters:
@@ -355,10 +140,6 @@ __WEAK void usbd_user_set_device_desc(uint8_t id, usb_desc_device_t *pdesc)
 	}
 }
 
-__WEAK error_t usbd_control_request_cb(uint8_t id, usbd_req_t* const preq)
-{
-	return ERROR_STALL;
-}
 #endif
 /*******************************************************************
 ** Parameters:
@@ -376,19 +157,19 @@ error_t usbd_pack_unicode_string( char *str, uint8_t *pdesc, uint16_t *pdesc_len
 	pdesc[1] = 0x03;
 
 	for(i=0; i<strlen(str); i++){
-		if(*pdesc_len <= len + 2) break;
+		if(*pdesc_len < len + 2) break;
+
 		pdesc[len++] = str[i];
 		pdesc[len++] = 0;
 	}
 	*pdesc_len = len;
 
-	return len;
+	return ERROR_SUCCESS;
 }
 
 error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t *pdesc_len)
 {
 	error_t err;
-	uint16_t i;
 	char *pstr;
 
 	if(index > 3) return ERROR_STALL;
@@ -396,10 +177,18 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 
 	pstr = usbd_user_get_string(id, index);	//user vendor get string 
 
-	if(pstr){
+	if(NULL != pstr){
 		err = usbd_pack_unicode_string(pstr,pdesc,pdesc_len);
 	}else{
-		err = usbd_pack_unicode_string((char*)usbd_string_desc[index],pdesc,pdesc_len);
+		if(0 == index){
+			pdesc[0] = 0x04;
+			pdesc[1] = 0x03;
+			pdesc[2] = 0x09;
+			pdesc[3] = 0x04;
+			*pdesc_len = 4;
+		}else{
+			err = usbd_pack_unicode_string((char*)usbd_string_desc[index],pdesc,pdesc_len);
+		}
 	}
 
 	return err;
@@ -430,6 +219,7 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 
 	pdev->vid = SWAP16_L(dev.idVendor);
 	pdev->pid = SWAP16_L(dev.idProduct);
+	pdev->endp0_mtu = dev.bMaxPacketSize0;
 
 	len = MIN(*pdesc_len, sizeof(usb_desc_device_t));
 	memcpy(pdesc, &dev, len);
@@ -442,7 +232,6 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 
 error_t usbd_get_configuration_desc(uint8_t id, uint8_t cfg, uint8_t *pdesc, uint16_t *pdesc_len)
 {
-	uint16_t len;
 	uint16_t desc_index = 9;
 	itf_ep_index_t index;
 	usb_desc_configuration_t* pcfg_desc = (usb_desc_configuration_t*)pdesc;
@@ -461,12 +250,14 @@ error_t usbd_get_configuration_desc(uint8_t id, uint8_t cfg, uint8_t *pdesc, uin
 	memset(&index,0,sizeof(index));
 	index.ep_in_num = 1;					//endp from 1
 	index.ep_out_num = 1;
-	desc_index += usbd_class_get_itf_desc(id, &index, pdesc, *pdesc_len, &desc_index);
+	usbd_class_get_itf_desc(id, &index, pdesc, *pdesc_len, &desc_index);
 
 	pcfg_desc->wTotalLength = SWAP16_L(desc_index);
 	pcfg_desc->bNumInterfaces = index.itf_num;
 
 	*pdesc_len = MIN(*pdesc_len, desc_index);
+
+	logd("usbd cfg:");dumpd(pdesc,*pdesc_len);
 	return ERROR_SUCCESS;
 }
 
@@ -483,8 +274,7 @@ error_t usbd_get_descriptor(uint8_t id, usbd_req_t* const preq)
 	uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
 	uint8_t desc_index = (uint8_t)(preq->req.wValue & 0xFF);
 
-	dev_type_t dev_type;
-
+	preq->setup_len = preq->req.wLength;
 	switch(desc_type){
 	case USB_DESC_DEVICE:
 		err = usbd_get_device_desc(id, preq->setup_buf, &preq->setup_len);
@@ -502,8 +292,40 @@ error_t usbd_get_descriptor(uint8_t id, usbd_req_t* const preq)
 		err = ERROR_STALL;
 		break;
 	}
+	return err;
 }
 
+error_t usbd_cfg_endp_all(uint8_t id)
+{
+    uint8_t i;
+	
+	usbd_dev_t *pdev = usbd_get_dev(id);
+
+	if(NULL == pdev) return ERROR_PARAM;
+
+	logd("usbd_cfg_endp_all%d...\n",id);
+	
+	for(i=1; i<USBD_ENDP_NUM; i++){
+		hal_usbd_endp_close(id,i);
+	}
+	memset(pdev->ep_status, 0, sizeof(pdev->ep_status));
+	pdev->endp0_mtu = USBD_ENDP0_MTU;
+
+	usbd_endp_dma_init(id);
+	for(i=0; i<USBD_MAX_ITF_NUM; i++){						//非0 端点
+		usbd_class_t *pclass = &m_usbd_class[id][i];
+
+		if( pdev->itf_alt[pclass->itf.if_num] != pclass->itf.if_alt) continue;		//选择itf alt
+		if(pclass->endpin.addr){
+			usbd_endp_open(id, &pclass->endpin);
+		}
+		if(pclass->endpout.addr){
+			usbd_endp_open(id, &pclass->endpout);
+		}
+	}
+	
+	return ERROR_SUCCESS;
+}
 
 /*******************************************************************
 ** Parameters:
@@ -514,11 +336,9 @@ static error_t usbd_control_request_process(uint8_t id)
 {
     error_t err = ERROR_SUCCESS;
 	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_req_t *preq = usbd_get_req_buf(id);
+	usbd_req_t *preq = usbd_get_req(id);
 
 	if(NULL == pdev) return ERROR_PARAM;
-
-	usbd_control_request_cb(id,preq);				//Use on special dev
 
     if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
 		switch (preq->req.bmRequestType.bit.recipient) {
@@ -526,7 +346,6 @@ static error_t usbd_control_request_process(uint8_t id)
 			switch (preq->req.bRequest) {
 			case USB_REQ_SET_ADDRESS:
 				// Depending on mcu, status phase could be sent either before or after changing device address,
-				err = usbd_set_address(id, (uint8_t)preq->req.wValue);
 				break;
 			case USB_REQ_GET_CONFIGURATION:
 				preq->setup_buf[0] = pdev->cfg_num;
@@ -534,7 +353,7 @@ static error_t usbd_control_request_process(uint8_t id)
 			case USB_REQ_SET_CONFIGURATION:
 				// Only process if new configure is different
 				if (pdev->cfg_num != preq->req.wValue) {
-					if (pdev->cfg_num) {
+					if (preq->req.wValue) {				//TODO
 						// close all non-control endpoints, cancel all pending transfers if any
 						// close all drivers and current configured state except bus speed
 						usbd_cfg_endp_all(id);
@@ -631,45 +450,143 @@ static error_t usbd_control_request_process(uint8_t id)
 }
 
 
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb 事件处理函数
+*******************************************************************/
+void usbd_reset_process( uint8_t id )
+{
+	usb_endp_t 	endp0;
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	if(NULL != pdev){
+		pdev->dev.reset = 0;
+		usbd_free_setup_buffer(preq);
+		memset(preq, 0, sizeof(usbd_req_t));
+		memset(pdev, 0, sizeof(usbd_dev_t));
+		pdev->state = USB_STA_DEFAULT;
+		pdev->endp0_mtu = USBD_ENDP0_MTU;
+
+	}
+		
+	usbd_class_reset(id);
+	usbd_set_address(id, 0);
+	
+	memset(&endp0, 0, sizeof(usb_endp_t));					
+	endp0.mtu = pdev->endp0_mtu;			//配置端点0
+	usbd_endp_open(id, &endp0);
+
+	usbd_cfg_endp_all(id);
+}
+void usbd_suspend_process( uint8_t id )
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	if(NULL != pdev){
+		pdev->dev.suspend = 0;
+		usbd_free_setup_buffer(preq);
+		if(USB_STA_CONFIGURED == pdev->state){
+			pdev->state = USB_STA_SUSPENDED;
+			usbd_class_suspend(id);
+		}else{
+			pdev->state = USB_STA_DETACHED;
+		}
+	}
+}
+void usbd_resume_process( uint8_t id )
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+
+	if(NULL != pdev){
+		pdev->dev.resume = 0;
+		if(USB_STA_DETACHED == pdev->state){
+			pdev->state = USB_STA_ATTACHED;
+		}else{
+			pdev->state = USB_STA_CONFIGURED;
+		}
+	}
+}
 void usbd_setup_process( uint8_t id )
 {
 	error_t err = ERROR_SUCCESS;
 	uint16_t rx_len;
-	usbd_req_t *preq = usbd_get_req_buf(id);
+	usbd_req_t *preq = usbd_get_req(id);
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
 	if(NULL == pdev) return;
 
-	if(pdev->dev.setup){
-		logd("steup:");dumpd((uint8_t*)&preq->req,8);
+	if(preq->req.wLength && (NULL == preq->setup_buf)) return;
 
-		if(preq->setup_len && (NULL == preq->setup_buf)) return;
-
-		//等待接收完整数据
-		if((USB_DIR_OUT == preq->req.bmRequestType.bit.direction) && preq->req.wLength){
-			rx_len = preq->req.wLength;
-			err = usbd_out(id, 0x00, preq->setup_buf, &rx_len);
-			if(rx_len && (ERROR_SUCCESS == err)){		//这里简单处理
-				preq->setup_len = rx_len;
-				pdev->dev.setup = 0;			
-			}
-		}else{
-			pdev->dev.setup = 0;
+	logd("steup:");dumpd((uint8_t*)&preq->req,8);
+	//等待接收完整数据
+	if((USB_DIR_OUT == preq->req.bmRequestType.bit.direction) && preq->req.wLength){
+		rx_len = preq->req.wLength;
+		err = usbd_out(id, 0x00, preq->setup_buf, &rx_len);
+		if(ERROR_SUCCESS == err){
+			preq->setup_index += rx_len;
+			if(preq->req.wLength == preq->setup_index){		//rx finish
+				preq->setup_index = 0;
+				pdev->dev.setup = 0;	
+			}		
 		}
+	}else{
+		pdev->dev.setup = 0;
+	}
 
-		//setup处理
-		if(0 == pdev->dev.setup){
-			err = usbd_control_request_process(id);
-			if(ERROR_SUCCESS == err){
-				if(preq->setup_len > preq->req.wLength) preq->setup_len = preq->req.wLength;
-				usbd_in(id, 0x80, preq->setup_buf, preq->setup_len);
-			}else if(ERROR_STALL == err){
-				usbd_endp_stall(id,0x80);
+	//setup处理
+	if(0 == pdev->dev.setup){
+		err = usbd_control_request_process(id);
+		if(ERROR_SUCCESS == err){
+			if(preq->setup_len > preq->req.wLength) preq->setup_len = preq->req.wLength;
+
+			usbd_in(id, 0x80, preq->setup_buf, preq->setup_len);
+			if(USB_DIR_OUT == preq->req.bmRequestType.bit.direction){
 				usbd_free_setup_buffer(preq);
-			}else{	//数据未就绪
-				//这里不能设置NAK,防止SOCKET情况下ACK后又被设置为NAK
 			}
+		}else if(ERROR_STALL == err){
+			usbd_endp_stall(id,0x80);
+			usbd_free_setup_buffer(preq);
+		}else{	//数据未就绪
+			//这里不能设置NAK,防止SOCKET情况下ACK后又被设置为NAK
 		}
+	}
+}
+
+
+error_t usbd_init(uint8_t id)
+{
+	if(id >= USBD_NUM) return ERROR_FAILE;
+
+	usbd_class_init(id);
+
+    return usbd_core_init(id);
+}
+error_t usbd_deinit(uint8_t id)
+{
+	if(id >= USBD_NUM) return ERROR_FAILE;
+	usbd_class_deinit(id);
+	
+    return usbd_core_deinit(id);
+}
+
+void usbds_init(void)
+{
+	uint8_t id;
+
+	for(id=0; id<USBD_NUM; id++){
+		usbd_init(id);
+	}
+}
+void usbds_deinit(void)
+{
+	uint8_t id;
+
+	for(id=0; id<USBD_NUM; id++){
+		usbd_deinit(id);
 	}
 }
 
@@ -682,54 +599,44 @@ void usbd_task(void*pa)
 {
 	uint8_t id;
 	usbd_dev_t *pdev;
-	usbd_req_t *preq;
-	
+
 	for(id=0; id<USBD_NUM; id++){
-		pdev = usbd_get_dev(id);
-		preq = usbd_get_req_buf(id);
+		if(API_USBD_BIT_ENABLE & BIT(id)){
+			pdev = usbd_get_dev(id);
 
-		if(pdev->dev.reset){
-			pdev->dev.reset = 0;
+			if(pdev->dev.reset){
+				usbd_reset_process(id);
+			}else if(pdev->dev.suspend){
+				usbd_suspend_process(id);
+			}else if(pdev->dev.resume){
+				usbd_resume_process(id);
+			}else if(pdev->dev.setup){
+				usbd_setup_process(id);
+			}
 
-			usbd_free_setup_buffer(preq);
-			memset(preq, 0, sizeof(usbd_req_t));
-			memset(pdev, 0, sizeof(usbd_dev_t));
-			pdev->state = USB_STA_DEFAULT;
-
-			usbd_class_reset(id);
-			usbd_cfg_endp_all(id);
-		}else if(pdev->dev.suspend){
-			pdev->dev.suspend = 0;
-			pdev->state = USB_STA_SUSPENDED;
-			usbd_class_suspend(id);
-		}else{
-			usbd_setup_process(id);
-		}
-
-		if(USB_STA_SUSPENDED == pdev->state){
-			usbd_class_task(id);
+			if(USB_STA_CONFIGURED == pdev->state){
+				usbd_class_task(id);
+			}
 		}
 	}
 }
 
-
-error_t usbd_init(uint8_t id)
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void usbd_handler(uint32_t period_10us)
 {
-	memset(&m_usbd_req[id],0, sizeof(usbd_req_t));
-	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
-	m_usbd_dev[id].state = USB_STA_ATTACHED;
-
-	usbd_class_init(id);
-    return hal_usbd_init(id);
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		usbd_task(NULL);
+	}
 }
-error_t usbd_deinit(uint8_t id)
-{
-	usbd_free_setup_buffer(&m_usbd_req[id]);					//防止资源未被释放
-	memset(&m_usbd_req[id],0, sizeof(usbd_req_t));
-	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
+#endif
 
-	usbd_class_deinit(id);
-    return hal_usbd_deinit(id);
-}
+
 
 #endif

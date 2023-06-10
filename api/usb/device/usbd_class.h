@@ -17,25 +17,25 @@
 #include "api/usb/device/usbd_core.h"
 
 
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 #include "api/usb/device/usbd_hid.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 #include "api/usb/device/usbd_audio.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
 #include "api/usb/device/usbd_printer.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
 #include "api/usb/device/usbd_msd.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
 #include "api/usb/device/usbd_cdc.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 #include "api/usb/device/usbd_iap2.h"
 #endif
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
 #include "api/usb/device/usbd_auto.h"
 #endif
 #ifdef __cplusplus

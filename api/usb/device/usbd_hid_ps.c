@@ -93,7 +93,7 @@ uint16_t usbd_hid_ps_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
     uint16_t len,rep_desc_len;
 
 	len = sizeof(ps_gamepade_itf_desc_tab);
-	if (desc_len <= *pdesc_index + len) {
+	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, ps_gamepade_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_PS4, pindex, pdesc + *pdesc_index, len);
 
@@ -130,32 +130,32 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 
 		switch(preq->req.bRequest){
 		case HID_REQ_CONTROL_GET_REPORT:
-			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->setup_len){
+			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->req.wLength){
 				switch (report_id){
                 case 0X03:		//第三方手柄主机会发03,解决PS4体感键盘无法使用的问题
-					preq->setup_len = MIN(preq->setup_len, sizeof(class_reuqes_in_03));
+					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_03));
 					memcpy(preq->setup_buf,class_reuqes_in_03,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break; 
 				case 0XF3:		//第三方手柄主机会发F3
-					preq->setup_len = MIN(preq->setup_len, sizeof(class_reuqes_in_f3));
+					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_f3));
 					memcpy(preq->setup_buf,class_reuqes_in_f3,preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
                 case 0X02:		//原装手柄主机会发02
-					preq->setup_len = MIN(preq->setup_len, sizeof(class_reuqes_in_02));
+					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_02));
 					memcpy(preq->setup_buf,class_reuqes_in_02,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break;
 				case 0XA3:
-					preq->setup_len = MIN(preq->setup_len, sizeof(class_reques_in_a3));
+					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reques_in_a3));
 					memcpy(preq->setup_buf,class_reques_in_a3,preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
                 case 0X12:{
 					ps_bt_mac_t ps_mac;
 					ps_get_bt_mac(&ps_mac);
-					preq->setup_len = MIN(preq->setup_len, sizeof(ps_mac));
+					preq->setup_len = MIN(preq->req.wLength, sizeof(ps_mac));
 					memcpy(preq->setup_buf,&ps_mac,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break;
@@ -172,8 +172,8 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 			}
 			break;
 		case  HID_REQ_CONTROL_SET_REPORT:
-			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->setup_len){
-				logd("usbd ps set report id=%d:",report_id);dumpd(preq->setup_buf,preq->setup_len);
+			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->req.wLength){
+				logd("usbd ps set report id=%d:",report_id);dumpd(preq->setup_buf,preq->req.wLength);
 				switch(report_id){
 				case 0X13:{
 					ps_set_bt_link((ps_bt_link_t*)preq->setup_buf);

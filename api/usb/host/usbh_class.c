@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_USBH_ENABLE
+#if API_USBH_BIT_ENABLE
 #include "api/usb/host/usbh_class.h"
 #include "api/usb/host/usbh.h"
 #include "api/api_tick.h"
@@ -79,7 +79,6 @@ void free_usbh_class(usbh_class_t* pclass)
 *******************************************************************/
 usbh_class_t* get_usbh_class(uint8_t class_id)   
 {
-	uint8_t i;
 	if(class_id >= countof(usbh_dev_class)) return NULL;
 	if(USBH_NULL == usbh_dev_class[class_id].id) return NULL;	//未分配
 	return &usbh_dev_class[class_id];
@@ -92,7 +91,6 @@ usbh_class_t* get_usbh_class(uint8_t class_id)
 *******************************************************************/
 usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_type)
 {
-	error_t err = ERROR_NOT_FOUND;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pclass = NULL;
 
@@ -122,7 +120,6 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 *******************************************************************/
 uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class_t **ppcalss)
 {
-	error_t err = ERROR_NOT_FOUND;
 	uint8_t i,id = USBH_NULL;
 	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
 	usbh_class_t *pcalss = NULL;

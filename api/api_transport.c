@@ -18,10 +18,10 @@
 #if API_BT_ENABLE
 #include  "api/bt/api_bt.h"
 #endif
-#if APP_USBH_ENABLE
+#if API_USBH_BIT_ENABLE
 #include "api/usb/host/usbh.h"
 #endif
-#if APP_USBD_ENABLE
+#if API_USBD_BIT_ENABLE
 #include "api/usb/device/usbd.h"
 #endif
 #ifdef HW_UART_MAP
@@ -104,16 +104,19 @@ uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	
+	phandle->index use U16(h,l)	set value
 *******************************************************************/
-bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
+bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 {
 	bool ret = true;
+	uint8_t* pbuf = buf;
 	static timer_t tx_timer;			//for test
+
 	if (len <= 0)			return false;
 	if (NULL == buf)		return false;
 
-	logd("trp(%d) id(%d) index(0x%x) dt=%d ret=%d:",phandle->trp, phandle->id,phandle->index,m_systick-tx_timer,ret); tx_timer = m_systick;dumpd(buf,len);
+	logd("trp(%d) id(%d) index(0x%x) dt=%d len=%d:",phandle->trp, phandle->id,phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
 	switch(phandle->trp){
 		#if API_BT_ENABLE
 		case TR_BLE	:
@@ -125,30 +128,31 @@ bool api_transport_tx(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 		case TR_RF:
 		case TR_RFC:
 			if(DEV_TYPE_VENDOR == (phandle->index >> 8)){
-				ret = api_bt_uart_tx(phandle->id,phandle->trp, buf, len);
+				ret = api_bt_uart_tx(phandle->id,phandle->trp, pbuf, len);
 			}else if(DEV_TYPE_HID == (phandle->index >> 8)){
-				ret = api_bt_hid_tx(phandle->id,phandle->trp, buf, len);
+				ret = api_bt_hid_tx(phandle->id,phandle->trp, pbuf, len);
 			}
 			break;
 		#endif
-		#if APP_USBD_ENABLE
+		#if API_USBD_BIT_ENABLE
 		case TR_USBD:
-			ret = !usbd_class_in(phandle->id, phandle->index>>8, phandle->index&0xFF, buf, len);
+			ret = !usbd_class_in(phandle->id, (dev_type_t)(phandle->index>>8), phandle->index&0xFF, pbuf, len);
 			break;	
 		#endif
-		#if APP_USBH_ENABLE
+		#if API_USBH_BIT_ENABLE
 		case TR_USBH:
-			ret = !usbh_class_out(phandle->index>>8, phandle->index&0xFF, buf, len);
+			ret = !usbh_class_out((dev_type_t)(phandle->index>>8), phandle->index&0xFF, pbuf, len);
 			break;	
 		#endif
 		#ifdef HW_UART_MAP
 		case TR_UART:
-			ret = api_uart_tx(phandle->id, buf, len);
+			ret = api_uart_tx(phandle->id, pbuf, len);
 			break;	
 		#endif
 		default:
 			break;
 	}
+	if(!ret) logd("trp err!\n");
 	return ret;
 }
 

@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include "hw_config.h"
 #include "hw_board.h"
-#if	defined HW_TIMER_MAP && API_TIMER_ENABLE
+#if	defined HW_TIMER_MAP && API_TIMER_BIT_ENABLE
 #include  "api/api_timer.h"
 
 /******************************************************************************************************

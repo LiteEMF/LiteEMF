@@ -13,8 +13,11 @@
 #ifndef _usbd_core_h
 #define _usbd_core_h
 #include "utils/emf_typedef.h" 
+#include "hw_config.h"
 #include "api/usb/usb_typedef.h"
 #include "api/api_transport.h"
+
+#include "usb/hal_usbd.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -99,6 +102,7 @@ typedef struct{
 		volatile uint8_t setup			: 1;	// 接收到usb setup 指令
 		volatile uint8_t reset			: 1;	// reset msg
 		volatile uint8_t suspend		: 1;	// suspend msg
+		volatile uint8_t resume			: 1;	// resume msg
 
 		uint8_t remote_wakeup_en      	: 1; // enable/disable by host
 		uint8_t remote_wakeup_support 	: 1; // configuration descriptor's attribute
@@ -113,10 +117,13 @@ typedef struct{
 	volatile uint8_t cfg_num; 			// current active configuration (0x00 is not configured)
 	uint8_t itf_alt[USBD_MAX_ITF_NUM];	// current bAlternateSetting
 	usbd_endp_state_t ep_status[USBD_ENDP_NUM][2];
+	volatile uint8_t enpd_in_busy[ USBD_ENDP_NUM ];			//注意端点0, 和其他端点判断busy方式不一样
+	volatile uint8_t enpd_out_len[ USBD_ENDP_NUM ];
+	uint8_t endp0_mtu;
 }usbd_dev_t;
 
 
-typedef struct _usbd_req_t{
+typedef volatile struct _usbd_req_t{
 	usb_control_request_t req;
     uint8_t *setup_buf;   		//必须调用usbd_malloc_setup_buffer分配内存, usbd_free_setup_buffer 释放内存
 	uint16_t setup_len;			//ep0 setup data stage数据长度
@@ -124,11 +131,58 @@ typedef struct _usbd_req_t{
 }usbd_req_t;
 
 
+
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+usbd_dev_t *usbd_get_dev(uint8_t id);
+usbd_req_t *usbd_get_req(uint8_t id);
+error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq);
+error_t usbd_free_setup_buffer(usbd_req_t *preq);
+
+error_t usbd_endp_dma_init(uint8_t id);
+error_t usbd_endp_open(uint8_t id, usb_endp_t *pendp);
+error_t usbd_endp_close(uint8_t id, uint8_t ep);
+error_t usbd_endp_ack(uint8_t id, uint8_t ep, uint16_t len);
+error_t usbd_endp_nak(uint8_t id, uint8_t ep);
+error_t usbd_clear_endp_stall(uint8_t id, uint8_t ep);
+error_t usbd_endp_stall(uint8_t id, uint8_t ep);
+bool 	usbd_get_endp_stalled(uint8_t id, uint8_t ep);
+void 	*usbd_get_endp_buffer(uint8_t id, uint8_t ep);
+error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len);
+error_t usbd_out(uint8_t id, uint8_t ep,uint8_t* buf, uint16_t* plen);
+error_t usbd_set_address(uint8_t id,uint8_t address);
+error_t usbd_reset(uint8_t id);
+
+void usbd_reset_event(uint8_t id);								//__WEAK
+void usbd_suspend_event(uint8_t id);							//__WEAK
+void usbd_resume_event(uint8_t id);								//__WEAK
+void usbd_sof_event(uint8_t id);								//__WEAK
+void usbd_endp_in_event(uint8_t id ,uint8_t ep);	//__WEAK
+void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len);	//__WEAK
+void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len);	//__WEAK
+
+error_t usbd_core_init(uint8_t id);
+error_t usbd_core_deinit(uint8_t id);
 
 
+
+
+//hal
+error_t hal_usbd_endp_dma_init(uint8_t id);
+error_t hal_usbd_endp_open(uint8_t id, usb_endp_t *pendp);
+error_t hal_usbd_endp_close(uint8_t id, uint8_t ep);
+error_t hal_usbd_endp_ack(uint8_t id, uint8_t ep, uint16_t len);
+error_t hal_usbd_endp_nak(uint8_t id, uint8_t ep);
+error_t hal_usbd_clear_endp_stall(uint8_t id, uint8_t ep);
+error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep);
+uint8_t 	*hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep);
+error_t hal_usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len);
+error_t hal_usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen);
+error_t hal_usbd_reset(uint8_t id);
+error_t hal_usbd_set_address(uint8_t id,uint8_t address);
+error_t hal_usbd_init(uint8_t id);
+error_t hal_usbd_deinit(uint8_t id);
 
 #ifdef __cplusplus
 }

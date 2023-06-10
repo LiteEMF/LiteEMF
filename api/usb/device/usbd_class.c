@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_USBD_ENABLE
+#if API_USBD_BIT_ENABLE
 #include "api/usb/device/usbd_class.h"
 #include "api/usb/device/usbd.h"
 #include "api/api_tick.h"
@@ -27,7 +27,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];			//注意接口下班和接口号不是一一对应的
+usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];			//注意接口下标和接口号不是一一对应的
 
 /******************************************************************************************************
 **	static Parameters
@@ -74,7 +74,7 @@ usbd_class_t *usbd_class_find_by_itf(uint8_t id, uint8_t itf)
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
 
-		if((pclass->itf.if_num | USB_DIR_IN_MASK) == itf){
+		if(pclass->itf.if_num == itf){
 			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
 				return pclass;
 			}
@@ -127,7 +127,6 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type,itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len)
 {
 	error_t err = ERROR_UNKNOW;
-    uint8_t ep,inf_num=0;
     uint16_t i, l;
 	usb_desc_interface_t *pitf;
     usb_desc_endpoint_t *pep;
@@ -140,13 +139,13 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
         l = pdesc[i];
         if(0 == l) break;
 
-		if(USB_DESC_INTERFACE == pdesc[i+2]){
+		if(USB_DESC_INTERFACE == pdesc[i+1]){
 			pitf = (usb_desc_interface_t*)(pdesc+i);
 			pitf->bInterfaceNumber = pindex->itf_num;
-			if(pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
+			if(0 == pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
 				pindex->itf_num++;
 			}
-
+			logd("assign itf =%d\n", pindex->itf_num);
 			pclass = &m_usbd_class[id][pindex->itf_index++];
 			pclass->dev_type = type;
 			pclass->hid_type = hid_type;
@@ -157,13 +156,13 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
 			pclass->itf.if_pro = pitf->bInterfaceProtocol;
 
-        }else if(USB_DESC_ENDPOINT == pdesc[i+2]){
+        }else if(USB_DESC_ENDPOINT == pdesc[i+1]){
 			usb_endp_t *endp;
         	pep = (usb_desc_endpoint_t*)(pdesc+i);
 
 			if(NULL == pclass){
-				return ERROR_FAILE;
 				loge("usbd desc err!");
+				return ERROR_FAILE;
 			}
 
 			if(pep->bEndpointAddress & USB_DIR_MASK){
@@ -202,7 +201,7 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pd
 		xbox_audio = true;
 	}
 
-	for(type=0; type<16; type++){
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -259,8 +258,9 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pd
 *******************************************************************/
 error_t usbd_class_reset(uint8_t id)
 {
-	dev_type_t type;
-	for(type=0; type<16; type++){
+	uint8_t type;
+	
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -308,8 +308,9 @@ error_t usbd_class_reset(uint8_t id)
 }
 error_t usbd_class_suspend(uint8_t id)
 {
-	dev_type_t type;
-	for(type=0; type<16; type++){
+	uint8_t type;
+	
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -363,7 +364,6 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 
 	uint8_t itf;
 	usbd_class_t *pclass;
-	dev_type_t type;
 
 	if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bit.recipient){
 		itf = (uint8_t)(preq->req.wIndex & 0xFF);
@@ -519,7 +519,7 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 		err = usbd_in(id, pclass->endpin.addr, buf, len);
 	}
 
-	return ERROR_SUCCESS;
+	return err;
 }
 
 /*******************************************************************
@@ -529,7 +529,7 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 *******************************************************************/
 void usbd_class_task(uint8_t id)
 {
-	dev_type_t type;
+	uint8_t type;
 
 	#if USBD_LOOP_OUT_ENABLE
 	error_t err;
@@ -545,7 +545,7 @@ void usbd_class_task(uint8_t id)
 	}
 	#endif
 	
-	for(type=0; type<16; type++){
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -592,11 +592,11 @@ void usbd_class_task(uint8_t id)
 
 error_t usbd_class_init(uint8_t id)
 {
-	dev_type_t type;
+	uint8_t type;
 
 	memset(&m_usbd_class[id], 0, sizeof(m_usbd_class[id]));
 
-	for(type=0; type<16; type++){
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -646,9 +646,9 @@ error_t usbd_class_init(uint8_t id)
 
 error_t usbd_class_deinit(uint8_t id)
 {
-	dev_type_t type;
+	uint8_t type;
 
-	for(type=0; type<16; type++){
+	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)

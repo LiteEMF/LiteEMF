@@ -128,7 +128,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
                     xbox_controller_init(&trp_handle);
                 }else if(pclass->endpin.type == USB_ENDP_TYPE_ISOCH){       //audio
                     #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)        //如果支持打开audio接口,xbox默认一直打开
-                    usbh_set_intercace(id, pclass->itf.if_num, 1);
+                    usbh_req_set_itf(id, pclass->itf.if_num, 1);
                     #endif
                 }
             }

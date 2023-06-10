@@ -118,7 +118,7 @@ static uint8c_t hid_desc_vendor_map[] =
 uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
 {
 	uint16_t map_len = 0;
-    uint8_t i;
+	
     switch(hid_type){
         #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
         case HID_TYPE_GAMEPADE:

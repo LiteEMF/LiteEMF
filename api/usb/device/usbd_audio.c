@@ -305,7 +305,7 @@ uint16_t usbd_audio_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pd
 {
     uint16_t len = sizeof(uac_itf_desc_tab);
 
-    if (desc_len <= *pdesc_index + len) {
+    if (desc_len >= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, uac_itf_desc_tab, len);
         usbd_assign_configuration_desc(id, DEV_TYPE_AUDIO, 0, pindex, pdesc + *pdesc_index, len);
     }
@@ -341,7 +341,7 @@ static error_t audio_ac_set_cur(uint8_t id, usbd_req_t* const preq)
             break;
 
         case AUDIO_FU_CTRL_VOLUME:
-			memcpy((uint8_t *)&volume,preq->setup_buf, MIN(4,preq->setup_len));
+			memcpy((uint8_t *)&volume,preq->setup_buf, MIN(4,preq->req.wLength));
 			volume =  SWAP16_L(volume);
             if (audio_id == USBD_SPK_FEATURE_UNIT) {
                 if (preq->req.wValue & 0xff == 1) {

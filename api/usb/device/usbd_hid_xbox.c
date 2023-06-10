@@ -96,7 +96,7 @@ uint16_t usbd_hid_xbox_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t*
     uint16_t len;
 
 	len = sizeof(xbox_itf_desc_tab);
-	if (desc_len <= *pdesc_index + len) {
+	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, xbox_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_GAMEPADE, pindex, pdesc + *pdesc_index, len);
 	}
@@ -117,7 +117,7 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 		if(0X90 == preq->req.bRequest){
 			switch(preq->req.wValue){
 			case 0X04:		//compat ID
-				preq->setup_len = MIN(preq->setup_len,sizeof(xbox_compat_id));
+				preq->setup_len = MIN(preq->req.wLength,sizeof(xbox_compat_id));
 				memcpy(preq->setup_buf, xbox_compat_id, preq->setup_len);
 				err = ERROR_SUCCESS;
 				break;
@@ -132,6 +132,7 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 	}else if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
         if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
 			pdev->ready = true;			//xbox set interface 后打开端点
+			logd_g("usbd%d ready...\n",id);
            	err = ERROR_SUCCESS;
 		}
 	}

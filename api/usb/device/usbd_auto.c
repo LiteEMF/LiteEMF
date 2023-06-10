@@ -124,7 +124,7 @@ uint16_t usbd_auto_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pde
 {
     uint16_t len = sizeof(auto_itf_desc_tab),rep_desc_len;
 
-    if (desc_len <= *pdesc_index + len) {
+    if (desc_len >= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, auto_itf_desc_tab, len);
         usbd_assign_configuration_desc(id, DEV_TYPE_AUTO, 0, pindex, pdesc + *pdesc_index, len);
 
@@ -159,7 +159,7 @@ error_t usbd_auto_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
                 }
             }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bit.recipient) {
                 if(HID_DESC_TYPE_REPORT == desc_type){
-                    preq->setup_len = MIN(preq->setup_len, sizeof(auto_desc_gamepad_map));
+                    preq->setup_len = MIN(preq->req.wLength, sizeof(auto_desc_gamepad_map));
                     memcpy(preq->setup_buf,auto_desc_gamepad_map,preq->setup_len);
                 }
             }

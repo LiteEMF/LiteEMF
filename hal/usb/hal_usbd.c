@@ -44,11 +44,20 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t hal_usbd_endp_open(uint8_t id, uint8_t ep)
+
+error_t hal_usbd_endp_dma_init(uint8_t id)
+{
+	return 0;
+}
+error_t hal_usbd_endp_open(uint8_t id, usb_endp_t *pendp)
 {
 	return 0;
 }
 error_t hal_usbd_endp_close(uint8_t id, uint8_t ep)
+{
+	return 0;
+}
+error_t hal_usbd_endp_ack(uint8_t id, uint8_t ep, uint16_t len)
 {
 	return 0;
 }
@@ -65,11 +74,7 @@ error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep)
 	return 0;
 }
 
-error_t hal_usbd_cfg_endp(uint8_t id, usb_endp_t *pendp)
-{
-	return 0;
-}
-void *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
+uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 {
 	return NULL;
 }
@@ -78,11 +83,11 @@ void *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 ** Returns:
 ** Description: 注意: 端点0 发送需要处理usbd_req_t
 *******************************************************************/
-error_t hal_usbd_in(uint8_t id, usb_endp_t *pendp, uint8_t* buf,uint16_t len)
+error_t hal_usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len)
 {
 	return 0;
 }
-error_t hal_usbd_out(uint8_t id, usb_endp_t *pendp,uint8_t* buf, uint16_t* plen)
+error_t hal_usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
 {
 	return 0;
 }

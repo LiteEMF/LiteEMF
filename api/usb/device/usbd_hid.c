@@ -43,7 +43,7 @@ uint8c_t usbd_hid_descriptor_tab[9] = { USBD_HID_DESC  };
 error_t usbd_hid_reset(uint8_t id)
 {
     error_t err = ERROR_FAILE;
-    hid_type_t hid_type;
+    uint8_t hid_type;
 
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
@@ -105,13 +105,13 @@ error_t usbd_hid_reset(uint8_t id)
             }
         }
     }
-    return ERROR_SUCCESS;
+    return err;
 }
 
 error_t usbd_hid_suspend(uint8_t id)
 {
     error_t err = ERROR_FAILE;
-    hid_type_t hid_type;
+    uint8_t hid_type;
 
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
@@ -173,14 +173,15 @@ error_t usbd_hid_suspend(uint8_t id)
             }
         }
     }
-    return ERROR_SUCCESS;
+    return err;
 }
 
 
 uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdesc, uint16_t desc_len, uint16_t* pdesc_index)
 {
     uint16_t len = 0;
-    hid_type_t hid_type;
+    uint8_t hid_type;
+	
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
 			switch(hid_type){
@@ -193,7 +194,7 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
                 case HID_TYPE_KB:
 				case HID_TYPE_MOUSE:
 				case HID_TYPE_CONSUMER:
-                    len += usbd_hid_km_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
+                    len += usbd_hid_km_get_itf_desc(id, hid_type, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
 				#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
@@ -256,17 +257,19 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 			uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
 			uint16_t desc_len;
 			uint8_t *desc_buf;
+
 			desc_len = get_hid_desc_map(TR_USBD, pclass->hid_type ,&desc_buf);
 
 			if(HID_DESC_TYPE_REPORT == desc_type){
-				preq->setup_len = MIN(preq->setup_len, desc_len);
+				preq->setup_len = MIN(preq->req.wLength, desc_len);
 				memcpy(preq->setup_buf,desc_buf,preq->setup_len);
 
                 if(HID_TYPE_SWITCH != pclass->hid_type){        //switch ready 在 switch_controller 中设置
                     pdev->ready = true;
+                    logd_g("usbd%d ready...\n",id);
                 }
 			}else if(HID_DESC_TYPE_HID == desc_type){
-				preq->setup_len = MIN(preq->setup_len, 9);
+				preq->setup_len = MIN(preq->req.wLength, 9);
 				memcpy(preq->setup_buf,usbd_hid_descriptor_tab,preq->setup_len);
 				preq->setup_buf[7] = desc_len&0xff;            //set hid report desc
 				preq->setup_buf[8] = desc_len>>8;
@@ -420,7 +423,7 @@ error_t usbd_hid_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uin
 *******************************************************************/
 error_t usbd_hid_init(uint8_t id)
 {
-    hid_type_t hid_type;
+    uint8_t hid_type;
 
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
@@ -492,7 +495,7 @@ error_t usbd_hid_init(uint8_t id)
 *******************************************************************/
 error_t usbd_hid_deinit(uint8_t id)
 {
-    hid_type_t hid_type;
+    uint8_t hid_type;
 
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
@@ -564,7 +567,7 @@ error_t usbd_hid_deinit(uint8_t id)
 *******************************************************************/
 void usbd_hid_task(uint8_t id)
 {
-    hid_type_t hid_type;
+    uint8_t hid_type;
 
 	for(hid_type=0; hid_type<16; hid_type++){
 		if(m_usbd_hid_types[id] & (1UL<<hid_type)){

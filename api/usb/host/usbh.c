@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_USBH_ENABLE
+#if API_USBH_BIT_ENABLE
 #include "api/usb/host/usbh.h"
 #include "api/api_tick.h"
 
@@ -26,7 +26,6 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-usbh_dev_t m_usbh_dev[USBH_MAX_PORTS][HUB_MAX_PORTS+1];
 
 uint16_t m_usbh_types;			//TODO 是否需要使用
 uint16_t m_usbh_hid_types;
@@ -43,6 +42,7 @@ uint16_t usbh_iap_hid_types;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+
 
 /*******************************************************************
 ** Parameters:	
@@ -116,45 +116,15 @@ error_t usbh_set_address(uint8_t id,uint8_t addr)
 
 	if(NULL == pdev ) return err;
 	if(pdev->state == USB_STA_DEFAULT){
-		err = usbh_set_addr(id,addr);
+		err = usbh_req_set_addr(id,addr);
 		if(ERROR_SUCCESS == err){
-			if(id & 0X0F == 0){
+			if((id & 0X0F) == 0){
 				hal_usbh_set_addr(id,addr);
 			}
 			usbh_set_status(id, USB_STA_ADDRESSING, addr);  
 		}
 	}
 	return err;
-}
-/*******************************************************************
-** Parameters:	id: usb id
-                preq: request 请求
-                buf: 发送/接收数据buf
-                plen:   输入:发送数据长度/ 接收数据长度 
-                        输出:实际发送/接收的数据长度
-** Returns:	
-** Description:	执行控制传输
-*******************************************************************/
-error_t usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen)
-{
-    return hal_usbh_ctrl_transfer(id, preq,buf, plen);
-}
-error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp)
-{
-    return hal_usbh_endp_unregister(id, endpp);
-}
-error_t usbh_endp_register(uint8_t id,usb_endp_t *endpp)
-{
-    return hal_usbh_endp_register(id,endpp);
-}
-//timeout_ms: 0不等待
-error_t usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen, uint16_t timeout_ms)
-{
-    return hal_usbh_in(id,endpp,buf,plen,timeout_ms);
-}
-error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
-{
-    return hal_usbh_out(id,endpp,buf,len);
 }
 
 
@@ -197,17 +167,6 @@ error_t usbh_get_endp( usb_endp_t* endp,uint8_t *buf ,uint16_t len,usb_dir_t dir
     return( err );
 }
 
-usbh_dev_t* get_usbh_dev(uint8_t id)   
-{
-    usbh_dev_t *pdev = NULL;
-
-	if (USBH_MAX_PORTS <= id>>4) return NULL;
-	if (HUB_MAX_PORTS < id&0x0f) return NULL;
-
-	pdev = &m_usbh_dev[id>>4][id&0x0f];
-
-	return pdev;
-}
 
 uint8_t usbh_find_by_status(uint8_t usb_stas)   
 {
@@ -232,7 +191,6 @@ uint8_t usbh_find_by_status(uint8_t usb_stas)
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)   
 {
     usbh_dev_t *pdev;
-	
 
 	if (USBH_MAX_PORTS <= id>>4) return ERROR_PARAM;
 	if (HUB_MAX_PORTS < id&0x0f) return ERROR_PARAM;
@@ -269,14 +227,14 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 
 static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf,uint16_t len)
 {
-	uint8_t err = ERROR_UNSUPPORT;
+	error_t err = ERROR_UNSUPPORT;
     uint16d_t   i, l;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usb_desc_interface_t *pitf;
 	usb_endp_t endp;
 	usbh_class_t *pclass, *pos;
 
-	err = usbh_set_configuration(id,cfg);			//set configuration
+	err = usbh_req_set_configuration(id,cfg);			//set configuration
 	if(err) return err;
 
 	for ( i = 0; i < len; i += l ){            		// 搜索中断端点描述符,跳过配置描述符和接口描述符
@@ -331,7 +289,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 static error_t usbh_enum_device( uint8_t id )
 {
 	error_t err = ERROR_UNKNOW;
-    uint8_t i,dev_indx;
+    uint8_t i;
 	uint8_t tmp_buf[20];
     uint16_t len;
 	usbh_dev_t* pdev = get_usbh_dev(id);
@@ -349,12 +307,12 @@ static error_t usbh_enum_device( uint8_t id )
 
 	
 	len = 8;
-	err = usbh_get_device_desc(id,tmp_buf,&len);
+	err = usbh_req_get_device_desc(id,tmp_buf,&len);
 	if(ERROR_SUCCESS != err) return err;
 	pdev->endp0_mtu = pdev_desc->bMaxPacketSize0;				//set endp0 mtu
 
 	len = sizeof(usb_desc_device_t);
-	err = usbh_get_device_desc(id,tmp_buf,&len);
+	err = usbh_req_get_device_desc(id,tmp_buf,&len);
 	if(ERROR_SUCCESS != err) return err;
 	logd("get device desc:");dumpd(pdev_desc,sizeof(usb_desc_device_t));
 
@@ -364,12 +322,12 @@ static error_t usbh_enum_device( uint8_t id )
 	for(i=0; i < pdev_desc->bNumConfigurations; i++){			//支持多配置描述符
 
 		len = sizeof(usb_desc_configuration_t);
-		err = usbh_get_configuration_desc(id, i, tmp_buf, &len);
+		err = usbh_req_configuration_desc(id, i, tmp_buf, &len);
 		if(ERROR_SUCCESS != err) return err;
 
 		len =  SWAP16_L(pcfg_desc->wTotalLength);
 		pcfg_buf = emf_malloc(len);
-		err = usbh_get_configuration_desc(id, i, pcfg_buf, &len);
+		err = usbh_req_configuration_desc(id, i, pcfg_buf, &len);
 		if(ERROR_SUCCESS != err) return err;
 		logd("get config desc:");dumpd(pcfg_buf,len);
 
@@ -431,25 +389,19 @@ static void usbh_enum_all_device( uint32_t period_10us )
 *******************************************************************/
 error_t usbh_init( uint8_t id )
 {
-	uint8_t i;
-	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
-	
 	usbh_class_buf_init();
 	#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
 	usbh_hid_km_pa_init();		//TODO 放一个合理的位置
 	#endif
 
-	memset(&m_usbh_dev, 0 ,sizeof(m_usbh_dev));
-	for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
-		INIT_LIST_HEAD(&pdev->class_list);
-	}
-
 	m_usbh_types = 0;
 	m_usbh_hid_types = 0;
+	#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
 	aoa_hid_types = 0;
+	#endif
 	usbh_iap_hid_types = 0;
 
-	return hal_usbh_driver_init(id);
+	return usbh_core_init(id);
 }
 
 /*******************************************************************
@@ -459,7 +411,7 @@ error_t usbh_init( uint8_t id )
 *******************************************************************/
 error_t usbh_deinit( uint8_t id )
 {
-	return hal_usbh_driver_deinit(id);
+	return usbh_core_deinit(id);
 }
 
 
@@ -470,6 +422,21 @@ void usbh_task(uint32_t dt_ms)
 	usbh_enum_all_device( 100*100 );		//TODO
 }
 
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void usbh_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		usbh_task(m_task_tick10us/100);
+	}
+}
+#endif
 
 
 #endif

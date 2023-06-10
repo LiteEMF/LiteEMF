@@ -60,7 +60,7 @@ uint16_t usbd_printer_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* 
 {
     uint16_t len = sizeof(printer_itf_desc_tab);
 
-    if (desc_len <= *pdesc_index + len) {
+    if (desc_len >= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, printer_itf_desc_tab, len);
         usbd_assign_configuration_desc(id, DEV_TYPE_PRINTER, 0, pindex, pdesc + *pdesc_index, len);
     }

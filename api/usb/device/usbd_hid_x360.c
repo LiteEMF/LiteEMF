@@ -128,7 +128,7 @@ uint16_t usbd_hid_x360_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t*
     uint16_t len;
 
 	len = sizeof(x360_itf_desc_tab);
-	if (desc_len <= *pdesc_index + len) {
+	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, x360_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_X360, pindex, pdesc + *pdesc_index, len);
 	}
@@ -147,7 +147,7 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 			if(0X90 == preq->req.bRequest){
 				switch(preq->req.wValue){
 				case 0X04:		//compat ID
-					preq->setup_len = MIN(preq->setup_len,sizeof(x360_compat_id));
+					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_compat_id));
 					memcpy(preq->setup_buf, x360_compat_id, preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
@@ -160,9 +160,10 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 				}
 			}else if(0x01 == preq->req.bRequest){
 				if(0x00 == preq->req.wValue){
-					preq->setup_len = MIN(preq->setup_len,sizeof(x360_null));
+					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_null));
 					memcpy(preq->setup_buf, x360_null, preq->setup_len);
 					pdev->ready = true;
+					logd_g("usbd%d ready...\n",id);
 					err = ERROR_SUCCESS;
 				}
 			}
@@ -172,12 +173,12 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 			if(0x01 == preq->req.bRequest){
 				switch (preq->req.wValue){
 				case 0X00:
-					preq->setup_len = MIN(preq->setup_len,sizeof(x360_null));
+					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_null));
 					memcpy(preq->setup_buf, x360_null, preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
 				case 0X100:
-					preq->setup_len = MIN(preq->setup_len,sizeof(x360_null));
+					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_null));
 					memcpy(preq->setup_buf, x360_null, preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;

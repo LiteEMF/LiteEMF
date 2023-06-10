@@ -66,7 +66,7 @@ uint16_t usbd_hid_switch_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_
     uint16_t len,rep_desc_len;
 
 	len = sizeof(switch_gamepade_itf_desc_tab);
-	if (desc_len <= *pdesc_index + len) {
+	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, switch_gamepade_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_SWITCH, pindex, pdesc + *pdesc_index, len);
 

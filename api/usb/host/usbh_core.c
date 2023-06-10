@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_USBH_ENABLE
+#if API_USBH_BIT_ENABLE
 #include "api/usb/host/usbh_core.h"
 
 
@@ -26,6 +26,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
+usbh_dev_t m_usbh_dev[USBH_MAX_PORTS][HUB_MAX_PORTS+1];
 
 
 /******************************************************************************************************
@@ -46,7 +47,7 @@ extern error_t usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8
 ** Returns:	    
 ** Description:		
 *******************************************************************/
-static error_t usbh_get_desc( uint8_t id , uint8_t type, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen)  
+static error_t usbh_req_get_desc( uint8_t id , uint8_t type, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -72,22 +73,37 @@ static error_t usbh_get_desc( uint8_t id , uint8_t type, uint8_t index, uint16_t
 ******************************************************************************************************/
 
 /*******************************************************************
+** Parameters:	id: usb id
+                preq: request 请求
+                buf: 发送/接收数据buf
+                plen:   输入:发送数据长度/ 接收数据长度 
+                        输出:实际发送/接收的数据长度
+** Returns:	
+** Description:	执行控制传输
+*******************************************************************/
+error_t usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen)
+{
+    return hal_usbh_ctrl_transfer(id, preq,buf, plen);
+}
+
+
+/*******************************************************************
 ** Parameters:	
 ** Returns:	
 ** Description:	获取usb描述符
 *******************************************************************/
-error_t usbh_get_device_desc(uint8_t id, uint8_t* buf, uint16_t *plen)  
+error_t usbh_req_get_device_desc(uint8_t id, uint8_t* buf, uint16_t *plen)  
 {
     error_t err;
     uint16_t tr_len = MIN(*plen, sizeof(usb_desc_device_t));
-    err = usbh_get_desc(id,USB_DESC_DEVICE,0,0,buf,&tr_len);
+    err = usbh_req_get_desc(id,USB_DESC_DEVICE,0,0,buf,&tr_len);
     *plen = tr_len;
     return err;
 }
 
-error_t usbh_get_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uint16_t *plen)  
+error_t usbh_req_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uint16_t *plen)  
 {
-    return usbh_get_desc(id,USB_DESC_CONFIGURATION,index,0,buf, plen);
+    return usbh_req_get_desc(id,USB_DESC_CONFIGURATION,index,0,buf, plen);
 }
 
 /*******************************************************************
@@ -95,9 +111,9 @@ error_t usbh_get_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uin
 ** Returns:	
 ** Description:	获取usb string 描述符
 *******************************************************************/
-error_t usbh_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen)  
+error_t usbh_req_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen)  
 {
-  return usbh_get_desc(id,USB_DESC_STRING,index,language_id,buf,plen);
+  return usbh_req_get_desc(id,USB_DESC_STRING,index,language_id,buf,plen);
 }
 
 
@@ -106,7 +122,7 @@ error_t usbh_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, ui
 ** Returns:	
 ** Description: usb set 
 *******************************************************************/
-error_t usbh_set_addr(uint8_t id, uint8_t addr)  
+error_t usbh_req_set_addr(uint8_t id, uint8_t addr)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -125,7 +141,7 @@ error_t usbh_set_addr(uint8_t id, uint8_t addr)
     return err;
 }
 
-error_t usbh_get_status(uint8_t id, uint8_t* pstatus)  
+error_t usbh_req_get_status(uint8_t id, uint8_t* pstatus)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -144,7 +160,7 @@ error_t usbh_get_status(uint8_t id, uint8_t* pstatus)
     return err;
 }
 
-error_t usbh_get_configuration(uint8_t id, uint8_t* pcfg)  
+error_t usbh_req_get_configuration(uint8_t id, uint8_t* pcfg)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -162,7 +178,7 @@ error_t usbh_get_configuration(uint8_t id, uint8_t* pcfg)
     err = usbh_ctrl_transfer(id, &req, pcfg, &tr_len);
     return err;
 }
-error_t usbh_set_configuration(uint8_t id, uint8_t cfg)  
+error_t usbh_req_set_configuration(uint8_t id, uint8_t cfg)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -180,7 +196,7 @@ error_t usbh_set_configuration(uint8_t id, uint8_t cfg)
     return err;
 }
 
-error_t usbh_get_intercace(uint8_t id, uint8_t inf, uint8_t *palt)  
+error_t usbh_req_get_itf(uint8_t id, uint8_t inf, uint8_t *palt)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -198,7 +214,7 @@ error_t usbh_get_intercace(uint8_t id, uint8_t inf, uint8_t *palt)
     err = usbh_ctrl_transfer(id, &req, palt, &tr_len);
     return err;
 }
-error_t usbh_set_intercace(uint8_t id, uint8_t inf, uint8_t alt)  
+error_t usbh_req_set_itf(uint8_t id, uint8_t inf, uint8_t alt)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -216,7 +232,7 @@ error_t usbh_set_intercace(uint8_t id, uint8_t inf, uint8_t alt)
     return err;
 }
 
-error_t usbh_endp_get_status(uint8_t id, uint8_t endp, uint8_t* pstatus)  
+error_t usbh_req_get_endp_status(uint8_t id, uint8_t endp, uint8_t* pstatus)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -234,7 +250,7 @@ error_t usbh_endp_get_status(uint8_t id, uint8_t endp, uint8_t* pstatus)
     err = usbh_ctrl_transfer(id, &req, pstatus, &tr_len);
     return err;
 }
-error_t usbh_endp_clean_feature(uint8_t id, uint8_t endp)  
+error_t usbh_req_clean_endp_feature(uint8_t id, uint8_t endp)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -252,7 +268,7 @@ error_t usbh_endp_clean_feature(uint8_t id, uint8_t endp)
     return err;
 }
 
-error_t usbh_endp_set_feature(uint8_t id, uint8_t endp, usb_request_feature_selector_t feature)  
+error_t usbh_req_set_endp_feature(uint8_t id, uint8_t endp, usb_request_feature_selector_t feature)  
 {
     error_t err;
 	usb_control_request_t req;
@@ -270,6 +286,69 @@ error_t usbh_endp_set_feature(uint8_t id, uint8_t endp, usb_request_feature_sele
     return err;
 }
 
+
+
+
+usbh_dev_t* get_usbh_dev(uint8_t id)   
+{
+    usbh_dev_t *pdev = NULL;
+
+	if (USBH_MAX_PORTS <= id>>4) return NULL;
+	if (HUB_MAX_PORTS < id&0x0f) return NULL;
+
+	pdev = &m_usbh_dev[id>>4][id&0x0f];
+
+	return pdev;
+}
+
+
+error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp)
+{
+    return hal_usbh_endp_unregister(id, endpp);
+}
+error_t usbh_endp_register(uint8_t id,usb_endp_t *endpp)
+{
+    return hal_usbh_endp_register(id,endpp);
+}
+//timeout_ms: 0不等待
+error_t usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen, uint16_t timeout_ms)
+{
+    return hal_usbh_in(id,endpp,buf,plen,timeout_ms);
+}
+error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
+{
+    return hal_usbh_out(id,endpp,buf,len);
+}
+
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+error_t usbh_core_init( uint8_t id )
+{
+	uint8_t i;
+	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
+	
+	memset(&m_usbh_dev, 0 ,sizeof(m_usbh_dev));
+	for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
+		INIT_LIST_HEAD(&pdev->class_list);
+	}
+
+	return hal_usbh_driver_init(id);
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+error_t usbh_core_deinit( uint8_t id )
+{
+	return hal_usbh_driver_deinit(id);
+}
 
 #endif
 

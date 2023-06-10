@@ -29,7 +29,7 @@
 #ifdef HW_ADC_MAP
 #include "api/api_adc.h"
 #endif
-#if	defined HW_TIMER_MAP && API_TIMER_ENABLE
+#if	defined HW_TIMER_MAP && API_TIMER_BIT_ENABLE
 #include "api/api_timer.h"
 #endif
 #ifdef HW_PWM_MAP
@@ -69,6 +69,12 @@
 #endif
 #if API_PM_ENABLE
 #include "api/api_pm.h"
+#endif
+#if API_USBD_BIT_ENABLE
+#include "api/usb/device/usbd.h"
+#endif
+#if API_USBH_BIT_ENABLE
+#include "api/usb/host/usbh.h"
 #endif
 
 //app

@@ -60,6 +60,7 @@ typedef enum
 }usb_speed_t;
 
 // defined base on USB Specs Endpoint's bmAttributes
+#ifndef USB_ENDP_TYPE_CTRL
 typedef enum
 {
 	USB_ENDP_TYPE_CTRL = 0,
@@ -67,7 +68,7 @@ typedef enum
 	USB_ENDP_TYPE_BULK,
 	USB_ENDP_TYPE_INTER
 }usb_endp_type_t;
-
+#endif
 
 #define  USB_DIR_POST  		7
 #define  USB_DIR_MASK  		0x80

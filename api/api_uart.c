@@ -20,6 +20,8 @@
 #include  "api/api_log.h"
 #include  "api/api_tick.h"
 
+
+#include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -100,17 +102,18 @@ __WEAK void api_uart_rx_hook(uint8_t id,uint8_t* buf,uint16_t len)
 	if(id >= m_uart_num) return;
 
 	fifop = &uart_rx_fifo[id];
-
+	
+	// dumpd(buf,fifo_len);
 	err = app_fifo_write(fifop,buf,&fifo_len);
 	if( (ERROR_SUCCESS != err) || (fifo_len != len) ){
 		logd("uo\n");
-		// if(ERROR_SUCCESS == err){
-		//     logd("write:%d %d,fifo:%d %d %d %d\n",fifo_len, len,
-		//         fifop->buf_size_max,
-		//         fifop->read_pos,
-		//         fifop->write_pos,
-		//         fifop->fifo_stu);
-		// }
+		if(ERROR_SUCCESS == err){
+		    logd("write:%d %d,fifo:%d %d %d %d\n",fifo_len, len,
+		        fifop->buf_size_max,
+		        fifop->read_pos,
+		        fifop->write_pos,
+		        fifop->fifo_stu);
+		}
 	}
 }
 

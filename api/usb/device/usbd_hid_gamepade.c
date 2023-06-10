@@ -64,7 +64,7 @@ uint16_t usbd_hid_gamepade_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint
     uint16_t len,rep_desc_len;
 
 	len = sizeof(hid_gamepade_itf_desc_tab);
-	if (desc_len <= *pdesc_index + len) {
+	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, hid_gamepade_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_GAMEPADE, pindex, pdesc + *pdesc_index, len);
 

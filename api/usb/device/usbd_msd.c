@@ -61,7 +61,7 @@ uint16_t usbd_msd_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
 {
     uint16_t len = sizeof(msd_itf_desc_tab);
 
-    if (desc_len <= *pdesc_index + len) {
+    if (desc_len >= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, msd_itf_desc_tab, len);
         usbd_assign_configuration_desc(id, DEV_TYPE_MSD, 0, pindex, pdesc + *pdesc_index, len);
     }

@@ -178,7 +178,7 @@ error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass)
         uint8_t rate[3];
 
         if(pclass->endpout.addr){       //spk
-            err = usbh_set_intercace(id, pclass->itf.if_num, 1);  
+            err = usbh_req_set_itf(id, pclass->itf.if_num, 1);  
 
             rate[0] = usbh_audio_info.spk_sampel.rate & 0XFF;
             rate[1] = (usbh_audio_info.spk_sampel.rate >> 8) & 0XFF;
@@ -187,7 +187,7 @@ error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass)
         }
 
         if(pclass->endpin.addr){       //mic
-            // err = usbh_set_intercace(id, pclass->itf.if_num, 1);   //mic not open immediately
+            // err = usbh_req_set_itf(id, pclass->itf.if_num, 1);   //mic not open immediately
 
             rate[0] = usbh_audio_info.mic_sampel.rate & 0XFF;
             rate[1] = (usbh_audio_info.mic_sampel.rate >> 8) & 0XFF;
