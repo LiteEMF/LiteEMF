@@ -184,7 +184,8 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
 
 void hid_desc_info_free(hid_desc_info_t *pinfo)
 {
-    emf_free(&pinfo->item_list);
+    logd("hid_desc_info_free =%x\n",pinfo->item_list.globalsStack);
+    emf_free(pinfo->item_list.globalsStack);
 }
 /*******************************************************************
 ** Parameters:	pinfo: return  desc parse info	
@@ -308,10 +309,14 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                    + (sizeof(hid_report_t) * pinfo->reports)
                    + (sizeof(hid_usage_item_t) * pinfo->usages)
                    + (sizeof(hid_globals_item_t) * pinfo->maxGlobalsNesting);
-    logd( "HID: Memory for Report Descriptor=%d\n", sizeRequired);
     assignMem = (uint8_t*) emf_malloc(sizeRequired);
+    logd( "HID: Memory for Report Descriptor=%d %x\n", sizeRequired, assignMem);
+    if (assignMem == NULL) 
+    {
+        emf_mem_stats();
+        return(ERROR_NO_MEM); /* Error: Not enough memory */
+    }
     memset(assignMem,0,sizeRequired);
-    if (assignMem == NULL) return(ERROR_NO_MEM); /* Error: Not enough memory */
 
     /* Allocate Space */
     hid_item.globalsStack = (hid_globals_item_t *) assignMem;

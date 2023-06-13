@@ -13,7 +13,7 @@
 **	Description:
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+#if API_USBD_BIT_ENABLE && USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 #include "api/usb/device/usbd.h"
 
 #include "api/api_log.h"

@@ -123,11 +123,11 @@ typedef struct{
 }usbd_dev_t;
 
 
-typedef volatile struct _usbd_req_t{
-	usb_control_request_t req;
-    uint8_t *setup_buf;   		//必须调用usbd_malloc_setup_buffer分配内存, usbd_free_setup_buffer 释放内存
-	uint16_t setup_len;			//ep0 setup data stage数据长度
-    uint16_t setup_index;     	//ep0 setup 当前传输的位置
+typedef struct _usbd_req_t{
+	volatile usb_control_request_t req;
+	uint8_t *setup_buf;   		//必须调用usbd_malloc_setup_buffer分配内存, usbd_free_setup_buffer 释放内存
+	volatile uint16_t setup_len;			//ep0 setup data stage数据长度
+    volatile uint16_t setup_index;     	//ep0 setup 当前传输的位置
 }usbd_req_t;
 
 

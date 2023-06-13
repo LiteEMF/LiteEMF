@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 #include "api/usb/host/usbh.h"
 
 

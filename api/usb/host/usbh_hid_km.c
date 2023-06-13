@@ -13,11 +13,11 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
 #include "utils/emf_utils.h"
 #include "api/usb/host/usbh.h"
-#include "km_typedef.h"
-#include "app_km.h"
+#include "app/km_typedef.h"
+#include "app/app_km.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -88,7 +88,7 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_k
 		set_port.val = (pled->val ^ led.val) & led.val;
 		pled->val = led.val;
 
-        for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
+        for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
             list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
                 if((pos->dev_type == DEV_TYPE_HID) && (pos->hid_type == HID_TYPE_KB)){
                     id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
@@ -252,13 +252,14 @@ error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
         }
     }
     
-    if(err){
+    if(ERROR_SUCCESS == err){
         km_items_t *pitem;
         pitem = malloc_hid_km_items();
         if(NULL != pitem){
             *pitem = item;
             pclass->pdata = pitem;
             pclass->hid_type = HID_TYPE_KB;
+            logd("usbh find kb\n");
         }else{
             err = ERROR_NO_MEM;
         }
@@ -317,6 +318,7 @@ error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *p
             *pitem = item;
             pclass->pdata = pitem;
             pclass->hid_type = HID_TYPE_MOUSE;
+            logd("usbh find mouse\n");
         }else{
             err = ERROR_NO_MEM;
         }
@@ -329,6 +331,7 @@ error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *p
 error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo)
 {
     error_t err = ERROR_NOT_FOUND;
+    
     err = usbh_hid_kb_init(id, pclass, pinfo);
     if(err){
         err = usbh_hid_mouse_init(id, pclass, pinfo);
@@ -357,7 +360,7 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
             memset(pclass->pdata, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
         }
     }
-	return 0;
+	return ERROR_SUCCESS;
 }
 
 /*******************************************************************

@@ -51,9 +51,27 @@ uint16_t usbh_iap_hid_types;
 *******************************************************************/
 void usbh_det_event(uint8_t id, uint8_t attached )
 {
-	usbh_disconnect(id);
+	usbh_dev_t* pdev = get_usbh_dev(id);
+
+	if(NULL == pdev) return;
+
+	logd_g("\nusbh%d det=%x\n",id, attached);
 	if(attached){
-		//设置 USB_STA_ATTACHED
+		if(USB_STA_DETACHED == pdev->state){
+			logd("usbh%d USB_STA_ATTACHED\n",id);
+			usbh_set_status(id, USB_STA_ATTACHED, 0);
+		}else{
+			// in enuming...
+		}
+	}else{
+		uint8_t i;
+		if((id & 0X0F) == 0){
+			for(i = 0; i < HUB_MAX_PORTS+1; i++){		//disconnect hub por also
+				usbh_set_status(id | i, USB_STA_DETACHED, 0);
+			}
+		}else{
+			usbh_set_status(id, USB_STA_DETACHED, 0);
+		}
 	}
 }
 
@@ -66,18 +84,20 @@ error_t usbh_disconnect(uint8_t id)
 {
 	error_t err = ERROR_SUCCESS;
 	uint8_t i;
-	if(id & 0X0F == 0){  				//直接接的root端口
-		err = hal_usbh_port_disable(id);
+
+	logd("usbh%d disconnect\n",id);
+	if((id & 0X0F) == 0){  				//直接接的root端口
+		err = usbh_port_en(id,0,NULL);
 		if(ERROR_SUCCESS == err){			
 			for(i = 0; i < HUB_MAX_PORTS+1; i++){		//disconnect hub por also
 				usbh_set_status(id | i, USB_STA_DETACHED, 0);
 			}
 		}
 	}else{
-		#if USBH_HUB_ENABLE
+		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
 		err =  usbh_hub_port_disable(id);
-		if(ERROR_SUCCESS = er){
-			usbh_set_status(id | i, USB_STA_DETACHED, 0);
+		if(ERROR_SUCCESS == err){
+			usbh_set_status(id, USB_STA_DETACHED, 0);
 		}
 		#endif
 	}
@@ -87,24 +107,26 @@ error_t usbh_disconnect(uint8_t id)
 
 error_t usbh_reset(uint8_t id)
 {
-	uint8_t i;
 	error_t err = ERROR_STATE;
+	usb_speed_t speed;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	if(NULL == pdev ) return err;
 	if(pdev->state >= USB_STA_POWERED){
-		if(id & 0X0F == 0){
-			err = hal_usbh_port_reset(id);
+		if((id & 0X0F) == 0){
+			err = usbh_port_reset(id);
+			if(err) return err;
+			err = usbh_port_en(id, 1, &speed );
+			if(err) return err;
 
-			for(i = 0; i < HUB_MAX_PORTS+1; i++){		//disconnect hub por also
-				usbh_set_status(id | i, USB_STA_DETACHED, 0);
-			}
+			usbh_set_status(id, USB_STA_DEFAULT, 0);
 		}else{
-			#if USBH_HUB_ENABLE
+			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
 			err =  usbh_hub_port_reset(id);
+			//hub reset state set in usbh_hub.c
 			#endif
 		}
-		usbh_set_status(id, USB_STA_DEFAULT, 0);  
+		
 	}
 	return err;
 }
@@ -115,12 +137,10 @@ error_t usbh_set_address(uint8_t id,uint8_t addr)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	if(NULL == pdev ) return err;
+
 	if(pdev->state == USB_STA_DEFAULT){
 		err = usbh_req_set_addr(id,addr);
 		if(ERROR_SUCCESS == err){
-			if((id & 0X0F) == 0){
-				hal_usbh_set_addr(id,addr);
-			}
 			usbh_set_status(id, USB_STA_ADDRESSING, addr);  
 		}
 	}
@@ -173,10 +193,10 @@ uint8_t usbh_find_by_status(uint8_t usb_stas)
     uint8_t i,j;
     usbh_dev_t *pdev;
 
-    for(i = 0; i < USBH_MAX_PORTS; i++){
+    for(i = 0; i < USBH_NUM; i++){
         for(j = 0; j < HUB_MAX_PORTS+1; j++){
             pdev = &m_usbh_dev[i][j];
-            
+
             if(BIT(pdev->state) & usb_stas) {
 				return (i<<4) | j;
             }
@@ -190,12 +210,10 @@ uint8_t usbh_find_by_status(uint8_t usb_stas)
 
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)   
 {
-    usbh_dev_t *pdev;
+    usbh_dev_t* pdev = get_usbh_dev(id);
 
-	if (USBH_MAX_PORTS <= id>>4) return ERROR_PARAM;
-	if (HUB_MAX_PORTS < id&0x0f) return ERROR_PARAM;
-
-	pdev = & m_usbh_dev[id>>4][(id&0x0f)+1];
+	if (USBH_NUM <= (id>>4)) return ERROR_PARAM;
+	if (HUB_MAX_PORTS < (id&0x0f)) return ERROR_PARAM;
 
 	switch (usb_sta){
 	case USB_STA_DETACHED:
@@ -221,6 +239,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 	}	
 	pdev->state = usb_sta;
 
+	logd("usbh%d set status=%d\n",id,pdev->state);
     return ERROR_SUCCESS;
 }
 
@@ -232,7 +251,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usb_desc_interface_t *pitf;
 	usb_endp_t endp;
-	usbh_class_t *pclass, *pos;
+	usbh_class_t *pclass;
 
 	err = usbh_req_set_configuration(id,cfg);			//set configuration
 	if(err) return err;
@@ -267,6 +286,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 
 				if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
 					err = usbh_class_init(id, pclass, buf + i, len - i);
+
 					if(ERROR_SUCCESS == err){
 						list_add(&pclass->list, &pdev->class_list);
 					}
@@ -298,45 +318,53 @@ static error_t usbh_enum_device( uint8_t id )
 	uint8_t *pcfg_buf;
 
 
-	logd("\nusbh%d enum start...\n",(uint16_t)id);
-	err = usbh_reset(id);
-	if(ERROR_SUCCESS != err) return err;
+	logd("\nusbh%x state=%d, enum start...\n",(uint16_t)id,pdev->state);
 
-	err = usbh_set_address(id, id | 0x80);
-	if(ERROR_SUCCESS != err) return err;
+	switch(pdev->state){
+	case USB_STA_POWERED:
+		err = usbh_reset(id);
+		if(ERROR_SUCCESS != err) return err;
+		logd("usbh%d powered=%d\n",id, err);
+		break;
+	case USB_STA_DEFAULT:
+		err = usbh_set_address(id, id | 0x20);
+		if(ERROR_SUCCESS != err) return err;
+		logd("usbh%d address=%d\n",id, err);
+		len = 8;
+		err = usbh_req_get_device_desc(id,tmp_buf,&len);
+		if(ERROR_SUCCESS != err) return err;
+		pdev->endp0_mtu = pdev_desc->bMaxPacketSize0;				//set endp0 mtu
 
-	
-	len = 8;
-	err = usbh_req_get_device_desc(id,tmp_buf,&len);
-	if(ERROR_SUCCESS != err) return err;
-	pdev->endp0_mtu = pdev_desc->bMaxPacketSize0;				//set endp0 mtu
-
-	len = sizeof(usb_desc_device_t);
-	err = usbh_req_get_device_desc(id,tmp_buf,&len);
-	if(ERROR_SUCCESS != err) return err;
-	logd("get device desc:");dumpd(pdev_desc,sizeof(usb_desc_device_t));
-
-	pdev->vid = SWAP16_L(pdev_desc->idVendor);
-	pdev->pid = SWAP16_L(pdev_desc->idProduct);
-
-	for(i=0; i < pdev_desc->bNumConfigurations; i++){			//支持多配置描述符
-
-		len = sizeof(usb_desc_configuration_t);
-		err = usbh_req_configuration_desc(id, i, tmp_buf, &len);
+		len = sizeof(usb_desc_device_t);
+		err = usbh_req_get_device_desc(id,tmp_buf,&len);
 		if(ERROR_SUCCESS != err) return err;
 
-		len =  SWAP16_L(pcfg_desc->wTotalLength);
-		pcfg_buf = emf_malloc(len);
-		err = usbh_req_configuration_desc(id, i, pcfg_buf, &len);
-		if(ERROR_SUCCESS != err) return err;
-		logd("get config desc:");dumpd(pcfg_buf,len);
+		logd("usbh get device desc:");dumpd(pdev_desc,sizeof(usb_desc_device_t));
+		pdev->vid = SWAP16_L(pdev_desc->idVendor);
+		pdev->pid = SWAP16_L(pdev_desc->idProduct);
 
-		err = usbh_parse_configuration_desc(id,i,pcfg_buf,len);
-		emf_free(pcfg_buf);
-		
-		if( ERROR_SUCCESS == err ){			//Configuration只能设置有一个, 成功枚举到一个后就退出(LG激活过程如果有枚举另外一个cfg会出错)
-			break;
+		for(i=0; i < pdev_desc->bNumConfigurations; i++){			//支持多配置描述符
+
+			len = sizeof(usb_desc_configuration_t);
+			err = usbh_req_configuration_desc(id, i, tmp_buf, &len);
+			if(ERROR_SUCCESS != err) return err;
+
+			len =  SWAP16_L(pcfg_desc->wTotalLength);
+			pcfg_buf = emf_malloc(len);
+			err = usbh_req_configuration_desc(id, i, pcfg_buf, &len);
+			if(ERROR_SUCCESS != err) return err;
+			logd("usbh get config desc:");dumpd(pcfg_buf, len);
+
+			err = usbh_parse_configuration_desc(id, i+1 ,pcfg_buf, len);
+			emf_free(pcfg_buf);
+			
+			if( ERROR_SUCCESS == err ){			//Configuration只能设置有一个, 成功枚举到一个后就退出(LG激活过程如果有枚举另外一个cfg会出错)
+				break;
+			}
 		}
+		break;
+	default:
+		break;
 	}
 	return err;
 }
@@ -356,23 +384,27 @@ static void usbh_enum_all_device( uint32_t period_10us )
 	if(m_task_tick10us - s_enumtimer >= period_10us){
 		s_enumtimer = m_task_tick10us;
 
-		id = usbh_find_by_status(BIT(USB_STA_POWERED) | BIT(USB_STA_DEFAULT));
-
+		id = usbh_find_by_status(BIT(USB_STA_DEFAULT));		//enum default dev first 
 		if(USBH_NULL == id){
+			id = usbh_find_by_status(BIT(USB_STA_POWERED));	//enum powered dev second
+		}
+		if(USBH_NULL == id){								// enum attached dev alse
 			id = usbh_find_by_status(BIT(USB_STA_ATTACHED));
 			if(USBH_NULL != id){  //查找到刚插入的设备  初始化枚举参数
 				s_enumtimer = m_task_tick10us;		//等待设备稳定
 				s_retry = 0;
 				usbh_set_status(id, USB_STA_POWERED, 0);
 			}
-		}else{
-			if(s_retry++ < 3){
+		}
+
+		if(USBH_NULL != id){
+			if(s_retry++ < 6){
 				err = usbh_enum_device( id );
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
 					logd( "usbh enum err = %X\n\n", (uint16_t)(err) );
 					usbh_set_status(id, USB_STA_POWERED, 0);		//枚举还未达到最大次数 重新枚举
 				}else{
-					logd("root enum suc...\n\n");
+					logd("root enum ret=%X\n\n",(uint16_t)(err));
 				}
 			}else{
 				usbh_disconnect( id );
@@ -389,6 +421,8 @@ static void usbh_enum_all_device( uint32_t period_10us )
 *******************************************************************/
 error_t usbh_init( uint8_t id )
 {
+	if((id>>4) >= USBH_NUM) return ERROR_FAILE;
+
 	usbh_class_buf_init();
 	#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
 	usbh_hid_km_pa_init();		//TODO 放一个合理的位置
@@ -411,15 +445,34 @@ error_t usbh_init( uint8_t id )
 *******************************************************************/
 error_t usbh_deinit( uint8_t id )
 {
+	if((id>>4) >= USBH_NUM) return ERROR_FAILE;
+	
 	return usbh_core_deinit(id);
 }
 
+
+void usbhs_init(void)
+{
+	uint8_t id;
+
+	for(id=0; id<USBH_NUM; id++){
+		usbh_init(id<<4);
+	}
+}
+void usbhs_deinit(void)
+{
+	uint8_t id;
+
+	for(id=0; id<USBH_NUM; id++){
+		usbh_deinit(id<<4);
+	}
+}
 
 void usbh_task(uint32_t dt_ms)
 {
 	hal_usbh_driver_task( dt_ms );
 	usbh_class_task( dt_ms );
-	usbh_enum_all_device( 100*100 );		//TODO
+	usbh_enum_all_device( 200*100 );
 }
 
 #if TASK_HANDLER_ENABLE
@@ -433,7 +486,7 @@ void usbh_handler(uint32_t period_10us)
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){
 		s_timer = m_task_tick10us;
-		usbh_task(m_task_tick10us/100);
+		usbh_task(period_10us/100);
 	}
 }
 #endif

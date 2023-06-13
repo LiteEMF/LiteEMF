@@ -15,6 +15,7 @@
 #include "utils/emf_typedef.h" 
 #include "api/api_transport.h"
 #include "app/gamepad/app_gamepad_key.h"
+#include "app/app_rumble.h"
 
 #if USBH_HID_SUPPORT & HID_SWITCH_MASK
 #include  "app/gamepad/switch_controller.h"

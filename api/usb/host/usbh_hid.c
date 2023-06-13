@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
 
 #include "api/usb/host/usbh.h"
 #include  "api/hid/hid_desc_parser.h"
@@ -168,7 +168,7 @@ uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len)
 *******************************************************************/
 void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-	logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 
     switch(pclass->hid_type){
         case HID_TYPE_KB:
@@ -176,7 +176,9 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             usbh_hid_km_in_process(id, pclass, buf, len);
             break;
         case HID_TYPE_GAMEPADE:
+            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_in_process(id, pclass, buf, len);
+            #endif
             break;
         default:
             break;
@@ -220,9 +222,12 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             err = usbh_hid_km_open(id, pclass);
+        logd("usbh_hid_open km %d\n",err);
             break;
         case HID_TYPE_GAMEPADE:
+            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_open(id, pclass);
+            #endif
             break;
         default:
             break;
@@ -231,7 +236,7 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
     if(err) return err;
     err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
     if(err) return err;
-
+logd("usbh_hid_open err= %d\n",err);
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
     return err;
 }
@@ -248,7 +253,7 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
         if(0 == desc_len) return ERROR_UNSUPPORT;
 
         err = usbh_hid_set_idle(id, pclass->itf.if_num);
-        if(err) return err;
+        // if(err) return err;          //note:  dev can STALL
 
         desc_buf = emf_malloc(desc_len);
         if(NULL == desc_buf) return ERROR_NO_MEM;
@@ -264,7 +269,9 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
             hid_desc_dump(&hid_info);
             err = usbh_hid_km_init(id, pclass, &hid_info);
             if(err){
+                #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
                 err = usbh_hid_gamepad_init(id, pclass, &hid_info);
+                #endif
             }
             hid_desc_info_free(&hid_info);
         }
@@ -280,18 +287,21 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
 *******************************************************************/
 error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass) 
 {
+    error_t err = ERROR_UNKNOW;
     switch(pclass->hid_type){
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
-            usbh_hid_km_deinit(id, pclass);
+            err = usbh_hid_km_deinit(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
-            usbh_hid_gamepad_deinit(id, pclass);
+            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
+            err = usbh_hid_gamepad_deinit(id, pclass);
+            #endif
             break;
         default:
             break;
     }
-	return 0;
+	return err;
 }
 
 /*******************************************************************
@@ -307,7 +317,9 @@ void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
             usbh_hid_km_task(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
+            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_task(id, pclass);
+            #endif
             break;
         default:
             break;

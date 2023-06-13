@@ -45,37 +45,51 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t hal_usbh_port_disable(uint8_t id)
+error_t hal_usbh_port_en(uint8_t id,uint8_t en, usb_speed_t* pspeed)
 {
+	return ERROR_SUCCESS;
+}
+error_t hal_usbh_set_speed(uint8_t id, usb_speed_t speed)
+{
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_port_reset(uint8_t id)
 {
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_set_addr(uint8_t id,uint8_t addr)
 {
-}
-error_t hal_usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen)
-{
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_endp_unregister(uint8_t id,usb_endp_t *endpp)
 {
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_endp_register(uint8_t id,usb_endp_t *endpp)
 {
+	return ERROR_SUCCESS;
+}
+error_t hal_usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen)
+{
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms)
 {
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
 {
-}
-void hal_usbh_driver_task(uint32_t dt_ms)
-{
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_driver_init(uint8_t id)
 {
+	return ERROR_SUCCESS;
 }
 error_t hal_usbh_driver_deinit(uint8_t id)
+{
+	return ERROR_SUCCESS;
+}
+void hal_usbh_driver_task(uint32_t dt_ms)
 {
 }
 

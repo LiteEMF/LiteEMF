@@ -124,7 +124,7 @@ uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class
 	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
 	usbh_class_t *pcalss = NULL;
 
-	for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
+	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
 		uint8_t tmp_id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 		pcalss = usbh_class_find_by_type(tmp_id,type,sub_type);
 		if(NULL != pcalss){
@@ -277,7 +277,7 @@ dev_type_t usbh_match_class( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbh_class_in(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t* plen, uint16_t timeout_ms)
+error_t usbh_class_in(dev_type_t type,uint8_t sub_type,void* buf, uint16_t* plen, uint16_t timeout_ms)
 {
 	error_t err = ERROR_NOT_FOUND;
 	uint8_t id = USBH_NULL;
@@ -285,7 +285,7 @@ error_t usbh_class_in(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t* p
 
 	id = usbh_class_find_by_type_all(type, sub_type,&pclass);
 	if(NULL != pclass){
-		err = usbh_in(id, &pclass->endpin, buf, plen,timeout_ms);
+		err = usbh_in(id, &pclass->endpin, (uint8_t*)buf, plen,timeout_ms);
 	}
 
 	return err;
@@ -296,7 +296,7 @@ error_t usbh_class_in(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t* p
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbh_class_out(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t len)
+error_t usbh_class_out(dev_type_t type,uint8_t sub_type,void* buf, uint16_t len)
 {
 	error_t err = ERROR_NOT_FOUND;
 	uint8_t id = USBH_NULL;
@@ -304,7 +304,7 @@ error_t usbh_class_out(dev_type_t type,uint8_t sub_type,uint8_t* buf, uint16_t l
 
 	id = usbh_class_find_by_type_all(type, sub_type,&pclass);
 	if(NULL != pclass){
-		err = usbh_out(id, &pclass->endpout, buf, len);
+		err = usbh_out(id, &pclass->endpout, (uint8_t*)buf, len);
 	}
 
 	return err;
@@ -658,7 +658,7 @@ void usbh_class_task(uint32_t dt_ms)
 	s_tick += dt_ms;
 	#endif
 
-	for(i = 0; i < USBH_MAX_PORTS * (HUB_MAX_PORTS+1); i++,pdev++){
+	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
 		list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
 			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 

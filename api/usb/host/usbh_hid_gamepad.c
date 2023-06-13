@@ -13,13 +13,11 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA)) 
-
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (HIDH_SUPPORT & HID_GAMEPAD_MASK)
+#include "api/api_transport.h"
 #include "api/usb/host/usbh.h"
 
-#if APP_GAMEAPD_ENABLE
 #include "app/gamepad/app_gamepad.h"
-#endif
 
 
 #include "api/api_log.h"

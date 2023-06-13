@@ -73,7 +73,7 @@ error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 
 	if(NULL != preq->setup_buf){					//防止出错内存未释放
 		logd("usbd malloc err,please note it %x!!!\n",(uint32_t)(preq->setup_buf));
-		emf_free(preq->setup_buf);
+		emf_free((void*)preq->setup_buf);
 	}
 
 	preq->setup_index = 0;
@@ -95,7 +95,7 @@ error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 error_t usbd_free_setup_buffer(usbd_req_t *preq)
 {
 	if(preq->setup_buf){
-		emf_free(preq->setup_buf);
+		emf_free((void*)preq->setup_buf);
 	}
 	preq->setup_len = 0;
 	preq->setup_index = 0;
@@ -206,9 +206,9 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 		preq->setup_len = len;
 		preq->setup_index = 0;
 		if(preq->setup_buf != buf){
-			memcpy(preq->setup_buf, buf, len);
+			memcpy((void*)preq->setup_buf, buf, len);
 		}
-		err = hal_usbd_in(id, ep, preq->setup_buf, preq->setup_len);
+		err = hal_usbd_in(id, ep, (void*)preq->setup_buf, preq->setup_len);
 
 		API_EXIT_CRITICAL();
 	}else{
@@ -347,7 +347,7 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 error_t usbd_core_init(uint8_t id)
 {
 	error_t err = ERROR_UNSUPPORT;
-	memset(&m_usbd_req[id],0, sizeof(usbd_req_t));
+	memset((void*)&m_usbd_req[id],0, sizeof(usbd_req_t));
 	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
 	m_usbd_dev[id].state = USB_STA_ATTACHED;
 	m_usbd_dev[id].endp0_mtu = USBD_ENDP0_MTU;
@@ -361,7 +361,7 @@ error_t usbd_core_deinit(uint8_t id)
 {
 	error_t err = ERROR_UNSUPPORT;
 	usbd_free_setup_buffer(&m_usbd_req[id]);					//防止资源未被释放
-	memset(&m_usbd_req[id],0, sizeof(usbd_req_t));
+	memset((void*)&m_usbd_req[id],0, sizeof(usbd_req_t));
 	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
 
 	if(API_USBD_BIT_ENABLE & BIT(id)){

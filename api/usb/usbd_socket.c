@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBD_SOCKET_ENABLE
+#if API_USBD_BIT_ENABLE &&  USBD_SOCKET_ENABLE
 #include "api/usb/usbd_socket.h"
 #include "api/usb/device/usbd.h"
 #include "api/usb/device/usbd.h"

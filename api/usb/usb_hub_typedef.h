@@ -158,8 +158,8 @@ typedef struct {
 			uint16_t suspend                : 1;
 			uint16_t over_current           : 1;
 			uint16_t reset                  : 1;
-
 			uint16_t                        : 3;
+			
 			uint16_t port_power             : 1;
 			uint16_t low_speed              : 1;
 			uint16_t high_speed             : 1;

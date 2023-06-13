@@ -277,15 +277,15 @@ error_t usbd_get_descriptor(uint8_t id, usbd_req_t* const preq)
 	preq->setup_len = preq->req.wLength;
 	switch(desc_type){
 	case USB_DESC_DEVICE:
-		err = usbd_get_device_desc(id, preq->setup_buf, &preq->setup_len);
+		err = usbd_get_device_desc(id, preq->setup_buf, (uint16_t*)&preq->setup_len);
 		break;
 
 	case USB_DESC_CONFIGURATION:
-		err = usbd_get_configuration_desc(id,desc_index, preq->setup_buf,&preq->setup_len);
+		err = usbd_get_configuration_desc(id,desc_index, preq->setup_buf,(uint16_t*)&preq->setup_len);
 		break;
 
 	case USB_DESC_STRING:
-		err = usbd_get_string_desc(id,desc_index, preq->setup_buf,&preq->setup_len);
+		err = usbd_get_string_desc(id,desc_index, preq->setup_buf,(uint16_t*)&preq->setup_len);
 		break;
 
 	default: 
@@ -353,7 +353,7 @@ static error_t usbd_control_request_process(uint8_t id)
 			case USB_REQ_SET_CONFIGURATION:
 				// Only process if new configure is different
 				if (pdev->cfg_num != preq->req.wValue) {
-					if (preq->req.wValue) {				//TODO
+					if (preq->req.wValue) {
 						// close all non-control endpoints, cancel all pending transfers if any
 						// close all drivers and current configured state except bus speed
 						usbd_cfg_endp_all(id);

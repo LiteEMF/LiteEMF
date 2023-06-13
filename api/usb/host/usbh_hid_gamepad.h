@@ -18,6 +18,10 @@
 #include "api/hid/hid_desc_parser.h"
 #include "app/gamepad/app_gamepad_key.h"
 
+#include "app/gamepad/switch_typedef.h"
+#include "app/gamepad/xbox_typedef.h"
+#include "app/gamepad/ps_typedef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

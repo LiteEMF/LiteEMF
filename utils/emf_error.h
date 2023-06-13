@@ -41,8 +41,9 @@ typedef enum{
   ERROR_LENGTH      = 11 ,     //< Invalid Length
   ERROR_DATA        = 12 ,     //< Invalid Data
   ERROR_ADDR        = 13 ,     //< Bad Memory Address
-  ERROR_UNSUPPORT   = 14 ,     //< Not supported
-  ERROR_UNKNOW      = 15 ,     //< Busy
+  ERROR_NACK        = 14 ,     //< Bad Memory Address
+  ERROR_UNSUPPORT   = 15 ,     //< Not supported
+  ERROR_UNKNOW      = 16 ,     //< Busy
 }error_t;
 
 

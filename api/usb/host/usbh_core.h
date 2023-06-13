@@ -18,6 +18,7 @@
 #include "api/usb/usb_typedef.h"
 #include "utils/list.h"
 
+#include "usb/hal_usbh.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,8 +28,8 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 
-#ifndef USBH_MAX_PORTS			//支持多少个usb
-#define USBH_MAX_PORTS			2
+#ifndef USBH_NUM				//支持多少个usb
+#define USBH_NUM				1
 #endif
 #ifndef HUB_MAX_PORTS			//支持多少个usb
 #define HUB_MAX_PORTS			3
@@ -73,7 +74,7 @@ typedef struct
 	list_head_t class_list;
 } usbh_dev_t;
 
-extern usbh_dev_t m_usbh_dev[USBH_MAX_PORTS][HUB_MAX_PORTS+1];
+extern usbh_dev_t m_usbh_dev[USBH_NUM][HUB_MAX_PORTS+1];
 
 
 /*****************************************************************************************************
@@ -95,6 +96,11 @@ error_t usbh_req_clean_endp_feature(uint8_t id, uint8_t endp);
 error_t usbh_req_set_endp_feature(uint8_t id, uint8_t endp, usb_request_feature_selector_t feature);  
 
 usbh_dev_t* get_usbh_dev(uint8_t id);  
+error_t usbh_select_hub_port(uint8_t id);
+error_t usbh_port_reset(uint8_t id);
+error_t usbh_set_speed(uint8_t id, usb_speed_t speed);
+error_t usbh_set_addr(uint8_t id,uint8_t addr);
+error_t usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed);
 error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);
 error_t usbh_endp_register(uint8_t id,usb_endp_t *endpp);
 error_t usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms);
@@ -104,17 +110,18 @@ error_t usbh_core_init( uint8_t id );
 error_t usbh_core_deinit( uint8_t id );
 
 //hal
-error_t hal_usbh_port_disable(uint8_t id);		//用于关闭usb口,防止多个设备在地址状态!!!
+error_t hal_usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed);		//用于打开/关闭usb口,防止多个设备在地址状态!!!
 error_t hal_usbh_port_reset(uint8_t id);
+error_t hal_usbh_set_speed(uint8_t id, usb_speed_t speed);
 error_t hal_usbh_set_addr(uint8_t id,uint8_t addr);
-error_t hal_usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen);
 error_t hal_usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);
 error_t hal_usbh_endp_register(uint8_t id,usb_endp_t *endpp);
+error_t hal_usbh_ctrl_transfer( uint8_t id, usb_control_request_t* preq,uint8_t* buf, uint16_t* plen);
 error_t hal_usbh_in(uint8_t id,usb_endp_t *endpp, uint8_t* buf,uint16_t* plen,uint16_t timeout_ms);
 error_t hal_usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len);
-void 	hal_usbh_driver_task(uint32_t dt_ms);
 error_t hal_usbh_driver_init(uint8_t id);
 error_t hal_usbh_driver_deinit(uint8_t id);
+void 	hal_usbh_driver_task(uint32_t dt_ms);
 
 
 #ifdef __cplusplus

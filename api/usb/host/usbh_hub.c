@@ -14,7 +14,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
+#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
 #include "api/usb/host/usbh.h"
 
 #include "api/api_log.h"
@@ -121,7 +121,7 @@ error_t usbh_hub_port_get_status(uint8_t id, uint8_t* pstatus)
     req.wIndex = SWAP16_L(id & 0x0f);;
     req.wLength = SWAP16_L(4);
 
-    err = usbh_ctrl_transfer(id&0xF0, &req, NULL, &tr_len);         //注意实际发送的对象是HUB
+    err = usbh_ctrl_transfer(id&0xF0, &req, pstatus, &tr_len);         //注意实际发送的对象是HUB
     return err;
 }
 
@@ -133,28 +133,24 @@ error_t usbh_hub_port_get_status(uint8_t id, uint8_t* pstatus)
 *******************************************************************/
 error_t usbh_hub_port_disable(uint8_t id)  
 {
-    error_t err;
-    uint8_t buf[4];
-    hub_port_status_response_t* pport_status = (hub_port_status_response_t*)buf;
+    uint8_t hub_stu[4];
 
-    //如果枚举设备通讯出错可能导致usbh_hub_port_get_status返回失败,这里不清楚是HUB问题还是芯片问题
-    //临时处理方法:如果失败直接清除HUB_PORT_ENABLE
-    err = usbh_hub_port_get_status(id, buf);
-    pport_status->change.value = SWAP16_L(pport_status->change.value);
-    if(pport_status->status.bit.port_enable || err){
-        err = usbh_hub_port_clear_feature(id, HUB_FEATURE_PORT_ENABLE); 
-
-        if(ERROR_SUCCESS == usbh_hub_port_get_status(id, buf)){
-            logd("hub%d_port_stu;",(uint16_t)id);
-            dumpd(buf,4);
-        }
+    if(ERROR_SUCCESS == usbh_hub_port_get_status(id, hub_stu)){
+        logd("hub%d_stu:",(uint16_t)id);dumpd(hub_stu,4);
     }
+
+	return ERROR_SUCCESS;
 }
 
 error_t usbh_hub_port_reset(uint8_t id)  
 {
     error_t err;
-    err = usbh_hub_port_clear_feature(id, HUB_FEATURE_PORT_RESET); 
+    uint8_t hub_stu[4];
+    
+    err = usbh_hub_port_get_status(id, hub_stu);
+    if(err) return err;
+
+    err = usbh_hub_port_set_feature(id, HUB_FEATURE_PORT_RESET); 
     return err;
 }
 
@@ -168,10 +164,10 @@ error_t usbh_hub_port_reset(uint8_t id)
 void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
     error_t err;
-    uint8_t i;
-    uint8d_t hub_stu[4];
-    hub_status_response_t* phub_status = (hub_status_response_t*)buf;
-    hub_port_status_response_t* pport_status = (hub_port_status_response_t*)buf;
+    uint8_t i, hub_id;
+    uint8_t hub_stu[4];
+    hub_status_response_t* phub_status = (hub_status_response_t*)hub_stu;
+    hub_port_status_response_t* pport_status = (hub_port_status_response_t*)hub_stu;
 
     id &= 0xf0;
     
@@ -188,35 +184,49 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
     }else{                  // Hub bits 1 to n are hub port events
         for(i = 1; i < (uintptr_t)(pclass->pdata); i++){
             if(buf[0] & BIT(i)){
-                err = usbh_hub_port_get_status(id | i, hub_stu);
+                hub_id = id | i;
+
+                err = usbh_hub_port_get_status(hub_id, hub_stu);
                 if(err) return;
 
-                logd("hub%d_portstu:",(uint16_t)id);dumpd(hub_stu,4);
+                logd("hubport%d_stu:",(uint16_t)hub_id);dumpd(hub_stu,4);
 
                 if(pport_status->change.bit.connection){         // Connection change
                     // Acknowledge Port Connection Change
-                    err = usbh_hub_port_clear_feature(id | i,HUB_FEATURE_PORT_CONNECTION_CHANGE);
+                    err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_CONNECTION_CHANGE);
                     if(err) return;
 
                     if(pport_status->status.bit.connection){         // Connection
-                        err = usbh_hub_port_reset(id | i);
-                        if(err) return;
-
-                        usbh_det_event(id,true); 
+                        usbh_det_event(hub_id, true); 
                     }else{
-                        usbh_det_event(id | i,false);
+                        usbh_det_event(hub_id, false);
                     }
                 }else{                  /// Clear other port status change interrupts. TODO Not currently handled - just cleared.
                     if(pport_status->change.bit.port_enable){
-                        err = usbh_hub_port_clear_feature(id | i,HUB_FEATURE_PORT_ENABLE_CHANGE);
+                        err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_ENABLE_CHANGE);
                     }else if(pport_status->change.bit.suspend){
-                        err = usbh_hub_port_clear_feature(id | i,HUB_FEATURE_PORT_SUSPEND_CHANGE);
+                        err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_SUSPEND_CHANGE);
                     }else if(pport_status->change.bit.over_current){
-                        err = usbh_hub_port_clear_feature(id | i,HUB_FEATURE_PORT_OVER_CURRENT_CHANGE);
+                        err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_OVER_CURRENT_CHANGE);
                     }else if(pport_status->change.bit.reset){
-                        err = usbh_hub_port_clear_feature(id | i,HUB_FEATURE_PORT_RESET_CHANGE);
+                        usbh_dev_t* pdev = get_usbh_dev(hub_id);
+                        err = usbh_hub_port_clear_feature(hub_id, HUB_FEATURE_PORT_RESET_CHANGE);
+
+                        if(USB_STA_POWERED == pdev->state){
+                            usbh_set_status(hub_id, USB_STA_DEFAULT, 0);
+                            
+                            if(pport_status->status.bit.low_speed){
+                                pdev->speed = USB_SPEED_LOW;
+                            }else if(pport_status->status.bit.high_speed){
+                                pdev->speed = USB_SPEED_HIGH;
+                            }else{
+                                pdev->speed = USB_SPEED_FULL;
+                            }
+                            logd("usbh%d speed=%d...\n", hub_id, pdev->speed);
+                        }
                     }
                 }
+                usbh_hub_port_get_status(hub_id, hub_stu);
             }
         }
     }
@@ -251,19 +261,25 @@ error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass)
     uint8_t i;
     uint8_t buf[4];
     usbh_dev_t* pdev = get_usbh_dev(id);
+    uint8_t hub_stu[4];
 
     id &= 0XF0;                             //not support hub connect hub
     // May need to GET_STATUS
     err = usbh_hub_port_get_status(id, buf);
     if(err) return err;
-    logd("hub%d_stu=%d\n",(uint16_t)id);
-    dumpd(buf,4);
-
+    logd("hub%d_stu=",(uint16_t)id);	  dumpd(buf,4);
+  
     // Set Port Power to be able to detect connection, starting with port 1
     for(i = 1; i <= (uintptr_t)(pclass->pdata); i++){
         err = usbh_hub_port_set_feature(id | i, HUB_FEATURE_PORT_POWER); 
         if(err) return err;
     }
+
+    for(i = 1; i <= (uintptr_t)(pclass->pdata); i++){
+        usbh_hub_port_get_status(id | i, hub_stu);
+    }
+
+    usbh_hub_port_get_status(id, hub_stu);
 
     pdev->class_ready = true;
     usbh_set_status(id, USB_STA_CONFIGURED, 0);   
@@ -281,6 +297,7 @@ error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
     err = usbh_hub_get_desc(id, &desc);
     if(err) return err;
 
+    if(pclass->endpin.interval > 10) pclass->endpin.interval = 10;     //most hub interval is 0xff
     pclass->pdata = (void*)((uintptr_t)desc.bNbrPorts);
     logd("hub port=%d\n",desc.bNbrPorts);
 

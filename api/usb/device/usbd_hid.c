@@ -13,7 +13,7 @@
 **	Description:
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+#if API_USBD_BIT_ENABLE && USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 #include "api/usb/device/usbd.h"
 
 #include "api/api_log.h"
@@ -262,7 +262,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 
 			if(HID_DESC_TYPE_REPORT == desc_type){
 				preq->setup_len = MIN(preq->req.wLength, desc_len);
-				memcpy(preq->setup_buf,desc_buf,preq->setup_len);
+				memcpy((void*)preq->setup_buf,desc_buf,preq->setup_len);
 
                 if(HID_TYPE_SWITCH != pclass->hid_type){        //switch ready 在 switch_controller 中设置
                     pdev->ready = true;
@@ -270,7 +270,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
                 }
 			}else if(HID_DESC_TYPE_HID == desc_type){
 				preq->setup_len = MIN(preq->req.wLength, 9);
-				memcpy(preq->setup_buf,usbd_hid_descriptor_tab,preq->setup_len);
+				memcpy((void*)preq->setup_buf,usbd_hid_descriptor_tab,preq->setup_len);
 				preq->setup_buf[7] = desc_len&0xff;            //set hid report desc
 				preq->setup_buf[8] = desc_len>>8;
 			}else{
