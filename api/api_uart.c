@@ -71,7 +71,7 @@ bool api_uart_tx(uint8_t id,void * buf,uint16_t len)
 	return hal_uart_tx(id,buf,len);
 }
 
-bool api_uart_fifo_tx(uint8_t id,void * buf,uint16_t len)
+bool api_uart_fifo_tx(uint8_t id, void * buf,uint16_t len)
 {
 	bool ret = false;
     uint16_t fifo_len = len;
@@ -84,6 +84,7 @@ bool api_uart_fifo_tx(uint8_t id,void * buf,uint16_t len)
 	}
 	#endif
 	
+	UNUSED_VARIABLE(buf);
 	UNUSED_VARIABLE(fifo_len);
 	return ret;
 }

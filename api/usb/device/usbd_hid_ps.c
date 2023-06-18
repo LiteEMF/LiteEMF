@@ -125,7 +125,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 	error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
+	if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t report_type = preq->req.wValue>>8;
 		uint8_t report_id   = preq->req.wValue & 0XFF;
 

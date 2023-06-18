@@ -154,7 +154,7 @@ extern "C" {
 
     #define GET_SP()  
 
-    #if defined(__MODEL__) && defined(2 == __MODEL__)     //TODO
+    #if defined( __MODEL__ ) && ( 2 == __MODEL__ )     //TODO
 	    #define __BIG_ENDIAN
     #endif
 

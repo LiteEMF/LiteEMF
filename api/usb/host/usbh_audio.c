@@ -54,9 +54,9 @@ error_t usbh_audio_set_request(uint8_t id, video_control_request_t reqest, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = reqest;
 
     req.wValue = SWAP16_L(U16(type,lr));
@@ -74,9 +74,9 @@ error_t usbh_audio_get_request(uint8_t id, video_control_request_t reqest, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = reqest;
 
     req.wValue = SWAP16_L(U16(type,lr));
@@ -95,9 +95,9 @@ error_t usbh_audio_endp_set_feature(uint8_t id, uint8_t endp, audio_clock_src_co
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_ENDPOINT;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_ENDPOINT;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = USB_REQ_SET_FEATURE;
 
     req.wValue = SWAP16_L(ctrl);

@@ -111,9 +111,9 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	// uint8_t itf = preq->req.wIndex & 0XFF;
 
-	if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bit.recipient) return err;
+	if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bit.type){
+    if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
 		if(0X90 == preq->req.bRequest){
 			switch(preq->req.wValue){
 			case 0X04:		//compat ID
@@ -129,7 +129,7 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 				break;
 			}
 		}
-	}else if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
+	}else if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
         if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
 			pdev->ready = true;			//xbox set interface 后打开端点
 			logd_g("usbd%d ready...\n",id);

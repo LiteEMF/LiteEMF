@@ -146,7 +146,7 @@ for x in range(256):
     print("{:3},".format(int(math.pow((x)/255.0,gamma)*255.0+0.5))),
     if x&15 == 15: print
 */
-#if COLOR_GAMMA_TABLE
+#if MODULE_ENABLE( COLOR_GAMMA_TABLE )
 static uint8c_t GammaTable[256] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
@@ -315,7 +315,8 @@ void color_hsv_to_rgb(hsv_t *phsv,rgb_t *prgb)
 
 void color_hsv_to_rgb_spectrum(hsv_t *phsv,rgb_t *prgb)
 {
-    hsv_t hsv2 = *phsv;
+    hsv_t hsv2;
+	hsv2 = *phsv;
     hsv2.hsv.h = SCALE8( hsv2.hsv.h, 191);
     color_hsv_to_rgb(&hsv2, prgb);
 }
@@ -352,12 +353,13 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
     
     // offset8 = offset * 8
     uint8_t offset8 = offset;
+	uint8_t third;
+	volatile uint8_t r=0, g=0, b=0;		//添加volatiel 防止过渡优化
+	
     offset8 <<= 3;
     
-    uint8_t third = SCALE8( offset8, (256 / 3)); // max = 85
-    
-    volatile uint8_t r=0, g=0, b=0;		//添加volatiel 防止过渡优化
-    
+    third = SCALE8( offset8, (256 / 3)); // max = 85
+
     if( ! (hue & 0x80) ) {
         // 0XX
         if( ! (hue & 0x40) ) {
@@ -378,9 +380,10 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
                     b = 0;
                 }
                 if( Y2 ) {
+					uint8_t twothirds;
                     r = K170 + third;
                     //uint8_t twothirds = (third << 1);
-                    uint8_t twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
+                    twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
                     g = K85 + twothirds;
                     b = 0;
                 }
@@ -392,8 +395,9 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
                 // 010
                 //case 2: // Y -> G
                 if( Y1 ) {
+					uint8_t twothirds;
                     //uint8_t twothirds = (third << 1);
-                    uint8_t twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
+                    twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
                     r = K171 - twothirds;
                     g = K170 + third;
                     b = 0;
@@ -417,11 +421,12 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
         if( ! (hue & 0x40) ) {
             // 10X
             if( ! ( hue & 0x20) ) {
+				uint8_t twothirds;
                 // 100
                 //case 4: // A -> B
                 r = 0;
                 //uint8_t twothirds = (third << 1);
-                uint8_t twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
+                twothirds = SCALE8( offset8, ((256 * 2) / 3)); // max=170
                 g = K171 - twothirds; //K170?
                 b = K85  + twothirds;
                 
@@ -463,10 +468,13 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
         if( sat == 0) {
             r = 255; b = 255; g = 255;
         } else {
-            uint8_t desat = 255 - sat;
+            uint8_t desat;
+			uint8_t brightness_floor, satscale;
+
+            desat = 255 - sat;
             desat = SCALE8_VIDEO( desat, desat);
 
-            uint8_t satscale = 255 - desat;
+            satscale = 255 - desat;
             //satscale = sat; // uncomment to revert to pre-2021 saturation behavior
 
             //nscale8x3_video( r, g, b, sat);
@@ -475,7 +483,7 @@ void color_hsv_to_rgb_rainbow(hsv_t *phsv,rgb_t *prgb)
             if( g ) g = SCALE8( g, satscale) + 1;
             if( b ) b = SCALE8( b, satscale) + 1;
 
-            uint8_t brightness_floor = desat;
+            brightness_floor = desat;
             r += brightness_floor;
             g += brightness_floor;
             b += brightness_floor;
@@ -674,7 +682,8 @@ uint32_t color_from_palette_hsv(uint8_t index, uint8_t brightness, blend_type_t 
     	uint8_t val2;
 		uint8_t f2;
         uint8_t f1;
-        
+        uint8_t deltaHue;
+		
         if( ++hi4 >= palette_size ) hi4 = 0;  //nest color
         color_rgb(palette[hi4], (rgb_t*)&entry);
 
@@ -719,7 +728,7 @@ uint32_t color_from_palette_hsv(uint8_t index, uint8_t brightness, blend_type_t 
         sat1  += sat2;
         val1  += val2;
 
-        uint8_t deltaHue = (uint8_t)(hue2 - hue1);
+        deltaHue = (uint8_t)(hue2 - hue1);
         if( deltaHue & 0x80 ) {
           // go backwards
           hue1 -= scale8( 256 - deltaHue, f2);

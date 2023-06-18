@@ -34,6 +34,128 @@ extern "C" {
 *******************************************************************************************************/
 #define PIN_NULL  (-1)
 
+#define PA_00       0X00
+#define PA_01       0X01
+#define PA_02       0X02
+#define PA_03       0X03
+#define PA_04       0X04
+#define PA_05       0X05
+#define PA_06       0X06
+#define PA_07       0X07
+#define PA_08       0X08
+#define PA_09       0X09
+#define PA_10       0X0A
+#define PA_11       0X0B
+#define PA_12       0X0C
+#define PA_13       0X0D
+#define PA_14       0X0E
+#define PA_15       0X0F
+
+#define PB_00       0X10
+#define PB_01       0X11
+#define PB_02       0X12
+#define PB_03       0X13
+#define PB_04       0X14
+#define PB_05       0X15
+#define PB_06       0X16
+#define PB_07       0X17
+#define PB_08       0X18
+#define PB_09       0X19
+#define PB_10       0X1A
+#define PB_11       0X1B
+#define PB_12       0X1C
+#define PB_13       0X1D
+#define PB_14       0X1E
+#define PB_15       0X1F
+
+#define PC_00       0X20
+#define PC_01       0X21
+#define PC_02       0X22
+#define PC_03       0X23
+#define PC_04       0X24
+#define PC_05       0X25
+#define PC_06       0X26
+#define PC_07       0X27
+#define PC_08       0X28
+#define PC_09       0X29
+#define PC_10       0X2A
+#define PC_11       0X2B
+#define PC_12       0X2C
+#define PC_13       0X2D
+#define PC_14       0X2E
+#define PC_15       0X2F
+
+#define PD_00       0X30
+#define PD_01       0X31
+#define PD_02       0X32
+#define PD_03       0X33
+#define PD_04       0X34
+#define PD_05       0X35
+#define PD_06       0X36
+#define PD_07       0X37
+#define PD_08       0X38
+#define PD_09       0X39
+#define PD_10       0X3A
+#define PD_11       0X3B
+#define PD_12       0X3C
+#define PD_13       0X3D
+#define PD_14       0X3E
+#define PD_15       0X3F
+
+#define PE_00       0X40
+#define PE_01       0X41
+#define PE_02       0X42
+#define PE_03       0X43
+#define PE_04       0X44
+#define PE_05       0X45
+#define PE_06       0X46
+#define PE_07       0X47
+#define PE_08       0X48
+#define PE_09       0X49
+#define PE_10       0X4A
+#define PE_11       0X4B
+#define PE_12       0X4C
+#define PE_13       0X4D
+#define PE_14       0X4E
+#define PE_15       0X4F
+
+#define PF_00       0X50
+#define PF_01       0X51
+#define PF_02       0X52
+#define PF_03       0X53
+#define PF_04       0X54
+#define PF_05       0X55
+#define PF_06       0X56
+#define PF_07       0X57
+#define PF_08       0X58
+#define PF_09       0X59
+#define PF_10       0X5A
+#define PF_11       0X5B
+#define PF_12       0X5C
+#define PF_13       0X5D
+#define PF_14       0X5E
+#define PF_15       0X5F
+
+#define PG_00       0X60
+#define PG_01       0X61
+#define PG_02       0X62
+#define PG_03       0X63
+#define PG_04       0X64
+#define PG_05       0X65
+#define PG_06       0X66
+#define PG_07       0X67
+#define PG_08       0X68
+#define PG_09       0X69
+#define PG_10       0X6A
+#define PG_11       0X6B
+#define PG_12       0X6C
+#define PG_13       0X6D
+#define PG_14       0X6E
+#define PG_15       0X6F
+
+typedef uint8_t    pin_t;
+
+/*
 typedef enum{
     PA_00 = 0,
     PA_01,
@@ -154,6 +276,7 @@ typedef enum{
     PG_14,
     PG_15,
 } pin_t;
+*/
 
 typedef enum{
     PIN_PULLNONE = 0,

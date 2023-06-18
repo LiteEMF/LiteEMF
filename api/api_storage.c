@@ -87,9 +87,10 @@ bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len)
 	return api_flash_read(STORAGE_MAP_ADDR(index),map, MIN(map_len,STORAGE_MAP_SIZE) );
 }
 
-bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len)
+bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 {
 	bool ret = false,merge;
+	
     uint8_t i;
 	uint16_t page_addr,page_end;										//page address
 
@@ -145,6 +146,7 @@ bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len)
 			}
 		}
 	}
+
 	return ret;
 }
 

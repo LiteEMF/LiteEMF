@@ -73,7 +73,7 @@ static error_t hid_desc_parse_report_type(hid_desc_info_t *pinfo,hid_item_info_t
     //  Update the Report by the size of this item
     lreport = &pinfo->item_list.reportList[pinfo->globals.reportIndex];
     bits = pinfo->globals.reportsize * pinfo->globals.reportCount;
-    switch (item->ItemDetails.bit.ItemTag)
+    switch (item->ItemDetails.bits.ItemTag)
     {
         case HIDTag_Feature:
             lreportItem->reportType = HID_REPORT_TYPE_FEATURE;
@@ -108,10 +108,10 @@ static void hid_desc_convert_to_signed(hid_item_info_t* item)
     uint8_t    dataByte=0;
     uint8_t    index;
 
-    index = item->ItemDetails.bit.ItemSize;
+    index = item->ItemDetails.bits.ItemSize;
 
     if(index) {
-       if(item->ItemDetails.bit.ItemSize == 3){
+       if(item->ItemDetails.bits.ItemSize == 3){
            index = 4;
        }
 
@@ -227,16 +227,16 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
     while(len_to_be_parsed > 0){    /* First parse to calculate the space required for all the items */
        item.ItemDetails.val = *currentRptDescPtr;
        /* Data need not be parsed at this point */
-       ldataSize = item.ItemDetails.bit.ItemSize ;
-       if(item.ItemDetails.bit.ItemSize == 3)
+       ldataSize = item.ItemDetails.bits.ItemSize ;
+       if(item.ItemDetails.bits.ItemSize == 3)
            ldataSize = 4;
 
        currentRptDescPtr += (ldataSize+1) ; /* point to next item i.e size of item data + 1(item detail) */
        len_to_be_parsed -= (ldataSize+1);   /* remaining bytes = current - (length of data + 1)*/
 
-        switch (item.ItemDetails.bit.ItemType){
+        switch (item.ItemDetails.bits.ItemType){
             case HIDType_Main:           /* Main Items */
-                switch (item.ItemDetails.bit.ItemTag){
+                switch (item.ItemDetails.bits.ItemTag){
                     case HIDTag_Collection:
                         break;
                     case HIDTag_EndCollection:
@@ -251,7 +251,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                 }
                 break;
             case HIDType_Global:         /* Global Items */
-                switch (item.ItemDetails.bit.ItemTag){
+                switch (item.ItemDetails.bits.ItemTag){
                     case HIDTag_ReportID:
                         pinfo->reports++;
                         break;
@@ -270,7 +270,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                 }
                 break;
             case HIDType_Local:          /* Local Item */
-                switch (item.ItemDetails.bit.ItemTag){
+                switch (item.ItemDetails.bits.ItemTag){
                     case HIDTag_Usage:
                         pinfo->usages++;
                         break;
@@ -343,8 +343,8 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
        item.ItemDetails.val = *currentRptDescPtr;
        item.Data.uItemData = 0;
 
-       ldataSize = item.ItemDetails.bit.ItemSize ;
-       if(item.ItemDetails.bit.ItemSize == 3)
+       ldataSize = item.ItemDetails.bits.ItemSize ;
+       if(item.ItemDetails.bits.ItemSize == 3)
            ldataSize = 4;
 
        currentRptDescPtr++; /* ptr points to data */
@@ -355,9 +355,9 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
 
        len_to_be_parsed -= (ldataSize+1);   /* remaining bytes = current - (length of current item + 1)*/
 
-       switch(item.ItemDetails.bit.ItemType){
+       switch(item.ItemDetails.bits.ItemType){
            case HIDType_Main:   /* look for Main Items*/
-                switch(item.ItemDetails.bit.ItemTag){
+                switch(item.ItemDetails.bits.ItemTag){
                     case HIDTag_Input :
                     case HIDTag_Output :
                     case HIDTag_Feature :
@@ -372,7 +372,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                 break;
 
            case HIDType_Global:   /* look for Global Items*/
-                switch(item.ItemDetails.bit.ItemTag){
+                switch(item.ItemDetails.bits.ItemTag){
                     case HIDTag_UsagePage :
                          pinfo->globals.usagePage = item.Data.uItemData;
                          break;
@@ -451,10 +451,10 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                 break;
 
            case HIDType_Local:  /* look for Local Items*/
-                switch(item.ItemDetails.bit.ItemTag){
+                switch(item.ItemDetails.bits.ItemTag){
                     case HIDTag_Usage :
                         lusageItem = &pinfo->item_list.usageItemList[pinfo->usageItems++];
-                        if (item.ItemDetails.bit.ItemSize == 3){ /* 4 data bytes */
+                        if (item.ItemDetails.bits.ItemSize == 3){ /* 4 data bytes */
                             lusageItem->usagePage = item.Data.uItemData >> 16;
                             lusageItem->usageMaximum = item.Data.uItemData & 0x00FF;
                         }else{
@@ -467,7 +467,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                     case HIDTag_UsageMinimum :
                         if(pinfo->haveUsageMax){
                             lusageItem = &pinfo->item_list.usageItemList[pinfo->usageItems++];
-                            if(item.ItemDetails.bit.ItemSize == 3){
+                            if(item.ItemDetails.bits.ItemSize == 3){
                                 lusageItem->usagePage = item.Data.uItemData >> 16;
                                 lusageItem->usageMinimum = item.Data.uItemData & 0x00FFL;
                             }else{
@@ -489,7 +489,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                             pinfo->haveUsageMax = false;
                             pinfo->haveUsageMin = false;
                         }else{
-                            if(item.ItemDetails.bit.ItemSize == 3){
+                            if(item.ItemDetails.bits.ItemSize == 3){
                                 pinfo->rangeUsagePage = item.Data.uItemData >> 16;
                                 pinfo->usageMinimum = item.Data.uItemData & 0x00FFL;
                             }else{
@@ -503,7 +503,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                     case HIDTag_UsageMaximum :
                         if(pinfo->haveUsageMin){
                             lusageItem = &pinfo->item_list.usageItemList[pinfo->usageItems++];
-                            if(item.ItemDetails.bit.ItemSize == 3){
+                            if(item.ItemDetails.bits.ItemSize == 3){
                                 lusageItem->usagePage = item.Data.uItemData >> 16;
                                 lusageItem->usageMaximum = item.Data.uItemData & 0x00FFL;
                             }else{
@@ -526,7 +526,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                             pinfo->haveUsageMax = false;
                             pinfo->haveUsageMin = false;
                         }else{
-                            if(item.ItemDetails.bit.ItemSize == 3){
+                            if(item.ItemDetails.bits.ItemSize == 3){
                                 pinfo->rangeUsagePage = item.Data.uItemData >> 16;
                                 pinfo->usageMaximum = item.Data.uItemData & 0x00FFL;
                             } else {

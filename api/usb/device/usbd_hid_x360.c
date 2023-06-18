@@ -142,8 +142,8 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
     error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bit.type){
-		if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bit.recipient) {
+	if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
+		if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
 			if(0X90 == preq->req.bRequest){
 				switch(preq->req.wValue){
 				case 0X04:		//compat ID
@@ -167,7 +167,7 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 					err = ERROR_SUCCESS;
 				}
 			}
-		}else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bit.recipient) {
+		}else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
 			uint8_t itf = preq->req.wIndex & 0XFF;
 
 			if(0x01 == preq->req.bRequest){

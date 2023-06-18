@@ -340,8 +340,8 @@ static error_t usbd_control_request_process(uint8_t id)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
-		switch (preq->req.bmRequestType.bit.recipient) {
+    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+		switch (preq->req.bmRequestType.bits.recipient) {
 		case USB_REQ_RCPT_DEVICE:
 			switch (preq->req.bRequest) {
 			case USB_REQ_SET_ADDRESS:
@@ -523,7 +523,7 @@ void usbd_setup_process( uint8_t id )
 
 	logd("steup:");dumpd((uint8_t*)&preq->req,8);
 	//等待接收完整数据
-	if((USB_DIR_OUT == preq->req.bmRequestType.bit.direction) && preq->req.wLength){
+	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){
 		rx_len = preq->req.wLength;
 		err = usbd_out(id, 0x00, preq->setup_buf, &rx_len);
 		if(ERROR_SUCCESS == err){
@@ -544,7 +544,7 @@ void usbd_setup_process( uint8_t id )
 			if(preq->setup_len > preq->req.wLength) preq->setup_len = preq->req.wLength;
 
 			usbd_in(id, 0x80, preq->setup_buf, preq->setup_len);
-			if(USB_DIR_OUT == preq->req.bmRequestType.bit.direction){
+			if(USB_DIR_OUT == preq->req.bmRequestType.bits.direction){
 				usbd_free_setup_buffer(preq);
 			}
 		}else if(ERROR_STALL == err){

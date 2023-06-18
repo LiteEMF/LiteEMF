@@ -227,7 +227,7 @@ extern "C" {
 
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack(1)
 #endif
 typedef struct 
@@ -263,7 +263,7 @@ typedef union{
         uint8_t capsLock      : 1;
         uint8_t scrollLock    : 1;
         uint8_t res : 5;
-    }bit;
+    }bits;
     uint8_t val;
 }kb_ledd_t;
 

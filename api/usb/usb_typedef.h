@@ -421,7 +421,7 @@ typedef struct {
 			uint8_t recipient :  5; ///< Recipient type usb_request_recipient_t.
 			uint8_t type      :  2; ///< Request type usb_request_type_t.
 			uint8_t direction :  1; ///< Direction type. usb_dir_t
-		}bit;
+		}bits;
 		uint8_t val;
   	}bmRequestType;
 

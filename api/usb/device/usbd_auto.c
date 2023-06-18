@@ -145,19 +145,19 @@ error_t usbd_auto_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
     uint8_t itf = preq->req.wIndex & 0XFF;
     uint8_t i;
 	
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
+    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
 		if (USB_REQ_GET_DESCRIPTOR == preq->req.bRequest) {
             uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
 	        uint8_t desc_index = (uint8_t)(preq->req.wValue & 0xFF);
 
-		    if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bit.recipient) {
+		    if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
                 usbd_steup_setp++;
                 if(USB_DESC_DEVICE == desc_type){
                     if(1== usbd_setup_devdesc_len){
                         usbd_setup_devdesc_len = preq->req.wLength;  //第一次获取设备描述符长度
                     }
                 }
-            }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bit.recipient) {
+            }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
                 if(HID_DESC_TYPE_REPORT == desc_type){
                     preq->setup_len = MIN(preq->req.wLength, sizeof(auto_desc_gamepad_map));
                     memcpy(preq->setup_buf,auto_desc_gamepad_map,preq->setup_len);

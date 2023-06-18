@@ -53,11 +53,11 @@ bool hal_adc_start_scan(void)
 {
 	return false;
 }
-bool hal_adc_init(uint8_t id)
+bool hal_adc_init(void)
 {
 	return false;
 }
-bool hal_adc_deinit(uint8_t id)
+bool hal_adc_deinit(void)
 {
 	return false;
 }

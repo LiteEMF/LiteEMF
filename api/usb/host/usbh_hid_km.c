@@ -79,9 +79,9 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_k
 
     led.val = 0;
 	for(i=1; i<len; i++){
-		if(KB_NUM == pkb[i]) led.bit.numLock = 1;
-		if(KB_CAP_LOCK == pkb[i]) led.bit.capsLock = 1;
-		if(KB_SCROLL == pkb[i]) led.bit.scrollLock = 1;
+		if(KB_NUM == pkb[i]) led.bits.numLock = 1;
+		if(KB_CAP_LOCK == pkb[i]) led.bits.capsLock = 1;
+		if(KB_SCROLL == pkb[i]) led.bits.scrollLock = 1;
 	}
 
 	if(pled->val != led.val){

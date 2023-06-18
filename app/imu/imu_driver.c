@@ -149,7 +149,7 @@ void imu_driver_task(void* pa)
         if(!m_imu_init) loge_r("imu driver init error!\n");
 	}
 
-	UNUSED_PARAMETER(pa);
+	UNUSED_VARIABLE(pa);
 }
 
 #if TASK_HANDLER_ENABLE

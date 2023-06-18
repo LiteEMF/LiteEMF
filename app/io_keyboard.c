@@ -168,7 +168,8 @@ uint8_t io_keyboard_scan(kb_bit_t* keyp)
 	#if defined(MATRIX_KB_IN_GPIO) && defined(MATRIX_KB_OUT_GPIO) && defined(MATRIX_KB)	
 	i += iokb_scan(keyp+i, len-i);
 	#endif
-
+	
+	UNUSED_PARAMETER(keyp);
 	return i;
 }
 

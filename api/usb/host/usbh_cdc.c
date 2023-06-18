@@ -55,9 +55,9 @@ error_t usbh_cdc_set_control_line_state(uint8_t id, uint8_t itf, uint16_t line_s
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = CDC_REQUEST_SET_CONTROL_LINE_STATE;
 
     req.wValue = SWAP16_L(line_state);
@@ -73,9 +73,9 @@ error_t usbh_cdc_set_line_coding(uint8_t id, uint8_t itf, cdc_line_coding_t cons
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = CDC_REQUEST_SET_LINE_CODING;
 
     req.wValue = 0;

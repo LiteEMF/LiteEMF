@@ -52,9 +52,9 @@ error_t usbh_hid_set_idle(uint8_t id, uint8_t itf)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_SET_IDLE;
 
     req.wValue = 0;     //Idle rate = 0 mean only report when there is changes
@@ -71,9 +71,9 @@ error_t usbh_hid_set_report(uint8_t id, uint8_t itf, hid_report_type_t type, uin
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_SET_REPORT;
 
     req.wValue = SWAP16_L(U16(type,rep_id));
@@ -91,9 +91,9 @@ error_t usbh_hid_get_report(uint8_t id, uint8_t itf, hid_report_type_t type, uin
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_GET_REPORT;
 
     req.wValue = SWAP16_L(U16(type,rep_id));
@@ -111,9 +111,9 @@ error_t usbh_hid_get_report_desc( uint8_t id, uint8_t index, uint16_t itf, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bit.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = USB_DIR_IN;
     req.bRequest = USB_REQ_GET_DESCRIPTOR;
 
     req.wValue = SWAP16_L(U16(HID_DESC_TYPE_REPORT,index));

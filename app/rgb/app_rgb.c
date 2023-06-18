@@ -389,6 +389,8 @@ void app_rgb_task(void *pa)
 	if(ret || rgb_show){
 		rgb_show = !rgb_driver_show(m_pixels,sizeof(m_pixels));
 	}
+	
+	UNUSED_PARAMETER(pa);
 }
 
 #if TASK_HANDLER_ENABLE

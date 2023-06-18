@@ -302,7 +302,7 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 		usbd_req_t *preq = usbd_get_req(id);
 		usbd_dev_t *pdev = usbd_get_dev(id);
 
-		 if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
+		 if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
 			if (USB_REQ_SET_ADDRESS == preq->req.bRequest) {
 				usbd_set_address(id, (uint8_t)preq->req.wValue);
 			}
@@ -337,7 +337,7 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 		usbd_malloc_setup_buffer(id, preq);
 	}
 
-	if((USB_DIR_OUT == preq->req.bmRequestType.bit.direction) && preq->req.wLength){		//设置ack 继续接收OUT数据
+	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置ack 继续接收OUT数据
 		hal_usbd_endp_ack(id, 0x00, 0);
 	}
 }

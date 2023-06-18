@@ -354,6 +354,7 @@ void app_imu_task(void* pa)
 			atuo_cal_timer = m_systick;
 		}
 	}
+	UNUSED_PARAMETER(pa);
 }
 
 

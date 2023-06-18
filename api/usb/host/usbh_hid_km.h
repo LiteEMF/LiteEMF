@@ -55,7 +55,7 @@ typedef union{
         uint8_t capsLock      : 1;
         uint8_t scrollLock    : 1;
         uint8_t res : 5;
-    }bit;
+    }bits;
     uint8_t val;
 }kb_led_t;
 

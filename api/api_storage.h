@@ -32,7 +32,7 @@ extern "C" {
 #define STORAGE_MAP_NUM		1
 #endif	
 #ifndef STORAGE_MAP_SIZE
-#define STORAGE_MAP_SIZE	0X100
+#define STORAGE_MAP_SIZE	0X01
 #endif	
 #define STORAGE_SIZE		(sizeof(m_storage) + STORAGE_MAP_NUM*STORAGE_MAP_SIZE)
 #define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + i*STORAGE_MAP_SIZE)
@@ -63,7 +63,6 @@ typedef struct {
 	#endif
 }api_storage_t;
 
-typedef struct 	HW_STORAGE_MAP	api_storage_map_t;
 
 extern api_storage_t m_storage;
 extern uint8_t m_storage_map[STORAGE_MAP_SIZE];

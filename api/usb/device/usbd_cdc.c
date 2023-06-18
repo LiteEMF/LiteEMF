@@ -80,9 +80,9 @@ error_t usbd_cdc_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
         error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bit.recipient) return err;
+    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if(USB_REQ_TYPE_CLASS == preq>req.bmRequestType.bit.type) {
+    if(USB_REQ_TYPE_CLASS == preq>req.bmRequestType.bits.type) {
 
     }
     return err;

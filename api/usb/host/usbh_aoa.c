@@ -46,9 +46,9 @@ static error_t accessory_get_version(uint8_t id, uint16_t *pversion)
 	error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_VENDOR;
-	req.bmRequestType.bit.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_VENDOR;
+	req.bmRequestType.bits.direction = USB_DIR_IN;
     req.bRequest = ACCESSORY_GET_PROTOCOL_VERSION;
 	req.wValue = 0;
     req.wIndex = 0;
@@ -65,9 +65,9 @@ static error_t accessory_send_string(uint8_t id,uint8_t string_id, char *string,
 	error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_VENDOR;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_VENDOR;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = ACCESSORY_SEND_STRING;
 	req.wValue = 0;
     req.wIndex = SWAP16_L(string_id);
@@ -83,9 +83,9 @@ static error_t accessory_set_request(uint8_t id, uint8_t request,  uint8_t index
 	error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_VENDOR;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_VENDOR;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = request;
 	req.wValue = SWAP16_L(index);
     req.wIndex = 0;

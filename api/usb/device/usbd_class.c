@@ -365,7 +365,7 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 	uint8_t itf;
 	usbd_class_t *pclass;
 
-	if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bit.recipient){
+	if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient){
 		itf = (uint8_t)(preq->req.wIndex & 0xFF);
 
 		pclass = usbd_class_find_by_itf(id, itf);
@@ -411,8 +411,8 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 			}
 		}
 	}else{			//特殊处理
-		if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bit.type){	//vendor
-			if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bit.recipient) {
+		if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
+			if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
 				
 				if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
 					if(m_usbd_hid_types[id] & (BIT(HID_TYPE_X360))){

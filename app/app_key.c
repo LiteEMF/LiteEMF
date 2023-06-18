@@ -135,7 +135,7 @@ void app_key_scan_task(void *pa)
         m_key_scan = key;
         app_key_dump(key);
     }
-    
+    UNUSED_PARAMETER(pa);
 }
 
 
@@ -143,16 +143,16 @@ void app_key_decode_task(uint32_t key_scan)
 {
 	bool ret = false;
     uint8_t i;
-	uint32_t key,bit;
+	uint32_t key,bits;
 	static uint16_t key_cnt[32];
 
     key = key_scan;
     for(i = 0; i < 32; i++){
-        bit = BIT(i);
+        bits = BIT(i);
 
-        if(key & bit){						//pressed
-            if(!(m_app_key.pressed & bit)){
-                m_app_key.pressed |= bit;
+        if(key & bits){						//pressed
+            if(!(m_app_key.pressed & bits)){
+                m_app_key.pressed |= bits;
                 key_cnt[i] = 0;
                 ret = true;
             }
@@ -161,60 +161,60 @@ void app_key_decode_task(uint32_t key_scan)
                 key_cnt[i] ++;
 
                 if(key_cnt[i] >= KEY_LONG_LONG_TIME){
-                    if(!(m_app_key.long_long & bit)){
-                        m_app_key.long_long |= bit;
+                    if(!(m_app_key.long_long & bits)){
+                        m_app_key.long_long |= bits;
                         logd("press_long_long: 0x%x\n", m_app_key.long_long);
                         ret = true;
                     }                
                 }else if(key_cnt[i] >= KEY_LONG_TIME){
-                    if(!(m_app_key.press_long & bit)){
-                        m_app_key.press_long |= bit;
+                    if(!(m_app_key.press_long & bits)){
+                        m_app_key.press_long |= bits;
                         logd("press_long=%x\n",m_app_key.press_long);
                         ret = true;
                     }
                 }else if(key_cnt[i] >= KEY_SHORT_TIME){
-                    if(!(m_app_key.press_short & bit)){
-                        m_app_key.press_short |= bit;
+                    if(!(m_app_key.press_short & bits)){
+                        m_app_key.press_short |= bits;
                         ret = true;
                     }
                 }
             }
         }else{												//key up
-            if((m_app_key.pressed & bit)){
-                if( 0 == ((m_app_key.pressed_b | m_app_key.double_b) & bit) ){
+            if((m_app_key.pressed & bits)){
+                if( 0 == ((m_app_key.pressed_b | m_app_key.double_b) & bits) ){
                     if(key_cnt[i] < KEY_SHORT_TIME){
-                        if(m_app_key.pre_double_b & bit){
-                            m_app_key.double_b |= bit;
-                            m_app_key.pre_double_b &= ~bit;
+                        if(m_app_key.pre_double_b & bits){
+                            m_app_key.double_b |= bits;
+                            m_app_key.pre_double_b &= ~bits;
                         }else{
-                            m_app_key.pre_double_b |= bit;
+                            m_app_key.pre_double_b |= bits;
                         }
                     }else{
-                        m_app_key.pre_double_b &= ~bit;
+                        m_app_key.pre_double_b &= ~bits;
                     }
                 }
 
-                m_app_key.pressed &= ~bit;
-                m_app_key.press_short &= ~bit;
-                m_app_key.press_long &= ~bit;
-                m_app_key.long_long &= ~bit;
+                m_app_key.pressed &= ~bits;
+                m_app_key.press_short &= ~bits;
+                m_app_key.press_long &= ~bits;
+                m_app_key.long_long &= ~bits;
                 ret = true;
                 key_cnt[i] = 0;
-            }else if(m_app_key.pre_double_b & bit){
+            }else if(m_app_key.pre_double_b & bits){
                 key_cnt[i]++;
                 if(key_cnt[i] >= KEY_DOUBLE_B_TIME){
                     key_cnt[i] = 0;
-                    m_app_key.pre_double_b &= ~bit;
-                    m_app_key.pressed_b |= bit;
+                    m_app_key.pre_double_b &= ~bits;
+                    m_app_key.pressed_b |= bits;
                     //logd("m_app_key.pressed_b\n");
                     ret = true;
                 }
-            }else if(((m_app_key.pressed_b | m_app_key.double_b) & bit)){
+            }else if(((m_app_key.pressed_b | m_app_key.double_b) & bits)){
                 key_cnt[i]++;
                 if(key_cnt[i] >= KEY_PRESSED_B_DELAY){
                     key_cnt[i] = 0;
-                    m_app_key.pressed_b &= ~bit;
-                    m_app_key.double_b &= ~bit;
+                    m_app_key.pressed_b &= ~bits;
+                    m_app_key.double_b &= ~bits;
                     ret = true;
                 }
             }

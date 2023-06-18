@@ -52,9 +52,9 @@ error_t usbh_hub_get_desc(uint8_t id, descriptor_hub_desc_t* pdesc)
 	usb_control_request_t req;
     uint16_t tr_len;
   
-    req.bmRequestType.bit.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_IN;
     req.bRequest = HUB_REQUEST_GET_DESCRIPTOR;
 
     req.wValue = 0; 
@@ -70,9 +70,9 @@ error_t usbh_hub_port_clear_feature(uint8_t id, uint8_t feature)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = HUB_REQUEST_CLEAR_FEATURE;
 
     req.wValue = SWAP16_L(feature);
@@ -88,9 +88,9 @@ error_t usbh_hub_port_set_feature(uint8_t id, uint8_t feature)      //注意实�
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bit.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_OUT;
     req.bRequest = HUB_REQUEST_SET_FEATURE;
 
     req.wValue = SWAP16_L(feature);     //Idle rate = 0 mean only report when there is changes
@@ -112,9 +112,9 @@ error_t usbh_hub_port_get_status(uint8_t id, uint8_t* pstatus)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bit.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;;
-    req.bmRequestType.bit.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bit.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;;
+    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = USB_DIR_IN;
     req.bRequest = HUB_REQUEST_GET_STATUS;
 
     req.wValue = 0;
@@ -175,9 +175,9 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
         err = usbh_hub_port_get_status(id, hub_stu);
         if(ERROR_SUCCESS == err){
             logd("hub%d_stu:",(uint16_t)id);dumpd(hub_stu,4);
-            if(phub_status->change.bit.local_power_source){
+            if(phub_status->change.bits.local_power_source){
                 err = usbh_hub_port_clear_feature(id,HUB_FEATURE_HUB_LOCAL_POWER_CHANGE); 
-            }else if(phub_status->change.bit.over_current){
+            }else if(phub_status->change.bits.over_current){
                 err = usbh_hub_port_clear_feature(id,HUB_FEATURE_HUB_OVER_CURRENT_CHANGE); 
             }
         }
@@ -191,33 +191,33 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
 
                 logd("hubport%d_stu:",(uint16_t)hub_id);dumpd(hub_stu,4);
 
-                if(pport_status->change.bit.connection){         // Connection change
+                if(pport_status->change.bits.connection){         // Connection change
                     // Acknowledge Port Connection Change
                     err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_CONNECTION_CHANGE);
                     if(err) return;
 
-                    if(pport_status->status.bit.connection){         // Connection
+                    if(pport_status->status.bits.connection){         // Connection
                         usbh_det_event(hub_id, true); 
                     }else{
                         usbh_det_event(hub_id, false);
                     }
                 }else{                  /// Clear other port status change interrupts. TODO Not currently handled - just cleared.
-                    if(pport_status->change.bit.port_enable){
+                    if(pport_status->change.bits.port_enable){
                         err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_ENABLE_CHANGE);
-                    }else if(pport_status->change.bit.suspend){
+                    }else if(pport_status->change.bits.suspend){
                         err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_SUSPEND_CHANGE);
-                    }else if(pport_status->change.bit.over_current){
+                    }else if(pport_status->change.bits.over_current){
                         err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_OVER_CURRENT_CHANGE);
-                    }else if(pport_status->change.bit.reset){
+                    }else if(pport_status->change.bits.reset){
                         usbh_dev_t* pdev = get_usbh_dev(hub_id);
                         err = usbh_hub_port_clear_feature(hub_id, HUB_FEATURE_PORT_RESET_CHANGE);
 
                         if(USB_STA_POWERED == pdev->state){
                             usbh_set_status(hub_id, USB_STA_DEFAULT, 0);
                             
-                            if(pport_status->status.bit.low_speed){
+                            if(pport_status->status.bits.low_speed){
                                 pdev->speed = USB_SPEED_LOW;
-                            }else if(pport_status->status.bit.high_speed){
+                            }else if(pport_status->status.bits.high_speed){
                                 pdev->speed = USB_SPEED_HIGH;
                             }else{
                                 pdev->speed = USB_SPEED_FULL;

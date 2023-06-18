@@ -142,7 +142,7 @@ typedef struct {
 			uint16_t local_power_source : 1;
 			uint16_t over_current       : 1;
 			uint16_t : 14;
-		}bit;
+		}bits;
 
 		uint16_t value;
 	} status, change;
@@ -166,7 +166,7 @@ typedef struct {
 			uint16_t port_test_mode         : 1;
 			uint16_t port_indicator_control : 1;
 			uint16_t TU_RESERVED            : 3;
-		}bit;
+		}bits;
 
 		uint16_t value;
 	} status, change;

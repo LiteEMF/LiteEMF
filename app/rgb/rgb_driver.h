@@ -38,9 +38,9 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void spi_rgb_set_buf(uint8_t* frame, uint8_t size, uint8_t* spi_tx_buf, uint8_t spi_size);
+void spi_rgb_set_buf(uint8_t* frame, uint8_t len, uint8_t* spi_tx_buf, uint8_t spi_size);
 
-bool rgb_driver_show(uint8_t* frame, uint8_t size);	//__WEAK 	
+bool rgb_driver_show(uint8_t* frame, uint8_t len);	//__WEAK 	
 bool rgb_driver_init(void);							//__WEAK 	
 bool rgb_driver_deinit(void);						//__WEAK 		
 

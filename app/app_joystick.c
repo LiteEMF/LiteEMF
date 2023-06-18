@@ -414,7 +414,7 @@ void app_joystick_task(void *pa)
         m_joystick.tarigger[id] = app_trigger_normalization(id,&joystick_adc);
         app_stick_normalization(id, &m_joystick.stick[id],&joystick_adc);
     }
-
+	UNUSED_PARAMETER(pa);
 }
 
 #if TASK_HANDLER_ENABLE

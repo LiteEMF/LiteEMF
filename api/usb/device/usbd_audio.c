@@ -425,9 +425,9 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
     error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bit.recipient) return err;
+    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bit.type){
+    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
         if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
             if(AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls){
                 #if API_AUDIO_ENABLE
@@ -450,7 +450,7 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
                 err = ERROR_SUCCESS;
             }
 		}
-	} else if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bit.type) {
+	} else if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t audio_id = preq->req.wIndex >> 8;
 		api_audio_t* paudio = &usbd_audio_info;
 
