@@ -7,7 +7,7 @@
 **  Polynomials are represented in LSB-first form
 **  following parameters:
 **    Width                      : 32 bit
-**    Poly                       : 0xedb88320
+**    Poly                       : 0x04C11DB7
 **    Output for "123456789"     : 0xCBF43926
 */
 #include "hw_config.h"

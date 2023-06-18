@@ -616,5 +616,12 @@ bool hid_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_
     return(ret);
 }
 
+bool hid_items_match_id(hid_items_t *pitem, uint8_t* buf, uint16_t len)
+{
+    if((pitem->report_length == len) && ((pitem->report_id == 0) || (buf[0] == pitem->report_id))){
+        return true;
+    }
+    return false;
+}
 
 #endif

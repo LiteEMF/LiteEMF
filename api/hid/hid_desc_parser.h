@@ -266,7 +266,7 @@ void hid_desc_dump(hid_desc_info_t *pinfo);
 error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t desc_len);
 void hid_desc_info_free(hid_desc_info_t *pinfo);
 bool hid_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems);
-
+bool hid_items_match_id(hid_items_t *pitem, uint8_t* buf, uint16_t len);
 
 #ifdef __cplusplus
 }

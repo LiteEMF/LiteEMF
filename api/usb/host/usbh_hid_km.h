@@ -29,24 +29,27 @@ extern "C" {
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
+/* 2.4G键鼠很多同时存在键盘和鼠标描述符, 所以键盘描述符里面会包含鼠标描述符,鼠标描述里面也会包含键盘描述符*/
 typedef struct{
-	uint8_t		magic;				//0: free, 非0: used
-	union{
-		struct{
-			hid_items_t kb_fun;
-			hid_items_t kb_normal;
-			hid_items_t kb2_normal;	//部分键盘会有两个report id
-			hid_items_t led;		
-		}kb;
-		struct{
-			hid_items_t button;
-			hid_items_t x;
-			hid_items_t y;
-			hid_items_t w;
-		}mouse;
-	}items;
-} km_items_t;
+	uint8_t find;
+	hid_items_t kb_fun;
+	hid_items_t kb_normal;
+	hid_items_t kb2_normal;	//部分键盘会有两个report id
+	hid_items_t led;		
+}kb_items_t;
+typedef struct{
+	uint8_t find;
+	hid_items_t button;
+	hid_items_t x;
+	hid_items_t y;
+	hid_items_t w;
+}mouse_items_t;;
+
+typedef struct{					
+	uint8_t		magic;			//0: free, 非0: used
+	kb_items_t kb;
+	mouse_items_t mouse;
+} km_items_t;	
 
 
 typedef union{

@@ -196,7 +196,7 @@ typedef enum {
 	XBOX_SERIESX,
 }xbox_series_t;
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack(1)
 #endif
 
@@ -374,7 +374,7 @@ typedef struct {
 }xbox_bt_report_t;			//17	xboxone,xboxxs都是这个结构体
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 

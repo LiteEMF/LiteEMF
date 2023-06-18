@@ -219,7 +219,7 @@ typedef enum {
 **	Parameters
 ********************************************************************************************************************/
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack(1)
 #endif
 
@@ -494,7 +494,7 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 

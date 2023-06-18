@@ -139,7 +139,7 @@
 **	Parameters
 ********************************************************************************************************************/
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack(1)
 #endif
 
@@ -158,7 +158,7 @@ typedef struct {
 
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 
