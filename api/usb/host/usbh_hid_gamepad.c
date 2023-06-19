@@ -95,7 +95,7 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

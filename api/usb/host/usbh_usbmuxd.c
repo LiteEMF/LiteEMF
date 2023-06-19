@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD))
 #include "api/usb/host/usbh.h"
 #include "app/usbmuxd/usbmuxd.h"
 
@@ -44,7 +44,7 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_usbmuxd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

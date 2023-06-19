@@ -15,6 +15,7 @@
 #include "bt_typedef.h"
 #include "api/hid/hid_dev_desc.h"
 #include "api/bt/bt_driver.h"
+#include "api/api_transport.h"
 #include "hal_bt.h"
 #include "utils/emf_utils.h"
 
@@ -111,8 +112,8 @@ RF_EVT_TX事件接收后可以根据fifo长度来判断是否填充按键数据
  *	范围 range(20~244)
 *******************************************************************/
 #ifndef APP_BT_ATT_MTU		//hid数据通道的MTU一般不超过32字节
-	#if BLE_CMD_MAX > 61
-	#define APP_BT_ATT_MTU   (BLE_CMD_MAX)
+	#if BLE_CMD_MTU > 61
+	#define APP_BT_ATT_MTU   (BLE_CMD_MTU)
 	#else					//不清楚为什么超过61会导致ios13.4鼠标描述符无作用
 	#define APP_BT_ATT_MTU   (61)					
 	#endif
@@ -138,7 +139,7 @@ typedef enum {
 	BT_BLEC 	= TR_BLEC,		
 	BT_EDRC 	= TR_EDRC,		
 	BT_BLE_RF 	= TR_BLE_RF,					//BLE模拟2.4G
-	BT_BLEC_RF 	= TR_BLEC_RF,	
+	BT_BLEC_RF 	= TR_BLE_RFC,	
 	BT_RF 		= TR_RF,			
 	BT_RFC 		= TR_RFC,	
 	BT_MAX 		= 8,
@@ -284,7 +285,7 @@ extern bt_evt_scan_t blec_scan_result;
 #if BT_SUPPORT & BIT_ENUM(TR_BLE_RF)
 extern api_bt_ctb_t m_ble_rf;
 #endif
-#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)					//ble central
+#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)					//ble central
 extern api_bt_ctb_t m_blec_rf;
 #endif
 #if BT_SUPPORT & BIT_ENUM(TR_EDRC)					//edr central

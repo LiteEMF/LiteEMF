@@ -44,6 +44,7 @@
 		"app_battery.h": "c",
 		"key_typedef.h": "c",
 		"api_gps.h": "c",
-		"emf.h": "c"
+		"emf.h": "c",
+		"app_iap2.h": "c"
 	}
 }

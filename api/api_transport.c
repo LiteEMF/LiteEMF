@@ -82,7 +82,7 @@ uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 		return EDRC_CMD_MTU;
 	case TR_BLE_RF	:
 		return BLE_RF_CMD_MTU;
-	case TR_BLEC_RF	:
+	case TR_BLE_RFC	:
 		return BLEC_RF_CMD_MTU;
 	case TR_RF		:
 		return RF_CMD_MTU;
@@ -124,7 +124,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 		case TR_BLEC:	
 		case TR_EDRC:
 		case TR_BLE_RF:
-		case TR_BLEC_RF:
+		case TR_BLE_RFC:
 		case TR_RF:
 		case TR_RFC:
 			if(DEV_TYPE_VENDOR == (phandle->index >> 8)){

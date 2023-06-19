@@ -22,7 +22,7 @@
 因此，VCP协议适用于需要通过串口与计算机通信的各种USB设备，如GPS接收器、遥控器、传感器等。
 ************************************************************************************************************/
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC))
 #include "api/usb/host/usbh.h"
 
 
@@ -90,7 +90,7 @@ error_t usbh_cdc_set_line_coding(uint8_t id, uint8_t itf, cdc_line_coding_t cons
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_cdc_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

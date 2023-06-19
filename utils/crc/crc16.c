@@ -15,7 +15,7 @@
  */
 
 
-#include "hw_config.h"
+
 #include "crc.h"
 #if  CRC16_EANBLE
 

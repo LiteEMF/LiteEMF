@@ -95,7 +95,7 @@ error_t usbh_disconnect(uint8_t id)
 		}
 	}else{
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
-		err =  usbh_hub_port_disable(id);
+		err = usbh_hub_port_disable(id);
 		if(ERROR_SUCCESS == err){
 			usbh_set_status(id, USB_STA_DETACHED, 0);
 		}
@@ -266,7 +266,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 				pclass = malloc_usbh_class();
 				if(NULL == pclass) break;
 
-				pclass->pdata = NULL;				//must null
+				pclass->pdat = NULL;				//must null
 				pclass->itf.if_num = pitf->bInterfaceNumber;
 				pclass->itf.if_alt = pitf->bAlternateSetting;
 				pclass->itf.num_endp = pitf->bNumEndpoints;

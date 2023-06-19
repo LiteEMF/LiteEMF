@@ -39,7 +39,7 @@ extern "C" {
 #define DEF_TR_BLEC			2
 #define DEF_TR_EDRC			3
 #define DEF_TR_BLE_RF		4				
-#define DEF_TR_BLEC_RF		5
+#define DEF_TR_BLE_RFC		5
 #define DEF_TR_RF			6
 #define DEF_TR_RFC			7
 
@@ -52,7 +52,7 @@ typedef enum{
 	TR_BLEC		= 2,
 	TR_EDRC		= 3,
 	TR_BLE_RF	= 4,				//BLE模拟2.4G	
-	TR_BLEC_RF	= 5,
+	TR_BLE_RFC	= 5,
 	TR_RF		= 6,
 	TR_RFC		= 7,
 	TR_USBD		= 8,

@@ -150,9 +150,9 @@ extern "C" {
         #define __PACKED            // == #pragma pack(1)
     #endif
 
-    #define pack()                  //for #pragma pack(n) used
+    #define pack(x)                  //for #pragma pack(n) used
 
-    #define GET_SP()  
+    #define GET_SP(x)  
 
     #if defined( __MODEL__ ) && ( 2 == __MODEL__ )     //TODO
 	    #define __BIG_ENDIAN

@@ -56,7 +56,7 @@ typedef struct
 	usb_endp_t 	endpin;
 	usb_endp_t 	endpout;
 
-	void		*pdata;				//注意内存释放
+	void		*pdat;				//注意内存释放
 	list_head_t list;
 } usbh_class_t;
 

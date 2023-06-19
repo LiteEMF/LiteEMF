@@ -26,9 +26,9 @@
 **	Hardware  Defined
 ********************************************************************************************************************/
 
-#if PS_P2_ENCRYPT_ENABLED
+#if defined PS_P2_ENCRYPT_ENABLED
 #define PS_READ_SECURITY_LEN		256
-#elif PS_7105_ENCRYPT_ENABLED
+#elif defined PS_7105_ENCRYPT_ENABLED
 #define PS_READ_SECURITY_LEN		1040
 #endif
 

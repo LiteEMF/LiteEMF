@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if (HIDD_SUPPORT & HID_PS_MASK) && (PS_P2_ENCRYPT_ENABLED || PS_7105_ENCRYPT_ENABLED)
+#if (HIDD_SUPPORT & HID_PS_MASK) && (defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED)
 #include  "ps_controller.h"
 #include  "api/api_tick.h"
 #include "api/api_iic_host.h"
@@ -113,10 +113,10 @@ void ps_encrypt_task(void *pa)
 		ps_encrypt.len = 0;
 		ps_encrypt.index = 0;
 
-		#if PS_P2_ENCRYPT_ENABLED
+		#if definedPS_P2_ENCRYPT_ENABLED
 		ps_encrypt.step = PS_WRITE_SECURITY;
 		logd("set PS_WRITE_SECURITY\n");
-		#elif PS_7105_ENCRYPT_ENABLED
+		#elif defined PS_7105_ENCRYPT_ENABLED
 		if(nxp7105_write_encrypt(ps_encrypt.index,NULL,0)){
 			ps_encrypt.step = PS_WRITE_SECURITY;
 			logd("set PS_WRITE_SECURITY\n");
@@ -130,14 +130,14 @@ void ps_encrypt_task(void *pa)
 			ps_encrypt.len = 0;
 			logd("set PS_READ_SECURITY\n");
 		}else{
-			#if PS_P2_ENCRYPT_ENABLED
+			#if defined PS_P2_ENCRYPT_ENABLED
 			if(p2_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
 				ps_encrypt.len += 16;
 				ps_encrypt.index++;
 			}else{
 				logd("iic write %d err!\n",ps_encrypt.index);
 			}
-			#elif PS_7105_ENCRYPT_ENABLED
+			#elif defined PS_7105_ENCRYPT_ENABLED
 			if(nxp7105_write_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],NXP7105_MTU)){
 				ps_encrypt.len += NXP7105_MTU;
 				ps_encrypt.index++;
@@ -152,14 +152,14 @@ void ps_encrypt_task(void *pa)
 			ps_encrypt.len = 0;
 			logd("set PS_CALCULATE_PHASE2\n");
 		}else{
-			#if PS_P2_ENCRYPT_ENABLED
+			#if defined PS_P2_ENCRYPT_ENABLED
 			if(p2_read_encrypt(ps_encrypt.index,&ps_encrypt_buf[ps_encrypt.len],16)){
 				ps_encrypt.len += 16;
 				ps_encrypt.index++;
 			}else{
 				logd("iic read %d err!\n",ps_encrypt.index);
 			}
-			#elif PS_7105_ENCRYPT_ENABLED
+			#elif defined PS_7105_ENCRYPT_ENABLED
 			uint8_t len=0;
 			if(ps_encrypt.index){		//第一条指令是获取地址不读取数据
 				len = MIN(NXP7105_MTU, PS_READ_SECURITY_LEN - ps_encrypt.len);

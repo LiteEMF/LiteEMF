@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA)))
 #include "utils/emf_utils.h"
 #include "api/usb/host/usbh.h"
 #include "app/km_typedef.h"
@@ -93,7 +93,7 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_k
                 if((pos->dev_type == DEV_TYPE_HID) && (pos->hid_type == HID_TYPE_KB)){
                     id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
-                    pitem = &((km_items_t*)pos->pdata)->kb.led;
+                    pitem = &((km_items_t*)pos->pdat)->kb.led;
                     if( pitem->report_length){
                         logd("usbh%d kb id%d set report=%x\n",id,pitem->report_id,set_port.val);
                         usbh_hid_set_report(id, pos->itf.if_num, HID_REPORT_TYPE_OUTPUT, pitem->report_id, &set_port.val,1);  
@@ -136,11 +136,11 @@ uint8_t kb_get_normal_key(hid_items_t *pitem, uint8_t* pkb, uint8_t kb_len, uint
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-    km_items_t *pkm_items = (km_items_t*)pclass->pdata;
+    km_items_t *pkm_items = (km_items_t*)pclass->pdat;
     hid_items_t *pitem;
     bool match_id = false;
     uint8_t i;
@@ -342,7 +342,7 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
 
         if(pitem->mouse.find || pitem->kb.find){
             pitem->magic = 1;
-            pclass->pdata = pitem;
+            pclass->pdat = pitem;
             if(HID_ITF_PROTOCOL_MOUSE == pclass->itf.if_pro){
                 pclass->hid_type = HID_TYPE_MOUSE;
             }else{
@@ -364,9 +364,9 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
 *******************************************************************/
 error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass) 
 {
-    if(NULL != pclass->pdata){
-        if( ((uintptr_t)pclass->pdata >= (uintptr_t)&m_km_items[0]) 
-            && ((uintptr_t)pclass->pdata <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
+    if(NULL != pclass->pdat){
+        if( ((uintptr_t)pclass->pdat >= (uintptr_t)&m_km_items[0]) 
+            && ((uintptr_t)pclass->pdat <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
             
             if(HID_TYPE_KB == pclass->hid_type){
                 memset(&usbh_kb, 0, sizeof(usbh_kb));
@@ -375,7 +375,7 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
                 memset(&usbh_mouse, 0, sizeof(usbh_mouse));
             }
 
-            memset(pclass->pdata, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
+            memset(pclass->pdat, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
         }
     }
 	return ERROR_SUCCESS;

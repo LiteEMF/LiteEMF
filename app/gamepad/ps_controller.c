@@ -22,10 +22,10 @@
 #if (API_AUDIO_ENABLE)
 #include "api/audio/api_audio.h"
 #endif
-#if USBD_HID_SUPPORT & HID_PS_MASK
+#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & HID_PS_MASK)
 #include "api/usb/device/usbd.h"
 #endif
-#if USBH_HID_SUPPORT & HID_PS_MASK
+#if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & HID_PS_MASK)
 #include "api/usb/host/usbh.h"
 #endif
 #if BT_ENABLE
@@ -724,11 +724,11 @@ void ps_controller_init(trp_handle_t *phandle)
 	memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
 	memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
 	
-	#if PS_P2_ENCRYPT_ENABLED || PS_7105_ENCRYPT_ENABLED
+	#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
 	ps_encrypt.step	= PS_IDLE;
 	#endif
 
-	#if PS_7105_ENCRYPT_ENABLED
+	#if defined PS_7105_ENCRYPT_ENABLED
 	nxp7105_init();
 	#endif
 	#endif

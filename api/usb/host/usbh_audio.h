@@ -15,6 +15,7 @@
 #include "utils/emf_typedef.h" 
 #include "api/usb/usb_typedef.h"
 #include "api/usb/usb_audio_typedef.h"
+#include "api/usb/host/usbh_core.h"
 
 #include "api/audio/api_audio.h"
 

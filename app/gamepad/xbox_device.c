@@ -20,7 +20,7 @@
 #if API_AUDIO_ENABLE
 #include "api/audio/api_audio.h"
 #endif
-#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 #include "api/usb/device/usbd.h"
 #endif
 #if BT_ENABLE
@@ -124,7 +124,7 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *k
 
 	if(0 == packet_len){
 		if(api_trp_is_usb(phandle->trp)){
-			#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+			#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 			usbd_dev_t *pdev = usbd_get_dev(phandle->id);
 
 			xboxp->id = XBOX_KEY_REP_CMD;
@@ -253,7 +253,7 @@ void get_xbox_info(xbox_info_t* infp)
 	memcpy(infp->unknown,xbox_info_unknow,sizeof(xbox_info_unknow));
 }
 
-#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 void xbox_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t  mic_buffer[64];
@@ -349,7 +349,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 	if ( 0 ==  len) return false;
 
 	if(api_trp_is_usb(phandle->trp)){
-		#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+		#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 		xbox_vol_ctrl_t vol_ctrl;
 		if(XBOX_KEY_REP_CMD == buf[0]){							//按键数据太多这里不处理
 			return false;
@@ -451,9 +451,11 @@ bool x360_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {
     bool ret = false;
 	rumble_t motor;
+	x360_usb_motor_t *motorp;
 
     if ( 0 ==  len) return false;
-	x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;	
+	
+	motorp = (x360_usb_motor_t *)buf;	
 	if (X360_RUMBLE_CMD == motorp->cmd){
 		#if APP_RUMBLE_ENABLE
 		app_rumble_set_duty(RUMBLE_L, motorp->motor1, 10000);

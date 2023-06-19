@@ -13,7 +13,7 @@
 **	Description:
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBD_BIT_ENABLE && USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC))
 #include "api/usb/device/usbd.h"
 
 #include "api/api_log.h"

@@ -21,5 +21,9 @@ $(OBJ):$(BUILD_DIR)/%.o:%.c
 
 sub_mudule:
 ifneq ($(SUB_DIR),)
-	@for dir in $(SUB_DIR); do $(MAKE) -C $$dir ; done
+	@for dir in $(SUB_DIR); do \
+		if [ -e "$$dir/Makefile" ]; then \
+			$(MAKE) -C $$dir; \
+		fi \
+	done 
 endif

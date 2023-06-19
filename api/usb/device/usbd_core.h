@@ -36,11 +36,11 @@ extern "C" {
 #define USBD_ENDP0_MTU			64
 #endif
 #ifndef USBD_SPEED_MODE
-#define USBD_SPEED_MODE		USB_SPEED_FULL
+#define USBD_SPEED_MODE		0		//0:full, 1 low, 2,high
 #endif
 
 #ifndef USBD_BCD_VERSION
-#if (USB_SPEED_LOW == USBD_SPEED_MODE)
+#if (1 == USBD_SPEED_MODE)
 	#define USBD_BCD_VERSION		0X110
 #else
 	#define USBD_BCD_VERSION		0X200

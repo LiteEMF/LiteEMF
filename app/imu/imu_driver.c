@@ -146,7 +146,9 @@ void imu_driver_task(void* pa)
         m_imu_init = Qmi8658_init(ACC_RANGE_8G, GYRO_RANGE_2000);
         #endif
 
-        if(!m_imu_init) loge_r("imu driver init error!\n");
+        if(!m_imu_init) {
+			loge_r("imu driver init error!\n");
+		}
 	}
 
 	UNUSED_VARIABLE(pa);

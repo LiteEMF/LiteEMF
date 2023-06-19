@@ -359,17 +359,17 @@ typedef struct {
   uint8_t bDescriptorType    ; ///< Descriptor Type, must be Class-Specific
   uint8_t bDescriptorSubType ; ///< Descriptor SubType one of above CDC_FUCN_DESC_
   struct {
-    uint32_t interrupted_dialtone   : 1; ///< 0 : Reports only dialtone (does not differentiate between normal and interrupted dialtone). 1 : Reports interrupted dialtone in addition to normal dialtone
-    uint32_t ringback_busy_fastbusy : 1; ///< 0 : Reports only dialing state. 1 : Reports ringback, busy, and fast busy states.
-    uint32_t caller_id              : 1; ///< 0 : Does not report caller ID. 1 : Reports caller ID information.
-    uint32_t incoming_distinctive   : 1; ///< 0 : Reports only incoming ringing. 1 : Reports incoming distinctive ringing patterns.
-    uint32_t dual_tone_multi_freq   : 1; ///< 0 : Cannot report dual tone multi-frequency (DTMF) digits input remotely over the telephone line. 1 : Can report DTMF digits input remotely over the telephone line.
-    uint32_t line_state_change      : 1; ///< 0 : Does not support line state change notification. 1 : Does support line state change notification
-    uint32_t TU_RESERVED0           : 2;
-    uint32_t TU_RESERVED1           : 16;
-    uint32_t TU_RESERVED2           : 8;
+    uint8_t interrupted_dialtone   : 1; ///< 0 : Reports only dialtone (does not differentiate between normal and interrupted dialtone). 1 : Reports interrupted dialtone in addition to normal dialtone
+    uint8_t ringback_busy_fastbusy : 1; ///< 0 : Reports only dialing state. 1 : Reports ringback, busy, and fast busy states.
+    uint8_t caller_id              : 1; ///< 0 : Does not report caller ID. 1 : Reports caller ID information.
+    uint8_t incoming_distinctive   : 1; ///< 0 : Reports only incoming ringing. 1 : Reports incoming distinctive ringing patterns.
+    uint8_t dual_tone_multi_freq   : 1; ///< 0 : Cannot report dual tone multi-frequency (DTMF) digits input remotely over the telephone line. 1 : Can report DTMF digits input remotely over the telephone line.
+    uint8_t line_state_change      : 1; ///< 0 : Does not support line state change notification. 1 : Does support line state change notification
+    uint8_t TU_RESERVED0           : 2;
+    uint16_t TU_RESERVED1          ;
+    uint8_t TU_RESERVED2           ;
   } bmCapabilities;
-}cdc_desc_func_telephone_call_state_reporting_capabilities_t;
+}cdc_desc_func_telephone_call_state_reporting_capabilities_t;		//TODO}cdc_desc_func_telephone_call_state_reporting_capabilities_t;
 
 
 //--------------------------------------------------------------------+

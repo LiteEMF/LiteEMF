@@ -13,8 +13,8 @@
 #include "compiler_abstraction.h"
 #include "hal_typedef.h"
 //std include
-#include <stdint.h>
-#include <stdbool.h>
+#include "stdint.h"
+#include "stdbool.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -177,7 +177,11 @@ typedef struct _bytes_array_t {
 #endif
 
 #ifndef UNUSED_VARIABLE
-#define UNUSED_VARIABLE(X)  ((void)(X))
+#if defined(__C51__)
+	#define UNUSED_VARIABLE(X)  (X = X)
+#else
+	#define UNUSED_VARIABLE(X)  ((void)(X))
+#endif
 #endif
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(X) UNUSED_VARIABLE(X)
@@ -250,6 +254,12 @@ typedef struct _bytes_array_t {
 	#ifndef doublec_t
 	typedef const double  code	doublec_t;
 	#endif
+	
+	#ifndef uintptr_t
+	typedef unsigned long uintptr_t;
+	#endif
+
+
 #else
     #ifndef const_t
 	#define const_t const

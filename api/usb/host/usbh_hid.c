@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA)))
 
 #include "api/usb/host/usbh.h"
 #include  "api/hid/hid_desc_parser.h"
@@ -164,7 +164,7 @@ uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

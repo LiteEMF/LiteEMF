@@ -6,6 +6,8 @@
 
 
 #include "adb_auth_sign.h"
+
+#if ADB_AUTH_SIGN_ENABLE
 #include "mbedtls/bignum.h"
 
 
@@ -125,4 +127,6 @@ cleanup:
 
     return ret;
 }
+
+#endif
 

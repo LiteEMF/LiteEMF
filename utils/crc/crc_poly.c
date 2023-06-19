@@ -87,6 +87,7 @@ uint32_t crc32_poly(uint32_t poly, uint16_t value) {
 }
 
 // LSB-first
+#if 0
 uint64_t crc64_poly(uint64_t poly, uint16_t value) {
     uint64_t crc;
     uint16_t j;
@@ -101,3 +102,4 @@ uint64_t crc64_poly(uint64_t poly, uint16_t value) {
     }
     return crc;
 }
+#endif

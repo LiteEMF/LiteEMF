@@ -14,6 +14,7 @@
 #define _usbh_hub_h
 #include "utils/emf_typedef.h" 
 #include "api/usb/usb_typedef.h"
+#include "api/usb/usb_hub_typedef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,7 @@ error_t usbh_hub_get_desc(uint8_t id, descriptor_hub_desc_t* pdesc);
 error_t usbh_hub_port_clear_feature(uint8_t id, uint8_t feature);  
 error_t usbh_hub_port_set_feature(uint8_t id, uint8_t feature); 
 error_t usbh_hub_port_get_status(uint8_t id, uint8_t* pstatus);  
+error_t usbh_hub_port_disable(uint8_t id);
 error_t usbh_hub_port_reset(uint8_t id);
 
 

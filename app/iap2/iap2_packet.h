@@ -76,14 +76,14 @@ typedef struct
 	uint8_t	 	SOFLSB;	/*0x40*/
 	uint16_t	length;
 	uint16_t	msg_id;
-	uint8_t	 	*pdata;
+	uint8_t	 	*pdat;
 } ipa2_ctrl_session_t;
 
 
 typedef struct{
 	uint16_t	length;		
 	uint16_t	id;
-	uint8_t		*pdata;
+	uint8_t		*pdat;
 } ipa2_msg_pa_t;
 
 enum _iap2_authent_ctrlsession_id{

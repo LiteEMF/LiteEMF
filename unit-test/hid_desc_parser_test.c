@@ -142,32 +142,32 @@ void hid_desc_parser_test(void)
         memset(&item, 0, sizeof(item));
   
         for(i=0; i<hid_info.reportItems; i++){
-            if(0 == item.items.kb.kb_fun.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.items.kb.kb_fun)){
+            if(0 == item.kb.kb_fun.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.kb.kb_fun)){
                     logd("usbh kb_fun:");
-                    hid_items_dump(&item.items.kb.kb_fun);
+                    hid_items_dump(&item.kb.kb_fun);
                     err = ERROR_SUCCESS;
                 }
             }
 
-            if(0 == item.items.kb.kb_normal.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.items.kb.kb_normal)){
+            if(0 == item.kb.kb_normal.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb.kb_normal)){
                     logd("usbh kb_normal:");
-                    hid_items_dump(&item.items.kb.kb_normal);
+                    hid_items_dump(&item.kb.kb_normal);
                     err = ERROR_SUCCESS;
                 }
-            }else if(0 == item.items.kb.kb2_normal.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.items.kb.kb2_normal)){
+            }else if(0 == item.kb.kb2_normal.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb.kb2_normal)){
                     logd("usbh kb2_normal:");
-                    hid_items_dump(&item.items.kb.kb2_normal);
+                    hid_items_dump(&item.kb.kb2_normal);
                     err = ERROR_SUCCESS;
                 }
             }
 
-            if(0 == item.items.kb.led.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_OUTPUT,0X07, KB_A, &item.items.kb.led)){
+            if(0 == item.kb.led.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_OUTPUT,0X07, KB_A, &item.kb.led)){
                     logd("usbh kb led:");
-                    hid_items_dump(&item.items.kb.led);
+                    hid_items_dump(&item.kb.led);
                 }
             }
         }

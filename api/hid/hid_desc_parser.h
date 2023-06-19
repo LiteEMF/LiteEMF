@@ -186,7 +186,7 @@ typedef struct {
 
 
 typedef struct {
-    uint32_t	data;              // Collection raw data
+    uint32_t	raw;              // Collection raw data
     uint16_t	usagePage;         // Usage page associated with current level of collection
     uint8_t 	firstUsageItem;    // Index of First Usage Item in the current collection
     uint8_t 	usageItems;        // Number of Usage Items in the current collection
@@ -211,7 +211,7 @@ typedef struct {
 }hid_usage_item_t;
 
 typedef struct {
-    bool    		isRange;   // If range of String Item is valid
+    uint8_t    		isRange;   // If range of String Item is valid
     uint16_t		index;     // String index for a String descriptor; allows a string to be associated with a particular item or control
     uint16_t		minimum;   // Specifies the first string index when assigning a group of sequential strings to controls in an array or bitmap
     uint16_t		maximum;   // Specifies the last string index when assigning a group of sequential strings to controls in an array or bitmap
@@ -226,8 +226,8 @@ typedef struct {
 
 typedef struct{
     // This set of members are used during parsing of Report descriptor , application does not normally need these details
-    bool haveUsageMax;          // True if report descriptor has a valid Usage Max
-    bool haveUsageMin;          // True if report descriptor has a valid Usage Min
+    uint8_t haveUsageMax;          // True if report descriptor has a valid Usage Max
+    uint8_t haveUsageMin;          // True if report descriptor has a valid Usage Min
     uint16_t rangeUsagePage;        // current usage page during parsing
     uint16_t usageMaximum;          // current usage maximum
     uint16_t usageMinimum;          // current usage minimum

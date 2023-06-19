@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 #include "api/usb/host/usbh.h"
 
 
@@ -113,7 +113,7 @@ error_t usbh_audio_endp_set_feature(uint8_t id, uint8_t endp, audio_clock_src_co
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_audio_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

@@ -28,13 +28,13 @@ extern "C" {
 #define  CRC8_TABLE_EANBLE 		1
 #endif
 #ifndef  CRC16_EANBLE
-#define  CRC16_EANBLE 			1
+#define  CRC16_EANBLE 			0
 #endif
 #ifndef  CRC16_TABLE16_EANBLE			//small flash size
 #define  CRC16_TABLE16_EANBLE 	0
 #endif
 #ifndef  CRC32_TABLE_EANBLE
-#define  CRC32_TABLE_EANBLE 	1
+#define  CRC32_TABLE_EANBLE 	0
 #endif
 
 

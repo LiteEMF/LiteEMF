@@ -19,7 +19,14 @@ all : $(OBJ) sub_mudule
 $(OBJ):$(BUILD_DIR)/%.o:%.c
 	$(DEBUG) $(CC) $(CFLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
-sub_mudule:
+sub_mudule:sub_mudule:
+ifneq ($(SUB_DIR),)
+	@for dir in $(SUB_DIR); do \
+		if [ -e "$$dir/Makefile" ]; then \
+			$(MAKE) -C $$dir; \
+		fi \
+	done 
+endif
 ifneq ($(SUB_DIR),)
 	@for dir in $(SUB_DIR); do $(MAKE) -C $$dir ; done
 endif

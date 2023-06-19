@@ -53,7 +53,7 @@ bt_evt_scan_t blec_scan_result;
 api_bt_ctb_t m_ble_rf;
 #endif
 
-#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)					//ble central
+#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)					//ble central
 api_bt_ctb_t m_blec_rf;
 #endif
 
@@ -186,7 +186,7 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 			api_btp = &m_ble_rf;
 			break;
 		#endif
-		#if BT_SUPPORT & BIT_ENUM(TR_BLEC_RF)
+		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)
 		case BT_BLEC_RF:
 			api_btp = &m_blec_rf;
 			break;

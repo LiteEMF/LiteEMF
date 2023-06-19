@@ -182,14 +182,14 @@ bool cp_wite_data(uint8_t reg, uint8_t* buf, uint16_t len)
 bool iap2_write(uint8_t* buf, uint16_t length, iap2_packet_ctrl_t ctrl)
 {
     bool ret = false;
-#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2))
     uint8_t s;
     s = usbd_class_in(0,DEV_TYPE_IAP2,0, buf, length);
     if (ERROR_SUCCESS == s)
         ret = true;
     ctrl = ctrl;
 
-#elif USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+#elif API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2))
     static uint16_t s_index = 0;
     static uint8_t s_pack_start = 0;
     static uint8_t s_buf[IAP2_USBH_HID_MTU];
@@ -332,7 +332,7 @@ bool iap2_power_update(ipa2_ctrl_session_t* pctrl_pa)
 {
     uint16_t i = 0;
     ipa2_msg_pa_t msg_pa;
-    uint8_t* param_p = pctrl_pa->pdata;
+    uint8_t* param_p = pctrl_pa->pdat;
     uint16_t param_len = pctrl_pa->length - IAP2_CTRL_SESSION_HEADER_LEN;
 
     if (NULL == param_p)
@@ -346,19 +346,19 @@ bool iap2_power_update(ipa2_ctrl_session_t* pctrl_pa)
         logd("	  power id=%x, ", msg_pa.id);
         switch (msg_pa.id) {
         case 0: // MaximumCrrentDrawnFormAccessory
-            logd("MaximumCrrent=%dmA\n", (msg_pa.pdata[0] << 8) + msg_pa.pdata[1]);
+            logd("MaximumCrrent=%dmA\n", (msg_pa.pdat[0] << 8) + msg_pa.pdat[1]);
             break;
         case 1: // DeviceBatteryWillChargeifPowerIsPresent
-            logd("Enable Charge=%d\n", (uint16_t)(msg_pa.pdata[0]));
+            logd("Enable Charge=%d\n", (uint16_t)(msg_pa.pdat[0]));
             break;
         case 4: // IsExternalChargerConnected
-            logd("IsExternalChargerConnected=%d\n", (uint16_t)(msg_pa.pdata[0]));
+            logd("IsExternalChargerConnected=%d\n", (uint16_t)(msg_pa.pdat[0]));
             break;
         case 5: // BatteryChargingState
-            logd("Charging=%d\n", (uint16_t)(msg_pa.pdata[0]));
+            logd("Charging=%d\n", (uint16_t)(msg_pa.pdat[0]));
             break;
         case 6: // BatteryChargeLevel
-            logd("battery=%d\n", (msg_pa.pdata[0] << 8) + msg_pa.pdata[1]);
+            logd("battery=%d\n", (msg_pa.pdat[0] << 8) + msg_pa.pdat[1]);
             break;
         default:
             logd("\n");
@@ -430,12 +430,12 @@ bool iap2_authent_challenge_send(ipa2_msg_pa_t* pmsg_pa)
     len = pmsg_pa->length - IAP2_MSG_PARA_HEADER_LEN;
 
     logd("Write Certificate_length = %d\r\n", len);
-    dumpd(pmsg_pa->pdata, len);
+    dumpd(pmsg_pa->pdat, len);
 
     auth_buf[0] = len >> 8;
     auth_buf[1] = len & 0xff;
     cp_wite_data(0x20, auth_buf, 2);
-    cp_wite_data(0x21, pmsg_pa->pdata, len);
+    cp_wite_data(0x21, pmsg_pa->pdat, len);
 
     auth_buf[0] = 0x01;
     cp_wite_data(0x10, auth_buf, 1);
@@ -490,11 +490,9 @@ bool iap2_starthid_send(void)
 
         desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_TOUCH, &pdesc);
         len += iap2_paramete_fill(iap2_tx_buffer + IAP2_PAR_OFFSET + len, (uint8_t*)pdesc, desc_len, 0x04); // pack id
-#if IOS134_ENABLED
-        if (m_gpad_mode == USB_IOS134_MT_MODE) {
-            iap2_tx_buffer[IAP2_PAR_OFFSET + len - desc_len + 3] = 0x05;
-        }
-#endif
+        
+        //ios 13.4
+        iap2_tx_buffer[IAP2_PAR_OFFSET + len - desc_len + 3] = 0x05;
 
         packet_len = iap2_ctrlsession_head_fill(iap2_tx_buffer, len, StartHID);
         iap2_tx_buffer[packet_len - 1] = check_sum_negative(iap2_tx_buffer + IAP2_PACKET_HEADER_LEN, packet_len - IAP2_PACKET_HEADER_LEN - 1);
@@ -651,7 +649,7 @@ static bool iap2_in_parse(uint8_t* p_pack, uint16_t pack_len)
         // Session id
         switch (CtrlSession.msg_id) { // mesg_id
         case RequestAuthenticationCertificate: // 0xAA00,
-            if (NULL == CtrlSession.pdata) {
+            if (NULL == CtrlSession.pdat) {
                 logd("iap2 IAP2_STA_REQ_CERTIFICATE...\n");
                 m_iap2_stu = IAP2_STA_REQ_CERTIFICATE;
             } else {
@@ -661,9 +659,9 @@ static bool iap2_in_parse(uint8_t* p_pack, uint16_t pack_len)
             break;
         case RequestAuthenticationChallengeResponse: // 0xAA02,
             // save value
-            iap2_paramete_parse(CtrlSession.pdata, &iAP2MsgPara);
-            memcpy(iap2_tx_buffer, iAP2MsgPara.pdata, iAP2MsgPara.length - IAP2_MSG_PARA_HEADER_LEN);
-            iAP2MsgPara.pdata = iap2_tx_buffer;
+            iap2_paramete_parse(CtrlSession.pdat, &iAP2MsgPara);
+            memcpy(iap2_tx_buffer, iAP2MsgPara.pdat, iAP2MsgPara.length - IAP2_MSG_PARA_HEADER_LEN);
+            iAP2MsgPara.pdat = iap2_tx_buffer;
 
             logd("iap2 IAP2_STA_REQ_AUTH_CHALLENGE...\n");
             m_iap2_stu = IAP2_STA_REQ_AUTH_CHALLENGE;
@@ -681,7 +679,7 @@ static bool iap2_in_parse(uint8_t* p_pack, uint16_t pack_len)
             break;
         case PowerUpdate: // 0xAE01,
             logd("iap2 rec PowerUpdate....\n");
-            dumpd(CtrlSession.pdata, CtrlSession.length - IAP2_CTRL_SESSION_HEADER_LEN);
+            dumpd(CtrlSession.pdat, CtrlSession.length - IAP2_CTRL_SESSION_HEADER_LEN);
             // iap2_power_update(&CtrlSession);
             m_iap2_stu = IAP2_STA_SUCCESS;
 
@@ -689,18 +687,18 @@ static bool iap2_in_parse(uint8_t* p_pack, uint16_t pack_len)
             // 如果电源欠压,可以先提升电压，然后发送AE03(POWER_SOURCE_UPDATE)处理）
             break;
         case AssistiveTouchInfo:
-            if (CtrlSession.pdata[IAP2_MSG_PARA_HEADER_LEN + 0]) { // 如果使能成功 可以发送数据
+            if (CtrlSession.pdat[IAP2_MSG_PARA_HEADER_LEN + 0]) { // 如果使能成功 可以发送数据
                 logd("---iap2 config success!!!---\n");
                 m_iap2_stu = IAP2_STA_SUCCESS;
             }
             break;
         case StartEA:
-            iap_EA_session_id = ((uint16_t)CtrlSession.pdata[9] << 8) | CtrlSession.pdata[10];
+            iap_EA_session_id = ((uint16_t)CtrlSession.pdat[9] << 8) | CtrlSession.pdat[10];
             logd("iap_EA_session_id=%d\n", iap_EA_session_id);
             break;
         default:
             logd("unknow mesg_id=%x\n", CtrlSession.msg_id);
-            dumpd(CtrlSession.pdata, CtrlSession.length - IAP2_CTRL_SESSION_HEADER_LEN);
+            dumpd(CtrlSession.pdat, CtrlSession.length - IAP2_CTRL_SESSION_HEADER_LEN);
             break;
         }
     }

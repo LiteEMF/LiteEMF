@@ -15,6 +15,7 @@
 #include "utils/emf_typedef.h" 
 #include "emf_math.h"
 
+#if SIN8_ENABLE
 #include "api/api_log.h"
 
 //@ref: https://github.com/Aircoookie/WLED/ file .pio\libdeps\esp01_1m_full\FastLED\src\lib8tion\trig8.h
@@ -122,9 +123,10 @@ int8_t cos8( uint8_t theta)
     return sin8( theta + 64);
 }
 
+#endif
 
 
-
+#if SIN16_ENABLE
 /// Fast 16-bit approximation of sin(x). This approximation never varies more than
 /// 0.69% from the floating point value you'd get by doing
 ///
@@ -168,3 +170,4 @@ int16_t cos16( uint16_t theta)
 {
     return sin16( theta + 16384);
 }
+#endif

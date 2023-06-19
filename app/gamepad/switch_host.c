@@ -18,7 +18,7 @@
 #include "api/api_tick.h"
 #include "app/gamepad/switch_host.h"
 
-#if USBH_HID_SUPPORT & HID_SWITCH_MASK
+#if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & HID_SWITCH_MASK)
 #include "api/usb/host/usbh.h"
 #endif
 

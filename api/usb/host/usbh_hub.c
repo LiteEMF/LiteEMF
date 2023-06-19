@@ -14,7 +14,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
+#if API_USBH_BIT_ENABLE && ((USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)))
 #include "api/usb/host/usbh.h"
 
 #include "api/api_log.h"
@@ -159,7 +159,7 @@ error_t usbh_hub_port_reset(uint8_t id)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
@@ -182,7 +182,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             }
         }
     }else{                  // Hub bits 1 to n are hub port events
-        for(i = 1; i < (uintptr_t)(pclass->pdata); i++){
+        for(i = 1; i < (uintptr_t)(pclass->pdat); i++){
             if(buf[0] & BIT(i)){
                 hub_id = id | i;
 
@@ -270,12 +270,12 @@ error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass)
     logd("hub%d_stu=",(uint16_t)id);	  dumpd(buf,4);
   
     // Set Port Power to be able to detect connection, starting with port 1
-    for(i = 1; i <= (uintptr_t)(pclass->pdata); i++){
+    for(i = 1; i <= (uintptr_t)(pclass->pdat); i++){
         err = usbh_hub_port_set_feature(id | i, HUB_FEATURE_PORT_POWER); 
         if(err) return err;
     }
 
-    for(i = 1; i <= (uintptr_t)(pclass->pdata); i++){
+    for(i = 1; i <= (uintptr_t)(pclass->pdat); i++){
         usbh_hub_port_get_status(id | i, hub_stu);
     }
 
@@ -298,7 +298,7 @@ error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
     if(err) return err;
 
     if(pclass->endpin.interval > 10) pclass->endpin.interval = 10;     //most hub interval is 0xff
-    pclass->pdata = (void*)((uintptr_t)desc.bNbrPorts);
+    pclass->pdat = (void*)((uintptr_t)desc.bNbrPorts);
     logd("hub port=%d\n",desc.bNbrPorts);
 
     return err;

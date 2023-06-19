@@ -22,7 +22,7 @@
 #if APP_BATTERY_ENABLE
 #include "app_battery.h"
 #endif
-#if USBD_HID_SUPPORT & HID_SWITCH_MASK
+#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & HID_SWITCH_MASK)
 #include "api/usb/device/usbd.h"
 #endif
 #if BT_ENABLE
@@ -93,7 +93,7 @@ switch_ctb_t switch_dev_ctb;
 //switch repot id,表示switch从机当前report模式,目前只对蓝牙模式有效, 蓝牙断开后要恢复0X3F
 
 
-#if (EDR_GAMEPAD_SUPPORT & BIT(DEV_TYPE_SWITCH))      //延时0.5s发送蓝牙数据包
+#if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)      //延时0.5s发送蓝牙数据包
 timer_t m_switch_bt_timer;  
 #endif
 
@@ -111,7 +111,6 @@ static timer_t swtich_report_timer;         //report timer
 static void switch_dump_cmd_in(char* tag, uint8_t* buf, uint16_t len)
 {
     static uint8_t s_cmd, s_sub_cmd;
-    static uint32_t s_pa;
 
     switch_ctrl_replies_t* switch_repliesp=(switch_ctrl_replies_t*)buf;
     
@@ -389,10 +388,10 @@ uint16_t switch_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, u
 
     if(TR_USBD == phandle->trp || SWITCH_STANDARD_REPORT_ID == switch_dev_ctb.report_mode){
         packet_len = switch_standard_key_pack(phandle,keyp,buf,len);
-    #if (EDR_GAMEPAD_SUPPORT & BIT(DEV_TYPE_SWITCH))
-    }else if(SWITCH_LARGE_REPORT_ID == m_switch_report_mode){
+    #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
+    }else if(SWITCH_LARGE_REPORT_ID == switch_dev_ctb.report_mode){
         packet_len = switch_large_key_pack(phandle,keyp,buf,len);
-    }else if(SWITCH_NORMAL_REPORT_ID == m_switch_report_mode){
+    }else if(SWITCH_NORMAL_REPORT_ID == switch_dev_ctb.report_mode){
         if(m_systick - m_switch_bt_timer > 500){
             packet_len = switch_normal_key_pack(phandle,keyp,buf,len);
         }
@@ -476,7 +475,7 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
     }
     case SUB_SET_INPUT_REPORT_MODE:
         switch_dev_ctb.report_mode = switch_ctrlp->cmd_data[0];
-        logi("m_switch_report_mode=%x\n",switch_dev_ctb.report_mode);
+        logi("switch_report_mode=%x\n",switch_dev_ctb.report_mode);
         break;
     case SUB_TRIGGER_BUTTONS_ELAPSED_TIME:
         sub_ack = 0x83;
@@ -497,7 +496,7 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         switch_dev_ctb.vibration_enable = switch_ctrlp->cmd_data[0];
         break;
     case SUB_SET_HCI_STATE:
-        #if (EDR_GAMEPAD_SUPPORT & BIT(DEV_TYPE_SWITCH))          //延时0.5s发送蓝牙数据包
+        #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)          //延时0.5s发送蓝牙数据包
         // if(m_edr_enable) api_bt_enable(BT_EDR,true);     //TODO 调试用
         #endif
         break;
@@ -663,13 +662,16 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
     case SWITCH_USB_BAUDRATE:       //0x03
         length = sizeof(replies);
         break;
-    case SWITCH_USB_DIS_TIMEOUT:       //0x04
-        logi("switch dev Handshake start\n");
-        #if USB_DEV_ENABLED
-        usbd_dev_ready = true;
+    case SWITCH_USB_DIS_TIMEOUT: {      //0x04
+        #if API_USBD_BIT_ENABLE
+        usbd_dev_t *pdev = usbd_get_dev(id);
+        pdev->ready = true;
+        logd_g("usbd%d ready...\n",id);
         #endif
+        logi("switch dev Handshake start\n");
         ret = true;
         break;
+    }
     case SWITCH_USB_ENABLE_TIMEOUT:     //0x05
         ret = true;
         break;

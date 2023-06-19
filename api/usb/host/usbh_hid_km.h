@@ -25,7 +25,9 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef MAX_KM_ITEMS_NUM
 #define MAX_KM_ITEMS_NUM		6
+#endif
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
@@ -37,13 +39,14 @@ typedef struct{
 	hid_items_t kb2_normal;	//部分键盘会有两个report id
 	hid_items_t led;		
 }kb_items_t;
+
 typedef struct{
 	uint8_t find;
 	hid_items_t button;
 	hid_items_t x;
 	hid_items_t y;
 	hid_items_t w;
-}mouse_items_t;;
+}mouse_items_t;
 
 typedef struct{					
 	uint8_t		magic;			//0: free, 非0: used

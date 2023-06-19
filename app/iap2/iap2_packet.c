@@ -163,9 +163,9 @@ bool iap2_paramete_parse(uint8_t* data_ptr, ipa2_msg_pa_t* pmsg_pa)
     pmsg_pa->id = (uint16_t)((temp1 << 8) | temp2);
 
     if (pmsg_pa->length > IAP2_MSG_PARA_HEADER_LEN) {
-        pmsg_pa->pdata = &data_ptr[4];
+        pmsg_pa->pdat = &data_ptr[4];
     } else {
-        pmsg_pa->pdata = NULL;
+        pmsg_pa->pdat = NULL;
     }
     return true;
 }
@@ -174,7 +174,7 @@ static bool iap2_hid_component_parse(ipa2_msg_pa_t* pmsg_pa)
 {
     uint16_t i = 0;
     ipa2_msg_pa_t msg_pa;
-    uint8_t* param_p = pmsg_pa->pdata;
+    uint8_t* param_p = pmsg_pa->pdat;
     uint16_t param_len = pmsg_pa->length - IAP2_MSG_PARA_HEADER_LEN;
 
     if (NULL == param_p)
@@ -189,25 +189,25 @@ static bool iap2_hid_component_parse(ipa2_msg_pa_t* pmsg_pa)
         switch (msg_pa.id) {
         case 0: // HIDComponentIdentifier
             logd("id=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         case 1: // HIDComponentName_Ptr
-            logd("%s\n", msg_pa.pdata);
+            logd("%s\n", msg_pa.pdat);
             break;
         case 2: // HIDComponentFunction
             logd("fun=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         case 3: // TransportComponentIdentifier
             logd("trp id=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         case 4: // TransportInterfaceNumber
             logd("trp num=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         default:
@@ -222,7 +222,7 @@ static bool iap2_transport_component_parse(ipa2_msg_pa_t* pmsg_pa)
 {
     uint16_t i = 0;
     ipa2_msg_pa_t msg_pa;
-    uint8_t* param_p = pmsg_pa->pdata;
+    uint8_t* param_p = pmsg_pa->pdat;
     uint16_t param_len = pmsg_pa->length - IAP2_MSG_PARA_HEADER_LEN;
 
     if (NULL == param_p)
@@ -237,18 +237,18 @@ static bool iap2_transport_component_parse(ipa2_msg_pa_t* pmsg_pa)
         switch (msg_pa.id) {
         case 0: // HIDComponentIdentifier
             logd("id=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         case 1: // HIDComponentName_Ptr
-            logd("%s\n", msg_pa.pdata);
+            logd("%s\n", msg_pa.pdat);
             break;
         case 2: // TrpSupportsIAP2Connection
             logd("iap suupport\n");
             break;
         case 3: // USBDeviceSupportsAudioSP
             logd("rate=");
-            dumpd(msg_pa.pdata,
+            dumpd(msg_pa.pdat,
                 msg_pa.length - IAP2_MSG_PARA_HEADER_LEN);
             break;
         default:
@@ -269,20 +269,20 @@ void iap2_identification_parse(ipa2_msg_pa_t* pmsg_pa)
     case SerialNumber_IDMSG: // 3,
     case FirmwareVersion_IDMSG: // 4,
     case HardwareVersion_IDMSG: // 5,
-        logd("%s\n", (char*)pmsg_pa->pdata);
+        logd("%s\n", (char*)pmsg_pa->pdat);
         break;
     case MessagesSentByAccessory_IDMSG: // 6,
     case MessagesReceivedFromDevice_IDMSG: // 7,
     case PowerSourceType_IDMSG: // 8,
     case MaxCurDrawnFromDevice_IDMSG: // 9,
     case SupportedExternalAccessoryProtocol_IDMSG: // 10,
-        dumpd(pmsg_pa->pdata,
+        dumpd(pmsg_pa->pdat,
             pmsg_pa->length - IAP2_MSG_PARA_HEADER_LEN);
         break;
     case PreferredAppBundleSeedIdentifier_IDMSG: // 11,
     case CurrentLanguage_IDMSG: // 12,
     case SupportedLanguage_IDMSG: // 13,
-        logd("%s\n", (char*)pmsg_pa->pdata);
+        logd("%s\n", (char*)pmsg_pa->pdat);
         break;
     case SerialTransportComponent_IDMSG: // 14,
     case USBDeviceTransportComponent_IDMSG: // 15,
@@ -297,7 +297,7 @@ void iap2_identification_parse(ipa2_msg_pa_t* pmsg_pa)
         iap2_hid_component_parse(pmsg_pa);
         break;
     case LocationInformationComponent_IDMSG: // 22,
-        dumpd(pmsg_pa->pdata,
+        dumpd(pmsg_pa->pdat,
             pmsg_pa->length - IAP2_MSG_PARA_HEADER_LEN);
         break;
     default:
@@ -310,7 +310,7 @@ bool iap2_msg_parse(ipa2_ctrl_session_t* pctrl_session)
 {
     uint16_t i = 0;
     ipa2_msg_pa_t msg_pa;
-    uint8_t* param_p = pctrl_session->pdata;
+    uint8_t* param_p = pctrl_session->pdat;
     uint16_t param_len = pctrl_session->length - IAP2_CTRL_SESSION_HEADER_LEN;
 
     if (NULL == param_p)
@@ -386,9 +386,9 @@ bool iap2_ctrlsession_parse(ipa2_packet_t* ppacket, ipa2_ctrl_session_t* pctrl_s
     logd("msg_id=0x%x,len=%d\r\n", pctrl_session->msg_id, pctrl_session->length);
 
     if (pctrl_session->length > 6) {
-        pctrl_session->pdata = &ppacket->ppayload[6];
+        pctrl_session->pdat = &ppacket->ppayload[6];
     } else {
-        pctrl_session->pdata = NULL;
+        pctrl_session->pdat = NULL;
     }
 
     return true;

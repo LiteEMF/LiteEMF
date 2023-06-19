@@ -18,7 +18,7 @@
 #include  "gamepad_controller.h"		//TODO
 #include  "api/api_tick.h"
 
-#if USBH_HID_SUPPORT & HID_XBOX_MASK
+#if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & HID_XBOX_MASK)
 #include  "api/usb/host/usbh.h"
 #endif
 
@@ -217,7 +217,7 @@ static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, ap
 **  Function
 ******************************************************************************************************/
 
-#if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+#if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 void xbox_spk_transfer(uint8_t id, usb_endp_t *endpp, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t spk_buf[192+6];

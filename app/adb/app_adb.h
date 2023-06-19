@@ -23,9 +23,6 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 
-#ifndef ADB_AUTH_SIGN_ENABLE
-#define ADB_AUTH_SIGN_ENABLE 	1
-#endif
 
 
 #define MAX_PAYLOAD 1024

@@ -856,7 +856,7 @@ typedef struct {
             uint8_t recipient :  5; ///< Recipient type tusb_request_recipient_t.
             uint8_t type      :  2; ///< Request type tusb_request_type_t.
             uint8_t direction :  1; ///< Direction type. tusb_dir_t
-        } bit;
+        } bits;
         
         uint8_t val;
     }bmRequestType;
@@ -900,7 +900,7 @@ typedef struct  {
     int8_t bMin             ; /*The setting for the MIN attribute of the nth subrange of the addressed Control*/
     int8_t bMax             ; /*The setting for the MAX attribute of the nth subrange of the addressed Control*/
     uint8_t bRes            ; /*The setting for the RES attribute of the nth subrange of the addressed Control*/
-  } subrange[]              ;
+  } subrange[1]              ;
 } audio_control_range_1_t;
 
 // 5.2.3.2 2-byte Control RANGE Parameter Block
@@ -910,7 +910,7 @@ typedef struct  {
     int16_t bMin            ; /*The setting for the MIN attribute of the nth subrange of the addressed Control*/
     int16_t bMax            ; /*The setting for the MAX attribute of the nth subrange of the addressed Control*/
     uint16_t bRes           ; /*The setting for the RES attribute of the nth subrange of the addressed Control*/
-  } subrange[]              ;
+  } subrange[1]              ;
 } audio_control_range_2_t;
 
 // 5.2.3.3 4-byte Control RANGE Parameter Block
@@ -920,7 +920,7 @@ typedef struct  {
     int32_t bMin            ; /*The setting for the MIN attribute of the nth subrange of the addressed Control*/
     int32_t bMax            ; /*The setting for the MAX attribute of the nth subrange of the addressed Control*/
     uint32_t bRes           ; /*The setting for the RES attribute of the nth subrange of the addressed Control*/
-  } subrange[]              ;
+  } subrange[1]              ;
 } audio_control_range_4_t;
 
 // 5.2.3.1 1-byte Control RANGE Parameter Block

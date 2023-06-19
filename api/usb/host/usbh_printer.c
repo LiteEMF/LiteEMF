@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER))
 #include "api/usb/host/usbh.h"
 
 
@@ -44,7 +44,7 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_printer_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

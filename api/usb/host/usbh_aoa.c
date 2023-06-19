@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA))
 #include "api/usb/host/usbh.h"
 #include "api/hid/hid_dev_desc.h"
 
@@ -153,7 +153,7 @@ error_t usbh_aoa_hid_out(uint8_t index, uint8_t *buf, uint8_t len)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdata used storage hub port numbers	
+** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
 void usbh_aoa_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {

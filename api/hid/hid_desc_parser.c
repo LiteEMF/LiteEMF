@@ -150,13 +150,16 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
         logd("Report   :%x\n",i);
         lreport = &pinfo->item_list.reportList[i];
         logd("\tReportID :%x\n",lreport->report_id);
-        if (lreport->inputBits > 0)
+        if (lreport->inputBits > 0){
             logd("\tInbits   :%x\n",lreport->inputBits);
-        if (lreport->outputBits > 0)
+		}
+        if (lreport->outputBits > 0){
             logd("\tOutbits  :%x\n",lreport->outputBits);
-        if (lreport->featureBits > 0)
+		}
+        if (lreport->featureBits > 0){
             logd("\tFeatbits :%x\n",lreport->featureBits);
-        }
+		}
+    }
     for (i=0; i<pinfo->reportItems; i++) {
         logd("------------------------\n");
         logd("ReportItem  :%x\n",i);

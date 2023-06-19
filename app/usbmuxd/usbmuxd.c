@@ -25,7 +25,7 @@
 
 
 #include "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD))
 #include "api/usb/host/usbh.h"
 
 #include "api/api_tick.h"

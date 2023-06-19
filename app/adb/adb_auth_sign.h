@@ -19,6 +19,11 @@
 extern "C" {
 #endif
 
+#ifndef ADB_AUTH_SIGN_ENABLE
+#define ADB_AUTH_SIGN_ENABLE 	0
+#endif
+
+
 #define SIGN_SIZE 256
 #define SHA1_SIZE 20
 

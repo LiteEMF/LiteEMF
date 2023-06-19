@@ -13,7 +13,7 @@
 #ifndef _emf_mem_h
 #define _emf_mem_h
 #include "utils/emf_typedef.h" 
-
+#include "hw_config.h" 
 #include "hal_mem.h" 
 #ifdef __cplusplus
 extern "C" {

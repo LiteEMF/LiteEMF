@@ -54,13 +54,8 @@
 *   writeLen: data length to write
 *   *writeBuf: data buffer to write
 *	
-* Note: I2C interface, define USER_INTERFACE_I2C (1)
-*       SPI interface, define USER_INTERFACE_I2C (0)
 *	
 ******************************************************************/
-#define USER_INTERFACE_I2C		(1)
-
-#if USER_INTERFACE_I2C
 
 /**
  * \brief
@@ -92,7 +87,7 @@ bool I2C_Write_NBytes(	unsigned char devAddr,
 	//your I2C interface code:
 	//......
 	#ifdef HW_IIC_MAP
-  	return api_iic_host_write(IMU_SH3001_ID,devAddr,regAddr,writeBuf,writeLen);
+  	return api_iic_host_write(IMU_SH3001_ID,devAddr,(uint16_t)regAddr,(uint8_t const *)writeBuf,(uint16_t)writeLen);
 	#else
 	return true;
 	#endif
@@ -111,57 +106,11 @@ bool I2C_Isr_Read_NBytes(	unsigned char devAddr,
 	//your I2C interface code:
 	//......
 	#ifdef HW_IIC_MAP
-  	return api_iic_host_isr_read(IMU_SH3001_ID,devAddr,regAddr,readBuf,readLen);
+  	return api_iic_host_isr_read(IMU_SH3001_ID,(uint16_t)devAddr,regAddr,readBuf,(uint16_t)readLen);
 	#else
 	return true;
 	#endif
 }
-
-
-IMU_read    SH3001_read     = I2C_Read_NBytes;
-IMU_write   SH3001_write    = I2C_Write_NBytes;
-IMU_read    SH3001_isr_read     = I2C_Isr_Read_NBytes;
-
-#else
-
-bool SPI_readNBytes (	unsigned char devAddr, 
-                                unsigned char regAddr, 
-                                unsigned char readLen, 
-                                unsigned char *readBuf)
-{
-	//your SPI interface code:
-
-	//For example:	
-	//unsigned char u8Data;		
-	//devAddr = devAddr;	
-	//u8Data = (regAddr > 0x7F) ? 0x01 : 0x00;
-	//SPIWrite(SH3001_SPI_REG_ACCESS, &u8Data, 1);
-	
-	//SPIRead((regAddr | 0x80), readBuf, readLen);	
-	return (SH3001_TRUE);
-}
-
-bool SPI_writeNBytes(	unsigned char devAddr, 
-                                unsigned char regAddr, 
-                                unsigned char writeLen, 
-                                unsigned char *writeBuf)
-{
-	//your SPI interface code:
-	
-	//For example: 
-	//unsigned char u8Data;	
-	//devAddr = devAddr;	
-	//u8Data = (regAddr > 0x7F) ? 0x01 : 0x00;
-	//SPIWrite(SH3001_SPI_REG_ACCESS, &u8Data, 1);
-	
-	//SPIWrite((regAddr & 0x7F), writeBuf, writeLen);
-	return (SH3001_TRUE);
-}																
-
-IMU_read 	SH3001_read		= SPI_readNBytes;
-IMU_write	SH3001_write	= SPI_writeNBytes;
-
-#endif
 
 
 /******************************************************************
@@ -213,16 +162,16 @@ static void SH3001_SoftReset(void)
     unsigned char regData = 0;	
     
   	regData = 0x84;
-	SH3001_write(SH3001_ADDRESS, 0xD4, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
 	delay_ms(1);
   	regData = 0x04;
-	SH3001_write(SH3001_ADDRESS, 0xD4, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);		
 	delay_ms(1);
 	regData = 0x08;
-	SH3001_write(SH3001_ADDRESS, 0x2F, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0x2F, 1, &regData);
 	delay_ms(1);
 	regData = 0x73;
-	SH3001_write(SH3001_ADDRESS, 0x00, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0x00, 1, &regData);
 	delay_ms(50);
 }	
 
@@ -242,19 +191,19 @@ static void SH3001_ADCReset(void)
 	
 	for(i=0; i<2; i++)
 	{
-		SH3001_read(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+		I2C_Read_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 	}	
 	
 	regData[0] = (regData[0] & 0xFC) | 0x01;
 	regData[1] = (regData[1] & 0xF9) | 0x02;
-    SH3001_write(SH3001_ADDRESS, 0xD5, 1, &regData[1]);	
-    SH3001_write(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
+    I2C_Write_NBytes(SH3001_ADDRESS, 0xD5, 1, &regData[1]);	
+    I2C_Write_NBytes(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
 	delay_ms(1);
 	regData[0] = (regData[0] & 0xFC) | 0x02;
-	SH3001_write(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
 	delay_ms(1);
 	regData[1] = (regData[1] & 0xF9);
-	SH3001_write(SH3001_ADDRESS, 0xD5, 1, &regData[1]);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD5, 1, &regData[1]);
 	delay_ms(50); 
 }	
 
@@ -270,12 +219,12 @@ static void SH3001_CVAReset(void)
 {
     unsigned char regData = 0;	
     
-	SH3001_read(SH3001_ADDRESS, 0xD4, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);	
 	regData |= 0x08;
-	SH3001_write(SH3001_ADDRESS, 0xD4, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
 	delay_ms(10);
   	regData &= 0xF7;
-	SH3001_write(SH3001_ADDRESS, 0xD4, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
 }	
 
 /******************************************************************
@@ -295,7 +244,7 @@ static void SH3001_DriveStart(void)
 	
 	for(i=0; i<3; i++)
 	{
-		SH3001_read(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+		I2C_Read_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 	}	
 	
 	regDataBack[0] = 0xBF;
@@ -304,14 +253,14 @@ static void SH3001_DriveStart(void)
 	
 	for(i=0; i<3; i++)
 	{
-		SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regDataBack[i]);	
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regDataBack[i]);	
 	}	
 	
 	delay_ms(100);
 	
 	for(i=0; i<3; i++)
 	{
-		SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);;	
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);;	
 	}
 	
 	delay_ms(50);
@@ -341,7 +290,7 @@ static void SH3001_ModuleReset(void)
 	
 	//set INT and INT1 Pin to Open-drain, in order to measure chip current 
 	//regData = 0x00;
-	//SH3001_write(SH3001_ADDRESS, 0x44, 1, &regData);	
+	//I2C_Write_NBytes(SH3001_ADDRESS, 0x44, 1, &regData);	
 }	
 
 
@@ -376,14 +325,14 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		
 	for(i=0; i<11; i++)
 	{
-		SH3001_read(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+		I2C_Read_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 	}
 	
 	switch(powerMode)
 	{
 	case SH3001_NORMAL_MODE:
 		// restore accODR
-		SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &storeAccODR);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &storeAccODR);
 		
 		regData[0] = (regData[0] & 0xF8);
 		regData[1] = (regData[1] & 0x7F);
@@ -396,9 +345,9 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0xF7);
 		for(i=0; i<8; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
-		SH3001_write(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
 		
 		regData[7] = (regData[7] & 0x87);
 		regData[8] = (regData[8] & 0x1F);
@@ -406,7 +355,7 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0x1F);
 		for(i=7; i<11; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}		
 		SH3001_DriveStart();
 		SH3001_ADCReset();
@@ -415,9 +364,9 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 	
 	case SH3001_SLEEP_MODE:
 		// store current acc ODR
-		SH3001_read(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &storeAccODR);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &storeAccODR);
 		// set acc ODR=1000Hz
-		SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &accODR);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &accODR);
 	
 		regData[0] = (regData[0] & 0xF8) | 0x07;
 		regData[1] = (regData[1] & 0x7F) | 0x80;
@@ -430,9 +379,9 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0xF7);
 		for(i=0; i<8; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
-		SH3001_write(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
 		
 		regData[7] = (regData[7] & 0x87);
 		regData[8] = (regData[8] & 0x1F);
@@ -440,7 +389,7 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0x1F);
 		for(i=7; i<11; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
 		return (SH3001_TRUE);
 		
@@ -456,9 +405,9 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0xF7);
 		for(i=0; i<8; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
-		SH3001_write(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
 		
 		regData[7] = (regData[7] & 0x87);
 		regData[8] = (regData[8] & 0x1F);
@@ -466,7 +415,7 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0x1F) | 0xE0;
 		for(i=7; i<11; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
 		return (SH3001_TRUE);
 		
@@ -482,9 +431,9 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0xF7);
 		for(i=0; i<8; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
-		SH3001_write(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
+		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[10], 1, &regData[10]);
 		
 		regData[7] = (regData[7] & 0x87) | 0x78;
 		regData[8] = (regData[8] & 0x1F) | 0xE0;
@@ -492,7 +441,7 @@ unsigned char SH3001_SwitchPowerMode(unsigned char powerMode)
 		regData[10] = (regData[10] & 0x1F);
 		for(i=7; i<11; i++)
 		{
-			SH3001_write(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
+			I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);	
 		}
 		return (SH3001_TRUE);		
 	
@@ -529,22 +478,22 @@ static void SH3001_Acc_Config(unsigned char accODR,
     unsigned char regData = 0;	
 	
 	// enable acc digital filter
-	SH3001_read(SH3001_ADDRESS, SH3001_ACC_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF0, 1, &regData);
 	regData |= 0x01;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF0, 1, &regData);
 	
 	// set acc ODR
 	storeAccODR = accODR;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &accODR);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF1, 1, &accODR);
 	
 	// set acc Range
-	SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF2, 1, &accRange);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF2, 1, &accRange);
 		
 	// bypass acc low pass filter or not
-	SH3001_read(SH3001_ADDRESS, SH3001_ACC_CONF3, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF3, 1, &regData);
 	regData &= 0x17;
 	regData |= (accCutOffFreq | accFilterEnble);
-	SH3001_write(SH3001_ADDRESS, SH3001_ACC_CONF3, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACC_CONF3, 1, &regData);
 }
 
 
@@ -579,23 +528,23 @@ static void SH3001_Gyro_Config(	unsigned char gyroODR,
     unsigned char regData = 0;	
 	
 	// enable gyro digital filter
-	SH3001_read(SH3001_ADDRESS, SH3001_GYRO_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF0, 1, &regData);
 	regData |= 0x01;
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF0, 1, &regData);
 	
 	// set gyro ODR
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF1, 1, &gyroODR);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF1, 1, &gyroODR);
 	
 	// set gyro X\Y\Z range
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF3, 1, &gyroRangeX);
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF4, 1, &gyroRangeY);
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF5, 1, &gyroRangeZ);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF3, 1, &gyroRangeX);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF4, 1, &gyroRangeY);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF5, 1, &gyroRangeZ);
 		
 	// bypass gyro low pass filter or not
-	SH3001_read(SH3001_ADDRESS, SH3001_GYRO_CONF2, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF2, 1, &regData);
 	regData &= 0xE3;
 	regData |= (gyroCutOffFreq | gyroFilterEnble);
-	SH3001_write(SH3001_ADDRESS, SH3001_GYRO_CONF2, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF2, 1, &regData);
 }
 
 
@@ -617,10 +566,10 @@ static void SH3001_Temp_Config(	unsigned char tempODR,
     unsigned char regData = 0;	
 	
 	// enable temperature, set ODR
-	SH3001_read(SH3001_ADDRESS, SH3001_TEMP_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_TEMP_CONF0, 1, &regData);
 	regData &= 0x4F;
 	regData |= (tempODR | tempEnable);
-	SH3001_write(SH3001_ADDRESS, SH3001_TEMP_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_TEMP_CONF0, 1, &regData);
 }
 
 
@@ -638,10 +587,10 @@ float SH3001_GetTempData(void)
     unsigned short int tempref[2] = {0};
 	
 	// read temperature data, unsigned 12bits;   SH3001_TEMP_CONF0..SH3001_TEMP_CONF1
-	SH3001_read(SH3001_ADDRESS, SH3001_TEMP_CONF0, 2, &regData[0]);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_TEMP_CONF0, 2, &regData[0]);
 	tempref[0] = ((unsigned short int)(regData[0] & 0x0F) << 8) | regData[1];
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_TEMP_ZL, 2, &regData[0]);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_TEMP_ZL, 2, &regData[0]);
 	tempref[1] = ((unsigned short int)(regData[1] & 0x0F) << 8) | regData[0];	
 	
 	return ( (((float)(tempref[1] - tempref[0]))/16.0f) + 25.0f );
@@ -679,16 +628,16 @@ void SH3001_INT_Enable(	unsigned short int intType,
 	// Z axis change between UP to DOWN
 	if((intType & 0x0040) == SH3001_INT_UP_DOWN_Z)
 	{
-		SH3001_read(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
 		regData[0] = (intEnable == SH3001_INT_ENABLE) \
                      ? (regData[0] | 0x40) : (regData[0] & 0xBF);
-		SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
 	}	
 	
 	if((intType & 0xFF1F))
 	{	
 		// enable or disable INT
-		SH3001_read(SH3001_ADDRESS, SH3001_INT_ENABLE0, 2, &regData[0]);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_ENABLE0, 2, &regData[0]);
 		u16IntVal = ((unsigned short int)regData[0] << 8) | regData[1];
 		
 		u16IntVal = (intEnable == SH3001_INT_ENABLE) \
@@ -696,12 +645,12 @@ void SH3001_INT_Enable(	unsigned short int intType,
     
 		regData[0] = (unsigned char)(u16IntVal >> 8);
 		regData[1] = (unsigned char)(u16IntVal);		
-		SH3001_write(SH3001_ADDRESS, SH3001_INT_ENABLE0, 1, &regData[0]);
-		SH3001_write(SH3001_ADDRESS, SH3001_INT_ENABLE1, 1, &regData[1]);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_ENABLE0, 1, &regData[0]);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_ENABLE1, 1, &regData[1]);
 							
 		
 		// mapping interrupt to INT pin or INT1 pin
-		SH3001_read(SH3001_ADDRESS, SH3001_INT_PIN_MAP0, 2, &regData[0]);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_PIN_MAP0, 2, &regData[0]);
 		u16IntVal = ((unsigned short int)regData[0] << 8) | regData[1];
     
 		u16IntTemp = (intType << 1) & 0xE03E;
@@ -716,8 +665,8 @@ void SH3001_INT_Enable(	unsigned short int intType,
 			
 		regData[0] = (unsigned char)(u16IntVal >> 8);
 		regData[1] = (unsigned char)(u16IntVal);
-		SH3001_write(SH3001_ADDRESS, SH3001_INT_PIN_MAP0, 1, &regData[0]);
-		SH3001_write(SH3001_ADDRESS, SH3001_INT_PIN_MAP1, 1, &regData[1]);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_PIN_MAP0, 1, &regData[0]);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_PIN_MAP1, 1, &regData[1]);
 	}	
 }
 
@@ -748,7 +697,7 @@ void SH3001_INT_Config(	unsigned char int0Level,
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_INT_CONF, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_CONF, 1, &regData);
 	
 	regData = (int0Level == SH3001_INT0_LEVEL_LOW) \
               ? (regData | SH3001_INT0_LEVEL_LOW) : (regData & SH3001_INT0_LEVEL_HIGH);
@@ -768,14 +717,14 @@ void SH3001_INT_Config(	unsigned char int0Level,
 	regData = (int0Mode == SH3001_INT0_NORMAL) \
               ? (regData | SH3001_INT0_NORMAL) : (regData & SH3001_INT0_OD);			
 	
-	SH3001_write(SH3001_ADDRESS, SH3001_INT_CONF, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_CONF, 1, &regData);	
 	
 	if(intLatch == SH3001_INT_NO_LATCH)
 	{
 		if(intTime != 0)
 		{	
 			regData = intTime;
-			SH3001_write(SH3001_ADDRESS, SH3001_INT_LIMIT, 1, &regData);	
+			I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INT_LIMIT, 1, &regData);	
 		}	
 	}
 }		
@@ -797,16 +746,16 @@ void SH3001_INT_LowG_Config(	unsigned char lowGEnDisIntAll,
 {
 	unsigned char regData = 0;		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
 	regData &= 0xFE;
 	regData |= lowGEnDisIntAll;
-	SH3001_write(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
 	
 	regData = lowGThres; 
-	SH3001_write(SH3001_ADDRESS, SH3001_LOWG_INT_THRESHOLD, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_LOWG_INT_THRESHOLD, 1, &regData);	
 	
 	regData = lowGTimsMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_LOWG_INT_TIME, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_LOWG_INT_TIME, 1, &regData);		
 }
 
 
@@ -835,16 +784,16 @@ void SH3001_INT_HighG_Config(	unsigned char highGEnDisIntX,
 {
 	unsigned char regData = 0;		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);	
 	regData &= 0x0F;
 	regData |= highGEnDisIntX | highGEnDisIntY | highGEnDisIntZ | highGEnDisIntAll;
-	SH3001_write(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_HIGHLOW_G_INT_CONF, 1, &regData);		
 																			
 	regData = highGThres; 
-	SH3001_write(SH3001_ADDRESS, SH3001_HIGHG_INT_THRESHOLD, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_HIGHG_INT_THRESHOLD, 1, &regData);	
 			
 	regData = highGTimsMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_HIGHG_INT_TIME, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_HIGHG_INT_TIME, 1, &regData);	
 }
 
 
@@ -878,31 +827,31 @@ void SH3001_INT_Inact_Config(	unsigned char inactEnDisIntX,
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
 	regData &= 0xF0;
 	regData |= inactEnDisIntX | inactEnDisIntY | inactEnDisIntZ | inactIntMode;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
 	
 	regData = (unsigned char)inactIntThres;
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDL, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDL, 1, &regData);
 	regData = (unsigned char)(inactIntThres >> 8);
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDM, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDM, 1, &regData);
 	regData = (unsigned char)(inactIntThres >> 16);
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDH, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_THRESHOLDH, 1, &regData);	
 		
 	regData = inactTimeS;
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_TIME, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_TIME, 1, &regData);	
 	
 	regData = (unsigned char)inactG1;
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_1G_REFL, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_1G_REFL, 1, &regData);
 	regData = (unsigned char)(inactG1 >> 8);
-	SH3001_write(SH3001_ADDRESS, SH3001_INACT_INT_1G_REFH, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_INACT_INT_1G_REFH, 1, &regData);	
 	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
 	regData &= 0xFE;
 	regData |= inactLinkStatus;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);		
 }	
 
 
@@ -933,21 +882,21 @@ void SH3001_INT_Act_Config(	unsigned char actEnDisIntX,
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
 	regData &= 0x0F;
 	regData |= actEnDisIntX | actEnDisIntY | actEnDisIntZ | actIntMode;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_CONF, 1, &regData);	
 	
 	regData = actIntThres;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INT_THRESHOLD, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INT_THRESHOLD, 1, &regData);
 
 	regData = actTimeNum;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INT_TIME, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INT_TIME, 1, &regData);
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
 	regData &= 0xFE;
 	regData |= actLinkStatus;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);		
 }	
 
 
@@ -977,22 +926,22 @@ void SH3001_INT_Tap_Config(	unsigned char tapEnDisIntX,
 {
 	unsigned char regData = 0;		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);	
 	regData &= 0xF1;
 	regData |= tapEnDisIntX | tapEnDisIntY | tapEnDisIntZ;
-	SH3001_write(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);																			
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ACT_INACT_INT_LINK, 1, &regData);																			
 																			
 	regData = tapIntThres; 
-	SH3001_write(SH3001_ADDRESS, SH3001_TAP_INT_THRESHOLD, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_TAP_INT_THRESHOLD, 1, &regData);
 	
 	regData = tapTimeMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_TAP_INT_DURATION, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_TAP_INT_DURATION, 1, &regData);	
 	
 	regData = tapWaitTimeMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_TAP_INT_LATENCY, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_TAP_INT_LATENCY, 1, &regData);	
 
 	regData = tapWaitTimeWindowMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_DTAP_INT_WINDOW, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_DTAP_INT_WINDOW, 1, &regData);	
 }
 
 
@@ -1011,9 +960,9 @@ void SH3001_INT_Flat_Config(	unsigned char flatTimeTH, unsigned char flatTanHeta
 {
 	unsigned char regData = 0;	
 	
-	//SH3001_read(SH3001_ADDRESS, SH3001_FLAT_INT_CONF, 1, &regData);	
+	//I2C_Read_NBytes(SH3001_ADDRESS, SH3001_FLAT_INT_CONF, 1, &regData);	
 	regData =  (flatTimeTH & 0xC0) | (flatTanHeta2 & 0x3F);
-	SH3001_write(SH3001_ADDRESS, SH3001_FLAT_INT_CONF, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FLAT_INT_CONF, 1, &regData);		
 }	
 
 
@@ -1041,29 +990,29 @@ void SH3001_INT_Orient_Config(	unsigned char 	orientBlockMode,
 {
 	unsigned char regData[2] = {0};	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
 	regData[0] |= (regData[0] & 0xC0) | (orientTheta & 0x3F); 
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData[0]);
 
-	SH3001_read(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData[0]);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData[0]);
 	regData[0] &= 0xF0;
 	regData[0] |= (orientBlockMode & 0x0C) | (orientMode & 0x03);
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData[0]);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData[0]);
 	
 	regData[0] = (unsigned char)orientG1point5;
 	regData[1] = (unsigned char)(orientG1point5 >> 8);
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_LOW, 1, &regData[0]);
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_HIGH, 1, &regData[1]);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_LOW, 1, &regData[0]);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_HIGH, 1, &regData[1]);
 	
 	regData[0] = (unsigned char)orientSlope;
 	regData[1] = (unsigned char)(orientSlope >> 8);
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_SLOPE_LOW, 1, &regData[0]);	
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_SLOPE_HIGH, 1, &regData[1]);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_SLOPE_LOW, 1, &regData[0]);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_SLOPE_HIGH, 1, &regData[1]);
 	
 	regData[0] = (unsigned char)orientHyst;
 	regData[1] = (unsigned char)(orientHyst >> 8);
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_LOW, 1, &regData[0]);	
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_HIGH, 1, &regData[1]);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_LOW, 1, &regData[0]);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_HIGH, 1, &regData[1]);	
 }
 
 
@@ -1083,10 +1032,10 @@ void SH3001_INT_FreeFall_Config(	unsigned char freeFallThres,
 	unsigned char regData = 0;
 	
 	regData = freeFallThres; 
-	SH3001_write(SH3001_ADDRESS, SH3001_FREEFALL_INT_THRES, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FREEFALL_INT_THRES, 1, &regData);	
 	
 	regData = freeFallTimsMs; 
-	SH3001_write(SH3001_ADDRESS, SH3001_FREEFALL_INT_TIME, 1, &regData);																						
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FREEFALL_INT_TIME, 1, &regData);																						
 }
 
 
@@ -1117,7 +1066,7 @@ unsigned short SH3001_INT_Read_Status0(void)
 {
 	unsigned char regData[2] = {0};
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_INT_STA0, 2, &regData[0]);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_STA0, 2, &regData[0]);	
 
 	return( ((unsigned short)(regData[1] & 0x0F) << 8) | regData[0]);
 }
@@ -1149,7 +1098,7 @@ unsigned char SH3001_INT_Read_Status2(void)
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_INT_STA2, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_STA2, 1, &regData);	
 
 	return( (regData & 0xF1));
 }
@@ -1182,7 +1131,7 @@ unsigned char SH3001_INT_Read_Status3(void)
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_INT_STA3, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_STA3, 1, &regData);	
 
 	return(regData);
 }
@@ -1214,7 +1163,7 @@ unsigned char SH3001_INT_Read_Status4(void)
 {
 	unsigned char regData = 0;	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_INT_STA4, 1, &regData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_INT_STA4, 1, &regData);	
 
 	return(regData & 0x07);
 }
@@ -1234,13 +1183,13 @@ void SH3001_pre_INT_config(void)
   unsigned char regData = 0;
 
 	regData = 0x20;
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF0, 1, &regData);
 
 	regData = 0x0A;
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INTCONF1, 1, &regData);
 	
 	regData = 0x01;
-	SH3001_write(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_HIGH, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_ORIEN_INT_HYST_HIGH, 1, &regData);		
 }
 
 
@@ -1263,14 +1212,14 @@ void SH3001_FIFO_Reset(unsigned char fifoMode)
 {
 	unsigned char regData = 0;		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
 	regData |= 0x80;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
 	regData &= 0x7F;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
 	
 	regData = fifoMode & 0x03;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF0, 1, &regData);
 }
 
 
@@ -1300,7 +1249,7 @@ void SH3001_FIFO_Freq_Config(	unsigned char fifoAccDownSampleEnDis,
 	
 	regData |= fifoAccDownSampleEnDis | fifoGyroDownSampleEnDis;
 	regData |= (fifoAccFreq << 4) | fifoGyroFreq;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF4, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF4, 1, &regData);
 }
 
 
@@ -1334,17 +1283,17 @@ void SH3001_FIFO_Data_Config(	unsigned short fifoMode,
 		fifoWaterMarkLevel = 1024;
 	}
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_FIFO_CONF2, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF2, 1, &regData);
 	regData = (regData & 0xC8) \
               | ((unsigned char)(fifoMode >> 8) & 0x30) \
               | (((unsigned char)(fifoWaterMarkLevel >> 8)) & 0x07);
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF2, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF2, 1, &regData);
 
 	regData = (unsigned char)fifoMode;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF3, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF3, 1, &regData);
 	
 	regData = (unsigned char)fifoWaterMarkLevel;
-	SH3001_write(SH3001_ADDRESS, SH3001_FIFO_CONF1, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_FIFO_CONF1, 1, &regData);
 }
 
 
@@ -1373,7 +1322,7 @@ unsigned char SH3001_FIFO_Read_Status(unsigned short int *fifoEntriesCount)
 {
 	unsigned char regData[2] = {0};
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_FIFO_STA0, 2, &regData[0]);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_FIFO_STA0, 2, &regData[0]);
 	*fifoEntriesCount = ((unsigned short int)(regData[1] & 0x07) << 8) | regData[0];
 	
 	return (regData[1] & 0x38);
@@ -1399,7 +1348,7 @@ void SH3001_FIFO_Read_Data(unsigned char *fifoReadData, unsigned short int fifoD
 	
 	while(fifoDataLength--)
 	{
-		SH3001_read(SH3001_ADDRESS, SH3001_FIFO_DATA, 1, fifoReadData);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_FIFO_DATA, 1, fifoReadData);
 		fifoReadData++;
 	}	
 }	
@@ -1421,11 +1370,11 @@ void SH3001_MI2C_Reset(void)
 {
 	unsigned char regData = 0;		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	regData |= 0x80;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	regData &= 0x7F;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);	
 	
 }
 
@@ -1454,13 +1403,13 @@ void SH3001_MI2C_Bus_Config(	unsigned char mi2cReadMode,
 		mi2cFreq = 15;
 	}
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF1, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF1, 1, &regData);
 	regData = (regData &0xC0) | (mi2cODR & 0x30) | mi2cFreq;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF1, 1, &regData);	
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF1, 1, &regData);	
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	regData = (regData & 0xBF) | mi2cReadMode;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);		
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);		
 }
 
 
@@ -1482,13 +1431,13 @@ void SH3001_MI2C_Cmd_Config(	unsigned char mi2cSlaveAddr,
 {
 	unsigned char regData = 0;	
 
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	regData = (regData & 0xBF) | mi2cReadMode;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	
 	regData = mi2cSlaveAddr << 1;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CMD0, 1, &regData);
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CMD1, 1, &mi2cSlaveCmd);																																							
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CMD0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CMD1, 1, &mi2cSlaveCmd);																																							
 }
 
 
@@ -1506,17 +1455,17 @@ unsigned char SH3001_MI2C_Write(unsigned char mi2cWriteData)
 	unsigned char regData = 0;	
 	unsigned char i = 0;
 
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_WR, 1, &mi2cWriteData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_WR, 1, &mi2cWriteData);
 		
 	//Master I2C enable, write-operation
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	regData = (regData & 0xFC) | 0x02;
-	SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	
 	// wait write-operation to end
 	while(i++ < 20)
 	{	
-		SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 		if(regData & 0x30)
 			break;
 	}
@@ -1546,26 +1495,26 @@ unsigned char SH3001_MI2C_Read(unsigned char *mi2cReadData)
 	unsigned char i = 0;
 		
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	if((regData & 0x40) == 0)
 	{	
 		//Master I2C enable, read-operation
 		regData |= 0x03;
-		SH3001_write(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+		I2C_Write_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	}
 	
 	// wait read-operation to end
 	while(i++ < 20)
 	{	
-		SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 		if(regData & 0x30)
 			break;
 	}	
 
-	SH3001_read(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_CONF0, 1, &regData);
 	if((regData & 0x30) == SH3001_MI2C_SUCCESS)
 	{
-		SH3001_read(SH3001_ADDRESS, SH3001_MI2C_RD, 1, &regData);
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_MI2C_RD, 1, &regData);
 		*mi2cReadData = regData;
 		
 		return (SH3001_TRUE);	
@@ -1594,7 +1543,7 @@ void SH3001_SPI_Config(	unsigned char spiInterfaceMode)
 {
 	unsigned char regData = spiInterfaceMode;		
 	
-	SH3001_write(SH3001_ADDRESS, SH3001_SPI_CONF, 1, &regData);
+	I2C_Write_NBytes(SH3001_ADDRESS, SH3001_SPI_CONF, 1, &regData);
 } 
 
 
@@ -1615,42 +1564,42 @@ static void SH3001_CompInit(compCoefType *compCoef)
 	unsigned char coefData[2] = {0};
 	
 	// Acc Cross
-	SH3001_read(SH3001_ADDRESS, 0x81, 2, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x81, 2, coefData);	
 	compCoef->cYX = (signed char)coefData[0];
 	compCoef->cZX = (signed char)coefData[1];
-	SH3001_read(SH3001_ADDRESS, 0x91, 2, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x91, 2, coefData);	
 	compCoef->cXY = (signed char)coefData[0];
 	compCoef->cZY = (signed char)coefData[1];
-	SH3001_read(SH3001_ADDRESS, 0xA1, 2, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0xA1, 2, coefData);	
 	compCoef->cXZ = (signed char)coefData[0];
 	compCoef->cYZ = (signed char)coefData[1];			
 	
 	// Gyro Zero
-	SH3001_read(SH3001_ADDRESS, 0x60, 1, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x60, 1, coefData);	
 	compCoef->jX = (signed char)coefData[0];
-	SH3001_read(SH3001_ADDRESS, 0x68, 1, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x68, 1, coefData);	
 	compCoef->jY = (signed char)coefData[0];
-	SH3001_read(SH3001_ADDRESS, 0x70, 1, coefData);	
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x70, 1, coefData);	
 	compCoef->jZ = (signed char)coefData[0];
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_GYRO_CONF3, 1, coefData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF3, 1, coefData);
 	coefData[0] = coefData[0] & 0x07;
 	compCoef->xMulti = ((coefData[0] < 2) || (coefData[0] >= 7)) ? 1 : (1 << (6 - coefData[0]));	
-	SH3001_read(SH3001_ADDRESS, SH3001_GYRO_CONF4, 1, coefData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF4, 1, coefData);
 	coefData[0] = coefData[0] & 0x07;
 	compCoef->yMulti = ((coefData[0] < 2) || (coefData[0] >= 7)) ? 1 : (1 << (6 - coefData[0]));	
-	SH3001_read(SH3001_ADDRESS, SH3001_GYRO_CONF5, 1, coefData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_GYRO_CONF5, 1, coefData);
 	coefData[0] = coefData[0] & 0x07;
 	compCoef->zMulti = ((coefData[0] < 2) || (coefData[0] >= 7)) ? 1 : (1 << (6 - coefData[0]));	
 			
-	SH3001_read(SH3001_ADDRESS, 0x2E, 1, coefData);		
+	I2C_Read_NBytes(SH3001_ADDRESS, 0x2E, 1, coefData);		
 	compCoef->paramP0 = coefData[0] & 0x1F;		
 }
 
 uint8_t SH3001_read_id(void)
 {
     unsigned char regData = 0;			
-	SH3001_read(SH3001_ADDRESS, SH3001_CHIP_ID, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_CHIP_ID, 1, &regData);
     return regData;
 }
 
@@ -1675,7 +1624,7 @@ unsigned char SH3001_init(acc_range_t acc_range, gyro_range_t gyro_range)
 	// SH3001 chipID = 0x61;	
 	while((regData != 0x61) && (i++ < 3))
 	{
-		SH3001_read(SH3001_ADDRESS, SH3001_CHIP_ID, 1, &regData);	
+		I2C_Read_NBytes(SH3001_ADDRESS, SH3001_CHIP_ID, 1, &regData);	
 		if((i == 3) && (regData != 0x61))
 		{
 			return SH3001_FALSE;
@@ -1743,7 +1692,7 @@ unsigned char SH3001_init(acc_range_t acc_range, gyro_range_t gyro_range)
 	// temperature ODR is 63Hz, enable temperature measurement
 	SH3001_Temp_Config(SH3001_TEMP_ODR_63, SH3001_TEMP_EN);
 	
-	SH3001_read(SH3001_ADDRESS, SH3001_CHIP_ID1, 1, &regData);
+	I2C_Read_NBytes(SH3001_ADDRESS, SH3001_CHIP_ID1, 1, &regData);
 	if(regData == 0x61)
 	{	
 		// read compensation coefficient
@@ -1769,7 +1718,7 @@ bool SH3001_GetImuData( short accData[3], short gyroData[3] )
 {
 	unsigned char regData[12]={0};	
 	bool ret;
-	ret = SH3001_read(SH3001_ADDRESS, SH3001_ACC_XL, 12, regData);
+	ret = I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_XL, 12, regData);
     if(accData!=NULL)
     {
         accData[0] = ((short)regData[1] << 8) | regData[0];
@@ -1805,9 +1754,9 @@ bool SH3001_GetImuCompData(short accData[3], short gyroData[3],unsigned char isr
 	int accTemp[3], gyroTemp[3];
 	bool ret;			
 	if(isr){	
-		ret = SH3001_isr_read(SH3001_ADDRESS, SH3001_ACC_XL, 15, regData);
+		ret = I2C_Isr_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_XL, 15, regData);
 	}else{
-		ret = SH3001_read(SH3001_ADDRESS, SH3001_ACC_XL, 15, regData);
+		ret = I2C_Read_NBytes(SH3001_ADDRESS, SH3001_ACC_XL, 15, regData);
 	}
 	
 	accData[0] = ((short)regData[1] << 8) | regData[0];

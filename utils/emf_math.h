@@ -12,7 +12,7 @@
 #ifndef _emf_math_h
 #define _emf_math_h
 #include "utils/emf_typedef.h" 
-
+#include "hw_config.h" 
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,10 +21,16 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef SIN8_ENABLE
+#define SIN8_ENABLE				0
+#endif
 #ifndef SIN8_TABLE_ENABLE
 #define SIN8_TABLE_ENABLE		0
 #endif
 
+#ifndef SIN16_ENABLE
+#define SIN16_ENABLE				0
+#endif
 
 /******************************************************************************************************
 **	Parameters

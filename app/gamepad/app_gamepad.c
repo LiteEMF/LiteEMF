@@ -314,14 +314,15 @@ bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp)
 {
 	bool ret = false;
 	uint16_t len = 0;
-	app_gamepad_key_t key = *keyp;
+	app_gamepad_key_t key;
 
 	#if ((BT_HID_SUPPORT) & HID_SWITCH_MASK)
 	uint8_t buf[sizeof(switch_large_report_t)];
 	#else
 	uint8_t buf[78];
 	#endif
-
+	
+	key = *keyp;
 	key.key = app_gamepad_key_convert(phandle, key.key);			//标准按键转换对应主机按键
 
 	switch(phandle->index & 0xff){

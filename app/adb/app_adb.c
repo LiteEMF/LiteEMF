@@ -14,7 +14,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_ADB))
 
 #include "app/adb/app_adb.h"
 #include "adb_auth_sign.h"
@@ -146,7 +146,7 @@ static void exec(adb_msg_t message, char *buf, uint32_t length, uint8_t *command
 bool send_auth_response(uint8_t *token)
 {
 	
-#if defined(ADB_RSA_ENABLED)
+#if ADB_AUTH_SIGN_ENABLE
 	uint8_t buf[0x100];
     uint32d_t len;
 	#if ADB_DEBUG

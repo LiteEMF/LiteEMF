@@ -13,10 +13,8 @@
 #ifndef _usb_typedef_h
 #define _usb_typedef_h
 #include "utils/emf_typedef.h" 
-#include "api/usb/usb_hub_typedef.h"
 #include "api/hid/hid_typedef.h"
-#include "api/usb/usb_cdc_typedef.h"
-#include "api/usb/usb_audio_typedef.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -280,7 +278,7 @@ typedef struct {
   uint8_t bDevCapabilityType;
   uint8_t bReserved;
   uint8_t PlatformCapabilityUUID[16];
-  uint8_t CapabilityData[];
+  uint8_t CapabilityData[1];			//TODO
 } usb_desc_bos_platform_t;
 
 /// USB Configuration Descriptor
@@ -377,7 +375,7 @@ typedef struct {
 typedef struct {
   uint8_t  bLength         ; ///< Size of this descriptor in bytes
   uint8_t  bDescriptorType ; ///< Descriptor Type
-  uint16_t unicode_string[];
+  uint16_t unicode_string[1];	//TODO
 } usb_desc_string_t;		//USB_DESC_STRING
 
 
@@ -387,7 +385,7 @@ typedef struct {
   uint8_t bLength;
   uint8_t bDescriptorType;
   uint8_t bScheme;
-  char    url[];
+  char    url[1];
 } usb_desc_webusb_url_t;
 // DFU Functional Descriptor
 typedef struct {

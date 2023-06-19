@@ -43,7 +43,7 @@ bool bt_driver_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -80,7 +80,7 @@ bool bt_driver_is_bonded(uint8_t id, bt_t bt)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -116,7 +116,7 @@ bool bt_driver_debond(uint8_t id, bt_t bt)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -152,7 +152,7 @@ bool bt_driver_disconnect(uint8_t id, bt_t bt)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -188,7 +188,7 @@ bool bt_driver_enable(uint8_t id, bt_t bt,bool en)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -224,7 +224,7 @@ bool bt_driver_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -260,7 +260,7 @@ bool bt_driver_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
     case BT_BLE_RF: 			//BLE模拟2.4G
         break;
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
     case BT_BLEC_RF:
         break;
@@ -294,7 +294,7 @@ bool bt_driver_init(uint8_t id)
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
 
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
 
     #endif
 
@@ -323,7 +323,7 @@ bool bt_driver_deinit(uint8_t id)
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
 
     #endif
-    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLEC_RF))
+    #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
 
     #endif
 
