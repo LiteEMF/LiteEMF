@@ -49,9 +49,9 @@ __WEAK void api_timer_hook(uint8_t id)
 {
 }
 #endif
-bool api_timer_init(uint8_t id,uint32_t us)
+bool api_timer_init(uint8_t id)
 {
-	return hal_timer_init(id,us);
+	return hal_timer_init(id);
 }
 bool api_timer_deinit(uint8_t id)
 {
@@ -62,7 +62,7 @@ void api_timers_init(void)
 {
 	uint8_t id;
 	for(id=0; id<m_timer_num; id++){
-		api_timer_init(id,m_timer_map[id].peripheral);
+		api_timer_init(id);
 	}   
 }
 void api_timers_deinit(void)

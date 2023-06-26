@@ -72,13 +72,23 @@ error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 	error_t err = ERROR_SUCCESS;
 
 	if(NULL != preq->setup_buf){					//防止出错内存未释放
-		logd("usbd malloc err,please note it %x!!!\n",(uint32_t)(preq->setup_buf));
+		logd_r("usbd malloc err,please note it %lx!!!\n",(uint32_t)(preq->setup_buf));
 		emf_free((void*)preq->setup_buf);
 	}
 
 	preq->setup_index = 0;
 	preq->setup_len = 0;
 	if(preq->req.wLength){
+
+		if(preq->req.wLength > 0XFF){			//字符串pc会读取1k多字节, 这里节省内存空间
+			if ((USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
+				&& (USB_REQ_GET_DESCRIPTOR == preq->req.bRequest)
+				&& (USB_DESC_STRING == (preq->req.wValue >> 8)) ){
+					
+				preq->req.wLength = 0XFF;
+			}
+		}
+
 		preq->setup_buf = emf_malloc(preq->req.wLength);
 		if(NULL == preq->setup_buf){
 			loge("usbd setup no memory %d!\n",preq->req.wLength);
@@ -334,6 +344,9 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 	if(NULL != pdev){
 		pdev->dev.setup = 1;
 		preq->req = *pctrl_req;
+		preq->req.wValue = SWAP16_L(preq->req.wValue);
+		preq->req.wIndex = SWAP16_L(preq->req.wIndex);
+		preq->req.wLength = SWAP16_L(preq->req.wLength);
 		usbd_malloc_setup_buffer(id, preq);
 	}
 

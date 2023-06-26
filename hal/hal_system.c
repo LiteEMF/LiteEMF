@@ -28,6 +28,15 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
+bool hal_set_sysclk(emf_clk_t clk, uint32_t freq)
+{
+	return true;
+}
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 uint32_t hal_get_sysclk(emf_clk_t clk)
 {
 	return HAL_SYS_FREQ;

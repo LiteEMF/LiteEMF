@@ -281,8 +281,8 @@ typedef enum{
 typedef enum{
     PIN_PULLNONE = 0,
     PIN_PULLUP,
-	PIN_PULLDOWN,
-    PIN_PULL_OD,     //open drain开漏输出, 只有GPIO作为输出有效
+	PIN_PULLDOWN,       //如果芯片不支持默认配置PIN_PULLNONE
+    PIN_PULL_OD,        //open drain开漏输出(默认配置带上拉), 只有GPIO作为输出有效
 }pin_pull_t;
 
 typedef enum {

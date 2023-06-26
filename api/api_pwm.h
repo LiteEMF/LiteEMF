@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _hal_pwm_h
-#define _hal_pwm_h
+#ifndef _api_pwm_h
+#define _api_pwm_h
 #include "utils/emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_pwm.h"

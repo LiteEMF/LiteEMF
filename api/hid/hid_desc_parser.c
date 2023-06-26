@@ -313,7 +313,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                    + (sizeof(hid_usage_item_t) * pinfo->usages)
                    + (sizeof(hid_globals_item_t) * pinfo->maxGlobalsNesting);
     assignMem = (uint8_t*) emf_malloc(sizeRequired);
-    logd( "HID: Memory for Report Descriptor=%d %x\n", sizeRequired, assignMem);
+    logd( "HID: Memory for Report Descriptor len=%d add=%lx\n", sizeRequired, (uint32_t)assignMem);
     if (assignMem == NULL) 
     {
         emf_mem_stats();

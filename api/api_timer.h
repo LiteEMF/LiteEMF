@@ -27,7 +27,7 @@ extern "C" {
 #define TIMER_FREQ_POS		(0)
 #define TIMER_FREQ_MASK		0X000FFFFF		/* HZ  max 1M*/
 #define TIMER_PRI_POS		(16)			/*Priority*/
-#define TIMER_PRI_MASK		0X00100000
+#define TIMER_PRI_MASK		0X00F00000
 
 
 
@@ -56,12 +56,12 @@ extern uint8c_t m_timer_num;
 **  Function
 ******************************************************************************************************/
 void api_timer_hook(uint8_t id);		//__WEAK
-bool api_timer_init(uint8_t id,uint32_t us);
+bool api_timer_init(uint8_t id);
 bool api_timer_deinit(uint8_t id);
 void api_timers_init(void);
 
 //hal
-bool hal_timer_init(uint8_t id,uint32_t us);
+bool hal_timer_init(uint8_t id);
 bool hal_timer_deinit(uint8_t id);
 
 #ifdef __cplusplus

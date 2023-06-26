@@ -116,7 +116,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	if (len <= 0)			return false;
 	if (NULL == buf)		return false;
 
-	logd("trp(%d) id(%d) index(0x%x) dt=%d len=%d:",phandle->trp, phandle->id,phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
+	logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
 	switch(phandle->trp){
 		#if API_BT_ENABLE
 		case TR_BLE	:

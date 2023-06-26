@@ -221,6 +221,12 @@ typedef struct _bytes_array_t {
 	#ifndef uint8x_t
 	typedef unsigned char  xdata   	uint8x_t;
 	#endif
+	#ifndef uint16x_t
+	typedef unsigned short xdata     uint16x_t;
+	#endif
+	#ifndef uint32x_t
+	typedef unsigned long  xdata     uint32x_t;
+	#endif
 	#ifndef uint8d_t
 	typedef unsigned char  data     uint8d_t;
 	#endif

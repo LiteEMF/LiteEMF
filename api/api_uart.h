@@ -47,7 +47,7 @@ extern "C" {
 //uart att
 #define UART_BAUD_POS		(0)
 #define UART_BAUD_MASK		0X00FFFFFF
-#define UART_PRI_POS		(24)				/*Priority*/
+#define UART_PRI_POS		(24)				/*是否开启中断, 设置中断优先级Priority*/
 #define UART_PRI_MASK		0X01000000
 
 #ifndef UART_BAUD_ATT

@@ -338,6 +338,10 @@ typedef struct{
 #endif
 
 
+#if APP_RGB_ENABLE
+#undef SIN8_ENABLE
+#define SIN8_ENABLE				1
+#endif
 
 #ifdef __cplusplus
 }

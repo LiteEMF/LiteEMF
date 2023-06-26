@@ -63,7 +63,7 @@ void usbh_det_event(uint8_t id, uint8_t attached )
 		}else{
 			// in enuming...
 		}
-	}else{
+	}else if(USB_STA_DETACHED != pdev->state){
 		uint8_t i;
 		if((id & 0X0F) == 0){
 			for(i = 0; i < HUB_MAX_PORTS+1; i++){		//disconnect hub por also

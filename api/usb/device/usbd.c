@@ -186,6 +186,7 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 			pdesc[2] = 0x09;
 			pdesc[3] = 0x04;
 			*pdesc_len = 4;
+			err = ERROR_SUCCESS;
 		}else{
 			err = usbd_pack_unicode_string((char*)usbd_string_desc[index],pdesc,pdesc_len);
 		}
@@ -462,6 +463,7 @@ void usbd_reset_process( uint8_t id )
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	usbd_req_t *preq = usbd_get_req(id);
 
+	logd("usbd reset...\n");
 	if(NULL != pdev){
 		pdev->dev.reset = 0;
 		usbd_free_setup_buffer(preq);

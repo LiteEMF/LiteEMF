@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-
+#if API_USBH_BIT_ENABLE
 #include  "api/usb/usb_typedef.h"
 #include  "api/usb/host/usbh.h"
 
@@ -93,6 +93,6 @@ void hal_usbh_driver_task(uint32_t dt_ms)
 {
 }
 
-
+#endif
 
 

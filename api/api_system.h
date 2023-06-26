@@ -46,9 +46,11 @@ typedef enum{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+bool api_set_sysclk(emf_clk_t clk,uint32_t freq);
 uint32_t api_get_sysclk(emf_clk_t clk);
 bool api_get_uuid(uint8_t *uuid, uint8_t len);
 //hal
+bool hal_set_sysclk(emf_clk_t clk, uint32_t freq);
 uint32_t hal_get_sysclk(emf_clk_t clk);
 bool hal_get_uuid(uint8_t *uuid, uint8_t len);
 

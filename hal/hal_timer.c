@@ -42,7 +42,7 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool hal_timer_init(uint8_t id,uint32_t us)
+bool hal_timer_init(uint8_t id)
 {
 	return true;
 }

@@ -13,8 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-
+#if API_USBD_BIT_ENABLE
 #include  "api/usb/usb_typedef.h"
+#include "api/usb/device/usbd.h"
 
 #include "api/api_log.h"
 
@@ -47,31 +48,31 @@
 
 error_t hal_usbd_endp_dma_init(uint8_t id)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_open(uint8_t id, usb_endp_t *pendp)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_close(uint8_t id, uint8_t ep)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_ack(uint8_t id, uint8_t ep, uint16_t len)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_nak(uint8_t id, uint8_t ep)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_clear_endp_stall(uint8_t id, uint8_t ep)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 
 uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
@@ -85,31 +86,31 @@ uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 *******************************************************************/
 error_t hal_usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_reset(uint8_t id)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_set_address(uint8_t id,uint8_t address)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 
 error_t hal_usbd_init(uint8_t id)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 error_t hal_usbd_deinit(uint8_t id)
 {
-	return 0;
+	return ERROR_SUCCESS;
 }
 
-
+#endif
 
 
 
