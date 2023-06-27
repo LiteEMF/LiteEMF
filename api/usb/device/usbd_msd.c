@@ -23,13 +23,15 @@
 *******************************************************************************************************/
 
 static uint8c_t msd_itf_desc_tab[] = {
-   
+    0x09,0x04,0x00,0x00,0x02,USB_CLASS_MSD,MSC_SUBCLASS_SCSI,MSC_PROTOCOL_BULK_ONLY,0x00,              //usb_desc_interface_t
+    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
+	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
 };
 
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-
+msc_cfg_t usbd_msc_cfg;
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -46,6 +48,12 @@ static uint8c_t msd_itf_desc_tab[] = {
 error_t usbd_msd_reset(uint8_t id)
 {
     UNUSED_PARAMETER(id);
+    memset(&usbd_msc_cfg, 0, sizeof(usbd_msc_cfg));
+    usbd_msc_cfg.stage = MSC_READ_CBW;
+    usbd_msc_cfg.readonly = false;
+
+    usbd_msc_cfg.scsi_blk_nbr = USBD_MSC_FLASH_BLOCK_NUM;
+    usbd_msc_cfg.scsi_blk_size = USBD_MSC_FLASH_BLOCK_SIZE;
     return ERROR_SUCCESS;
 }
 
@@ -78,16 +86,38 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
     if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
     if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+        switch ( preq->req.bRequest ){
+            case MSC_REQUEST_RESET:
+                logd("MSC BOT Reset\n");
+                // driver state reset
+                usbd_msd_reset(id);
+                err = ERROR_SUCCESS;
+                break;
 
+            case MSC_REQUEST_GET_MAX_LUN:
+                logd("MSC Get Max Lun\n");
+                preq->setup_buf[0] = usbd_msc_cfg.max_lun;  //default 0
+                preq->setup_len = 1;
+                err = ERROR_SUCCESS;
+            break;
+        }
     }
+
     return err;
 }
 
+
 error_t usbd_msd_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
 {
+    mass_storage_bulk_out(id, buf, len);
     return ERROR_SUCCESS;
 }
 
+error_t usbd_msd_in_process(uint8_t id)
+{
+    mass_storage_bulk_in(id);
+    return ERROR_SUCCESS;
+}
 
 /*******************************************************************
 ** Parameters:

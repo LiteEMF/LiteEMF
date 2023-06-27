@@ -179,7 +179,6 @@ error_t usbh_get_endp( usb_endp_t* endp,uint8_t *buf ,uint16_t len,usb_dir_t dir
             endp->dir = dir;
 			endp->mtu = SWAP16_L(pdesc->wMaxPacketSize);
             endp->interval = pdesc->bInterval;
-			if(0 ==  endp->interval)	 endp->interval = 1;		//cesra add for default
 			err = ERROR_SUCCESS;
             break;
         }

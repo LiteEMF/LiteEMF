@@ -446,6 +446,81 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 }
 
 
+/*******************************************************************
+** Parameters:
+** Returns:	
+** Description:		
+*******************************************************************/
+error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len)
+{
+	error_t err = ERROR_FAILE;
+	usbd_class_t* pclass;
+
+	pclass = usbd_class_find_by_type(id, type,sub_type);
+	if(NULL == pclass) return ERROR_NOT_FOUND;
+
+	if(pclass->endpin.addr){
+		err = usbd_in(id, pclass->endpin.addr, buf, len);
+	}
+
+	return err;
+}
+
+#if 0
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+error_t usbd_class_in_process(uint8_t id, uint8_t ep)
+{
+	usbd_class_t *pclass;
+
+	pclass = usbd_class_find_by_ep(id, ep);
+	if(NULL == pclass) return ERROR_NOT_FOUND;
+
+	switch(pclass->dev_type){
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+		case DEV_TYPE_HID	:
+			usbd_hid_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+		case DEV_TYPE_AUDIO	:
+			usbd_audio_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+		case DEV_TYPE_PRINTER:
+			usbd_printer_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
+		case DEV_TYPE_MSD	:
+			usbd_msd_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+		case DEV_TYPE_CDC	:
+			usbd_cdc_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+		case DEV_TYPE_IAP2 :
+			usbd_iap2_in_process(id, pclass);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+		case DEV_TYPE_AUTO :
+			usbd_auto_in_process(id, pclass);
+			break;
+		#endif
+		default:
+			break;
+	}
+	return ERROR_SUCCESS;
+}
+#endif
 
 /*******************************************************************
 ** Parameters:		
@@ -503,29 +578,9 @@ error_t usbd_class_out_process(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t le
 
 
 /*******************************************************************
-** Parameters:
-** Returns:	
-** Description:		
-*******************************************************************/
-error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len)
-{
-	error_t err = ERROR_FAILE;
-	usbd_class_t* pclass;
-
-	pclass = usbd_class_find_by_type(id, type,sub_type);
-	if(NULL == pclass) return ERROR_NOT_FOUND;
-
-	if(pclass->endpin.addr){
-		err = usbd_in(id, pclass->endpin.addr, buf, len);
-	}
-
-	return err;
-}
-
-/*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	
 *******************************************************************/
 void usbd_class_task(uint8_t id)
 {
@@ -545,6 +600,7 @@ void usbd_class_task(uint8_t id)
 	}
 	#endif
 	
+	// 以下class task当前未使用到
 	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){
 			switch(type){

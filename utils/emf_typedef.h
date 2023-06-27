@@ -120,6 +120,68 @@ b(high): if x is greater than b.
 #define U32(msb,msbl,lsbh,lsb)	( ((uint32_t)(msb) << 24) | ((uint32_t)(msbl) << 16) | ((uint32_t)(lsbh) << 8) | (lsb) )
 #endif
 
+#ifndef U16_H
+#define U16_H(pbuf)	 U16((pbuf)[0],(pbuf)[1])
+#endif
+#ifndef U32_H
+#define U32_H(pbuf)	 U32((pbuf)[0],(pbuf)[1],(pbuf)[2],(pbuf)[3])
+#endif
+#ifndef U16_L
+#define U16_L(pbuf)	 U16((pbuf)[1],(pbuf)[0])
+#endif
+#ifndef U32_L
+#define U32_L(pbuf)	 U32((pbuf)[3],(pbuf)[2],(pbuf)[1],(pbuf)[0])
+#endif
+
+#ifndef SET_U16_H
+#define SET_U16_H(pbuf)	 						\
+do {                                      	\
+        (pbuf)[0] = (uint8_t)((value) >> 8); \
+        (pbuf)[1] = (uint8_t)((value) >> 0); \
+    } while (0)
+#endif
+#ifndef SET_U24_H
+#define SET_U24_H(pbuf, value)                 \
+    do {                                       \
+        (pbuf)[0] = (uint8_t)((value) >> 16); \
+        (pbuf)[1] = (uint8_t)((value) >> 8);  \
+        (pbuf)[2] = (uint8_t)((value) >> 0);  \
+    } while (0)
+#endif
+#ifndef SET_U32_H
+#define SET_U32_H(pbuf, value)                 \
+    do {                                       \
+        (pbuf)[0] = (uint8_t)((value) >> 24); \
+        (pbuf)[1] = (uint8_t)((value) >> 16); \
+        (pbuf)[2] = (uint8_t)((value) >> 8);  \
+        (pbuf)[3] = (uint8_t)((value) >> 0);  \
+    } while (0)
+#endif
+
+#ifndef SET_U16_L
+#define SET_U16_L(pbuf)	 						\
+do {                                      	\
+        (pbuf)[1] = (uint8_t)((value) >> 8); \
+        (pbuf)[0] = (uint8_t)((value) >> 0); \
+    } while (0)
+#endif
+#ifndef SET_U24_L
+#define SET_U24_L(pbuf, value)                 \
+    do {                                       \
+        (pbuf)[2] = (uint8_t)((value) >> 16); \
+        (pbuf)[1] = (uint8_t)((value) >> 8);  \
+        (pbuf)[0] = (uint8_t)((value) >> 0);  \
+    } while (0)
+#endif
+#ifndef SET_U32_L
+#define SET_U32_L(pbuf, value)                 \
+    do {                                       \
+        (pbuf)[3] = (uint8_t)((value) >> 24); \
+        (pbuf)[2] = (uint8_t)((value) >> 16); \
+        (pbuf)[1] = (uint8_t)((value) >> 8);  \
+        (pbuf)[0] = (uint8_t)((value) >> 0);  \
+    } while (0)
+#endif
 
 #ifndef SWAP16
 #define SWAP16(s) ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff))  

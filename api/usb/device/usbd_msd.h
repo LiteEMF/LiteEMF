@@ -13,7 +13,9 @@
 #ifndef _usbd_msd_h
 #define _usbd_msd_h
 #include "utils/emf_typedef.h" 
+#include "api/usb/usb_msd_typedef.h"
 #include "api/usb/device/usbd_core.h"
+#include "api/usb/device/usbd_msd_scsi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,17 +25,63 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef USBD_MSC_FLASH_BLOCK_SIZE
+#define USBD_MSC_FLASH_BLOCK_SIZE	64
+#endif
+#ifndef USBD_MSC_FLASH_BLOCK_NUM
+#define USBD_MSC_FLASH_BLOCK_NUM	16
+#endif
 
+#ifndef USBD_MSC_BLOCK_SIZE
+#define USBD_MSC_BLOCK_SIZE			256
+#endif
+
+#ifndef CONFIG_USBDEV_MSC_MANUFACTURER_STRING
+#define CONFIG_USBDEV_MSC_MANUFACTURER_STRING ""
+#endif
+
+#ifndef CONFIG_USBDEV_MSC_PRODUCT_STRING
+#define CONFIG_USBDEV_MSC_PRODUCT_STRING ""
+#endif
+
+#ifndef CONFIG_USBDEV_MSC_VERSION_STRING
+#define CONFIG_USBDEV_MSC_VERSION_STRING "0.01"
+#endif
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+/* MSC Bulk-only Stage */
+typedef enum {
+    MSC_READ_CBW = 0, /* Command Block Wrapper */
+    MSC_DATA_OUT = 1, /* Data Out Phase */
+    MSC_DATA_IN = 2,  /* Data In Phase */
+    MSC_SEND_CSW = 3, /* Command Status Wrapper */
+    MSC_WAIT_CSW = 4, /* Command Status Wrapper */
+}msc_stage_t;
+
+/* Device data structure */
+typedef struct _msc_cfg {
+    /* state of the bulk-only state machine */
+    msc_stage_t stage;
+    __ALIGN(4) msc_cbw_t cbw;
+    __ALIGN(4) msc_csw_t csw;
+
+    uint8_t readonly;
+    uint8_t sKey; /* Sense key */
+    uint8_t ASC;  /* Additional Sense Code */
+    uint8_t ASQ;  /* Additional Sense Qualifier */
+    uint8_t max_lun;
+    uint32_t start_sector;
+    uint32_t nsectors;
+    uint16_t scsi_blk_size;	//flash block size must <= USBD_MSC_BLOCK_SIZE
+    uint32_t scsi_blk_nbr;	//flash block num
+
+    uint8_t block_buffer[USBD_MSC_BLOCK_SIZE];
+} msc_cfg_t;
 
 
-
-
-
-
+extern msc_cfg_t usbd_msc_cfg;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/

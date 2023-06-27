@@ -663,12 +663,14 @@ void usbh_class_task(uint32_t dt_ms)
 			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
 			#if USBH_LOOP_IN_ENABLE
-			if(0 == (s_tick % pos->endpin.interval)){
-				uint8_t buf[64];
-				uint16_t len = sizeof(buf);
-				err = usbh_in(id, &pos->endpin, buf, &len,0);
-				if((ERROR_SUCCESS == err) && len){
-					usbh_class_in_process(id, pos, buf, len);
+			if(USB_ENDP_TYPE_INTER == pos->endpin.type){			//only inter enpd
+				if(0 == (s_tick % pos->endpin.interval)){
+					uint8_t buf[64];
+					uint16_t len = sizeof(buf);
+					err = usbh_in(id, &pos->endpin, buf, &len,0);
+					if((ERROR_SUCCESS == err) && len){
+						usbh_class_in_process(id, pos, buf, len);
+					}
 				}
 			}
 			#endif

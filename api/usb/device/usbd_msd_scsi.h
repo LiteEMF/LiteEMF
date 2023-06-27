@@ -10,12 +10,10 @@
 */
 
 
-#ifndef _usbh_msd_h
-#define _usbh_msd_h
+#ifndef _usbd_msd_scsi_h
+#define _usbd_msd_scsi_h
 #include "utils/emf_typedef.h" 
-#include "api/usb/usb_typedef.h"
 #include "api/usb/usb_msd_typedef.h"
-#include "api/usb/host/usbh_core.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,22 +25,18 @@ extern "C" {
 *******************************************************************************************************/
 
 
-
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
+error_t usbd_msc_sector_read(uint32_t sector, uint8_t *buffer, uint32_t length);	//__WEAK
+error_t usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length);	//__WEAK
+void mass_storage_bulk_out(uint8_t id, uint8_t* buf, uint16_t len);
+void mass_storage_bulk_in(uint8_t id);
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_msd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
-error_t usbh_match_msd( uint8_t id, usbh_class_t *pclass);
-error_t usbh_msd_open( uint8_t id, usbh_class_t *pclass);
-error_t usbh_msd_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
-error_t usbh_msd_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_msd_task(uint8_t id, usbh_class_t *pclass);
 
 
 #ifdef __cplusplus

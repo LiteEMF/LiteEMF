@@ -563,7 +563,7 @@ error_t usbd_hid_deinit(uint8_t id)
 /*******************************************************************
 ** Parameters:
 ** Returns:
-** Description:
+** Description: 
 *******************************************************************/
 void usbd_hid_task(uint8_t id)
 {
