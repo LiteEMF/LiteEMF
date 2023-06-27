@@ -482,7 +482,8 @@ bool iap2_starthid_send(void)
     uint16_t len = 0, packet_len;
     uint8_t i;
     uint8_t *pdesc, desc_len;
-
+    
+    #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_MT) | BIT_ENUM(HID_TYPE_TOUCH))
     for (i = 1; i <= MT_CONTACT_NUM; i++) {
         memcpy(iap2_tx_buffer + IAP2_PAR_OFFSET, StartHIDPara, sizeof(StartHIDPara));
         iap2_tx_buffer[IAP2_PAR_OFFSET + 5] = (i << 8) | TOUCH_REPORT_ID; // 修改当前ID
@@ -499,21 +500,21 @@ bool iap2_starthid_send(void)
         if (1 == i) {
             ret = iap2_write(iap2_tx_buffer, packet_len, PACK_START);
         } else {
-#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
+            #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
             ret = iap2_write(iap2_tx_buffer, packet_len, PACK_MID);
-#else
+            #else
             if (IAP2_MT_MAX == i) {
                 ret = iap2_write(iap2_tx_buffer, packet_len, PACK_END);
             } else {
                 ret = iap2_write(iap2_tx_buffer, packet_len, PACK_MID);
             }
-#endif
+            #endif
         }
     }
+    #endif
 
     // mouse
-
-#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
+    #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
     memcpy(iap2_tx_buffer + IAP2_PAR_OFFSET, StartHIDPara, sizeof(StartHIDPara));
     iap2_tx_buffer[IAP2_PAR_OFFSET + 5] = MOUSE_REPORT_ID; // 修改当前ID
     len = sizeof(StartHIDPara);
@@ -523,7 +524,7 @@ bool iap2_starthid_send(void)
     packet_len = iap2_ctrlsession_head_fill(iap2_tx_buffer, len, StartHID);
     iap2_tx_buffer[packet_len - 1] = check_sum_negative(iap2_tx_buffer + IAP2_PACKET_HEADER_LEN, packet_len - IAP2_PACKET_HEADER_LEN - 1);
     ret = iap2_write(iap2_tx_buffer, packet_len, PACK_END);
-#endif
+    #endif
     return ret;
 }
 

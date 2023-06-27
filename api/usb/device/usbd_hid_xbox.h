@@ -39,9 +39,9 @@ error_t usbd_hid_xbox_reset(uint8_t id);
 error_t usbd_hid_xbox_suspend(uint8_t id);
 uint16_t usbd_hid_xbox_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
-error_t usbd_hid_xbox_out_process(uint8_t id, usbd_class_t *pclass, uint8_t* buf, uint16_t len);
+error_t usbd_hid_xbox_out_process(uint8_t id, usbd_class_t *pclass);
 usbd_class_t *usbd_xbox_audio_find(uint8_t id);
-void 	usbd_hid_xbox_task(uint8_t id);
+void 	usbd_hid_xbox_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
 error_t usbd_hid_xbox_init(uint8_t id);
 error_t usbd_hid_xbox_deinit(uint8_t id);
 

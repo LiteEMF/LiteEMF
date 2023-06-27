@@ -23,7 +23,7 @@
 *******************************************************************************************************/
 
 static uint8c_t printer_itf_desc_tab[] = {
-   
+   0x01
 };
 
 /******************************************************************************************************
@@ -82,8 +82,17 @@ error_t usbd_printer_control_request_process(uint8_t id, usbd_class_t *pclass, u
     return err;
 }
 
-error_t usbd_printer_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_printer_out_process(uint8_t id, usbd_class_t* pclass)
 {
+    uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
+
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        logd("printer ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+    }
+
     return ERROR_SUCCESS;
 }
 
@@ -115,9 +124,23 @@ error_t usbd_printer_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_printer_task(uint8_t id)
+void usbd_printer_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+        usbd_printer_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_printer_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_printer_out_process(id, pclass);
+        break;
+    case USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif

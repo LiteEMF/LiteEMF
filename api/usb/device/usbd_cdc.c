@@ -24,7 +24,7 @@
 
 
 static uint8c_t cdc_itf_desc_tab[] = {
-   
+   0x09
 };
 
 /******************************************************************************************************
@@ -82,15 +82,23 @@ error_t usbd_cdc_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 	
     if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if(USB_REQ_TYPE_CLASS == preq>req.bmRequestType.bits.type) {
+    if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 
     }
     return err;
 }
 
-error_t usbd_cdc_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_cdc_out_process(uint8_t id, usbd_class_t* pclass)
 {
-    logd("cdc hid ep%d in%d:",pclass->endpout.addr, len);dumpd(buf,len);
+    uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
+
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        logd("cdc hid ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+    }
+
     return ERROR_SUCCESS;
 }
 
@@ -122,9 +130,23 @@ error_t usbd_cdc_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_cdc_task(uint8_t id)
+void usbd_cdc_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+        usbd_cdc_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_cdc_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_cdc_out_process(id, pclass);
+        break;
+    case USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif

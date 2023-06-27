@@ -598,7 +598,7 @@ void ps_get_bt_mac(ps_bt_mac_t *pmac)
 	memcpy(ps_mac.mac, "\xFC\xD3\x1D\xB8\xA0\x1C", 6);	//for default
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID0, BT_EDR, ps_mac.mac);
-	#else 
+	#elif BT1_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID1, BT_EDR, ps_mac.mac);
 	#endif
 	memcpy(ps_mac.res, "\x08\x25\x00", 3);

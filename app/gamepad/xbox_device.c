@@ -238,7 +238,7 @@ void get_xbox_info(xbox_info_t* infp)
 
 	#if BT0_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID0, BT_EDR, mac_buf);
-	#else 
+	#elif BT1_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID1, BT_EDR, mac_buf);
 	#endif
 

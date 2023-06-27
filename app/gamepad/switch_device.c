@@ -187,9 +187,11 @@ void get_switch_mac_addr(uint8_t* macp)
 
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID0, BT_EDR, macp);
-	#else 
+	#elif BT1_SUPPORT & BIT_ENUM(TR_EDR)
 	api_bt_get_mac(BT_ID1, BT_EDR, macp);
 	#endif
+	
+
 
     swap_buf(macp,6);              //MAC address is Big Endian
 }
@@ -663,11 +665,12 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         length = sizeof(replies);
         break;
     case SWITCH_USB_DIS_TIMEOUT: {      //0x04
-        #if API_USBD_BIT_ENABLE
-        usbd_dev_t *pdev = usbd_get_dev(id);
+        #if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & HID_SWITCH_MASK)
+        usbd_dev_t *pdev = usbd_get_dev(phandle->id);
         pdev->ready = true;
-        logd_g("usbd%d ready...\n",id);
+        logd_g("usbd%d ready...\n",phandle->id);
         #endif
+
         logi("switch dev Handshake start\n");
         ret = true;
         break;

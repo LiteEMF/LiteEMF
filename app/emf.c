@@ -280,7 +280,7 @@ void emf_handler(uint32_t period_10us)
 	#endif
 
 	#if API_USBD_BIT_ENABLE
-	usbd_handler(100);
+	usbd_handler(0);
 	#endif
 	#if API_USBH_BIT_ENABLE
 	usbh_handler(100);

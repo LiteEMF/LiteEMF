@@ -304,10 +304,10 @@ error_t usbd_cfg_endp_all(uint8_t id)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	logd("usbd_cfg_endp_all%d...\n",id);
+	logd("usbd%d_cfg_endp_all...\n",id);
 	
 	for(i=1; i<USBD_ENDP_NUM; i++){
-		hal_usbd_endp_close(id,i);
+		usbd_endp_close(id,i);
 	}
 	memset(pdev->ep_status, 0, sizeof(pdev->ep_status));
 	pdev->endp0_mtu = USBD_ENDP0_MTU;
@@ -474,7 +474,7 @@ void usbd_reset_process( uint8_t id )
 
 	}
 		
-	usbd_class_reset(id);
+	usbd_class_notify_evt(id,USBD_EVENT_RESET,0);
 	usbd_set_address(id, 0);
 	
 	memset(&endp0, 0, sizeof(usb_endp_t));					
@@ -493,7 +493,7 @@ void usbd_suspend_process( uint8_t id )
 		usbd_free_setup_buffer(preq);
 		if(USB_STA_CONFIGURED == pdev->state){
 			pdev->state = USB_STA_SUSPENDED;
-			usbd_class_suspend(id);
+			usbd_class_notify_evt(id,USBD_EVENT_SUSPEND,0);
 		}else{
 			pdev->state = USB_STA_DETACHED;
 		}
@@ -559,6 +559,191 @@ void usbd_setup_process( uint8_t id )
 }
 
 
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb 事件, 在usb 中断事件产生后调用	
+	用户可消息多种处理方式,用户可以自定义修改:
+	1. 轮训方式	(默认)
+	2. 任务消息推送方式
+	3. 中断直接处理方式
+*******************************************************************/
+__WEAK void usbd_reset_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.reset = 1;
+	}
+}
+__WEAK void usbd_suspend_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.suspend = 1;
+	}
+}
+__WEAK void usbd_resume_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.resume = 1;
+	}
+}
+__WEAK void usbd_sof_event(uint8_t id)
+{
+
+}
+__WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	uint8_t ep_addr = ep & 0x7f;
+
+	ep |= USB_DIR_IN_MASK; 		//防止出错
+	if(0 == ep_addr){
+		usbd_req_t *preq = usbd_get_req(id);
+		usbd_dev_t *pdev = usbd_get_dev(id);
+
+		 if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+			if (USB_REQ_SET_ADDRESS == preq->req.bRequest) {
+				usbd_set_address(id, (uint8_t)preq->req.wValue);
+			}
+		 }
+
+		hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
+	}else{
+		usbd_endp_nak(id, USB_DIR_IN_MASK | ep);
+		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
+
+		#if !USBD_LOOP_ENABLE
+		{
+			usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+
+			pdev->enpd_in_busy[ ep_addr ] = 0x00;
+			if(NULL != pclass){
+				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
+			}
+		}
+		#endif
+	}
+}
+__WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+
+	ep &= ~USB_DIR_IN_MASK; 		//防止出错
+	if (len) {
+		usbd_endp_nak(id,ep);
+	}
+	pdev->enpd_out_len[ep] = len;
+
+	#if !USBD_LOOP_ENABLE
+	if(pdev->enpd_out_len[ep]){
+		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+		if(NULL != pclass){
+			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
+		}
+	}
+	#endif
+			
+}
+__WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	pdev->enpd_in_busy[0] = 1;
+	pdev->enpd_out_len[0] = 0;
+	if(NULL != pdev){
+		pdev->dev.setup = 1;
+		preq->req = *pctrl_req;
+		preq->req.wValue = SWAP16_L(preq->req.wValue);
+		preq->req.wIndex = SWAP16_L(preq->req.wIndex);
+		preq->req.wLength = SWAP16_L(preq->req.wLength);
+		usbd_malloc_setup_buffer(id, preq);
+	}
+
+	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置ack 继续接收OUT数据
+		usbd_endp_ack(id, 0x00, 0);
+	}
+}
+
+
+
+void usbd_endp_loop(uint8_t id)
+{
+	uint8_t ep;
+	usbd_dev_t *pdev = usbd_get_dev(id);
+
+	if(USB_STA_CONFIGURED == pdev->state){
+		for(ep=1; ep<USBD_ENDP_NUM; ep++){
+			usbd_dev_t *pdev = usbd_get_dev(id);
+			usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+
+			if(NULL == pclass) continue;
+
+			if(pdev->enpd_out_len[ep]){
+				usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
+			}
+
+			if(0x80 == pdev->enpd_in_busy[ep]){
+				pdev->enpd_in_busy[ep] = 0x00;
+				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
+			}
+		}
+	}
+}
+
+
+/*******************************************************************
+** Parameters:
+** Returns:
+** Description:
+*******************************************************************/
+void usbd_task(void *pa)
+{
+	#if USBD_LOOP_ENABLE
+	uint8_t id;
+	usbd_dev_t *pdev;
+
+	for(id=0; id<USBD_NUM; id++){
+		if(API_USBD_BIT_ENABLE & BIT(id)){
+			pdev = usbd_get_dev(id);
+
+			if(pdev->dev.reset){
+				usbd_reset_process(id);
+			}else if(pdev->dev.suspend){
+				usbd_suspend_process(id);
+			}else if(pdev->dev.resume){
+				usbd_resume_process(id);
+			}else if(pdev->dev.setup){
+				usbd_setup_process(id);
+			}
+		}
+		usbd_endp_loop(id);
+	}
+	#endif
+}
+
+#if TASK_HANDLER_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+void usbd_handler(uint32_t period_10us)
+{
+	static timer_t s_timer;
+	if((m_task_tick10us - s_timer) >= period_10us){
+		s_timer = m_task_tick10us;
+		usbd_task(NULL);
+	}
+}
+#endif
+
+
+
+
 error_t usbd_init(uint8_t id)
 {
 	if(id >= USBD_NUM) return ERROR_FAILE;
@@ -591,53 +776,6 @@ void usbds_deinit(void)
 		usbd_deinit(id);
 	}
 }
-
-/*******************************************************************
-** Parameters:
-** Returns:
-** Description:
-*******************************************************************/
-void usbd_task(void*pa)
-{
-	uint8_t id;
-	usbd_dev_t *pdev;
-
-	for(id=0; id<USBD_NUM; id++){
-		if(API_USBD_BIT_ENABLE & BIT(id)){
-			pdev = usbd_get_dev(id);
-
-			if(pdev->dev.reset){
-				usbd_reset_process(id);
-			}else if(pdev->dev.suspend){
-				usbd_suspend_process(id);
-			}else if(pdev->dev.resume){
-				usbd_resume_process(id);
-			}else if(pdev->dev.setup){
-				usbd_setup_process(id);
-			}
-
-			if(USB_STA_CONFIGURED == pdev->state){
-				usbd_class_task(id);
-			}
-		}
-	}
-}
-
-#if TASK_HANDLER_ENABLE
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-void usbd_handler(uint32_t period_10us)
-{
-	static timer_t s_timer;
-	if((m_task_tick10us - s_timer) >= period_10us){
-		s_timer = m_task_tick10us;
-		usbd_task(NULL);
-	}
-}
-#endif
 
 
 

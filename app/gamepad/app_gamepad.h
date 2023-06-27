@@ -17,16 +17,16 @@
 #include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 
-#if USBH_HID_SUPPORT & HID_SWITCH_MASK
+#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_SWITCH_MASK
 #include  "app/gamepad/switch_controller.h"
 #endif
-#if USBH_HID_SUPPORT & HID_PS_MASK
+#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_PS_MASK
 #include  "app/gamepad/ps_controller.h"
 #endif
-#if USBH_HID_SUPPORT & HID_XBOX_MASK
+#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_XBOX_MASK
 #include  "app/gamepad/xbox_controller.h"
 #endif
-#if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
 #include  "app/gamepad/gamepad_controller.h"
 #endif
 

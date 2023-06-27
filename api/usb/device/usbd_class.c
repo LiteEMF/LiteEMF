@@ -251,112 +251,6 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pd
 }
 
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-error_t usbd_class_reset(uint8_t id)
-{
-	uint8_t type;
-	
-	for(type=0; type<DEV_TYPE_NONE; type++){
-		if(m_usbd_types[id] & (1UL<<type)){
-			switch(type){
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-			case DEV_TYPE_HID	:
-				usbd_hid_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-			case DEV_TYPE_AUDIO	:
-				usbd_audio_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-			case DEV_TYPE_PRINTER:
-				usbd_printer_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-			case DEV_TYPE_MSD	:
-				usbd_msd_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-			case DEV_TYPE_CDC	:
-				usbd_cdc_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-			case DEV_TYPE_IAP2 :
-				usbd_iap2_reset(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-			case DEV_TYPE_AUTO :
-				usbd_auto_reset(id);
-				break;
-			#endif
-			default:
-				break;
-		}
-		}
-	}
-	
-	return ERROR_SUCCESS;
-}
-error_t usbd_class_suspend(uint8_t id)
-{
-	uint8_t type;
-	
-	for(type=0; type<DEV_TYPE_NONE; type++){
-		if(m_usbd_types[id] & (1UL<<type)){
-			switch(type){
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-			case DEV_TYPE_HID	:
-				usbd_hid_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-			case DEV_TYPE_AUDIO	:
-				usbd_audio_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-			case DEV_TYPE_PRINTER:
-				usbd_printer_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-			case DEV_TYPE_MSD	:
-				usbd_msd_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-			case DEV_TYPE_CDC	:
-				usbd_cdc_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-			case DEV_TYPE_IAP2 :
-				usbd_iap2_suspend(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-			case DEV_TYPE_AUTO :
-				usbd_auto_suspend(id);
-				break;
-			#endif
-			default:
-				break;
-			}
-		}
-	}
-	
-	return ERROR_SUCCESS;
-}
-
 
 error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 {
@@ -365,7 +259,27 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 	uint8_t itf;
 	usbd_class_t *pclass;
 
-	if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient){
+	if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
+		if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
+			if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
+				if(m_usbd_hid_types[id] & (BIT(HID_TYPE_X360))){
+					#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
+					pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_X360);
+					if(pclass){
+						err = usbd_hid_x360_control_request_process(id, pclass, preq);
+					}
+					#endif
+				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_XBOX))){
+					#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+					pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_XBOX);
+					if(pclass){
+						err = usbd_hid_xbox_control_request_process(id, pclass, preq);
+					}
+					#endif
+				}
+			}
+		}
+	}else{
 		itf = (uint8_t)(preq->req.wIndex & 0xFF);
 
 		pclass = usbd_class_find_by_itf(id, itf);
@@ -410,38 +324,8 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 				break;
 			}
 		}
-	}else{			//特殊处理
-		if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
-			if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
-				
-				if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
-					if(m_usbd_hid_types[id] & (BIT(HID_TYPE_X360))){
-				 		#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-						pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_X360);
-						if(pclass){
-							err = usbd_hid_x360_control_request_process(id, pclass, preq);
-						}
-						#endif
-					}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_XBOX))){
-						#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-						pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_XBOX);
-						if(pclass){
-							err = usbd_hid_xbox_control_request_process(id, pclass, preq);
-						}
-						#endif
-					}
-				}
-			}
-		}
-
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)		//自动识别设备特殊处理
-		if(m_usbd_types[id] == BIT(DEV_TYPE_AUTO)){
-			pclass = usbd_class_find_by_type(id, DEV_TYPE_AUTO, 0);
-			usbd_auto_control_request_process(id,pclass,preq);
-		}
-		#endif
 	}
-
+	
 	return err;
 }
 
@@ -466,185 +350,79 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 	return err;
 }
 
-#if 0
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
-error_t usbd_class_in_process(uint8_t id, uint8_t ep)
-{
-	usbd_class_t *pclass;
 
-	pclass = usbd_class_find_by_ep(id, ep);
-	if(NULL == pclass) return ERROR_NOT_FOUND;
-
-	switch(pclass->dev_type){
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-		case DEV_TYPE_HID	:
-			usbd_hid_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-		case DEV_TYPE_AUDIO	:
-			usbd_audio_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-		case DEV_TYPE_PRINTER:
-			usbd_printer_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-		case DEV_TYPE_MSD	:
-			usbd_msd_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-		case DEV_TYPE_CDC	:
-			usbd_cdc_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-		case DEV_TYPE_IAP2 :
-			usbd_iap2_in_process(id, pclass);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-		case DEV_TYPE_AUTO :
-			usbd_auto_in_process(id, pclass);
-			break;
-		#endif
-		default:
-			break;
-	}
-	return ERROR_SUCCESS;
-}
-#endif
 
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbd_class_out_process(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
+error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 {
+	uint8_t i;
 	usbd_class_t *pclass;
 
-	pclass = usbd_class_find_by_ep(id, ep);
-	if(NULL == pclass) return ERROR_NOT_FOUND;
-
-	switch(pclass->dev_type){
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-		case DEV_TYPE_HID	:
-			usbd_hid_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-		case DEV_TYPE_AUDIO	:
-			usbd_audio_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-		case DEV_TYPE_PRINTER:
-			usbd_printer_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-		case DEV_TYPE_MSD	:
-			usbd_msd_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-		case DEV_TYPE_CDC	:
-			usbd_cdc_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-		case DEV_TYPE_IAP2 :
-			usbd_iap2_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-		case DEV_TYPE_AUTO :
-			usbd_auto_out_process(id, pclass, buf, len);
-			break;
-		#endif
-		default:
-			break;
-	}
-	return ERROR_SUCCESS;
-}
-
-
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:	
-*******************************************************************/
-void usbd_class_task(uint8_t id)
-{
-	uint8_t type;
-
-	#if USBD_LOOP_OUT_ENABLE
-	error_t err;
-	uint8_t  usb_rxbuf[64];
-	uint16_t usb_rxlen = sizeof(usb_rxbuf);
-	uint8_t ep;
-
-	for(ep=1; ep<USBD_ENDP_NUM; ep++){
-		err = usbd_out(id,ep,usb_rxbuf,&usb_rxlen);
-		if((ERROR_SUCCESS == err) && usb_rxlen){
-			usbd_class_out_process(id,ep,usb_rxbuf,usb_rxlen);
+	for(i=0; i<countof(m_usbd_class[id]); i++){
+		pclass = &m_usbd_class[id][i];
+		if(pclass->endpin.addr || pclass->endpout.addr){
+			usbd_class_process(id, pclass, event, 0);
 		}
 	}
-	#endif
 	
-	// 以下class task当前未使用到
-	for(type=0; type<DEV_TYPE_NONE; type++){
-		if(m_usbd_types[id] & (1UL<<type)){
-			switch(type){
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-			case DEV_TYPE_HID	:
-				usbd_hid_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-			case DEV_TYPE_AUDIO	:
-				usbd_audio_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-			case DEV_TYPE_PRINTER:
-				usbd_printer_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-			case DEV_TYPE_MSD	:
-				usbd_msd_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-			case DEV_TYPE_CDC	:
-				usbd_cdc_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-			case DEV_TYPE_IAP2 :
-				usbd_iap2_task(id);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-			case DEV_TYPE_AUTO :
-				usbd_auto_task(id);
-				break;
-			#endif
-			default:
-				break;
-			}
-		}
+	return ERROR_SUCCESS;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description: usb事件触发任务,有3种usb事件处理方式
+	1. 轮询方式 USBD_LOOP_ENABLE 置1
+	2. 中断方式 USBD_LOOP_ENABLE 置0
+	3. 事件方式 USBD_LOOP_ENABLE 置0, 修改 usbd_xxx_event WEAK 在函数中发送事件
+*******************************************************************/
+void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
+{
+	switch(pclass->dev_type){
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+	case DEV_TYPE_HID	:
+		usbd_hid_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+	case DEV_TYPE_AUDIO	:
+		usbd_audio_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+	case DEV_TYPE_PRINTER:
+		usbd_printer_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
+	case DEV_TYPE_MSD	:
+		usbd_msd_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+	case DEV_TYPE_CDC	:
+		usbd_cdc_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+	case DEV_TYPE_IAP2 :
+		usbd_iap2_process(id, pclass, evt, val);
+		break;
+	#endif
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+	case DEV_TYPE_AUTO :
+		usbd_auto_process(id, pclass, evt, val);
+		break;
+	#endif
+	default:
+		break;
 	}
 }
+
 
 error_t usbd_class_init(uint8_t id)
 {

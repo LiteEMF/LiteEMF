@@ -40,143 +40,6 @@ uint8c_t usbd_hid_descriptor_tab[9] = { USBD_HID_DESC  };
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-error_t usbd_hid_reset(uint8_t id)
-{
-    error_t err = ERROR_FAILE;
-    uint8_t hid_type;
-
-	for(hid_type=0; hid_type<16; hid_type++){
-		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
-			switch(hid_type){
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
-                case HID_TYPE_VENDOR:
-                    err = usbd_hid_vendor_reset(id);
-                    break;
-                #endif
-                #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
-                case HID_TYPE_KB:
-				case HID_TYPE_MOUSE:
-				case HID_TYPE_CONSUMER:
-                    err = usbd_hid_km_reset(id);
-					break;
-                #endif
-				#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
-				case HID_TYPE_MT:
-                    err = usbd_hid_mt_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-				case HID_TYPE_GAMEPADE:
-                    err = usbd_hid_gamepade_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-				case HID_TYPE_X360	:
-                    err = usbd_hid_x360_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-				case HID_TYPE_XBOX	:
-                   err = usbd_hid_xbox_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
-				case HID_TYPE_SWITCH:
-                    err = usbd_hid_switch_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
-				case HID_TYPE_PS3	:
-                    err = usbd_hid_ps_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
-				case HID_TYPE_PS4	:
-                    err = usbd_hid_ps_reset(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
-				case HID_TYPE_PS5	:
-                    err = usbd_hid_ps_reset(id);
-					break;
-                #endif
-				default:
-					break;
-            }
-        }
-    }
-    return err;
-}
-
-error_t usbd_hid_suspend(uint8_t id)
-{
-    error_t err = ERROR_FAILE;
-    uint8_t hid_type;
-
-	for(hid_type=0; hid_type<16; hid_type++){
-		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
-			switch(hid_type){
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
-                case HID_TYPE_VENDOR:
-                    err = usbd_hid_vendor_suspend(id);
-                    break;
-                #endif
-                #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
-                case HID_TYPE_KB:
-				case HID_TYPE_MOUSE:
-				case HID_TYPE_CONSUMER:
-                    err = usbd_hid_km_suspend(id);
-					break;
-                #endif
-				#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
-				case HID_TYPE_MT:
-                    err = usbd_hid_mt_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-				case HID_TYPE_GAMEPADE:
-                    err = usbd_hid_gamepade_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-				case HID_TYPE_X360	:
-                    err = usbd_hid_x360_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-				case HID_TYPE_XBOX	:
-                   err = usbd_hid_xbox_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
-				case HID_TYPE_SWITCH:
-                    err = usbd_hid_switch_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
-				case HID_TYPE_PS3	:
-                    err = usbd_hid_ps_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
-				case HID_TYPE_PS4	:
-                    err = usbd_hid_ps_suspend(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
-				case HID_TYPE_PS5	:
-                    err = usbd_hid_ps_suspend(id);
-					break;
-                #endif
-				default:
-					break;
-            }
-        }
-    }
-    return err;
-}
-
-
 uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdesc, uint16_t desc_len, uint16_t* pdesc_index)
 {
     uint16_t len = 0;
@@ -353,67 +216,6 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
     return err;
 }
 
-error_t usbd_hid_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
-{
-    switch(pclass->hid_type){
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
-    case HID_TYPE_VENDOR:
-        len += usbd_hid_vendor_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
-    case HID_TYPE_KB:
-    case HID_TYPE_MOUSE:
-    case HID_TYPE_CONSUMER:
-        len += usbd_hid_km_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
-    case HID_TYPE_MT:
-        len += usbd_hid_mt_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-    case HID_TYPE_GAMEPADE:
-        len += usbd_hid_gamepade_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-    case HID_TYPE_X360	:
-        len += usbd_hid_x360_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-    case HID_TYPE_XBOX	:
-        len += usbd_hid_xbox_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
-    case HID_TYPE_SWITCH:
-        len += usbd_hid_switch_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
-    case HID_TYPE_PS3	:
-        len += usbd_hid_ps_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
-    case HID_TYPE_PS4	:
-        len += usbd_hid_ps_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
-    case HID_TYPE_PS5	:
-        len += usbd_hid_ps_out_process(id, pclass, buf, len);
-        break;
-    #endif
-    default:
-        break;
-    }
-    return ERROR_SUCCESS;
-}
-
 
 
 /*******************************************************************
@@ -565,69 +367,65 @@ error_t usbd_hid_deinit(uint8_t id)
 ** Returns:
 ** Description: 
 *******************************************************************/
-void usbd_hid_task(uint8_t id)
+void usbd_hid_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    uint8_t hid_type;
-
-	for(hid_type=0; hid_type<16; hid_type++){
-		if(m_usbd_hid_types[id] & (1UL<<hid_type)){
-			switch(hid_type){
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
-                case HID_TYPE_VENDOR:
-                    usbd_hid_vendor_task(id);
-                    break;
-                #endif
-                #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
-                case HID_TYPE_KB:
-				case HID_TYPE_MOUSE:
-				case HID_TYPE_CONSUMER:
-                    usbd_hid_km_task(id);
-					break;
-                #endif
-				#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
-				case HID_TYPE_MT:
-                    usbd_hid_mt_task(id);
-					break;
-                #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-				case HID_TYPE_GAMEPADE:
-                    usbd_hid_gamepade_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-				case HID_TYPE_X360	:
-                    usbd_hid_x360_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-				case HID_TYPE_XBOX	:
-                    usbd_hid_xbox_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
-				case HID_TYPE_SWITCH:
-                    usbd_hid_switch_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
-				case HID_TYPE_PS3	:
-                    usbd_hid_ps_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
-				case HID_TYPE_PS4	:
-                    usbd_hid_ps_task(id);
-					break;
-				#endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
-				case HID_TYPE_PS5	:
-                    usbd_hid_ps_task(id);
-					break;
-                #endif
-				default:
-					break;
-            }
-        }
+    usbd_class_t *pclass = (usbd_class_t*)pclass;
+    
+    switch(pclass->hid_type){
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
+        case HID_TYPE_VENDOR:
+            usbd_hid_vendor_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE) | BIT_ENUM(HID_TYPE_CONSUMER) )
+        case HID_TYPE_KB:
+        case HID_TYPE_MOUSE:
+        case HID_TYPE_CONSUMER:
+            usbd_hid_km_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT)
+        case HID_TYPE_MT:
+            usbd_hid_mt_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        case HID_TYPE_GAMEPADE:
+            usbd_hid_gamepade_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
+        case HID_TYPE_X360	:
+            usbd_hid_x360_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+        case HID_TYPE_XBOX	:
+            usbd_hid_xbox_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
+        case HID_TYPE_SWITCH:
+            usbd_hid_switch_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
+        case HID_TYPE_PS3	:
+            usbd_hid_ps_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
+        case HID_TYPE_PS4	:
+            usbd_hid_ps_process(id, pclass, evt, val);
+            break;
+        #endif
+        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
+        case HID_TYPE_PS5	:
+            usbd_hid_ps_process(id, pclass, evt, val);
+            break;
+        #endif
+        default:
+            break;
     }
 }
 

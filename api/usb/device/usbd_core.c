@@ -212,7 +212,7 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 
 		API_ENTER_CRITICAL();
 
-		pdev->enpd_in_busy[ep_addr] = false;			//注意endp0开始发发送接触busy状态
+		pdev->enpd_in_busy[0] = 1;			//注意endp0开始发发送接触busy状态
 		preq->setup_len = len;
 		preq->setup_index = 0;
 		if(preq->setup_buf != buf){
@@ -222,9 +222,9 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 
 		API_EXIT_CRITICAL();
 	}else{
-		if (pdev->enpd_in_busy[ep_addr]) return ERROR_BUSY;
+		if (pdev->enpd_in_busy[ep_addr] & 0X01) return ERROR_BUSY;
 
-		pdev->enpd_in_busy[ep_addr] = true;
+		pdev->enpd_in_busy[ep_addr] = 1;
 		err = hal_usbd_in(id, ep, buf, len);
 	}
     return err;
@@ -256,6 +256,7 @@ error_t usbd_set_address(uint8_t id, uint8_t address)
     return hal_usbd_set_address(id, address);
 }
 
+extern void usbd_reset_event(uint8_t id);
 error_t usbd_reset(uint8_t id)
 {
 	error_t err;
@@ -268,92 +269,6 @@ error_t usbd_reset(uint8_t id)
 }
 
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:	usb 事件, 在usb 中断事件产生后调用	
-	用户可消息多种处理方式,用户可以自定义修改:
-	1. 轮训方式	(默认)
-	2. 任务消息推送方式
-	3. 中断直接处理方式
-*******************************************************************/
-__WEAK void usbd_reset_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.reset = 1;
-	}
-}
-__WEAK void usbd_suspend_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.suspend = 1;
-	}
-}
-__WEAK void usbd_resume_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.resume = 1;
-	}
-}
-__WEAK void usbd_sof_event(uint8_t id)
-{
-
-}
-__WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	uint8_t ep_addr = ep & 0x7f;
-
-	ep |= USB_DIR_IN_MASK; 		//防止出错
-	if(0 == ep_addr){
-		usbd_req_t *preq = usbd_get_req(id);
-		usbd_dev_t *pdev = usbd_get_dev(id);
-
-		 if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-			if (USB_REQ_SET_ADDRESS == preq->req.bRequest) {
-				usbd_set_address(id, (uint8_t)preq->req.wValue);
-			}
-		 }
-
-		hal_usbd_in(id, ep, NULL,0);			//TODO 考虑简化
-	}else{
-		hal_usbd_endp_nak(id, USB_DIR_IN_MASK | ep);
-		pdev->enpd_in_busy[ ep_addr ] = false;
-	}
-}
-__WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-
-	ep &= ~USB_DIR_IN_MASK; 		//防止出错
-	if (len) {
-		hal_usbd_endp_nak(id,ep);
-	}
-	pdev->enpd_out_len[ep] = len;
-}
-__WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_req_t *preq = usbd_get_req(id);
-
-	pdev->enpd_in_busy[0] = true;
-	pdev->enpd_out_len[0] = 0;
-	if(NULL != pdev){
-		pdev->dev.setup = 1;
-		preq->req = *pctrl_req;
-		preq->req.wValue = SWAP16_L(preq->req.wValue);
-		preq->req.wIndex = SWAP16_L(preq->req.wIndex);
-		preq->req.wLength = SWAP16_L(preq->req.wLength);
-		usbd_malloc_setup_buffer(id, preq);
-	}
-
-	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置ack 继续接收OUT数据
-		hal_usbd_endp_ack(id, 0x00, 0);
-	}
-}
 
 
 

@@ -240,9 +240,9 @@ typedef struct{
 #endif
 
 #define BT_SUPPORT 			(BT0_SUPPORT | BT1_SUPPORT)
-#define BT_ENABLE			((BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF) | BIT_ENUM(TR_EDR)) & BT_SUPPORT)
-#define BTC_ENABLE			((BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC) | BIT_ENUM(TR_EDRC)) & BT_SUPPORT)
-#define API_RF_ENABLE		((BIT_ENUM(TR_RF) | BIT_ENUM(TR_RFC)) & BT_SUPPORT)
+#define BT_ENABLE			(BT_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF) | BIT_ENUM(TR_EDR)))
+#define BTC_ENABLE			(BT_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC) | BIT_ENUM(TR_EDRC)))
+#define API_RF_ENABLE		(BT_SUPPORT & (BIT_ENUM(TR_RF) | BIT_ENUM(TR_RFC)))
 #define API_BT_ENABLE		(BT_ENABLE | BTC_ENABLE | API_RF_ENABLE)
 
 //*********************************************************************************//

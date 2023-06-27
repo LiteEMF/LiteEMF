@@ -101,7 +101,12 @@ void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf,
 {
 	logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 
-    trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
+    trp_handle_t trp_handle;
+		
+    trp_handle.trp = TR_USBH;
+    trp_handle.id = id;
+    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+
     app_gamepad_in_process(&trp_handle,&usbh_gamepad_key,buf,len);
 }
 
@@ -110,7 +115,11 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_SUCCESS;
     uint8_t buf[0X40];
     uint16_t len;
-    trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
+    trp_handle_t trp_handle;
+		
+    trp_handle.trp = TR_USBH;
+    trp_handle.id = id;
+    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
     
     switch(pclass->hid_type){
         #if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
@@ -247,7 +256,11 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
 error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass) 
 {
     error_t err = ERROR_UNKNOW;
-    trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
+    trp_handle_t trp_handle;
+		
+    trp_handle.trp = TR_USBH;
+    trp_handle.id = id;
+    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
 
     app_gamepad_deinit(&trp_handle);
     
@@ -262,7 +275,11 @@ error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 void usbh_hid_gamepad_task(uint8_t id, usbh_class_t *pclass)
 {
-    trp_handle_t trp_handle = {TR_USBH, id, U16(pclass->dev_type,pclass->hid_type) };
+    trp_handle_t trp_handle;
+		
+    trp_handle.trp = TR_USBH;
+    trp_handle.id = id;
+    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
     app_gamepad_task(&trp_handle);
     UNUSED_PARAMETER(id);
 }

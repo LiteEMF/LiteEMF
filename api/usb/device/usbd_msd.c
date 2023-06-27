@@ -54,6 +54,8 @@ error_t usbd_msd_reset(uint8_t id)
 
     usbd_msc_cfg.scsi_blk_nbr = USBD_MSC_FLASH_BLOCK_NUM;
     usbd_msc_cfg.scsi_blk_size = USBD_MSC_FLASH_BLOCK_SIZE;
+
+logd("usbd_msc_cfg.max_lun=%bd\n",usbd_msc_cfg.max_lun);
     return ERROR_SUCCESS;
 }
 
@@ -62,8 +64,6 @@ error_t usbd_msd_suspend(uint8_t id)
     UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;
 }
-
-
 
 uint16_t usbd_msd_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdesc, uint16_t desc_len, uint16_t* pdesc_index)
 {
@@ -83,10 +83,15 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
     error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
-
-    if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
-        switch ( preq->req.bRequest ){
+    if(USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient){
+        if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+            if (USB_REQ_SET_CONFIGURATION == preq->req.bRequest){
+                usbd_msd_reset(id);
+            }
+        }
+    }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient){
+        if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+            switch ( preq->req.bRequest ){
             case MSC_REQUEST_RESET:
                 logd("MSC BOT Reset\n");
                 // driver state reset
@@ -97,23 +102,34 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
             case MSC_REQUEST_GET_MAX_LUN:
                 logd("MSC Get Max Lun\n");
                 preq->setup_buf[0] = usbd_msc_cfg.max_lun;  //default 0
+                logd("usbd_msc_cfg.max_lun=%bd\n",usbd_msc_cfg.max_lun);
                 preq->setup_len = 1;
                 err = ERROR_SUCCESS;
-            break;
+                break;
+            }
         }
     }
+
 
     return err;
 }
 
 
-error_t usbd_msd_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_msd_out_process(uint8_t id, usbd_class_t* pclass)
 {
-    mass_storage_bulk_out(id, buf, len);
+    uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
+
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        mass_storage_bulk_out(id,usb_rxbuf,usb_rxlen);
+    }
+
     return ERROR_SUCCESS;
 }
 
-error_t usbd_msd_in_process(uint8_t id)
+error_t usbd_msd_in_process(uint8_t id,usbd_class_t* pclass)
 {
     mass_storage_bulk_in(id);
     return ERROR_SUCCESS;
@@ -141,14 +157,31 @@ error_t usbd_msd_deinit(uint8_t id)
     return ERROR_SUCCESS;
 }
 
+
 /*******************************************************************
 ** Parameters:
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_msd_task(uint8_t id)
+void usbd_msd_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+        usbd_msd_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_msd_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_msd_out_process(id, pclass);
+        break;
+    case  USBD_EVENT_EP_IN:
+        usbd_msd_in_process(id,pclass);
+        break;
+    default:
+        break;
+    }
 }
+
 
 #endif

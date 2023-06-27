@@ -39,8 +39,8 @@ error_t usbd_hid_switch_reset(uint8_t id);
 error_t usbd_hid_switch_suspend(uint8_t id);
 uint16_t usbd_hid_switch_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_hid_switch_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
-error_t usbd_hid_switch_out_process(uint8_t id, usbd_class_t *pclass, uint8_t* buf, uint16_t len);
-void 	usbd_hid_switch_task(uint8_t id);
+error_t usbd_hid_switch_out_process(uint8_t id, usbd_class_t *pclass);
+void 	usbd_hid_switch_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
 error_t usbd_hid_switch_init(uint8_t id);
 error_t usbd_hid_switch_deinit(uint8_t id);
 

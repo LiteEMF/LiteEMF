@@ -80,7 +80,7 @@ bool usbd_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,
 		#endif
 
 		usbd_class_init(id);		//初始化usbd 类
-		usbd_class_reset(id);		//usbd_core_reset 会调用 usbd_core_init 
+		usbd_class_notify_evt(id,USBD_EVENT_RESET,0);		//usbd_core_reset 会调用 usbd_core_init 
 		break;
 	case CMD_SOCKET_SETUP_STALL:
 		usbd_endp_stall(id, 0x00);

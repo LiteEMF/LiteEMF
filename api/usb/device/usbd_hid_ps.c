@@ -196,11 +196,21 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
     return err;
 }
 
-error_t usbd_hid_ps_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_hid_ps_out_process(uint8_t id, usbd_class_t* pclass)
 {
-	trp_handle_t trp_handle = {TR_USBD, id, U16(pclass->dev_type, pclass->hid_type)};
+	uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
 
-	app_gamepad_dev_process(&trp_handle, buf,len);
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        trp_handle_t trp_handle;
+		
+		trp_handle.trp = TR_USBD;
+		trp_handle.id = id;
+		trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+		app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen);
+    }
 
     return ERROR_SUCCESS;
 }
@@ -233,9 +243,23 @@ error_t usbd_hid_ps_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_ps_task(uint8_t id)
+void usbd_hid_ps_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-	UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+		usbd_hid_ps_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_hid_ps_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_hid_ps_out_process(id, pclass);
+        break;
+    case USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif

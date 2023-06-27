@@ -36,7 +36,7 @@ extern "C" {
 #define USBD_ENDP0_MTU			64
 #endif
 #ifndef USBD_SPEED_MODE
-#define USBD_SPEED_MODE		0		//0:full, 1 low, 2,high
+#define USBD_SPEED_MODE		0		/*0:full, 1 low, 2,high*/
 #endif
 
 #ifndef USBD_BCD_VERSION
@@ -55,9 +55,10 @@ extern "C" {
 #define USBD_SELF_POWERED		0
 #endif
 
-#ifndef USBD_LOOP_OUT_ENABLE			//采样轮训方式读取USB数据
-#define USBD_LOOP_OUT_ENABLE	1
+#ifndef USBD_LOOP_ENABLE			//1 采样轮训方式处理usb
+#define USBD_LOOP_ENABLE		1
 #endif
+
 
 #ifndef USB_VID
 #define USB_VID				VID_DEFAULT
@@ -73,6 +74,19 @@ extern "C" {
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+typedef enum
+{
+  USBD_EVENT_NULL = 0,
+  USBD_EVENT_RESET,
+  USBD_EVENT_SOF,
+  USBD_EVENT_SUSPEND,
+  USBD_EVENT_RESUME,
+
+  USBD_EVENT_EP_OUT,
+  USBD_EVENT_EP_IN,
+} usbd_event_t;
+
+
 typedef struct 
 {
 	dev_type_t 	dev_type;
@@ -99,25 +113,25 @@ typedef struct
 
 typedef struct{
 	struct{
-		volatile uint8_t setup			: 1;	// 接收到usb setup 指令
-		volatile uint8_t reset			: 1;	// reset msg
-		volatile uint8_t suspend		: 1;	// suspend msg
-		volatile uint8_t resume			: 1;	// resume msg
+		volatile uint8_t setup			: 1;		// 接收到usb setup 指令
+		volatile uint8_t reset			: 1;		// reset msg
+		volatile uint8_t suspend		: 1;		// suspend msg
+		volatile uint8_t resume			: 1;		// resume msg
 
-		uint8_t remote_wakeup_en      	: 1; // enable/disable by host
-		uint8_t remote_wakeup_support 	: 1; // configuration descriptor's attribute
-		uint8_t self_powered          	: 1; // configuration descriptor's attribute
+		uint8_t remote_wakeup_en      	: 1; 		// enable/disable by host
+		uint8_t remote_wakeup_support 	: 1; 		// configuration descriptor's attribute
+		uint8_t self_powered          	: 1; 		// configuration descriptor's attribute
 	}dev;
 
-	uint8_t 	ready;						//usbd ready
+	uint8_t 	ready;								//usbd ready
 	uint8_t 	address;
 	usb_state_t state;
 	uint16_t vid;
 	uint16_t pid;
-	volatile uint8_t cfg_num; 			// current active configuration (0x00 is not configured)
-	uint8_t itf_alt[USBD_MAX_ITF_NUM];	// current bAlternateSetting
+	volatile uint8_t cfg_num; 						// current active configuration (0x00 is not configured)
+	uint8_t itf_alt[USBD_MAX_ITF_NUM];				// current bAlternateSetting
 	usbd_endp_state_t ep_status[USBD_ENDP_NUM][2];
-	volatile uint8_t enpd_in_busy[ USBD_ENDP_NUM ];			//注意端点0, 和其他端点判断busy方式不一样
+	volatile uint8_t enpd_in_busy[ USBD_ENDP_NUM ];	//bit0:busy, bit7: 中断标志注意端点0, 和其他端点判断busy方式不一样
 	volatile uint8_t enpd_out_len[ USBD_ENDP_NUM ];
 	uint8_t endp0_mtu;
 }usbd_dev_t;
@@ -127,7 +141,7 @@ typedef struct _usbd_req_t{
 	volatile usb_control_request_t req;
 	uint8_t *setup_buf;   		//必须调用usbd_malloc_setup_buffer分配内存, usbd_free_setup_buffer 释放内存
 	volatile uint16_t setup_len;			//ep0 setup data stage数据长度
-    volatile uint16_t setup_index;     	//ep0 setup 当前传输的位置
+    volatile uint16_t setup_index;     		//ep0 setup 当前传输的位置
 }usbd_req_t;
 
 
@@ -153,15 +167,6 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len);
 error_t usbd_out(uint8_t id, uint8_t ep,uint8_t* buf, uint16_t* plen);
 error_t usbd_set_address(uint8_t id,uint8_t address);
 error_t usbd_reset(uint8_t id);
-
-void usbd_reset_event(uint8_t id);								//__WEAK
-void usbd_suspend_event(uint8_t id);							//__WEAK
-void usbd_resume_event(uint8_t id);								//__WEAK
-void usbd_sof_event(uint8_t id);								//__WEAK
-void usbd_endp_in_event(uint8_t id ,uint8_t ep);	//__WEAK
-void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len);	//__WEAK
-void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len);	//__WEAK
-
 error_t usbd_core_init(uint8_t id);
 error_t usbd_core_deinit(uint8_t id);
 

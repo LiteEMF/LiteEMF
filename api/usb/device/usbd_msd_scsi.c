@@ -67,9 +67,11 @@ static void usbd_msc_send_csw(uint8_t id,uint8_t CSW_Status)
 	 * transfer is complete, ie when we get a bulk in callback
 	 */
     usbd_msc_cfg.stage = MSC_WAIT_CSW;
-
+    
     logd("Send csw\n");
     usbd_class_in(id, DEV_TYPE_MSD, DEV_TYPE_NONE, (uint8_t *)&usbd_msc_cfg.csw,sizeof(msc_csw_t));
+    
+    usbd_msc_cfg.stage = MSC_READ_CBW;      //cesar add 
 }
 
 static void usbd_msc_send_info(uint8_t id, uint8_t *buffer, uint8_t size)

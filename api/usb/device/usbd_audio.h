@@ -81,12 +81,12 @@ error_t usbd_audio_reset(uint8_t id);
 error_t usbd_audio_suspend(uint8_t id);
 uint16_t usbd_audio_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
-error_t usbd_audio_out_process(uint8_t id, usbd_class_t *pclass, uint8_t* buf, uint16_t len);
+error_t usbd_audio_out_process(uint8_t id, usbd_class_t *pclass);
 error_t usbd_audio_spk_en(uint8_t id,uint8_t en);
 error_t usbd_audio_mic_en(uint8_t id,uint8_t en);
 error_t usbd_audio_init(uint8_t id);
 error_t usbd_audio_deinit(uint8_t id);
-void usbd_audio_task(uint8_t id);
+void usbd_audio_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
 
 #ifdef __cplusplus
 }

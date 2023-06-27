@@ -194,7 +194,7 @@ error_t usbd_auto_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
     return err;
 }
 
-error_t usbd_auto_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_auto_out_process(uint8_t id, usbd_class_t* pclass)
 {
     return ERROR_SUCCESS;
 }
@@ -227,9 +227,23 @@ error_t usbd_auto_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_auto_task(uint8_t id)
+void usbd_auto_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+        usbd_auto_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_auto_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_auto_out_process(id, pclass);
+        break;
+    case  USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif

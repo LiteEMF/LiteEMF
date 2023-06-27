@@ -191,17 +191,24 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
     return err;
 }
 
-error_t usbd_hid_x360_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_hid_x360_out_process(uint8_t id, usbd_class_t* pclass)
 {
-	logd("gamepade ep%d in%d:",pclass->endpout.addr, len);dumpd(buf,len);
-	#if APP_RUMBLE_ENABLE
-	// x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;
-	// if (X360_RUMBLE_CMD == motorp->cmd){
-	// 	app_rumble_set_duty(RUMBLE_L, motorp->motor1, 20000);
-	// 	app_rumble_set_duty(RUMBLE_R, motorp->motor2, 20000);
-	// }
-	#endif
-	
+
+	uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
+
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        logd("gamepade x360 ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+		#if APP_RUMBLE_ENABLE
+		// x360_usb_motor_t *motorp = (x360_usb_motor_t *)buf;
+		// if (X360_RUMBLE_CMD == motorp->cmd){
+		// 	app_rumble_set_duty(RUMBLE_L, motorp->motor1, 20000);
+		// 	app_rumble_set_duty(RUMBLE_R, motorp->motor2, 20000);
+		// }
+		#endif
+    }
     return ERROR_SUCCESS;
 }
 
@@ -233,9 +240,23 @@ error_t usbd_hid_x360_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_x360_task(uint8_t id)
+void usbd_hid_x360_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-	UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+		usbd_hid_x360_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_hid_x360_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_hid_x360_out_process(id, pclass);
+        break;
+    case USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif

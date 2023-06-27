@@ -80,12 +80,20 @@ error_t usbd_hid_mt_control_request_process(uint8_t id, usbd_class_t *pclass, us
     error_t err = ERROR_SUCCESS;
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);
-	UNUSED_PARAMETER(preq);
     return err;
 }
 
-error_t usbd_hid_mt_out_process(uint8_t id, usbd_class_t* pclass, uint8_t* buf, uint16_t len)
+error_t usbd_hid_mt_out_process(uint8_t id, usbd_class_t* pclass)
 {
+    uint8_t  usb_rxbuf[64];
+	uint16_t usb_rxlen = sizeof(usb_rxbuf);
+    error_t err;
+
+    err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
+    if((ERROR_SUCCESS == err) && usb_rxlen){
+        logd("mt hid ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+    }
+
     return ERROR_SUCCESS;
 }
 
@@ -117,9 +125,23 @@ error_t usbd_hid_mt_deinit(uint8_t id)
 ** Returns:
 ** Description:
 *******************************************************************/
-void usbd_hid_mt_task(uint8_t id)
+void usbd_hid_mt_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-	UNUSED_PARAMETER(id);
+    switch(evt){
+    case  USBD_EVENT_RESET:
+        usbd_hid_mt_reset(id);
+        break;
+    case  USBD_EVENT_SUSPEND:
+        usbd_hid_mt_suspend(id);
+        break;
+    case  USBD_EVENT_EP_OUT:
+        usbd_hid_mt_out_process(id, pclass);
+        break;
+    case USBD_EVENT_EP_IN:
+        break;
+    default:
+        break;
+    }
 }
 
 #endif
