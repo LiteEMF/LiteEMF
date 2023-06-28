@@ -234,11 +234,12 @@ error_t usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
 	error_t err = ERROR_NULL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	uint8_t ep_addr = ep & 0x7f;
+	ep &= 0x7f;
 	
 	if(pdev->enpd_out_len[ep_addr]){
 		*plen = MIN(pdev->enpd_out_len[ep_addr],*plen);
 		pdev->enpd_out_len[ep_addr] = 0;
-		err = hal_usbd_out(id, 0, buf, plen);
+		err = hal_usbd_out(id, ep, buf, plen);
 	}
 
 	return err;

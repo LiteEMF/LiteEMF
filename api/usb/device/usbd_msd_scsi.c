@@ -421,11 +421,12 @@ static bool SCSI_read10(uint8_t id,uint8_t **ppdata, uint32_t *len)
         return false;
     }
 
+    // scsicmd_read10_s
     usbd_msc_cfg.start_sector = U32_H(&usbd_msc_cfg.cbw.CB[2]); /* Logical Block Address of First Block */
-    logd("lba: 0x%04x\n", usbd_msc_cfg.start_sector);
+    logd("lba: 0x%04lx\n", usbd_msc_cfg.start_sector);
 
     usbd_msc_cfg.nsectors = U16_H(&usbd_msc_cfg.cbw.CB[7]); /* Number of Blocks to transfer */
-    logd("nsectors: 0x%02x\n", usbd_msc_cfg.nsectors);
+    logd("nsectors: 0x%02lx\n", usbd_msc_cfg.nsectors);
 
     if ((usbd_msc_cfg.start_sector + usbd_msc_cfg.nsectors) > usbd_msc_cfg.scsi_blk_nbr) {
         SCSI_SetSenseData(SCSI_KCQIR_LBAOUTOFRANGE);
@@ -434,7 +435,7 @@ static bool SCSI_read10(uint8_t id,uint8_t **ppdata, uint32_t *len)
     }
 
     if (usbd_msc_cfg.cbw.dDataLength != (usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size)) {
-        loge("scsi_blk_len does not match with dDataLength\n");
+        loge("scsi_blk_len does not match with dDataLength=%ld, blk size=%d\n",usbd_msc_cfg.cbw.dDataLength,usbd_msc_cfg.scsi_blk_size );
         return false;
     }
     usbd_msc_cfg.stage = MSC_DATA_IN;
@@ -449,10 +450,10 @@ static bool SCSI_read12(uint8_t id,uint8_t **ppdata, uint32_t *len)
     }
 
     usbd_msc_cfg.start_sector = U32_H(&usbd_msc_cfg.cbw.CB[2]); /* Logical Block Address of First Block */
-    logd("lba: 0x%04x\n", usbd_msc_cfg.start_sector);
+    logd("lba: 0x%04lx\n", usbd_msc_cfg.start_sector);
 
     usbd_msc_cfg.nsectors = U32_H(&usbd_msc_cfg.cbw.CB[6]); /* Number of Blocks to transfer */
-    logd("nsectors: 0x%02x\n", usbd_msc_cfg.nsectors);
+    logd("nsectors: 0x%02lx\n", usbd_msc_cfg.nsectors);
 
     if ((usbd_msc_cfg.start_sector + usbd_msc_cfg.nsectors) > usbd_msc_cfg.scsi_blk_nbr) {
         SCSI_SetSenseData(SCSI_KCQIR_LBAOUTOFRANGE);
@@ -461,7 +462,7 @@ static bool SCSI_read12(uint8_t id,uint8_t **ppdata, uint32_t *len)
     }
 
     if (usbd_msc_cfg.cbw.dDataLength != (usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size)) {
-        loge("scsi_blk_len does not match with dDataLength\n");
+        loge("scsi_blk_len does not match with dDataLength=%ld, blk size=%d\n",usbd_msc_cfg.cbw.dDataLength,usbd_msc_cfg.scsi_blk_size );
         return false;
     }
     usbd_msc_cfg.stage = MSC_DATA_IN;
@@ -477,10 +478,10 @@ static bool SCSI_write10(uint8_t id,uint8_t **ppdata, uint32_t *len)
     }
 
     usbd_msc_cfg.start_sector = U32_H(&usbd_msc_cfg.cbw.CB[2]); /* Logical Block Address of First Block */
-    logd("lba: 0x%04x\n", usbd_msc_cfg.start_sector);
+    logd("lba: 0x%04lx\n", usbd_msc_cfg.start_sector);
 
     usbd_msc_cfg.nsectors = U16_H(&usbd_msc_cfg.cbw.CB[7]); /* Number of Blocks to transfer */
-    logd("nsectors: 0x%02x\n", usbd_msc_cfg.nsectors);
+    logd("nsectors: 0x%02lx\n", usbd_msc_cfg.nsectors);
 
     data_len = usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size;
     if ((usbd_msc_cfg.start_sector + usbd_msc_cfg.nsectors) > usbd_msc_cfg.scsi_blk_nbr) {
@@ -507,10 +508,10 @@ static bool SCSI_write12(uint8_t id,uint8_t **ppdata, uint32_t *len)
     }
 
     usbd_msc_cfg.start_sector = U32_H(&usbd_msc_cfg.cbw.CB[2]); /* Logical Block Address of First Block */
-    logd("lba: 0x%04x\n", usbd_msc_cfg.start_sector);
+    logd("lba: 0x%04lx\n", usbd_msc_cfg.start_sector);
 
     usbd_msc_cfg.nsectors = U32_H(&usbd_msc_cfg.cbw.CB[6]); /* Number of Blocks to transfer */
-    logd("nsectors: 0x%02x\n", usbd_msc_cfg.nsectors);
+    logd("nsectors: 0x%02lx\n", usbd_msc_cfg.nsectors);
 
     data_len = usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size;
     if ((usbd_msc_cfg.start_sector + usbd_msc_cfg.nsectors) > usbd_msc_cfg.scsi_blk_nbr) {
@@ -577,19 +578,21 @@ static bool SCSI_processRead(uint8_t id)
 {
     uint32_t transfer_len;
 
-    logd("read lba:%d\n", usbd_msc_cfg.start_sector);
-
     transfer_len = MIN(usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size, USBD_MSC_BLOCK_SIZE);
+    //logd("read lba:%ld,offset=%d,transfer_len=%ld\n", usbd_msc_cfg.start_sector,usbd_msc_cfg.sector_offset,transfer_len);
 
-    if (usbd_msc_sector_read(usbd_msc_cfg.start_sector, usbd_msc_cfg.block_buffer, transfer_len) != 0) {
+    if (usbd_msc_sector_read(0, usbd_msc_cfg.start_sector, usbd_msc_cfg.sector_offset, usbd_msc_cfg.block_buffer, transfer_len) != 0) {
         SCSI_SetSenseData(SCSI_KCQHE_UREINRESERVEDAREA);
         return false;
     }
     usbd_class_in(id, DEV_TYPE_MSD, DEV_TYPE_NONE, usbd_msc_cfg.block_buffer,transfer_len);
 
-    usbd_msc_cfg.start_sector += (transfer_len / usbd_msc_cfg.scsi_blk_size);
-    usbd_msc_cfg.nsectors -= (transfer_len / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.sector_offset += transfer_len;
+    usbd_msc_cfg.start_sector += (usbd_msc_cfg.sector_offset / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.nsectors -= (usbd_msc_cfg.sector_offset / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.sector_offset %= usbd_msc_cfg.scsi_blk_size;
     usbd_msc_cfg.csw.dDataResidue -= transfer_len;
+
 
     if (usbd_msc_cfg.nsectors == 0) {
         usbd_msc_cfg.stage = MSC_SEND_CSW;
@@ -600,23 +603,24 @@ static bool SCSI_processRead(uint8_t id)
 
 static bool SCSI_processWrite(uint8_t id,uint32_t nbytes)
 {
-    uint32_t data_len = 0;
-    logd("write lba:%d\n", usbd_msc_cfg.start_sector);
+    //uint32_t data_len = 0;
 
-    if (usbd_msc_sector_write(usbd_msc_cfg.start_sector, usbd_msc_cfg.block_buffer, nbytes) != 0) {
+    //logd("write lba:%ld,offset=%d,transfer_len=%ld\n", usbd_msc_cfg.start_sector,usbd_msc_cfg.sector_offset,nbytes);
+    if (usbd_msc_sector_write(0, usbd_msc_cfg.start_sector, usbd_msc_cfg.sector_offset, usbd_msc_cfg.block_buffer, nbytes) != 0) {
         SCSI_SetSenseData(SCSI_KCQHE_WRITEFAULT);
         return false;
     }
 
-    usbd_msc_cfg.start_sector += (nbytes / usbd_msc_cfg.scsi_blk_size);
-    usbd_msc_cfg.nsectors -= (nbytes / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.sector_offset += nbytes;
+    usbd_msc_cfg.start_sector += (usbd_msc_cfg.sector_offset / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.nsectors -= (usbd_msc_cfg.sector_offset / usbd_msc_cfg.scsi_blk_size);
+    usbd_msc_cfg.sector_offset %= usbd_msc_cfg.scsi_blk_size;
     usbd_msc_cfg.csw.dDataResidue -= nbytes;
 
     if (usbd_msc_cfg.nsectors == 0) {
         usbd_msc_send_csw(id, CSW_STATUS_CMD_PASSED);
     } else {
-        data_len = MIN(usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size, USBD_MSC_BLOCK_SIZE);
-
+        //data_len = MIN(usbd_msc_cfg.nsectors * usbd_msc_cfg.scsi_blk_size, USBD_MSC_BLOCK_SIZE);
         // usbd_ep_start_read(mass_ep_data[MSD_OUT_EP_IDX].ep_addr, usbd_msc_cfg.block_buffer, data_len);
     }
 
@@ -635,14 +639,19 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
         return false;
     }
 
+    usbd_msc_cfg.cbw.dSignature = SWAP32_L( usbd_msc_cfg.cbw.dSignature );
+    usbd_msc_cfg.cbw.dTag = SWAP32_L( usbd_msc_cfg.cbw.dTag );
+    usbd_msc_cfg.cbw.dDataLength = SWAP32_L( usbd_msc_cfg.cbw.dDataLength );
+
     usbd_msc_cfg.csw.dTag = usbd_msc_cfg.cbw.dTag;
     usbd_msc_cfg.csw.dDataResidue = usbd_msc_cfg.cbw.dDataLength;
+    usbd_msc_cfg.sector_offset = 0;
 
     if ((usbd_msc_cfg.cbw.bLUN > 1) || (usbd_msc_cfg.cbw.dSignature != MSC_CBW_Signature) || (usbd_msc_cfg.cbw.bCBLength < 1) || (usbd_msc_cfg.cbw.bCBLength > 16)) {
         SCSI_SetSenseData(SCSI_KCQIR_INVALIDCOMMAND);
         return false;
     } else {
-        logd("Decode CB:0x%02x\n", usbd_msc_cfg.cbw.CB[0]);
+        logd("usbd decode CB:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
         switch (usbd_msc_cfg.cbw.CB[0]) {
             case SCSI_CMD_TESTUNITREADY:
                 ret = SCSI_testUnitReady(&buf2send, &len2send);
@@ -690,7 +699,7 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
 
             default:
                 SCSI_SetSenseData(SCSI_KCQIR_INVALIDCOMMAND);
-                loge("unsupported cmd:0x%02x\n", usbd_msc_cfg.cbw.CB[0]);
+                loge("unsupported cmd:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
                 ret = false;
                 break;
         }
@@ -698,7 +707,7 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
     if (ret) {
         if (usbd_msc_cfg.stage == MSC_READ_CBW) {
             if (len2send) {
-                logd("Send info len:%d\n", len2send);
+                logd("Send info len:%ld\n", len2send);
                 usbd_msc_send_info(id,buf2send, len2send);
             } else {
                 usbd_msc_send_csw(id,CSW_STATUS_CMD_PASSED);
@@ -716,15 +725,23 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
 ** Description:		
 *******************************************************************/
 #if WEAK_ENABLE
-__WEAK error_t usbd_msc_sector_read(uint32_t sector, uint8_t *buffer, uint32_t length)
+__WEAK error_t usbd_msc_sector_read(uint8_t lun, uint32_t sector, uint32_t offset, uint8_t *buffer, uint32_t length)
 {
-    //memcpy(buffer, mass_block[sector].BlockSpace, length);
+    // out of ramdisk
+  	if ( sector >= USBD_DISK_BLOCK_NUM ) return ERROR_NO_MEM;
+
+    // memcpy(buffer, msc_disk[sector] + offset, length);
     return ERROR_SUCCESS;
+
 }
 
-__WEAK error_t usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length)
+__WEAK error_t usbd_msc_sector_write(uint8_t lun, uint32_t sector, uint32_t offset, uint8_t *buffer, uint32_t length)
 {
-    // memcpy(mass_block[sector].BlockSpace, buffer, length);
+    // out of ramdisk
+	if ( sector >= USBD_DISK_BLOCK_NUM ) return ERROR_NO_MEM;
+
+    // memcpy(msc_disk[sector] + offset, buffer, length);
+
     return ERROR_SUCCESS;
 }
 #endif
@@ -733,9 +750,9 @@ void mass_storage_bulk_out(uint8_t id, uint8_t* buf, uint16_t len)
 {
     switch (usbd_msc_cfg.stage) {
         case MSC_READ_CBW:
-            memcpy(&usbd_msc_cfg.cbw, buf, MIN(len, sizeof(usbd_msc_cfg.cbw)));
+            memcpy(&usbd_msc_cfg.cbw, buf, MIN(len, sizeof(msc_cbw_t)));
             if (SCSI_CBWDecode(id,len) == false) {
-                loge("Command:0x%02x decode err\n", usbd_msc_cfg.cbw.CB[0]);
+                loge("usbd mass command:0x%02x decode err\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
                 usbd_msc_bot_abort(id);
                 return;
             }

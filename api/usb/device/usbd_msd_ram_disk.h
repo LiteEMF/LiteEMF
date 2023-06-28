@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_otg_h
-#define _app_otg_h
+#ifndef _usbd_msd_ram_disk_h
+#define _usbd_msd_ram_disk_h
 #include "utils/emf_typedef.h" 
 
 #ifdef __cplusplus
@@ -34,9 +34,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool app_otg_init(void);
-bool app_otg_deinit(void);
-void app_otg_handler(uint32_t period_10us);
+
 
 #ifdef __cplusplus
 }

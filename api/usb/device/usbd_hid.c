@@ -369,8 +369,7 @@ error_t usbd_hid_deinit(uint8_t id)
 *******************************************************************/
 void usbd_hid_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-    usbd_class_t *pclass = (usbd_class_t*)pclass;
-    
+
     switch(pclass->hid_type){
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
         case HID_TYPE_VENDOR:

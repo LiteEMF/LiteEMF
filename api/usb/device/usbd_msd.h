@@ -25,15 +25,19 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef USBD_MSC_FLASH_BLOCK_SIZE
-#define USBD_MSC_FLASH_BLOCK_SIZE	64
-#endif
-#ifndef USBD_MSC_FLASH_BLOCK_NUM
-#define USBD_MSC_FLASH_BLOCK_NUM	16
+#ifndef USBD_RAM_DISK_ENABLE
+#define USBD_RAM_DISK_ENABLE	1
 #endif
 
-#ifndef USBD_MSC_BLOCK_SIZE
-#define USBD_MSC_BLOCK_SIZE			256
+#ifndef USBD_DISK_BLOCK_SIZE
+#define USBD_DISK_BLOCK_SIZE	512
+#endif
+#ifndef USBD_DISK_BLOCK_NUM				//FAT12 min 8 , FAT32 min 64
+#define USBD_DISK_BLOCK_NUM	    64
+#endif
+
+#ifndef USBD_MSC_BLOCK_SIZE             //endp mtu
+#define USBD_MSC_BLOCK_SIZE		64
 #endif
 
 #ifndef CONFIG_USBDEV_MSC_MANUFACTURER_STRING
@@ -64,8 +68,8 @@ typedef enum {
 typedef struct _msc_cfg {
     /* state of the bulk-only state machine */
     msc_stage_t stage;
-    __ALIGN(4) msc_cbw_t cbw;
-    __ALIGN(4) msc_csw_t csw;
+    msc_cbw_t cbw;
+    msc_csw_t csw;
 
     uint8_t readonly;
     uint8_t sKey; /* Sense key */
@@ -74,6 +78,7 @@ typedef struct _msc_cfg {
     uint8_t max_lun;
     uint32_t start_sector;
     uint32_t nsectors;
+    uint16_t sector_offset;
     uint16_t scsi_blk_size;	//flash block size must <= USBD_MSC_BLOCK_SIZE
     uint32_t scsi_blk_nbr;	//flash block num
 

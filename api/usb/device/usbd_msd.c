@@ -52,10 +52,9 @@ error_t usbd_msd_reset(uint8_t id)
     usbd_msc_cfg.stage = MSC_READ_CBW;
     usbd_msc_cfg.readonly = false;
 
-    usbd_msc_cfg.scsi_blk_nbr = USBD_MSC_FLASH_BLOCK_NUM;
-    usbd_msc_cfg.scsi_blk_size = USBD_MSC_FLASH_BLOCK_SIZE;
+    usbd_msc_cfg.scsi_blk_nbr = USBD_DISK_BLOCK_NUM;
+    usbd_msc_cfg.scsi_blk_size = USBD_DISK_BLOCK_SIZE;
 
-logd("usbd_msc_cfg.max_lun=%bd\n",usbd_msc_cfg.max_lun);
     return ERROR_SUCCESS;
 }
 
@@ -71,7 +70,7 @@ uint16_t usbd_msd_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
 
     if (desc_len >= *pdesc_index + len) {
         memcpy(pdesc + *pdesc_index, msd_itf_desc_tab, len);
-        usbd_assign_configuration_desc(id, DEV_TYPE_MSD, 0, pindex, pdesc + *pdesc_index, len);
+        usbd_assign_configuration_desc(id, DEV_TYPE_MSD, DEF_HID_TYPE_NONE, pindex, pdesc + *pdesc_index, len);
     }
     *pdesc_index += len;
 
@@ -102,7 +101,7 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
             case MSC_REQUEST_GET_MAX_LUN:
                 logd("MSC Get Max Lun\n");
                 preq->setup_buf[0] = usbd_msc_cfg.max_lun;  //default 0
-                logd("usbd_msc_cfg.max_lun=%bd\n",usbd_msc_cfg.max_lun);
+                logd("usbd_msc_cfg.max_lun=%d\n",(uint16_t)usbd_msc_cfg.max_lun);
                 preq->setup_len = 1;
                 err = ERROR_SUCCESS;
                 break;

@@ -335,7 +335,7 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint8_t len)
+error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint16_t len)
 {
 	error_t err = ERROR_FAILE;
 	usbd_class_t* pclass;
