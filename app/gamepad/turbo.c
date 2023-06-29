@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if TURBO_ENABLE
+#if defined TURBO_ENABLE && TURBO_ENABLE
 #include "turbo.h"
 #include "api/api_tick.h"
 

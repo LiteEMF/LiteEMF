@@ -187,7 +187,7 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
 
 void hid_desc_info_free(hid_desc_info_t *pinfo)
 {
-    logd("hid_desc_info_free =%x\n",pinfo->item_list.globalsStack);
+    logd("hid_desc_info_free=%x\n", (uint32_t)pinfo->item_list.globalsStack);
     emf_free(pinfo->item_list.globalsStack);
 }
 /*******************************************************************
@@ -313,7 +313,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                    + (sizeof(hid_usage_item_t) * pinfo->usages)
                    + (sizeof(hid_globals_item_t) * pinfo->maxGlobalsNesting);
     assignMem = (uint8_t*) emf_malloc(sizeRequired);
-    logd( "HID: Memory for Report Descriptor len=%d add=%lx\n", sizeRequired, (uint32_t)assignMem);
+    logd( "HID: Memory for Report Descriptor len=%d add=%x\n", sizeRequired, (uint32_t)assignMem);
     if (assignMem == NULL) 
     {
         emf_mem_stats();

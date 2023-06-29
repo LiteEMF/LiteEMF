@@ -93,11 +93,11 @@ extern "C" {
 
     #define GET_SP()                gcc_current_sp()
 
-    static inline unsigned int gcc_current_sp(void)
-    {
-        register unsigned sp __ASM("sp");
-        return sp;
-    }
+    // static inline unsigned int gcc_current_sp(void)
+    // {
+    //     register unsigned sp __ASM("sp");
+    //     return sp;
+    // }
 
 #elif defined   ( __TASKING__ )
 

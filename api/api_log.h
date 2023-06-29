@@ -102,7 +102,7 @@ extern "C" {
 		#define dumpe(fmt,args...)
 	#endif
 
-	#if ( __CC_ARM )
+	#if defined(__CC_ARM) && (__CC_ARM)
 		// ANSI控制字符定义
 		#define ANSI_RESET          "\x1b[0m"
 		#define ANSI_BOLD           "\x1b[1m"
