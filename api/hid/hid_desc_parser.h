@@ -163,6 +163,10 @@ typedef struct{
 }hid_item_info_t;
 
 
+
+#ifndef pack
+#pragma pack(1)
+#endif
 typedef struct {
     uint16_t                    usagePage;         // Specifies current Usage Page
     int32_t                     logicalMinimum;    // This is the minimum value that a variable or array item will report
@@ -245,6 +249,10 @@ typedef struct{
     hid_item_t item_list;
 }hid_desc_info_t;
 
+
+#ifndef pack
+#pragma pack()
+#endif
 
 
 

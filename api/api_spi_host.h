@@ -32,13 +32,20 @@ extern "C" {
 
 #define SPI_BADU_POS		(0)
 #define SPI_BADU_MASK		0X0000FFFF		//KHZ
-#define SPI_RES_POS			(16)
-#define SPI_RES_MASK		0XFFFF0000
+#define SPI_MODE_POS		(16)
+#define SPI_MODE_MASK		0X00FF0000
+#define SPI_RES_POS			(24)
+#define SPI_RES_MASK		0XFF000000
 
 
-#ifndef SPI_BADU_ATT		//api layout fix do not fix in hal_pwm
+
+#ifndef SPI_BADU_ATT		
 #define SPI_BADU_ATT(id)  	(FLD2VAL(SPI_BADU, m_spi_map[id].att))
 #endif
+#ifndef SPI_MODE_ATT		//SPI mode
+#define SPI_MODE_ATT(id)  	(FLD2VAL(SPI_MODE, m_spi_map[id].att))
+#endif
+
 
 #ifndef SPI_DELAY			//ns
 #define SPI_DELAY(id)  		delay_ns(1000000/2/SPI_BADU_ATT(id)) 	

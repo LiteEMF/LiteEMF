@@ -57,13 +57,13 @@ extern "C" {
 #define ADC_EAR_DET_ID		ID_NULL
 #endif
 
-#define ADC_CHANNEL_POS		(0)
-#define ADC_CHANNEL_MASK	0X0000FFFF
+#define ADC_CH_POS			(0)
+#define ADC_CH_MASK			0X0000FFFF
 #define ADC_PULL_POS		(16)
 #define ADC_PULL_MASK		0X00FF0000
 
-#ifndef ADC_CHANNEL_ATT			
-#define ADC_CHANNEL_ATT(id)  	(FLD2VAL(ADC_CHANNEL, m_adc_map[id].att))
+#ifndef ADC_CH_ATT			
+#define ADC_CH_ATT(id)  		(FLD2VAL(ADC_CH, m_adc_map[id].att))
 #endif
 #ifndef ADC_PULL_ATT
 #define ADC_PULL_ATT(id)  		(FLD2VAL(ADC_PULL, m_adc_map[id].att))
