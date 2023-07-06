@@ -67,6 +67,7 @@ __WEAK void user_vender_handler(void)
 *******************************************************************/
 bool emf_api_init(void)
 {
+	logd("emf_api_init\n");
 	// emf_mem_init();
 	// #ifdef HW_UART_MAP
 	// api_uart_init(UART_DEBUG_ID);			
@@ -139,6 +140,8 @@ bool emf_api_init(void)
 *******************************************************************/
 bool emf_init(void)
 {
+	logd("emf_init\n");
+
 	#if APP_KEY_ENABLE
 	app_key_init();
 	#endif

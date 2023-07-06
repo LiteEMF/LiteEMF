@@ -27,12 +27,17 @@ extern "C" {
 #define EMF_MEMPOLL_SIZE		(2*0x400)			/*2k*/
 #endif
 
+#define emf_free_and_clear(p)	do {emf_free(p); p = NULL;} while(0)
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
-#define emf_free_and_clear(p)	do {emf_free(p); p = NULL;} while(0)
-
+typedef struct {
+	uint8_t alignment;
+	uint8_t alignment_mask;
+	uint16_t heap_index;
+	uint16_t heap_len;
+	uint8_t* pheap_head;
+}mem_buf_t;				//只分分配内存,不释放内存
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
@@ -40,6 +45,11 @@ void emf_mem_init(void);
 void* emf_malloc(uint32_t size);
 void emf_free(void* p);
 void emf_mem_stats(void);
+// mem buf
+void *mem_buf_alloc(mem_buf_t * pmbuf, uint16_t size);
+void mem_buf_init(mem_buf_t * pmbuf, uint8_t *buf, uint16_t buf_size, uint8_t alignment);
+uint16_t get_mem_buf_free_size(mem_buf_t * pmbuf );
+
 
 
 //hal

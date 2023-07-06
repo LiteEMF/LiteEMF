@@ -21,6 +21,56 @@
 **	static Parameters
 *******************************************************************************************************/
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	mem_buf_alloc 只分分配内存,不释放内存
+	使用的时候需要单独创建 mem_buf_t
+*******************************************************************/
+void *mem_buf_alloc(mem_buf_t * pmbuf, uint16_t size)
+{
+    void *p = NULL;
+
+	if(NULL == pmbuf) return NULL;
+	if(NULL == pmbuf->pheap_head) return NULL;
+
+    /* Ensure that blocks are always aligned. */
+	if( size & pmbuf->alignment_mask ){
+		/* Byte alignment required. Check for overflow. */
+		if((size + (pmbuf->alignment - (size & pmbuf->alignment_mask))) > size ){
+			size += (pmbuf->alignment - (size & pmbuf->alignment_mask) );
+		}else{
+			size = 0;
+		}
+	}
+
+	/* Check there is enough room left for the allocation and. */
+	if( ( size > 0 ) &&                                /* valid size */
+		( ( pmbuf->heap_index + size ) < pmbuf->heap_len ) &&
+		( ( pmbuf->heap_index + size ) > pmbuf->heap_index ) ) {/* Check for overflow. */
+		/* Return the next free byte then increment the index past this block. */
+		p = pmbuf->pheap_head + pmbuf->heap_index;
+		pmbuf->heap_index += size;
+	}
+
+    return p;
+}
+
+void mem_buf_init(mem_buf_t * pmbuf, uint8_t *buf, uint16_t buf_size, uint8_t alignment)
+{
+	pmbuf->alignment = alignment;
+	pmbuf->alignment_mask = alignment -1;
+	pmbuf->heap_index = 0;
+	pmbuf->heap_len = buf_size - alignment;
+	pmbuf->pheap_head = ( uint8_t * ) (((uint32_t)&buf[pmbuf->alignment_mask]) & ~((uint32_t)(pmbuf->alignment_mask)));
+}
+
+uint16_t get_mem_buf_free_size( mem_buf_t * pmbuf )
+{
+    return( pmbuf->heap_len - pmbuf->heap_index );
+}
+
+
 
 /*******************************************************************
 ** Parameters:		

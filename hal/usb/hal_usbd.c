@@ -45,7 +45,10 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-
+uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
+{
+	return NULL;
+}
 error_t hal_usbd_endp_dma_init(uint8_t id)
 {
 	return ERROR_SUCCESS;
@@ -75,10 +78,7 @@ error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep)
 	return ERROR_SUCCESS;
 }
 
-uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
-{
-	return NULL;
-}
+
 /*******************************************************************
 ** Parameters:
 ** Returns:
