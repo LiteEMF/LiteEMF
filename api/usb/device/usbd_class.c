@@ -27,7 +27,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];			//注意接口下标和接口号不是一一对应的
+usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];			//注意由于有itf_alt的存在,接口下标和接口号不是一一对应的
 
 /******************************************************************************************************
 **	static Parameters
@@ -121,8 +121,8 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 
 /*******************************************************************
 ** Parameters:		
-** Returns:	
-** Description:	重新设配置描述符, 同时分配接口号好端点	
+** Returns:	 配置输出到 m_usbd_class 中
+** Description:	分配设配置描述符, 同时分配接口号和端点	
 *******************************************************************/
 error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type,itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len)
 {
@@ -191,11 +191,21 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
     return( err );
 }
 
-uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index)
+/*******************************************************************
+** Parameters:		
+** Returns:	 return 获取到的接口数, 配置输出到 m_usbd_class 中
+** Description:	重新设配置描述符, 同时分配接口号和端点	
+*******************************************************************/
+uint16_t usbd_class_get_itf_desc(uint8_t id, uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index)
 {
-	uint16_t len = 0;
 	uint8_t type;
+	itf_ep_index_t index;
 	bool xbox_audio = false;			//特殊处理xbox audio
+
+	//每次调用的时候从0开始, 不会因为多次调用导致数据不一致
+	memset(&index,0,sizeof(index));
+	index.ep_in_num = 1;					//endp from 1
+	index.ep_out_num = 1;
 
 	if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX))){
 		xbox_audio = true;
@@ -206,39 +216,39 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pd
 			switch(type){
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 			case DEV_TYPE_HID	:
-				len = usbd_hid_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_hid_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 			case DEV_TYPE_AUDIO	:
 				if(!xbox_audio){
-					len = usbd_audio_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+					usbd_audio_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				}
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
 			case DEV_TYPE_PRINTER:
-				len = usbd_printer_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_printer_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
 			case DEV_TYPE_MSD	:
-				len = usbd_msd_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_msd_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
 			case DEV_TYPE_CDC	:
-				len = usbd_cdc_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_cdc_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 			case DEV_TYPE_IAP2 :
-				len = usbd_iap2_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_iap2_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
 			case DEV_TYPE_AUTO :
-				len = usbd_auto_get_itf_desc(id,pindex,pdesc,desc_len,pdesc_index);
+				usbd_auto_get_itf_desc(id,&index,pdesc,desc_len,pdesc_index);
 				break;
 			#endif
 			default:
@@ -247,7 +257,7 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t *pd
 		}
 	}
 
-	return len;
+	return index.itf_index;
 }
 
 

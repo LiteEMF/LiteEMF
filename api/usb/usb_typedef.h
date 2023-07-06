@@ -63,7 +63,7 @@ typedef enum
 {
 	USB_ENDP_TYPE_CTRL = 0,
 	USB_ENDP_TYPE_ISOCH,
-	USB_ENDP_TYPE_BULK,
+	USB_ENDP_TYPE_BULK,	//BULK 端点是双buf,需要两倍空间,如果和BULK in 不同时使用(比如U盘协议),可以优化共用BULK in buf
 	USB_ENDP_TYPE_INTER
 }usb_endp_type_t;
 #endif

@@ -108,7 +108,7 @@ error_t usbd_free_setup_buffer(usbd_req_t *preq)
 		emf_free((void*)preq->setup_buf);
 	}
 	preq->setup_len = 0;
-	preq->setup_index = 0;
+	preq->setup_index = 0xffff;   	//set  setup_index > setup_len
 	preq->setup_buf = NULL;
 	return ERROR_SUCCESS;
 }

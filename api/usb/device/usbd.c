@@ -17,7 +17,7 @@
 #include "utils/emf_utils.h"
 #include "api/usb/device/usbd.h"
 #include "api/api_tick.h"
-
+#include "api/api_system.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -35,9 +35,8 @@ char const* usbd_string_desc[4] =
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t m_usbd_types[USBD_NUM];
-uint16_t m_usbd_hid_types[USBD_NUM];
-
+uint16_t m_usbd_types[USBD_NUM] = {USBD_TYPE_SUPPORT};		//for default type, please fix in project
+uint16_t m_usbd_hid_types[USBD_NUM] = {USBD_HID_SUPPORT};
 
 /******************************************************************************************************
 **	static Parameters
@@ -233,8 +232,8 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 
 error_t usbd_get_configuration_desc(uint8_t id, uint8_t cfg, uint8_t *pdesc, uint16_t *pdesc_len)
 {
+	uint8_t itf_num;
 	uint16_t desc_index = 9;
-	itf_ep_index_t index;
 	usb_desc_configuration_t* pcfg_desc = (usb_desc_configuration_t*)pdesc;
 
 	if(*pdesc_len < 9) 	return ERROR_STALL;
@@ -247,14 +246,12 @@ error_t usbd_get_configuration_desc(uint8_t id, uint8_t cfg, uint8_t *pdesc, uin
 	pcfg_desc->iConfiguration = 0x00;		//string index	 
 	pcfg_desc->bmAttributes = 0x80 | (USBD_REMOTE_WAKEUP << 6) | (USBD_SELF_POWERED << 5);	//D6: Self-powered, remote wakeup, D5
 	pcfg_desc->bMaxPower = 0xfa;			//500mA
-
-	memset(&index,0,sizeof(index));
-	index.ep_in_num = 1;					//endp from 1
-	index.ep_out_num = 1;
-	usbd_class_get_itf_desc(id, &index, pdesc, *pdesc_len, &desc_index);
+	
+	/*遍历设备接口描述符*/
+	itf_num = usbd_class_get_itf_desc(id, pdesc, *pdesc_len, &desc_index);
 
 	pcfg_desc->wTotalLength = SWAP16_L(desc_index);
-	pcfg_desc->bNumInterfaces = index.itf_num;
+	pcfg_desc->bNumInterfaces = itf_num;
 
 	*pdesc_len = MIN(*pdesc_len, desc_index);
 
@@ -358,6 +355,7 @@ static error_t usbd_control_request_process(uint8_t id)
 						// close all non-control endpoints, cancel all pending transfers if any
 						// close all drivers and current configured state except bus speed
 						usbd_cfg_endp_all(id);
+						usbd_cfg_endp_all(id);			//TODO JLAD14需要设置两遍?
 					}
 				}
 
@@ -608,9 +606,11 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 			if (USB_REQ_SET_ADDRESS == preq->req.bRequest) {
 				usbd_set_address(id, (uint8_t)preq->req.wValue);
 			}
-		 }
+		}
 
-		hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
+		if(preq->setup_index <= preq->setup_len){
+			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
+		}
 	}else{
 		usbd_endp_nak(id, USB_DIR_IN_MASK | ep);
 		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
@@ -663,7 +663,7 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 		usbd_malloc_setup_buffer(id, preq);
 	}
 
-	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置ack 继续接收OUT数据
+	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
 		usbd_endp_ack(id, 0x00, 0);
 	}
 }

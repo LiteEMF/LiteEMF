@@ -651,7 +651,7 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
         SCSI_SetSenseData(SCSI_KCQIR_INVALIDCOMMAND);
         return false;
     } else {
-        logd("usbd decode CB:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
+        logd("usbd msd cmd:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
         switch (usbd_msc_cfg.cbw.CB[0]) {
             case SCSI_CMD_TESTUNITREADY:
                 ret = SCSI_testUnitReady(&buf2send, &len2send);
