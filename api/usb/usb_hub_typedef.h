@@ -181,6 +181,6 @@ typedef struct {
  }
 #endif
 
-#endif /* _TUSB_HUB_H_ */
+#endif /* _USB_HUB_H_ */
 
 /** @} */

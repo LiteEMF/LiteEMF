@@ -35,8 +35,8 @@
 static uint8c_t ps_gamepade_itf_desc_tab[] = {
 	0x09,0x04,0x00,0x00,0x02,0x03,0x00,0x00,0x00,             			//usb_desc_interface_t
     USBD_HID_DESC,          			//usb_hid_descriptor_hid_t
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x03,0x40,0x00,0x02,			//usb_desc_endpoint_t
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x03,0x40,0x00,0x04,			//usb_desc_endpoint_t
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x02,			//usb_desc_endpoint_t
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,			//usb_desc_endpoint_t
 };
 
 
@@ -125,7 +125,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 	error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+	if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t report_type = preq->req.wValue>>8;
 		uint8_t report_id   = preq->req.wValue & 0XFF;
 

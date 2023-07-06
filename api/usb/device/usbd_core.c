@@ -81,9 +81,9 @@ error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 	if(preq->req.wLength){
 
 		if(preq->req.wLength > 0XFF){			//字符串pc会读取1k多字节, 这里节省内存空间
-			if ((USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
-				&& (USB_REQ_GET_DESCRIPTOR == preq->req.bRequest)
-				&& (USB_DESC_STRING == (preq->req.wValue >> 8)) ){
+			if ((TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
+				&& (TUSB_REQ_GET_DESCRIPTOR == preq->req.bRequest)
+				&& (TUSB_DESC_STRING == (preq->req.wValue >> 8)) ){
 					
 				preq->req.wLength = 0XFF;
 			}
@@ -149,7 +149,7 @@ error_t usbd_clear_endp_stall(uint8_t id, uint8_t ep)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	dir = (ep & USB_DIR_MASK)? 1:0;
+	dir = (ep & TUSB_DIR_MASK)? 1:0;
 
 	if ( pdev->ep_status[ep_addr][dir].stalled ){
 		err = hal_usbd_clear_endp_stall(id, ep);
@@ -168,7 +168,7 @@ error_t usbd_endp_stall(uint8_t id, uint8_t ep)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	dir = (ep & USB_DIR_MASK)? 1:0;
+	dir = (ep & TUSB_DIR_MASK)? 1:0;
 
 	if ( !pdev->ep_status[ep_addr][dir].stalled ){
 		err = hal_usbd_endp_stall(id, ep);
@@ -186,7 +186,7 @@ bool usbd_get_endp_stalled(uint8_t id, uint8_t ep)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	dir = (ep & USB_DIR_MASK)? 1:0;
+	dir = (ep & TUSB_DIR_MASK)? 1:0;
     return pdev->ep_status[ep_addr][dir].stalled;
 }
 void* usbd_get_endp_buffer(uint8_t id, uint8_t ep)
@@ -205,7 +205,7 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 	error_t err;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	uint8_t ep_addr = ep & 0x7f;
-	ep |= USB_DIR_IN_MASK;			//防止端点信息出错
+	ep |= TUSB_DIR_IN_MASK;			//防止端点信息出错
 
 	if(0 == (ep_addr)){
 		usbd_req_t *preq = usbd_get_req(id);
@@ -252,7 +252,7 @@ error_t usbd_set_address(uint8_t id, uint8_t address)
 	if(NULL == pdev) return ERROR_PARAM;
 
 	pdev->address = address;
-	pdev->state = USB_STA_ADDRESSING;
+	pdev->state = TUSB_STA_ADDRESSING;
 
     return hal_usbd_set_address(id, address);
 }
@@ -278,7 +278,7 @@ error_t usbd_core_init(uint8_t id)
 	error_t err = ERROR_UNSUPPORT;
 	memset((void*)&m_usbd_req[id],0, sizeof(usbd_req_t));
 	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
-	m_usbd_dev[id].state = USB_STA_ATTACHED;
+	m_usbd_dev[id].state = TUSB_STA_ATTACHED;
 	m_usbd_dev[id].endp0_mtu = USBD_ENDP0_MTU;
 	
 	if(API_USBD_BIT_ENABLE & BIT(id)){

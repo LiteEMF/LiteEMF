@@ -53,7 +53,7 @@ usbd_class_t *usbd_class_find_by_ep(uint8_t id, uint8_t ep)
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
 
-		if(((pclass->endpin.addr | USB_DIR_IN_MASK) == ep) || (pclass->endpout.addr == ep)){
+		if(((pclass->endpin.addr | TUSB_DIR_IN_MASK) == ep) || (pclass->endpout.addr == ep)){
 			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
 				return pclass;
 			}
@@ -103,8 +103,8 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 			if(DEV_TYPE_HID == type){
 				if(sub_type != pclass->hid_type) continue;
 				if(HID_TYPE_XBOX == sub_type){		//xbox特殊处理,xbox音频不在这里处理
-					if(pclass->endpin.type != USB_ENDP_TYPE_INTER) continue;
-					if(pclass->endpout.type != USB_ENDP_TYPE_INTER) continue;
+					if(pclass->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
+					if(pclass->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
 				}
 			}else if(DEV_TYPE_AUDIO == type){
 				if(sub_type != pclass->itf.if_sub_cls) continue;
@@ -139,7 +139,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
         l = pdesc[i];
         if(0 == l) break;
 
-		if(USB_DESC_INTERFACE == pdesc[i+1]){
+		if(TUSB_DESC_INTERFACE == pdesc[i+1]){
 			pitf = (usb_desc_interface_t*)(pdesc+i);
 			pitf->bInterfaceNumber = pindex->itf_num;
 			if(0 == pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
@@ -156,7 +156,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
 			pclass->itf.if_pro = pitf->bInterfaceProtocol;
 
-        }else if(USB_DESC_ENDPOINT == pdesc[i+1]){
+        }else if(TUSB_DESC_ENDPOINT == pdesc[i+1]){
 			usb_endp_t *endp;
         	pep = (usb_desc_endpoint_t*)(pdesc+i);
 
@@ -165,9 +165,9 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 				return ERROR_FAILE;
 			}
 
-			if(pep->bEndpointAddress & USB_DIR_MASK){
+			if(pep->bEndpointAddress & TUSB_DIR_MASK){
 				endp = &pclass->endpin;
-				pep->bEndpointAddress = USB_DIR_IN_MASK | pindex->ep_in_num;
+				pep->bEndpointAddress = TUSB_DIR_IN_MASK | pindex->ep_in_num;
 				if(0 == pclass->itf.if_alt) {			//接口alt为0,表示接口号不相同才需要分配新端点
 					pindex->ep_in_num++;
 				}
@@ -182,7 +182,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			endp->addr = pep->bEndpointAddress & 0x0F;
 			endp->type = pep->bmAttributes.xfer;
 			endp->sync = 0;
-			endp->dir = (pep->bEndpointAddress & USB_DIR_MASK)? USB_DIR_IN:USB_DIR_OUT;
+			endp->dir = (pep->bEndpointAddress & TUSB_DIR_MASK)? TUSB_DIR_IN:TUSB_DIR_OUT;
 			endp->interval = pep->bInterval;
 			endp->mtu = SWAP16_L(pep->wMaxPacketSize);
 			
@@ -269,8 +269,8 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 	uint8_t itf;
 	usbd_class_t *pclass;
 
-	if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
-		if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
+	if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
+		if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
 			if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
 				if(m_usbd_hid_types[id] & (BIT(HID_TYPE_X360))){
 					#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)

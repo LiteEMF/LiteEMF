@@ -131,9 +131,9 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
             if(pclass->itf.if_num){
-                if(pclass->endpin.type == USB_ENDP_TYPE_INTER){             //gamepad
+                if(pclass->endpin.type == TUSB_ENDP_TYPE_INTER){             //gamepad
                     xbox_controller_init(&trp_handle);
-                }else if(pclass->endpin.type == USB_ENDP_TYPE_ISOCH){       //audio
+                }else if(pclass->endpin.type == TUSB_ENDP_TYPE_ISOCH){       //audio
                     #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)        //如果支持打开audio接口,xbox默认一直打开
                     usbh_req_set_itf(id, pclass->itf.if_num, 1);
                     #endif
@@ -203,7 +203,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
         return err;
     }
 
-    if(USB_CLASS_VENDOR == pclass->itf.if_cls){     //特殊识别xbox
+    if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){     //特殊识别xbox
         if(XBOX_SUBCLASS == pclass->itf.if_sub_cls){
             pclass->hid_type = HID_TYPE_XBOX;
             if(XBOXX_PID == pdev->pid){
@@ -219,7 +219,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
             logd("usbh x360\n");
             err = ERROR_SUCCESS;
         }
-    }else{          //USB_CLASS_HID识别ps4 switch dinput
+    }else{          //TUSB_CLASS_HID识别ps4 switch dinput
         uint8_t i;
         hid_items_t hat_switch,vendor;
 

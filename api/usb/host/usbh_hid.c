@@ -52,9 +52,9 @@ error_t usbh_hid_set_idle(uint8_t id, uint8_t itf)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_SET_IDLE;
 
     req.wValue = 0;     //Idle rate = 0 mean only report when there is changes
@@ -71,9 +71,9 @@ error_t usbh_hid_set_report(uint8_t id, uint8_t itf, hid_report_type_t type, uin
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_SET_REPORT;
 
     req.wValue = SWAP16_L(U16(type,rep_id));
@@ -91,9 +91,9 @@ error_t usbh_hid_get_report(uint8_t id, uint8_t itf, hid_report_type_t type, uin
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = HID_REQ_CONTROL_GET_REPORT;
 
     req.wValue = SWAP16_L(U16(type,rep_id));
@@ -111,10 +111,10 @@ error_t usbh_hid_get_report_desc( uint8_t id, uint8_t index, uint16_t itf, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_DESCRIPTOR;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_DESCRIPTOR;
 
     req.wValue = SWAP16_L(U16(HID_DESC_TYPE_REPORT,index));
     req.wIndex = SWAP16_L(itf);
@@ -142,7 +142,7 @@ uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len)
         l = buf[i];
         if(0 == l) break;
 
-    	if( buf[i+1] == USB_DESC_INTERFACE){
+    	if( buf[i+1] == TUSB_DESC_INTERFACE){
     		inf_num++;
     		if(inf_num > 1) break;
     	}
@@ -197,11 +197,11 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
 error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
 {
     error_t err = ERROR_NOT_FOUND;
-    if(USB_CLASS_HID == pclass->itf.if_cls){
+    if(TUSB_CLASS_HID == pclass->itf.if_cls){
         err = ERROR_SUCCESS;
-    }else if(USB_CLASS_VENDOR == pclass->itf.if_cls){
+    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){
         if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) || (X360_SUBCLASS == pclass->itf.if_sub_cls)){
-            if(pclass->endpin.addr && (USB_ENDP_TYPE_INTER == pclass->endpin.type)){
+            if(pclass->endpin.addr && (TUSB_ENDP_TYPE_INTER == pclass->endpin.type)){
                 err = ERROR_SUCCESS;
             }
         }
@@ -234,7 +234,7 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
     }
     
     if(err) return err;
-    err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+    err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(err) return err;
 logd("usbh_hid_open err= %d\n",err);
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
@@ -248,7 +248,7 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
     uint8_t *desc_buf;
     hid_desc_info_t hid_info;
 
-    if(USB_CLASS_HID == pclass->itf.if_cls){            //except xbox
+    if(TUSB_CLASS_HID == pclass->itf.if_cls){            //except xbox
         desc_len = usbh_get_hid_desc_len(pdesc, len);
         if(0 == desc_len) return ERROR_UNSUPPORT;
 

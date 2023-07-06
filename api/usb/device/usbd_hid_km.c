@@ -37,22 +37,22 @@
 uint8c_t kb_itf_desc_tab[] = {
     0x09,0x04,0x00,0x00,0x01,0x03,0x01,0x01,0x00,                       //接口描述符,键盘
     USBD_HID_DESC,                       //HID类描述符
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x03,0X40,0x00,USBD_HID_KB_INTERVAL,			//端点描述符
-    // 0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x03,0X40,0x00,0x08,			//键盘不需要out端点,通过控制传输设置
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0X40,0x00,USBD_HID_KB_INTERVAL,			//端点描述符
+    // 0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0X40,0x00,0x08,			//键盘不需要out端点,通过控制传输设置
 };
 #endif
 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
 uint8c_t mouse_itf_desc_tab[] = {
     0x09,0x04,0x01,0x00,0x01,0x03,0x01,0x02,0x00,						//接口描述符,鼠标
     USBD_HID_DESC,					//HID类描述符
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST),0x03,0X40,0x00,USBD_HID_MOUSE_INTERVAL,			//端点描述符
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST),0x03,0X40,0x00,USBD_HID_MOUSE_INTERVAL,			//端点描述符
 };
 #endif
 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)
 uint8c_t consumer_itf_desc_tab[] = {
    	0x09,0x04,0x02,0x00,0x01,0x03,0x00,0x00,0x00,						//接口描述符
     USBD_HID_DESC,						//HID类描述符
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x03,0X40,0x00,0x04,			//端点描述符
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0X40,0x00,0x04,			//端点描述符
 };
 #endif
 /*****************************************************************************************************
@@ -136,7 +136,7 @@ error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass, us
 	error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+	if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t report_type = preq->req.wValue>>8;
 		uint8_t report_id   = preq->req.wValue & 0XFF;
 		switch(preq->req.bRequest){

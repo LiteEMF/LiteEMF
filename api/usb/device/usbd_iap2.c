@@ -25,12 +25,12 @@
 static uint8c_t iap2_itf_desc_tab[] = {
 
 	0x09,0x04,0x00,0x00,0x02,0xFF,0xF0,0x00,0x04,                       // usb_desc_interface_t
-	0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x02,0X40,0x00,0x01,			//端点描述符
-    0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x02,0X40,0x00,0x01,			//端点描述符
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x02,0X40,0x00,0x01,			//端点描述符
+    0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x02,0X40,0x00,0x01,			//端点描述符
 
 	0x09,0x04,0x01,0x00,0x01,0x03,0x00,0x00,0x00,                       //接口描述符
 	0x09,0x21,0x10,0x01,0x00,0x01,0x22,0x00,0x00,
-	0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x02,0X40,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x02,0X40,0x00,0x01,
 	
 };
 
@@ -91,9 +91,9 @@ error_t usbd_iap2_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
     error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
+    if(TUSB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+    if(TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 
     }
     return err;

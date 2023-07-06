@@ -26,7 +26,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef USBD_RAM_DISK_ENABLE
-#define USBD_RAM_DISK_ENABLE	1
+#define USBD_RAM_DISK_ENABLE	0
 #endif
 
 #ifndef USBD_DISK_BLOCK_SIZE

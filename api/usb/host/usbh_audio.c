@@ -54,9 +54,9 @@ error_t usbh_audio_set_request(uint8_t id, video_control_request_t reqest, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = reqest;
 
     req.wValue = SWAP16_L(U16(type,lr));
@@ -74,9 +74,9 @@ error_t usbh_audio_get_request(uint8_t id, video_control_request_t reqest, uint8
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = reqest;
 
     req.wValue = SWAP16_L(U16(type,lr));
@@ -95,10 +95,10 @@ error_t usbh_audio_endp_set_feature(uint8_t id, uint8_t endp, audio_clock_src_co
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_ENDPOINT;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_SET_FEATURE;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_ENDPOINT;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_SET_FEATURE;
 
     req.wValue = SWAP16_L(ctrl);
     req.wIndex = SWAP16_L(endp);
@@ -129,9 +129,9 @@ error_t usbh_match_audio( uint8_t id, usbh_class_t *pclass)
 {
 	error_t err = ERROR_NOT_FOUND;
 
-	if ((USB_CLASS_AUDIO == pclass->itf.if_cls)){
-		if( (pclass->endpin.addr && (USB_ENDP_TYPE_ISOCH == pclass->endpin.type)) 
-			|| (pclass->endpout.addr && (USB_ENDP_TYPE_ISOCH == pclass->endpout.type)) ){
+	if ((TUSB_CLASS_AUDIO == pclass->itf.if_cls)){
+		if( (pclass->endpin.addr && (TUSB_ENDP_TYPE_ISOCH == pclass->endpin.type)) 
+			|| (pclass->endpout.addr && (TUSB_ENDP_TYPE_ISOCH == pclass->endpout.type)) ){
 			err = ERROR_SUCCESS;
 		}
 	}
@@ -192,10 +192,10 @@ error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass)
             rate[0] = usbh_audio_info.mic_sampel.rate & 0XFF;
             rate[1] = (usbh_audio_info.mic_sampel.rate >> 8) & 0XFF;
             rate[2] = (usbh_audio_info.mic_sampel.rate >> 16) & 0XFF; 
-            err = usbh_audio_endp_set_feature(id, pclass->endpin.addr | USB_DIR_IN_MASK, AUDIO_CS_CTRL_SAM_FREQ, rate, 3);
+            err = usbh_audio_endp_set_feature(id, pclass->endpin.addr | TUSB_DIR_IN_MASK, AUDIO_CS_CTRL_SAM_FREQ, rate, 3);
         }  
         if(ERROR_SUCCESS == err){
-            err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+            err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
             if(ERROR_SUCCESS == err) pdev->class_ready = true;
         }
     }
@@ -214,12 +214,12 @@ error_t usbh_audio_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint1
         l = pdesc[i];
         if(0 == l) break;
 
-    	if( pdesc[i+1] == USB_DESC_INTERFACE){
+    	if( pdesc[i+1] == TUSB_DESC_INTERFACE){
     		if(++inf_num > 1) break;
     	}
 
         if(pclass->itf.if_sub_cls == AUDIO_SUBCLASS_CONTROL){
-            if( pdesc[i+1] != USB_DESC_CS_INTERFACE) continue;
+            if( pdesc[i+1] != TUSB_DESC_CS_INTERFACE) continue;
 
             switch(pdesc[i+2]){
             case AUDIO_CS_AC_INTERFACE_HEADER:
@@ -260,7 +260,7 @@ error_t usbh_audio_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint1
                 break;
             }
         }else if(pclass->itf.if_sub_cls == AUDIO_SUBCLASS_STREAMING){
-            if(pdesc[i+1] != USB_DESC_CS_INTERFACE) continue;
+            if(pdesc[i+1] != TUSB_DESC_CS_INTERFACE) continue;
 
             if(AUDIO_CS_AS_INTERFACE_FORMAT_TYPE == pdesc[i+2]){
                 audio_desc_type_I_format_t *pterminal = (audio_desc_type_I_format_t*)(pdesc+i);

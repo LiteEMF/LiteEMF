@@ -53,7 +53,7 @@ static void usbd_msc_bot_abort(uint8_t id)
     if ((usbd_msc_cfg.cbw.bmFlags == 0) && (usbd_msc_cfg.cbw.dDataLength != 0)) {
         usbd_endp_stall(id,pclass->endpout.addr);
     }
-    usbd_endp_stall(id,USB_DIR_IN_MASK | pclass->endpin.addr);
+    usbd_endp_stall(id,TUSB_DIR_IN_MASK | pclass->endpin.addr);
 
     usbd_msc_cfg.stage = MSC_READ_CBW;
 }

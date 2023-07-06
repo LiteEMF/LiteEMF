@@ -55,9 +55,9 @@ error_t usbh_cdc_set_control_line_state(uint8_t id, uint8_t itf, uint16_t line_s
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = CDC_REQUEST_SET_CONTROL_LINE_STATE;
 
     req.wValue = SWAP16_L(line_state);
@@ -73,9 +73,9 @@ error_t usbh_cdc_set_line_coding(uint8_t id, uint8_t itf, cdc_line_coding_t cons
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = CDC_REQUEST_SET_LINE_CODING;
 
     req.wValue = 0;
@@ -107,7 +107,7 @@ error_t usbh_match_cdc( uint8_t id, usbh_class_t *pclass)
 	error_t err = ERROR_NOT_FOUND;
 
 	// Only support ACM subclass,Protocol 0xFF can be RNDIS device for windows XP
-	if ( (USB_CLASS_CDC == pclass->itf.if_cls) 
+	if ( (TUSB_CLASS_CDC == pclass->itf.if_cls) 
 		&& (CDC_COMM_SUBCLASS_ABSTRACT_CONTROL_MODEL == pclass->itf.if_sub_cls)
 		&& (0XFF != pclass->itf.if_pro)){
 
@@ -130,7 +130,7 @@ error_t usbh_cdc_open( uint8_t id, usbh_class_t *pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	cdc_line_coding_t line_coding = CFG_TUH_CDC_LINE_CODING_ON_ENUM;
 
-	err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
 	if(err) return err;
 
 	err = usbh_cdc_set_control_line_state(id, pclass->itf.if_num, CFG_TUH_CDC_LINE_CONTROL_ON_ENUM);

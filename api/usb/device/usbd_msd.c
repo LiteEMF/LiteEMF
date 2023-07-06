@@ -23,9 +23,9 @@
 *******************************************************************************************************/
 
 static uint8c_t msd_itf_desc_tab[] = {
-    0x09,0x04,0x00,0x00,0x02,USB_CLASS_MSD,MSC_SUBCLASS_SCSI,MSC_PROTOCOL_BULK_ONLY,0x00,              //usb_desc_interface_t
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
+    0x09,0x04,0x00,0x00,0x02,TUSB_CLASS_MSD,MSC_SUBCLASS_SCSI,MSC_PROTOCOL_BULK_ONLY,0x00,              //usb_desc_interface_t
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x02,0x40,0x00,0x00,			//usb_desc_endpoint_t
 };
 
 /******************************************************************************************************
@@ -82,14 +82,14 @@ error_t usbd_msd_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
     error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient){
-        if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-            if (USB_REQ_SET_CONFIGURATION == preq->req.bRequest){
+    if(TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient){
+        if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+            if (TUSB_REQ_SET_CONFIGURATION == preq->req.bRequest){
                 usbd_msd_reset(id);
             }
         }
-    }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient){
-        if(USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+    }else if(TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient){
+        if(TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
             switch ( preq->req.bRequest ){
             case MSC_REQUEST_RESET:
                 logd("MSC BOT Reset\n");

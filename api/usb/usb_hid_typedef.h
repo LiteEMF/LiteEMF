@@ -162,4 +162,4 @@ typedef struct {
  }
 #endif
 
-#endif /* _TUSB_HID_H__ */
+#endif /* _USB_HID_H__ */

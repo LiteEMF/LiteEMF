@@ -80,7 +80,7 @@ error_t usbh_usbmuxd_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNKNOW;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err){
 		pdev->class_ready = true;
 		usbmuxd_init();
@@ -121,7 +121,7 @@ error_t usbh_usbmuxd_deinit( uint8_t id, usbh_class_t *pclass)
 void usbh_usbmuxd_task(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
-	if(USB_STA_CONFIGURED == pdev->state){
+	if(TUSB_STA_CONFIGURED == pdev->state){
 		static timer_t muxd_t;
 		uint8_t err = ERROR_NOT_FOUND;
 		

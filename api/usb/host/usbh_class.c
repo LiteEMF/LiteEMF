@@ -99,8 +99,8 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 			if(DEV_TYPE_HID == type){
 				if(sub_type != pclass->hid_type) continue;
 				if(HID_TYPE_XBOX == sub_type){		//xbox特殊处理,xbox音频不在这里处理
-					if(pclass->endpin.type != USB_ENDP_TYPE_INTER) continue;
-					if(pclass->endpout.type != USB_ENDP_TYPE_INTER) continue;
+					if(pclass->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
+					if(pclass->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
 				}
 			}else if(DEV_TYPE_AUDIO == type){
 				if(sub_type != pclass->itf.if_sub_cls) continue;
@@ -187,48 +187,48 @@ dev_type_t usbh_match_class( uint8_t id, usbh_class_t *pclass)
 
 	switch(pclass->itf.if_cls){
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-		case USB_CLASS_HID	:
+		case TUSB_CLASS_HID	:
 			if(ERROR_SUCCESS == usbh_match_hid(id, pclass)){
 				type = DEV_TYPE_HID;
 			}
 			break;
 		#endif
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-		case USB_CLASS_AUDIO	:
+		case TUSB_CLASS_AUDIO	:
 			if(ERROR_SUCCESS == usbh_match_audio(id, pclass)){
 				type = DEV_TYPE_AUDIO;
 			}
 			break;
 		#endif
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-		case USB_CLASS_PRINTER:
+		case TUSB_CLASS_PRINTER:
 			if(ERROR_SUCCESS == usbh_match_printer(id, pclass)){
 				type = DEV_TYPE_PRINTER;
 			}
 			break;
 		#endif
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-		case USB_CLASS_MSD	:
+		case TUSB_CLASS_MSD	:
 			if(ERROR_SUCCESS == usbh_match_msd(id, pclass)){
 				type = DEV_TYPE_MSD;
 			}
 			break;
 		#endif
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HUB)
-		case USB_CLASS_HUB	:
+		case TUSB_CLASS_HUB	:
 			if(ERROR_SUCCESS == usbh_match_hub(id, pclass)){
 				type = DEV_TYPE_HUB;
 			}
 			break;
 		#endif
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-		case USB_CLASS_CDC	:
+		case TUSB_CLASS_CDC	:
 			if(ERROR_SUCCESS == usbh_match_cdc(id, pclass)){
 				type = DEV_TYPE_CDC;
 			}
 			break;
 		#endif
-		case USB_CLASS_VENDOR :
+		case TUSB_CLASS_VENDOR :
 			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR)
 				if(ERROR_SUCCESS == usbh_match_vendor(id, pclass)){
 				type = DEV_TYPE_VENDOR;
@@ -663,7 +663,7 @@ void usbh_class_task(uint32_t dt_ms)
 			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
 			#if USBH_LOOP_IN_ENABLE
-			if(USB_ENDP_TYPE_INTER == pos->endpin.type){			//only inter enpd
+			if(TUSB_ENDP_TYPE_INTER == pos->endpin.type){			//only inter enpd
 				if(0 == (s_tick % pos->endpin.interval)){
 					uint8_t buf[64];
 					uint16_t len = sizeof(buf);

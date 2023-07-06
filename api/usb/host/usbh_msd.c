@@ -60,9 +60,9 @@ error_t usbh_match_msd( uint8_t id, usbh_class_t *pclass)
 {
 	error_t err = ERROR_NOT_FOUND;
 
-	if ((USB_CLASS_MSD == pclass->itf.if_cls)){
-		if( (pclass->endpin.addr && (USB_ENDP_TYPE_BULK == pclass->endpin.type)) 
-			&& (pclass->endpout.addr && (USB_ENDP_TYPE_BULK == pclass->endpout.type)) ){
+	if ((TUSB_CLASS_MSD == pclass->itf.if_cls)){
+		if( (pclass->endpin.addr && (TUSB_ENDP_TYPE_BULK == pclass->endpin.type)) 
+			&& (pclass->endpout.addr && (TUSB_ENDP_TYPE_BULK == pclass->endpout.type)) ){
 			err = ERROR_SUCCESS;
 		}
 	}
@@ -80,7 +80,7 @@ error_t usbh_msd_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNKNOW;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
     return err;
 }

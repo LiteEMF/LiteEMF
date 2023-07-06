@@ -48,13 +48,13 @@ static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 	0x01,
 	0x01,
 	0x24,
-	(USB_DIR_IN<<USB_DIR_POST),
+	(TUSB_DIR_IN<<TUSB_DIR_POST),
 	0x14,
 	0x03,   		/* wDescriptorLength*/
 	0x00,
 	0x03,
 	0x13,
-	(USB_DIR_OUT<<USB_DIR_POST),
+	(TUSB_DIR_OUT<<TUSB_DIR_POST),
 	0x00,   		/*bDescriptorType*/
 	0x03,
 	0x00,   		/* wDescriptorLength*/
@@ -62,7 +62,7 @@ static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 	/******************** Descriptor of Custom HID endpoints ***********/
 	0x07,		  	/* bLength: Endpoint Descriptor size */
 	0x05, 		  	/* bDescriptorType: */
-	(USB_DIR_IN<<USB_DIR_POST),	/* bEndpointAddress: Endpoint Address (IN) */
+	(TUSB_DIR_IN<<TUSB_DIR_POST),	/* bEndpointAddress: Endpoint Address (IN) */
 	0x03,		  	/* bmAttributes: Interrupt endpoint */
 	0x20,
 	0x00,		  	/* wMaxPacketSize: 2 Bytes max */
@@ -70,7 +70,7 @@ static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 
 	0x07,			/* bLength: Endpoint Descriptor size */
 	0x05,			/* bDescriptorType: */
-	(USB_DIR_OUT<<USB_DIR_POST),	/* bEndpointAddress:  Endpoint Address (OUT) */
+	(TUSB_DIR_OUT<<TUSB_DIR_POST),	/* bEndpointAddress:  Endpoint Address (OUT) */
 	0x03, 			/* bmAttributes: Interrupt endpoint */
 	0x20,
 	0x00,			/* wMaxPacketSize: 2 Bytes max  */
@@ -142,8 +142,8 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
     error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
-		if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
+	if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
+		if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
 			if(0X90 == preq->req.bRequest){
 				switch(preq->req.wValue){
 				case 0X04:		//compat ID
@@ -167,7 +167,7 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 					err = ERROR_SUCCESS;
 				}
 			}
-		}else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
+		}else if(TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
 			uint8_t itf = preq->req.wIndex & 0XFF;
 
 			if(0x01 == preq->req.bRequest){

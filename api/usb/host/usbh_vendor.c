@@ -60,7 +60,7 @@ error_t usbh_match_vendor( uint8_t id, usbh_class_t *pclass)
 {
 	error_t err = ERROR_NOT_FOUND;
 
-	if ((USB_CLASS_VENDOR == pclass->itf.if_cls)){
+	if ((TUSB_CLASS_VENDOR == pclass->itf.if_cls)){
 		if( pclass->endpin.addr || pclass->endpout.addr ){
 			err = ERROR_SUCCESS;
 		}
@@ -79,7 +79,7 @@ error_t usbh_vendor_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNKNOW;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	err = usbh_set_status(id, USB_STA_CONFIGURED, 0);
+	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
     return err;
 }

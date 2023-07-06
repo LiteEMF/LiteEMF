@@ -30,14 +30,14 @@ static uint8c_t uac_itf_desc_tab[] = {
     0x00, /*bInterfaceNumber: Number of Interface*/
     0x00, /*bAlternateSetting: Alternate setting*/
     0x00, /*bNumEndpoints*/
-    USB_CLASS_AUDIO, // InterfaceClass:audio
+    TUSB_CLASS_AUDIO, // InterfaceClass:audio
     AUDIO_SUBCLASS_CONTROL, // InterfaceSubClass:audio ctl
     AUDIO_FUNC_PROTOCOL_CODE_UNDEF, // PC_PROTOCOL_UNDEFINED InterfaceProtocol
     0, // Interface String
 
     // audio_desc_cs_ac_interface_t ?
     0x0a, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_HEADER, // DescriptorSubType:audio control header
     0x00, 0x01, // bcdADC:audio Device Class v1.00
     0x47,
@@ -47,7 +47,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     // audio_desc_input_terminal_t
     0x0c, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_INPUT_TERMINAL, // DescriptorSubType:Input Terminal
     USBD_SPK_INPUT_TERMINAL, // TerminalID
     (AUDIO_TERM_TYPE_USB_STREAMING & 0xff), (AUDIO_TERM_TYPE_USB_STREAMING >> 8) & 0xff, // TerminalType:USB Streaming
@@ -63,7 +63,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     // uac_mic_input_terminal_desc[]
     0x0c, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_INPUT_TERMINAL, // DescriptorSubType:Input Terminal
     USBD_MIC_INPUT_TERMINAL, // TerminalID
     (AUDIO_TERM_TYPE_IN_GENERIC_MIC & 0xff), (AUDIO_TERM_TYPE_IN_GENERIC_MIC >> 8) & 0xff, // TerminalType:Microphone
@@ -79,7 +79,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     /// uac_spk_output_terminal_desc USB Speaker OT
     0x09, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_OUTPUT_TERMINAL, // DescriptorSubTYpe:Output Terminal
     USBD_SPK_OUTPUT_TERMINAL, // TerminalID
     (AUDIO_TERM_TYPE_OUT_GENERIC_SPEAKER & 0xff), (AUDIO_TERM_TYPE_OUT_GENERIC_SPEAKER >> 8) & 0xff, // TerminalType:Speaker
@@ -89,7 +89,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     /// uac_mic_output_terminal_desc USB Microphone OT
     0x09, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_OUTPUT_TERMINAL, // DescriptorSubTYpe:Output Terminal
     USBD_MIC_OUTPUT_TERMINAL, // TerminalID
     (AUDIO_TERM_TYPE_USB_STREAMING & 0xff), (AUDIO_TERM_TYPE_USB_STREAMING >> 8) & 0xff, // TerminalType:USB Sreaming
@@ -99,7 +99,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     // uac_mic_selector_uint_desc SELECTOR_UNIT
     0x7, //  bLength	7
-    USB_DESC_CS_INTERFACE, //  bDescriptorType	CS_INTERFACE (0x24)
+    TUSB_DESC_CS_INTERFACE, //  bDescriptorType	CS_INTERFACE (0x24)
     AUDIO_CS_AC_INTERFACE_SELECTOR_UNIT, //    bDescriptorSubtype	SELECTOR_UNIT (0x05)
     USBD_MIC_SELECTOR_UNIT, // bUnitID	33
     1, // bNrInPins	1
@@ -108,7 +108,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     // uac_spk_feature_desc
     0x07 + (USBD_AUDIO_SPK_CHANNEL + 1) * 1, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_FEATURE_UNIT, // DescriptorSubType:Audio Feature Unit
     USBD_SPK_FEATURE_UNIT, // UnitID
     USBD_SPK_INPUT_TERMINAL, // SourceID:1 #USB Streaming IT
@@ -123,7 +123,7 @@ static uint8c_t uac_itf_desc_tab[] = {
     // uac_mic_feature_desc
     /// Audio Feature Unit Descriptor(Microphone)
     7 + (USBD_AUDIO_MIC_CHANNEL + 1) * 1, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AC_INTERFACE_FEATURE_UNIT, // DescriptorSubType:Audio Feature Unit
     USBD_MIC_FEATURE_UNIT, // UnitID
     USBD_MIC_INPUT_TERMINAL, // SourceID: #Microphone
@@ -141,7 +141,7 @@ static uint8c_t uac_itf_desc_tab[] = {
     0x01, // InterfaceNum
     0x00, // AlternateSetting:0
     0x00, // NumEndpoint:0
-    USB_CLASS_AUDIO, // InterfaceClass:audio
+    TUSB_CLASS_AUDIO, // InterfaceClass:audio
     AUDIO_SUBCLASS_STREAMING, // InterfaceSubClass:audio streaming
     0x00, // InterfaceProtocol
     0x00, // Interface String
@@ -152,14 +152,14 @@ static uint8c_t uac_itf_desc_tab[] = {
     0x01, // InterfaceNum
     0x01, // AlternateSetting
     0x01, // NumEndpoint
-    USB_CLASS_AUDIO, // InterfaceClass:audio
+    TUSB_CLASS_AUDIO, // InterfaceClass:audio
     AUDIO_SUBCLASS_STREAMING, // InterfaceSubClass:audio streaming
     0x00, // InterfaceProtocol
     0x00, // Interface String
 
     /// Audio Streaming Interface Descriptor:AS_GENERAL(0x01),
     0x07, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AS_INTERFACE_AS_GENERAL, // DescriptorSubType:AS_GENERAL
     USBD_SPK_INPUT_TERMINAL, // TerminalLink:#1 USB Streaming IT
     0x01, // Delay:1
@@ -167,7 +167,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     /// Type 1 Format type descriptor
     0x0b, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AS_INTERFACE_FORMAT_TYPE, // DescriptorSubType:Format_type
     AUDIO_DATA_FORMAT_TYPE_I_PCM, // FormatType:Format type 1
     USBD_AUDIO_SPK_CHANNEL, // NumberOfChannel
@@ -179,7 +179,7 @@ static uint8c_t uac_itf_desc_tab[] = {
     // Isochronous,Synchronization Type(Asynchronous)
     0x09, // Length
     0x05, // DescriptorType:endpoint descriptor
-    (USB_DIR_OUT << USB_DIR_POST), // EndpointAddress:Output endpoint 1
+    (TUSB_DIR_OUT << TUSB_DIR_POST), // EndpointAddress:Output endpoint 1
     0x09, // 0x09,iso sync
     (API_AUDIO_SIZE(USBD_AUDIO_SPK_RATE, USBD_AUDIO_SPK_RESOLUTION, USBD_AUDIO_SPK_CHANNEL) & 0xff),
     (API_AUDIO_SIZE(USBD_AUDIO_SPK_RATE, USBD_AUDIO_SPK_RESOLUTION, USBD_AUDIO_SPK_CHANNEL) >> 8), // MaxPacketSize
@@ -202,7 +202,7 @@ static uint8c_t uac_itf_desc_tab[] = {
     0x02, // InterfaceNum
     0x00, // AlternateSetting
     0x00, // NumEndpoint
-    USB_CLASS_AUDIO, // InterfaceClass:audio
+    TUSB_CLASS_AUDIO, // InterfaceClass:audio
     AUDIO_SUBCLASS_STREAMING, // InterfaceSubClass:audio streaming
     0x00, // InterfaceProtocol
     0x00, // Interface String
@@ -213,14 +213,14 @@ static uint8c_t uac_itf_desc_tab[] = {
     0x02, // InterfaceNum
     0x01, // AlternateSetting
     0x01, // NumEndpoint
-    USB_CLASS_AUDIO, // InterfaceClass:audio
+    TUSB_CLASS_AUDIO, // InterfaceClass:audio
     AUDIO_SUBCLASS_STREAMING, // InterfaceSubClass:audio streaming
     0x00, // InterfaceProtocol
     0x00, // Interface String
 
     /// Audio Streaming Interface Descriptor:AS_GENERAL
     0x07, // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AS_INTERFACE_AS_GENERAL, // DescriptorSubType:AS_GENERAL
     USBD_MIC_OUTPUT_TERMINAL, // TerminalLink:#1 USB Streaming OT
     0x01, // Delay:1
@@ -228,7 +228,7 @@ static uint8c_t uac_itf_desc_tab[] = {
 
     /// Type 1 Format type descriptor
     0x08 + 3 * (USBD_AUDIO_MIC_RATE_NUM), // Length
-    USB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
+    TUSB_DESC_CS_INTERFACE, // DescriptorType:audio interface descriptor
     AUDIO_CS_AS_INTERFACE_FORMAT_TYPE, // DescriptorSubType:Format_type
     AUDIO_DATA_FORMAT_TYPE_I_PCM, // FormatType:Format type 1
     USBD_AUDIO_MIC_CHANNEL, // NumberOfChannel:1
@@ -248,7 +248,7 @@ static uint8c_t uac_itf_desc_tab[] = {
     // Isochronous,Synchronization Type(Asynchronous)
     0x09, // Length
     0x05, // DescriptorType:endpoint descriptor
-    (USB_DIR_IN << USB_DIR_POST), // EndpointAddress
+    (TUSB_DIR_IN << TUSB_DIR_POST), // EndpointAddress
     0x05,
     (API_AUDIO_SIZE(USBD_AUDIO_MIC_RATE, USBD_AUDIO_MIC_RESOLUTION, USBD_AUDIO_MIC_CHANNEL) & 0xff),
     (API_AUDIO_SIZE(USBD_AUDIO_MIC_RATE, USBD_AUDIO_MIC_RESOLUTION, USBD_AUDIO_MIC_CHANNEL) >> 8), // MaxPacketSize
@@ -425,10 +425,10 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
     error_t err = ERROR_STALL;
     uint8_t itf = preq->req.wIndex & 0XFF;
 	
-    if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
+    if(TUSB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-        if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
+    if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+        if(TUSB_REQ_SET_INTERFACE == preq->req.bRequest) {
             if(AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls){
                 #if API_AUDIO_ENABLE
                 if(pclass->endpout.addr){                   //out endp
@@ -450,7 +450,7 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
                 err = ERROR_SUCCESS;
             }
 		}
-	} else if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+	} else if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t audio_id = preq->req.wIndex >> 8;
 		api_audio_t* paudio = &usbd_audio_info;
 
@@ -544,7 +544,7 @@ usbd_class_t *usbd_audio_mic_find(uint8_t id)
 
 		if((pclass->dev_type == DEV_TYPE_AUDIO) && (AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls)){
 			if(pclass->endpin.addr) continue;
-            if(pclass->endpin.type != USB_ENDP_TYPE_ISOCH) continue;
+            if(pclass->endpin.type != TUSB_ENDP_TYPE_ISOCH) continue;
             
 			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
 				return pclass;

@@ -74,10 +74,10 @@ static error_t usbh_req_get_desc( uint8_t id , uint8_t type, uint8_t index, uint
 	usb_control_request_t req;
     uint16_t tr_len = *plen;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_DESCRIPTOR;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_DESCRIPTOR;
 
     req.wValue = SWAP16_L(U16(type,index));
     req.wIndex = language_id;
@@ -98,14 +98,14 @@ error_t usbh_req_get_device_desc(uint8_t id, uint8_t* buf, uint16_t *plen)
 {
     error_t err;
     uint16_t tr_len = MIN(*plen, sizeof(usb_desc_device_t));
-    err = usbh_req_get_desc(id,USB_DESC_DEVICE,0,0,buf,&tr_len);
+    err = usbh_req_get_desc(id,TUSB_DESC_DEVICE,0,0,buf,&tr_len);
     *plen = tr_len;
     return err;
 }
 
 error_t usbh_req_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uint16_t *plen)  
 {
-    return usbh_req_get_desc(id,USB_DESC_CONFIGURATION,index,0,buf, plen);
+    return usbh_req_get_desc(id,TUSB_DESC_CONFIGURATION,index,0,buf, plen);
 }
 
 /*******************************************************************
@@ -115,7 +115,7 @@ error_t usbh_req_configuration_desc(uint8_t id, uint8_t index, uint8_t* buf, uin
 *******************************************************************/
 error_t usbh_req_get_string_desc(uint8_t id, uint8_t index, uint16_t language_id, uint8_t* buf, uint16_t *plen)  
 {
-  return usbh_req_get_desc(id,USB_DESC_STRING,index,language_id,buf,plen);
+  return usbh_req_get_desc(id,TUSB_DESC_STRING,index,language_id,buf,plen);
 }
 
 
@@ -129,10 +129,10 @@ error_t usbh_req_set_addr(uint8_t id, uint8_t addr)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_SET_ADDRESS;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_SET_ADDRESS;
 
     req.wValue = SWAP16_L(addr);
     req.wIndex = 0;
@@ -149,10 +149,10 @@ error_t usbh_req_get_status(uint8_t id, uint8_t* pstatus)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_STATUS;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_STATUS;
 
     req.wValue = 0;
     req.wIndex = 0;
@@ -168,10 +168,10 @@ error_t usbh_req_get_configuration(uint8_t id, uint8_t* pcfg)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_CONFIGURATION;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_CONFIGURATION;
 
     req.wValue = 0;
     req.wIndex = 0;
@@ -185,10 +185,10 @@ error_t usbh_req_set_configuration(uint8_t id, uint8_t cfg)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_SET_CONFIGURATION;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_SET_CONFIGURATION;
 
     req.wValue = SWAP16_L(cfg);
     req.wIndex = 0;
@@ -204,10 +204,10 @@ error_t usbh_req_get_itf(uint8_t id, uint8_t inf, uint8_t *palt)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_INTERFACE;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_INTERFACE;
 
     req.wValue = 0;
     req.wIndex = SWAP16_L(inf);;
@@ -221,10 +221,10 @@ error_t usbh_req_set_itf(uint8_t id, uint8_t inf, uint8_t alt)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_INTERFACE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_SET_INTERFACE;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_SET_INTERFACE;
 
     req.wValue = SWAP16_L(alt);
     req.wIndex = SWAP16_L(inf);
@@ -240,10 +240,10 @@ error_t usbh_req_get_endp_status(uint8_t id, uint8_t endp, uint8_t* pstatus)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_ENDPOINT;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
-    req.bRequest = USB_REQ_GET_STATUS;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_ENDPOINT;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
+    req.bRequest = TUSB_REQ_GET_STATUS;
 
     req.wValue = 0;
     req.wIndex = SWAP16_L(endp);
@@ -257,10 +257,10 @@ error_t usbh_req_clean_endp_feature(uint8_t id, uint8_t endp)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_ENDPOINT;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_CLEAR_FEATURE;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_ENDPOINT;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_CLEAR_FEATURE;
 
     req.wValue = 0;
     req.wIndex = SWAP16_L(endp);
@@ -275,10 +275,10 @@ error_t usbh_req_set_endp_feature(uint8_t id, uint8_t endp, usb_request_feature_
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_ENDPOINT;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_STANDARD;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
-    req.bRequest = USB_REQ_SET_FEATURE;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_ENDPOINT;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_STANDARD;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+    req.bRequest = TUSB_REQ_SET_FEATURE;
 
     req.wValue = SWAP16_L(feature);
     req.wIndex = SWAP16_L(endp);

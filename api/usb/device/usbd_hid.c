@@ -115,8 +115,8 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
     error_t err = ERROR_SUCCESS;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-		if (preq->req.bRequest == USB_REQ_GET_DESCRIPTOR){
+	if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+		if (preq->req.bRequest == TUSB_REQ_GET_DESCRIPTOR){
 			uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
 			uint16_t desc_len;
 			uint8_t *desc_buf;
@@ -142,7 +142,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 		}else{
             err = ERROR_STALL;
         }
-	} else if (USB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
+	} else if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		switch(preq->req.bRequest){
             case HID_REQ_CONTROL_SET_IDLE:
                 break;

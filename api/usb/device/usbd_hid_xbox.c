@@ -33,18 +33,18 @@
 static uint8c_t  xbox_itf_desc_tab[] =
 {
 	0x09,0x04,0x00,0x00,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x03,0x40,0x00,0x02,
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x03,0x40,0x00,0x04,
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x02,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,
 
 	0x09,0x04,0x01,0x00,0x00,0xFF,0x47,0xD0,0x00,
 	0x09,0x04,0x01,0x01,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x01,0xE4,0x00,0x01,
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x01,0x40,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x01,0xE4,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x01,0x40,0x00,0x01,
 
 	0x09,0x04,0x02,0x00,0x00,0xFF,0x47,0xD0,0x00,
 	0x09,0x04,0x02,0x01,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x02,0x40,0x00,0x00,
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x02,0x40,0x00,0x00
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x02,0x40,0x00,0x00,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x02,0x40,0x00,0x00
 };
 
 // Feature Descriptor	bMS_VendorCode:0X90
@@ -119,9 +119,9 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	// uint8_t itf = preq->req.wIndex & 0XFF;
 
-	if(USB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
+	if(TUSB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
 
-    if (USB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
+    if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
 		if(0X90 == preq->req.bRequest){
 			switch(preq->req.wValue){
 			case 0X04:		//compat ID
@@ -137,8 +137,8 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 				break;
 			}
 		}
-	}else if(USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-        if(USB_REQ_SET_INTERFACE == preq->req.bRequest) {
+	}else if(TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+        if(TUSB_REQ_SET_INTERFACE == preq->req.bRequest) {
 			pdev->ready = true;			//xbox set interface 后打开端点
 			logd_g("usbd%d ready...\n",id);
            	err = ERROR_SUCCESS;
@@ -185,8 +185,8 @@ usbd_class_t *usbd_xbox_audio_find(uint8_t id)
 		pclass = &m_usbd_class[id][i];
 
 		if((pclass->dev_type == DEV_TYPE_HID) && (HID_TYPE_XBOX == pclass->hid_type)){
-			if(pclass->endpin.type != USB_ENDP_TYPE_ISOCH) continue;
-			if(pclass->endpout.type != USB_ENDP_TYPE_ISOCH) continue;
+			if(pclass->endpin.type != TUSB_ENDP_TYPE_ISOCH) continue;
+			if(pclass->endpout.type != TUSB_ENDP_TYPE_ISOCH) continue;
 			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
 				return pclass;
 			}

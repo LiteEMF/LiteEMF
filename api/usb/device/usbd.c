@@ -201,7 +201,7 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
 	dev.bLength            = sizeof(usb_desc_device_t); 
-	dev.bDescriptorType    = USB_DESC_DEVICE; 
+	dev.bDescriptorType    = TUSB_DESC_DEVICE; 
 	dev.bcdUSB             = SWAP16_L(USBD_BCD_VERSION);
 	dev.bDeviceClass       = 0;
 	dev.bDeviceSubClass    = 0;
@@ -274,15 +274,15 @@ error_t usbd_get_descriptor(uint8_t id, usbd_req_t* const preq)
 
 	preq->setup_len = preq->req.wLength;
 	switch(desc_type){
-	case USB_DESC_DEVICE:
+	case TUSB_DESC_DEVICE:
 		err = usbd_get_device_desc(id, preq->setup_buf, (uint16_t*)&preq->setup_len);
 		break;
 
-	case USB_DESC_CONFIGURATION:
+	case TUSB_DESC_CONFIGURATION:
 		err = usbd_get_configuration_desc(id,desc_index, preq->setup_buf,(uint16_t*)&preq->setup_len);
 		break;
 
-	case USB_DESC_STRING:
+	case TUSB_DESC_STRING:
 		err = usbd_get_string_desc(id,desc_index, preq->setup_buf,(uint16_t*)&preq->setup_len);
 		break;
 
@@ -338,17 +338,17 @@ static error_t usbd_control_request_process(uint8_t id)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+    if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
 		switch (preq->req.bmRequestType.bits.recipient) {
-		case USB_REQ_RCPT_DEVICE:
+		case TUSB_REQ_RCPT_DEVICE:
 			switch (preq->req.bRequest) {
-			case USB_REQ_SET_ADDRESS:
+			case TUSB_REQ_SET_ADDRESS:
 				// Depending on mcu, status phase could be sent either before or after changing device address,
 				break;
-			case USB_REQ_GET_CONFIGURATION:
+			case TUSB_REQ_GET_CONFIGURATION:
 				preq->setup_buf[0] = pdev->cfg_num;
 				break;
-			case USB_REQ_SET_CONFIGURATION:
+			case TUSB_REQ_SET_CONFIGURATION:
 				// Only process if new configure is different
 				if (pdev->cfg_num != preq->req.wValue) {
 					if (preq->req.wValue) {
@@ -359,33 +359,33 @@ static error_t usbd_control_request_process(uint8_t id)
 					}
 				}
 
-				pdev->state = USB_STA_CONFIGURED;
+				pdev->state = TUSB_STA_CONFIGURED;
 				pdev->ready = false;
 				pdev->cfg_num = preq->req.wValue;
 				err = ERROR_SUCCESS;			//must success
 				break;
-			case USB_REQ_GET_DESCRIPTOR:
+			case TUSB_REQ_GET_DESCRIPTOR:
 				err = usbd_get_descriptor(id, preq);
 				break;
-			case USB_REQ_SET_FEATURE:
+			case TUSB_REQ_SET_FEATURE:
 				// Only support remote wakeup for device feature
-				if (USB_REQ_FEATURE_REMOTE_WAKEUP != preq->req.wValue)
+				if (TUSB_REQ_FEATURE_REMOTE_WAKEUP != preq->req.wValue)
 					break;
 				logd("usbd enable remote wakeup\n");
 
 				// Host may enable remote wake up before suspending especially HID device
 				pdev->dev.remote_wakeup_en = true;
 				break;
-			case USB_REQ_CLEAR_FEATURE:
+			case TUSB_REQ_CLEAR_FEATURE:
 				// Only support remote wakeup for device feature
-				if (USB_REQ_FEATURE_REMOTE_WAKEUP != preq->req.wValue)
+				if (TUSB_REQ_FEATURE_REMOTE_WAKEUP != preq->req.wValue)
 					break;
 				logd("usbd disable remote wakeup\n");
 
 				// Host may disable remote wake up after resuming
 				pdev->dev.remote_wakeup_en = false;
 				break;
-			case USB_REQ_GET_STATUS:
+			case TUSB_REQ_GET_STATUS:
 				// Device status bit mask,Bit 0: Self Powered,Bit 1: Remote Wakeup enabled
 				preq->setup_buf[0] = (pdev->dev.self_powered ? 1 : 0) | (pdev->dev.remote_wakeup_en ? 2 : 0);
 				preq->setup_buf[1] = 0;
@@ -396,13 +396,13 @@ static error_t usbd_control_request_process(uint8_t id)
 			}
 			break;
 
-		case USB_REQ_RCPT_INTERFACE:
+		case TUSB_REQ_RCPT_INTERFACE:
 			// it is mandatory to respond even if the class driver doesn't use alternate settings or implement this
 			switch (preq->req.bRequest) {
-			case USB_REQ_SET_INTERFACE:		//注意是否需要切换和配置端点?
+			case TUSB_REQ_SET_INTERFACE:		//注意是否需要切换和配置端点?
 				pdev->itf_alt[preq->req.wIndex & 0xff] = preq->req.wValue & 0xff;
 				break;
-			case USB_REQ_GET_INTERFACE:
+			case TUSB_REQ_GET_INTERFACE:
 				preq->setup_buf[0] = pdev->itf_alt[preq->req.wIndex & 0xff];
 				break;
 			default:
@@ -411,19 +411,19 @@ static error_t usbd_control_request_process(uint8_t id)
 			}
 			break;
 
-		case USB_REQ_RCPT_ENDPOINT:
+		case TUSB_REQ_RCPT_ENDPOINT:
 			// Handle STD request to endpoint
 			switch (preq->req.bRequest) {
-			case USB_REQ_GET_STATUS: {
+			case TUSB_REQ_GET_STATUS: {
 				preq->setup_buf[0] = usbd_get_endp_stalled(id, preq->req.wIndex) ? 1 : 0;
 			} break;
-			case USB_REQ_CLEAR_FEATURE:
-				if (USB_REQ_FEATURE_EDPT_HALT == preq->req.wValue) {
+			case TUSB_REQ_CLEAR_FEATURE:
+				if (TUSB_REQ_FEATURE_EDPT_HALT == preq->req.wValue) {
 					err = usbd_clear_endp_stall(id, preq->req.wIndex);
 				}
 				break;
-			case USB_REQ_SET_FEATURE:
-				if (USB_REQ_FEATURE_EDPT_HALT == preq->req.wValue) {
+			case TUSB_REQ_SET_FEATURE:
+				if (TUSB_REQ_FEATURE_EDPT_HALT == preq->req.wValue) {
 					err = usbd_endp_stall(id, preq->req.wIndex);
 				}
 				break;
@@ -441,7 +441,7 @@ static error_t usbd_control_request_process(uint8_t id)
 
 	if(ERROR_STALL == err){
 		err = usbd_class_control_request_process(id, preq);
-	}else{				//枚举成功分发setup事件给需要的设备,比如 USB_REQ_SET_INTERFACE
+	}else{				//枚举成功分发setup事件给需要的设备,比如 TUSB_REQ_SET_INTERFACE
 		usbd_class_control_request_process(id, preq);
 	}
 
@@ -467,7 +467,7 @@ void usbd_reset_process( uint8_t id )
 		usbd_free_setup_buffer(preq);
 		memset(preq, 0, sizeof(usbd_req_t));
 		memset(pdev, 0, sizeof(usbd_dev_t));
-		pdev->state = USB_STA_DEFAULT;
+		pdev->state = TUSB_STA_DEFAULT;
 		pdev->endp0_mtu = USBD_ENDP0_MTU;
 
 	}
@@ -489,11 +489,11 @@ void usbd_suspend_process( uint8_t id )
 	if(NULL != pdev){
 		pdev->dev.suspend = 0;
 		usbd_free_setup_buffer(preq);
-		if(USB_STA_CONFIGURED == pdev->state){
-			pdev->state = USB_STA_SUSPENDED;
+		if(TUSB_STA_CONFIGURED == pdev->state){
+			pdev->state = TUSB_STA_SUSPENDED;
 			usbd_class_notify_evt(id,USBD_EVENT_SUSPEND,0);
 		}else{
-			pdev->state = USB_STA_DETACHED;
+			pdev->state = TUSB_STA_DETACHED;
 		}
 	}
 }
@@ -503,10 +503,10 @@ void usbd_resume_process( uint8_t id )
 
 	if(NULL != pdev){
 		pdev->dev.resume = 0;
-		if(USB_STA_DETACHED == pdev->state){
-			pdev->state = USB_STA_ATTACHED;
+		if(TUSB_STA_DETACHED == pdev->state){
+			pdev->state = TUSB_STA_ATTACHED;
 		}else{
-			pdev->state = USB_STA_CONFIGURED;
+			pdev->state = TUSB_STA_CONFIGURED;
 		}
 	}
 }
@@ -523,7 +523,7 @@ void usbd_setup_process( uint8_t id )
 
 	logd("steup:");dumpd((uint8_t*)&preq->req,8);
 	//等待接收完整数据
-	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){
+	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){
 		rx_len = preq->req.wLength;
 		err = usbd_out(id, 0x00, preq->setup_buf, &rx_len);
 		if(ERROR_SUCCESS == err){
@@ -544,7 +544,7 @@ void usbd_setup_process( uint8_t id )
 			if(preq->setup_len > preq->req.wLength) preq->setup_len = preq->req.wLength;
 
 			usbd_in(id, 0x80, preq->setup_buf, preq->setup_len);
-			if(USB_DIR_OUT == preq->req.bmRequestType.bits.direction){
+			if(TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction){
 				usbd_free_setup_buffer(preq);
 			}
 		}else if(ERROR_STALL == err){
@@ -597,13 +597,13 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	uint8_t ep_addr = ep & 0x7f;
 
-	ep |= USB_DIR_IN_MASK; 		//防止出错
+	ep |= TUSB_DIR_IN_MASK; 		//防止出错
 	if(0 == ep_addr){
 		usbd_req_t *preq = usbd_get_req(id);
 		usbd_dev_t *pdev = usbd_get_dev(id);
 
-		 if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-			if (USB_REQ_SET_ADDRESS == preq->req.bRequest) {
+		 if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+			if (TUSB_REQ_SET_ADDRESS == preq->req.bRequest) {
 				usbd_set_address(id, (uint8_t)preq->req.wValue);
 			}
 		}
@@ -612,7 +612,7 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
 		}
 	}else{
-		usbd_endp_nak(id, USB_DIR_IN_MASK | ep);
+		usbd_endp_nak(id, TUSB_DIR_IN_MASK | ep);
 		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
 
 		#if !USBD_LOOP_ENABLE
@@ -631,7 +631,7 @@ __WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
 {
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	ep &= ~USB_DIR_IN_MASK; 		//防止出错
+	ep &= ~TUSB_DIR_IN_MASK; 		//防止出错
 	if (len) {
 		usbd_endp_nak(id,ep);
 	}
@@ -663,7 +663,7 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 		usbd_malloc_setup_buffer(id, preq);
 	}
 
-	if((USB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
+	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
 		usbd_endp_ack(id, 0x00, 0);
 	}
 }
@@ -675,7 +675,7 @@ void usbd_endp_loop(uint8_t id)
 	uint8_t ep;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if(USB_STA_CONFIGURED == pdev->state){
+	if(TUSB_STA_CONFIGURED == pdev->state){
 		for(ep=1; ep<USBD_ENDP_NUM; ep++){
 			usbd_dev_t *pdev = usbd_get_dev(id);
 			usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);

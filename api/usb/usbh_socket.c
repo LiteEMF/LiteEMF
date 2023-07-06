@@ -88,7 +88,7 @@ bool usbh_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,
 			break;
 		case CMD_SOCKET_SETUP:
 			preq = (usb_control_request_t*)buf;
-			if(USB_DIR_IN == preq->bmRequestType.bits.direction){
+			if(TUSB_DIR_IN == preq->bmRequestType.bits.direction){
 				req_buf = emf_malloc(preq->wLength);
 				if(NULL != req_buf){
 					err = usbh_ctrl_transfer( id, preq, req_buf, &req_len);

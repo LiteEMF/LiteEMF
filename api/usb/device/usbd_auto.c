@@ -29,8 +29,8 @@ static uint8c_t auto_desc_gamepad_map[] =
 static uint8c_t auto_itf_desc_tab[] = {
     0x09,0x04,0x00,0x00,0x02,0x03,0x00,0x00,0x00,             			//usb_desc_interface_t
     USBD_HID_DESC,									          			//usb_hid_descriptor_hid_t
-    0x07,0x05,(USB_DIR_IN<<USB_DIR_POST), 0x03,0x40,0x00,0x02,			//usb_desc_endpoint_t
-	0x07,0x05,(USB_DIR_OUT<<USB_DIR_POST),0x03,0x40,0x00,0x04,			//usb_desc_endpoint_t
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x02,			//usb_desc_endpoint_t
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,			//usb_desc_endpoint_t
 };
 
 
@@ -39,7 +39,7 @@ usbd_det_t m_usbd_auto_type = USBD_DET_NULL;				//自动识别到的主机
 
 static uint8_t usbd_setup_devdesc_len;			//第一次获取设备描述符长度值
 static uint8_t usbd_steup_buf[2][8];
-static uint8_t usbd_steup_setp;				//从1开始, 包括USB_GET_DESCRIPTOR 和特殊定义config, 不包含setaddr,setconfig等, step3,step4用于判断主机类型, setp6~step7单独用于判断PC和XBOX
+static uint8_t usbd_steup_setp;				//从1开始, 包括TUSB_GET_DESCRIPTOR 和特殊定义config, 不包含setaddr,setconfig等, step3,step4用于判断主机类型, setp6~step7单独用于判断PC和XBOX
 static timer_t usbd_steup_timer;			//用于第7步计时
 
 // static uint8c_t usb_host_enum_list[USBD_DET_MAX][8*3]={
@@ -145,19 +145,19 @@ error_t usbd_auto_control_request_process(uint8_t id, usbd_class_t *pclass, usbd
     uint8_t itf = preq->req.wIndex & 0XFF;
     uint8_t i;
 	
-    if (USB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-		if (USB_REQ_GET_DESCRIPTOR == preq->req.bRequest) {
+    if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+		if (TUSB_REQ_GET_DESCRIPTOR == preq->req.bRequest) {
             uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
 	        uint8_t desc_index = (uint8_t)(preq->req.wValue & 0xFF);
 
-		    if (USB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
+		    if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
                 usbd_steup_setp++;
-                if(USB_DESC_DEVICE == desc_type){
+                if(TUSB_DESC_DEVICE == desc_type){
                     if(1== usbd_setup_devdesc_len){
                         usbd_setup_devdesc_len = preq->req.wLength;  //第一次获取设备描述符长度
                     }
                 }
-            }else if(USB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
+            }else if(TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
                 if(HID_DESC_TYPE_REPORT == desc_type){
                     preq->setup_len = MIN(preq->req.wLength, sizeof(auto_desc_gamepad_map));
                     memcpy(preq->setup_buf,auto_desc_gamepad_map,preq->setup_len);

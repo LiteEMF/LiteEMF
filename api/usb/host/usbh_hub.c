@@ -52,9 +52,9 @@ error_t usbh_hub_get_desc(uint8_t id, descriptor_hub_desc_t* pdesc)
 	usb_control_request_t req;
     uint16_t tr_len;
   
-    req.bmRequestType.bits.recipient = USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
     req.bRequest = HUB_REQUEST_GET_DESCRIPTOR;
 
     req.wValue = 0; 
@@ -70,9 +70,9 @@ error_t usbh_hub_port_clear_feature(uint8_t id, uint8_t feature)
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? TUSB_REQ_RCPT_OTHER : TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = HUB_REQUEST_CLEAR_FEATURE;
 
     req.wValue = SWAP16_L(feature);
@@ -88,9 +88,9 @@ error_t usbh_hub_port_set_feature(uint8_t id, uint8_t feature)      //注意实�
     error_t err;
 	usb_control_request_t req;
 
-    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_OUT;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? TUSB_REQ_RCPT_OTHER : TUSB_REQ_RCPT_DEVICE;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
     req.bRequest = HUB_REQUEST_SET_FEATURE;
 
     req.wValue = SWAP16_L(feature);     //Idle rate = 0 mean only report when there is changes
@@ -112,9 +112,9 @@ error_t usbh_hub_port_get_status(uint8_t id, uint8_t* pstatus)
 	usb_control_request_t req;
     uint16_t tr_len;
 
-    req.bmRequestType.bits.recipient = (id & 0x0f)? USB_REQ_RCPT_OTHER : USB_REQ_RCPT_DEVICE;;
-    req.bmRequestType.bits.type = USB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = USB_DIR_IN;
+    req.bmRequestType.bits.recipient = (id & 0x0f)? TUSB_REQ_RCPT_OTHER : TUSB_REQ_RCPT_DEVICE;;
+    req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
     req.bRequest = HUB_REQUEST_GET_STATUS;
 
     req.wValue = 0;
@@ -212,15 +212,15 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                         usbh_dev_t* pdev = get_usbh_dev(hub_id);
                         err = usbh_hub_port_clear_feature(hub_id, HUB_FEATURE_PORT_RESET_CHANGE);
 
-                        if(USB_STA_POWERED == pdev->state){
-                            usbh_set_status(hub_id, USB_STA_DEFAULT, 0);
+                        if(TUSB_STA_POWERED == pdev->state){
+                            usbh_set_status(hub_id, TUSB_STA_DEFAULT, 0);
                             
                             if(pport_status->status.bits.low_speed){
-                                pdev->speed = USB_SPEED_LOW;
+                                pdev->speed = TUSB_SPEED_LOW;
                             }else if(pport_status->status.bits.high_speed){
-                                pdev->speed = USB_SPEED_HIGH;
+                                pdev->speed = TUSB_SPEED_HIGH;
                             }else{
-                                pdev->speed = USB_SPEED_FULL;
+                                pdev->speed = TUSB_SPEED_FULL;
                             }
                             logd("usbh%d speed=%d...\n", hub_id, pdev->speed);
                         }
@@ -241,7 +241,7 @@ error_t usbh_match_hub( uint8_t id, usbh_class_t *pclass)
 {
 	error_t err = ERROR_NOT_FOUND;
 
-	if ((USB_CLASS_HUB == pclass->itf.if_cls) && (0 == (id & 0x0F)) ){  //不支持HUB级联
+	if ((TUSB_CLASS_HUB == pclass->itf.if_cls) && (0 == (id & 0x0F)) ){  //不支持HUB级联
 		if(pclass->endpin.addr ){
 			err = ERROR_SUCCESS;
 		}
@@ -282,7 +282,7 @@ error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass)
     usbh_hub_port_get_status(id, hub_stu);
 
     pdev->class_ready = true;
-    usbh_set_status(id, USB_STA_CONFIGURED, 0);   
+    usbh_set_status(id, TUSB_STA_CONFIGURED, 0);   
 
     return err;
 }

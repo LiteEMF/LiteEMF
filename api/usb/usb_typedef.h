@@ -36,118 +36,118 @@ extern "C" {
 // CONFIGURED （已配置）状态：表示 USB 设备已被配置并正在进行数据传输。该状态可以转换到 SUSPENDED（已挂起）状态。
 // SUSPENDED （已挂起）状态：表示 USB 设备已被暂停以节省电源，但仍然保持连接。该状态可以转换到 CONFIGURED（已配置）或 DETACHED（断开）状态。
 typedef enum {
-	USB_STA_DETACHED = 0,		//断开链接		usbh_disconnect(),或枚举失败设置
-	USB_STA_ATTACHED,			//连接USB接入	usbh_det_event(true) 中设置
+	TUSB_STA_DETACHED = 0,		//断开链接		usbh_disconnect(),或枚举失败设置
+	TUSB_STA_ATTACHED,			//连接USB接入	usbh_det_event(true) 中设置
 
-	USB_STA_POWERED,			//上电
-	USB_STA_DEFAULT,			//默认状态		usbh_reset() 中设置,设备在可寻址的默认地址0状态
-	USB_STA_ADDRESSING,			//地址状态		CtrlSetUsbAddress() 中设置
+	TUSB_STA_POWERED,			//上电
+	TUSB_STA_DEFAULT,			//默认状态		usbh_reset() 中设置,设备在可寻址的默认地址0状态
+	TUSB_STA_ADDRESSING,			//地址状态		CtrlSetUsbAddress() 中设置
 
-	USB_STA_CONFIGURED,			//配置状态 		枚举成功正确配置后设置
-	USB_STA_SUSPENDED,			//挂起状态		未使用
+	TUSB_STA_CONFIGURED,			//配置状态 		枚举成功正确配置后设置
+	TUSB_STA_SUSPENDED,			//挂起状态		未使用
 }usb_state_t;
 
 
 /// defined base on EHCI specs value for Endpoint Speed
 typedef enum
 {
-	USB_SPEED_FULL = 0,
-	USB_SPEED_LOW  = 1,
-	USB_SPEED_HIGH = 2,
-	USB_SPEED_INVALID = 0xff,
+	TUSB_SPEED_FULL = 0,
+	TUSB_SPEED_LOW  = 1,
+	TUSB_SPEED_HIGH = 2,
+	TUSB_SPEED_INVALID = 0xff,
 }usb_speed_t;
 
 // defined base on USB Specs Endpoint's bmAttributes
-#ifndef USB_ENDP_TYPE_CTRL
+#ifndef TUSB_ENDP_TYPE_CTRL
 typedef enum
 {
-	USB_ENDP_TYPE_CTRL = 0,
-	USB_ENDP_TYPE_ISOCH,
-	USB_ENDP_TYPE_BULK,	//BULK 端点是双buf,需要两倍空间,如果和BULK in 不同时使用(比如U盘协议),可以优化共用BULK in buf
-	USB_ENDP_TYPE_INTER
+	TUSB_ENDP_TYPE_CTRL = 0,
+	TUSB_ENDP_TYPE_ISOCH,
+	TUSB_ENDP_TYPE_BULK,	//BULK 端点是双buf,需要两倍空间,如果和BULK in 不同时使用(比如U盘协议),可以优化共用BULK in buf
+	TUSB_ENDP_TYPE_INTER
 }usb_endp_type_t;
 #endif
 
-#define  USB_DIR_POST  		7
-#define  USB_DIR_MASK  		0x80
-#define  USB_DIR_IN_MASK  	0x80
+#define  TUSB_DIR_POST  		7
+#define  TUSB_DIR_MASK  		0x80
+#define  TUSB_DIR_IN_MASK  	0x80
 typedef enum
 {
-	USB_DIR_OUT = 0,
-	USB_DIR_IN  = 0x01,
+	TUSB_DIR_OUT = 0,
+	TUSB_DIR_IN  = 0x01,
 }usb_dir_t;
 
 
 /// USB Descriptor Types
 typedef enum
 {
-	USB_DESC_DEVICE                = 0x01,
-	USB_DESC_CONFIGURATION         = 0x02,
-	USB_DESC_STRING                = 0x03,
-	USB_DESC_INTERFACE             = 0x04,
-	USB_DESC_ENDPOINT              = 0x05,
-	USB_DESC_DEVICE_QUALIFIER      = 0x06,
-	USB_DESC_SPEED_CONFIG    	   = 0x07,
-	USB_DESC_INTERFACE_POWER       = 0x08,
-	USB_DESC_OTG                   = 0x09,
-	USB_DESC_DEBUG                 = 0x0A,
-	USB_DESC_INTERFACE_ASSOCIATION = 0x0B,
+	TUSB_DESC_DEVICE                = 0x01,
+	TUSB_DESC_CONFIGURATION         = 0x02,
+	TUSB_DESC_STRING                = 0x03,
+	TUSB_DESC_INTERFACE             = 0x04,
+	TUSB_DESC_ENDPOINT              = 0x05,
+	TUSB_DESC_DEVICE_QUALIFIER      = 0x06,
+	TUSB_DESC_SPEED_CONFIG    	   = 0x07,
+	TUSB_DESC_INTERFACE_POWER       = 0x08,
+	TUSB_DESC_OTG                   = 0x09,
+	TUSB_DESC_DEBUG                 = 0x0A,
+	TUSB_DESC_INTERFACE_ASSOCIATION = 0x0B,
 
-	USB_DESC_BOS                   = 0x0F,		//Binary Device Object Store Descriptor
-	USB_DESC_DEVICE_CAPABILITY     = 0x10,
+	TUSB_DESC_BOS                   = 0x0F,		//Binary Device Object Store Descriptor
+	TUSB_DESC_DEVICE_CAPABILITY     = 0x10,
 
-	USB_DESC_FUNCTIONAL            = 0x21,
+	TUSB_DESC_FUNCTIONAL            = 0x21,
 
 	// Class Specific Descriptor
-	USB_DESC_CS_DEVICE             = 0x21,
-	USB_DESC_CS_CONFIGURATION      = 0x22,
-	USB_DESC_CS_STRING             = 0x23,
-	USB_DESC_CS_INTERFACE          = 0x24,
-	USB_DESC_CS_ENDPOINT           = 0x25,
+	TUSB_DESC_CS_DEVICE             = 0x21,
+	TUSB_DESC_CS_CONFIGURATION      = 0x22,
+	TUSB_DESC_CS_STRING             = 0x23,
+	TUSB_DESC_CS_INTERFACE          = 0x24,
+	TUSB_DESC_CS_ENDPOINT           = 0x25,
 
-	USB_DESC_SUPERSPEED_ENDPOINT_COMPANION     = 0x30,
-	USB_DESC_SUPERSPEED_ISO_ENDPOINT_COMPANION = 0x31
+	TUSB_DESC_SUPERSPEED_ENDPOINT_COMPANION     = 0x30,
+	TUSB_DESC_SUPERSPEED_ISO_ENDPOINT_COMPANION = 0x31
 }usb_desc_type_t;
 
 /* USB standard device request code */
 typedef enum
 {
-	USB_REQ_GET_STATUS        = 0  ,
-	USB_REQ_CLEAR_FEATURE     = 1  ,
-	USB_REQ_RESERVED          = 2  ,
-	USB_REQ_SET_FEATURE       = 3  ,
-	USB_REQ_RESERVED2         = 4  ,
-	USB_REQ_SET_ADDRESS       = 5  ,
-	USB_REQ_GET_DESCRIPTOR    = 6  ,
-	USB_REQ_SET_DESCRIPTOR    = 7  ,
-	USB_REQ_GET_CONFIGURATION = 8  ,
-	USB_REQ_SET_CONFIGURATION = 9  ,
-	USB_REQ_GET_INTERFACE     = 10 ,
-	USB_REQ_SET_INTERFACE     = 11 ,
-	USB_REQ_SYNCH_FRAME       = 12
+	TUSB_REQ_GET_STATUS        = 0  ,
+	TUSB_REQ_CLEAR_FEATURE     = 1  ,
+	TUSB_REQ_RESERVED          = 2  ,
+	TUSB_REQ_SET_FEATURE       = 3  ,
+	TUSB_REQ_RESERVED2         = 4  ,
+	TUSB_REQ_SET_ADDRESS       = 5  ,
+	TUSB_REQ_GET_DESCRIPTOR    = 6  ,
+	TUSB_REQ_SET_DESCRIPTOR    = 7  ,
+	TUSB_REQ_GET_CONFIGURATION = 8  ,
+	TUSB_REQ_SET_CONFIGURATION = 9  ,
+	TUSB_REQ_GET_INTERFACE     = 10 ,
+	TUSB_REQ_SET_INTERFACE     = 11 ,
+	TUSB_REQ_SYNCH_FRAME       = 12
 }usb_request_code_t;
 
 typedef enum
 {
-	USB_REQ_FEATURE_EDPT_HALT     = 0,
-	USB_REQ_FEATURE_REMOTE_WAKEUP = 1,
-	USB_REQ_FEATURE_TEST_MODE     = 2
+	TUSB_REQ_FEATURE_EDPT_HALT     = 0,
+	TUSB_REQ_FEATURE_REMOTE_WAKEUP = 1,
+	TUSB_REQ_FEATURE_TEST_MODE     = 2
 }usb_request_feature_selector_t;
 
 typedef enum
 {
-	USB_REQ_TYPE_STANDARD = 0,
-	USB_REQ_TYPE_CLASS,
-	USB_REQ_TYPE_VENDOR,
-	USB_REQ_TYPE_INVALID
+	TUSB_REQ_TYPE_STANDARD = 0,
+	TUSB_REQ_TYPE_CLASS,
+	TUSB_REQ_TYPE_VENDOR,
+	TUSB_REQ_TYPE_INVALID
 } usb_request_type_t;
 
 typedef enum
 {
-	USB_REQ_RCPT_DEVICE = 0,
-	USB_REQ_RCPT_INTERFACE,
-	USB_REQ_RCPT_ENDPOINT,
-	USB_REQ_RCPT_OTHER
+	TUSB_REQ_RCPT_DEVICE = 0,
+	TUSB_REQ_RCPT_INTERFACE,
+	TUSB_REQ_RCPT_ENDPOINT,
+	TUSB_REQ_RCPT_OTHER
 } usb_request_recipient_t;
 
 
@@ -155,50 +155,50 @@ typedef enum
 // @ref:https://www.usb.org/defined-class-codes
 typedef enum
 {
-	USB_CLASS_NONE          	   	= 0    ,
-	USB_CLASS_AUDIO                	= 1    ,
-	USB_CLASS_CDC                  	= 2    ,
-	USB_CLASS_HID                  	= 3    ,
-	USB_CLASS_MONITOR	           	= 4    ,
-	USB_CLASS_PHYSICAL             	= 5    ,
-	USB_CLASS_IMAGE                	= 6    ,
-	USB_CLASS_PRINTER              	= 7    ,
-	USB_CLASS_MSD                  	= 8    ,			//mass storage devices
-	USB_CLASS_HUB                  	= 9    ,
-	USB_CLASS_CDC_DATA             	= 10   ,
-	USB_CLASS_SMART_CARD           	= 11   ,
-	USB_CLASS_RESERVED_12          	= 12   ,
-	USB_CLASS_CONTENT_SECURITY     	= 13   ,
-	USB_CLASS_VIDEO                	= 14   ,
-	USB_CLASS_PERSONAL_HEALTHCARE  	= 15   ,			//保健
-	USB_CLASS_AUDIO_VIDEO          	= 16   ,
+	TUSB_CLASS_NONE          	   	= 0    ,
+	TUSB_CLASS_AUDIO                	= 1    ,
+	TUSB_CLASS_CDC                  	= 2    ,
+	TUSB_CLASS_HID                  	= 3    ,
+	TUSB_CLASS_MONITOR	           	= 4    ,
+	TUSB_CLASS_PHYSICAL             	= 5    ,
+	TUSB_CLASS_IMAGE                	= 6    ,
+	TUSB_CLASS_PRINTER              	= 7    ,
+	TUSB_CLASS_MSD                  	= 8    ,			//mass storage devices
+	TUSB_CLASS_HUB                  	= 9    ,
+	TUSB_CLASS_CDC_DATA             	= 10   ,
+	TUSB_CLASS_SMART_CARD           	= 11   ,
+	TUSB_CLASS_RESERVED_12          	= 12   ,
+	TUSB_CLASS_CONTENT_SECURITY     	= 13   ,
+	TUSB_CLASS_VIDEO                	= 14   ,
+	TUSB_CLASS_PERSONAL_HEALTHCARE  	= 15   ,			//保健
+	TUSB_CLASS_AUDIO_VIDEO          	= 16   ,
 
-	USB_CLASS_DIAGNOSTIC           	= 0xDC ,			//诊断设备
-	USB_CLASS_WIRELESS_CONTROLLER  	= 0xE0 ,			//无线控制器
-	USB_CLASS_MISC                 	= 0xEF ,			//杂项
-	USB_CLASS_APP_SPECIFIC 		   	= 0xFE ,
-	USB_CLASS_VENDOR      		   	= 0xFF
+	TUSB_CLASS_DIAGNOSTIC           	= 0xDC ,			//诊断设备
+	TUSB_CLASS_WIRELESS_CONTROLLER  	= 0xE0 ,			//无线控制器
+	TUSB_CLASS_MISC                 	= 0xEF ,			//杂项
+	TUSB_CLASS_APP_SPECIFIC 		   	= 0xFE ,
+	TUSB_CLASS_VENDOR      		   	= 0xFF
 }usb_class_code_t;
 
 
 typedef enum
 {
-	USB_CAPABILITY_WIRELESS_USB               = 0x01,
-	USB_CAPABILITY_USB20_EXTENSION            = 0x02,
-	USB_CAPABILITY_SUPERSPEED_USB             = 0x03,
-	USB_CAPABILITY_CONTAINER_id               = 0x04,
-	USB_CAPABILITY_PLATFORM                   = 0x05,
-	USB_CAPABILITY_POWER_DELIVERY             = 0x06,
-	USB_CAPABILITY_BATTERY_INFO               = 0x07,
-	USB_CAPABILITY_PD_CONSUMER_PORT           = 0x08,
-	USB_CAPABILITY_PD_PROVIDER_PORT           = 0x09,
-	USB_CAPABILITY_SUPERSPEED_PLUS            = 0x0A,
-	USB_CAPABILITY_PRECESION_TIME_MEASUREMENT = 0x0B,
-	USB_CAPABILITY_WIRELESS_USB_EXT           = 0x0C,
-	USB_CAPABILITY_BILLBOARD                  = 0x0D,
-	USB_CAPABILITY_AUTHENTICATION             = 0x0E,
-	USB_CAPABILITY_BILLBOARD_EX               = 0x0F,
-	USB_CAPABILITY_CONFIGURATION_SUMMARY      = 0x10
+	TUSB_CAPABILITY_WIRELESS_USB               = 0x01,
+	TUSB_CAPABILITY_USB20_EXTENSION            = 0x02,
+	TUSB_CAPABILITY_SUPERSPEED_USB             = 0x03,
+	TUSB_CAPABILITY_CONTAINER_id               = 0x04,
+	TUSB_CAPABILITY_PLATFORM                   = 0x05,
+	TUSB_CAPABILITY_POWER_DELIVERY             = 0x06,
+	TUSB_CAPABILITY_BATTERY_INFO               = 0x07,
+	TUSB_CAPABILITY_PD_CONSUMER_PORT           = 0x08,
+	TUSB_CAPABILITY_PD_PROVIDER_PORT           = 0x09,
+	TUSB_CAPABILITY_SUPERSPEED_PLUS            = 0x0A,
+	TUSB_CAPABILITY_PRECESION_TIME_MEASUREMENT = 0x0B,
+	TUSB_CAPABILITY_WIRELESS_USB_EXT           = 0x0C,
+	TUSB_CAPABILITY_BILLBOARD                  = 0x0D,
+	TUSB_CAPABILITY_AUTHENTICATION             = 0x0E,
+	TUSB_CAPABILITY_BILLBOARD_EX               = 0x0F,
+	TUSB_CAPABILITY_CONFIGURATION_SUMMARY      = 0x10
 }usb_capability_type_t;
 
 
@@ -270,7 +270,7 @@ typedef struct {
 	uint8_t  bDescriptorType ; ///< CONFIGURATION Descriptor Type
 	uint16_t wTotalLength    ; ///< Total length of data returned for this descriptor
 	uint8_t  bNumDeviceCaps  ; ///< Number of device capability descriptors in the BOS
-} usb_desc_bos_t;				//USB_DESC_BOS
+} usb_desc_bos_t;				//TUSB_DESC_BOS
 // USB Binary Device Object Store (BOS)
 typedef struct {
   uint8_t bLength;
@@ -338,7 +338,7 @@ typedef struct {
 	uint8_t  iConfiguration      ; ///< Index of string descriptor
 	uint8_t  bmAttributes        ; ///< Same as Configuration descriptor
 	uint8_t  bMaxPower           ; ///< Same as Configuration descriptor
-} usb_desc_speed_cfg_t;		//USB_DESC_SPEED_CONFIG
+} usb_desc_speed_cfg_t;		//TUSB_DESC_SPEED_CONFIG
 
 /// USB Device Qualifier Descriptor
 typedef struct {
@@ -353,7 +353,7 @@ typedef struct {
 	uint8_t  bMaxPacketSize0    ; ///< Maximum packet size for other speed
 	uint8_t  bNumConfigurations ; ///< Number of Other-speed Configurations
 	uint8_t  bReserved          ; ///< Reserved for future use, must be zero
-} usb_desc_device_qualifier_t;	//USB_DESC_DEVICE_QUALIFIER
+} usb_desc_device_qualifier_t;	//TUSB_DESC_DEVICE_QUALIFIER
 
 
 /// USB Interface Association Descriptor (IAD ECN)
@@ -369,14 +369,14 @@ typedef struct {
 	uint8_t bFunctionProtocol ; ///< Interface protocol ID.
 
 	uint8_t iFunction         ; ///< Index of the string descriptor describing the interface association.
-} usb_desc_interface_assoc_t;	//USB_DESC_INTERFACE_ASSOCIATION
+} usb_desc_interface_assoc_t;	//TUSB_DESC_INTERFACE_ASSOCIATION
 
 // USB String Descriptor
 typedef struct {
   uint8_t  bLength         ; ///< Size of this descriptor in bytes
   uint8_t  bDescriptorType ; ///< Descriptor Type
   uint16_t unicode_string[1];	//TODO
-} usb_desc_string_t;		//USB_DESC_STRING
+} usb_desc_string_t;		//TUSB_DESC_STRING
 
 
 
