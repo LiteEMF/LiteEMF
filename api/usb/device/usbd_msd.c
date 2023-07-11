@@ -122,7 +122,7 @@ error_t usbd_msd_out_process(uint8_t id, usbd_class_t* pclass)
 
     err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
     if((ERROR_SUCCESS == err) && usb_rxlen){
-        mass_storage_bulk_out(id,usb_rxbuf,usb_rxlen);
+        mass_storage_bulk_out(id,pclass->endpout.mtu, usb_rxbuf,usb_rxlen);
     }
 
     return ERROR_SUCCESS;
@@ -130,7 +130,7 @@ error_t usbd_msd_out_process(uint8_t id, usbd_class_t* pclass)
 
 error_t usbd_msd_in_process(uint8_t id,usbd_class_t* pclass)
 {
-    mass_storage_bulk_in(id);
+    mass_storage_bulk_in(id,pclass->endpin.mtu);
     return ERROR_SUCCESS;
 }
 

@@ -646,12 +646,13 @@ static bool SCSI_CBWDecode(uint8_t id,uint32_t nbytes)
     usbd_msc_cfg.csw.dTag = usbd_msc_cfg.cbw.dTag;
     usbd_msc_cfg.csw.dDataResidue = usbd_msc_cfg.cbw.dDataLength;
     usbd_msc_cfg.sector_offset = 0;
+    usbd_msc_cfg.block_index = 0;
 
     if ((usbd_msc_cfg.cbw.bLUN > 1) || (usbd_msc_cfg.cbw.dSignature != MSC_CBW_Signature) || (usbd_msc_cfg.cbw.bCBLength < 1) || (usbd_msc_cfg.cbw.bCBLength > 16)) {
         SCSI_SetSenseData(SCSI_KCQIR_INVALIDCOMMAND);
         return false;
     } else {
-        logd("usbd msd cmd:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
+        //logd("usbd msd cmd:0x%02x\n", (uint16_t)usbd_msc_cfg.cbw.CB[0]);
         switch (usbd_msc_cfg.cbw.CB[0]) {
             case SCSI_CMD_TESTUNITREADY:
                 ret = SCSI_testUnitReady(&buf2send, &len2send);
@@ -746,7 +747,7 @@ __WEAK error_t usbd_msc_sector_write(uint8_t lun, uint32_t sector, uint32_t offs
 }
 #endif
 
-void mass_storage_bulk_out(uint8_t id, uint8_t* buf, uint16_t len)
+void mass_storage_bulk_out(uint8_t id, uint8_t mtu, uint8_t* buf, uint16_t len)
 {
     switch (usbd_msc_cfg.stage) {
         case MSC_READ_CBW:
@@ -758,17 +759,23 @@ void mass_storage_bulk_out(uint8_t id, uint8_t* buf, uint16_t len)
             }
             break;
         case MSC_DATA_OUT:
-            memcpy(&usbd_msc_cfg.block_buffer, buf, MIN(len, USBD_MSC_BLOCK_SIZE));
+            memcpy(&usbd_msc_cfg.block_buffer+usbd_msc_cfg.block_index, buf, MIN(len, USBD_MSC_BLOCK_SIZE - usbd_msc_cfg.block_index));
+            usbd_msc_cfg.block_index += len;
+            logd("o:%d\n",usbd_msc_cfg.block_index);
+            if((usbd_msc_cfg.block_index < USBD_MSC_BLOCK_SIZE) && (len == mtu)){
+                break;      //continue out data
+            }
             switch (usbd_msc_cfg.cbw.CB[0]) {
                 case SCSI_CMD_WRITE10:
                 case SCSI_CMD_WRITE12:
-                    if (SCSI_processWrite(id,len) == false) {
+                    if (SCSI_processWrite(id,usbd_msc_cfg.block_index) == false) {
                         usbd_msc_send_csw(id, CSW_STATUS_CMD_FAILED); /* send fail status to host,and the host will retry*/
                     }
                     break;
                 default:
                     break;
             }
+            usbd_msc_cfg.block_index = 0;
             break;
         default:
             break;
@@ -778,7 +785,7 @@ void mass_storage_bulk_out(uint8_t id, uint8_t* buf, uint16_t len)
 
 
 
-void mass_storage_bulk_in(uint8_t id)
+void mass_storage_bulk_in(uint8_t id, uint8_t mtu)
 {
     switch (usbd_msc_cfg.stage) {
         case MSC_DATA_IN:

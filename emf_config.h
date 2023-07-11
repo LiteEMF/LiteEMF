@@ -252,6 +252,9 @@ typedef struct{
 //*********************************************************************************//
 //                       		USB			                  					//
 //*********************************************************************************//
+#ifndef API_OTG_BIT_ENABLE				//used BIT(n);
+#define API_OTG_BIT_ENABLE			0
+#endif
 #ifndef API_USBD_BIT_ENABLE				//used BIT(n);
 #define API_USBD_BIT_ENABLE			0
 #endif

@@ -10,10 +10,12 @@
 */
 
 
-#ifndef _usbd_msd_scsi_h
-#define _usbd_msd_scsi_h
+#ifndef _api_otg_h
+#define _api_otg_h
 #include "utils/emf_typedef.h" 
-#include "api/usb/usb_msd_typedef.h"
+
+#include "api/usb/device/usbd.h"
+#include "api/usb/host/usbh.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,21 +25,31 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#if USBD_NUM > USBH_NUM
+#define OTG_NUM			USBD_NUM
+#else
+#define OTG_NUM			USBH_NUM
+#endif	
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-error_t usbd_msc_sector_read(uint8_t lun, uint32_t sector, uint32_t offset, uint8_t *buffer, uint32_t length);	//__WEAK
-error_t usbd_msc_sector_write(uint8_t lun, uint32_t sector, uint32_t offset, uint8_t *buffer, uint32_t length);	//__WEAK
-void mass_storage_bulk_out(uint8_t id, uint8_t mtu, uint8_t* buf, uint16_t len);
-void mass_storage_bulk_in(uint8_t id,uint8_t mtu );
+typedef enum{
+	API_OTG_IDEL = 0,
+	API_OTG_DEV,
+	API_OTG_HOST
+}api_otg_t;
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-
+bool api_otg_init(uint8_t id, api_otg_t mode);
+bool api_otg_deinit(uint8_t id, api_otg_t mode);
+void api_otgs_init(void);
+void api_otg_task(void* pa);
+void api_otg_handler(uint32_t period_10us);
 
 #ifdef __cplusplus
 }

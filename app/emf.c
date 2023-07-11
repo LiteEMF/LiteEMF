@@ -166,14 +166,17 @@ bool emf_init(void)
 	#if APP_RGB_ENABLE
 	app_rgb_init();
 	#endif
-
-	#if API_USBD_BIT_ENABLE
-	usbds_init();
+	
+	#if API_OTG_BIT_ENABLE
+		api_otgs_init();
+	#else
+		#if API_USBD_BIT_ENABLE
+		usbds_init();
+		#endif
+		#if API_USBH_BIT_ENABLE
+		usbhs_init();
+		#endif
 	#endif
-	#if API_USBH_BIT_ENABLE
-	usbhs_init();
-	#endif
-
 
 	user_vender_init();
 

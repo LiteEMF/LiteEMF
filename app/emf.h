@@ -76,6 +76,10 @@
 #if API_USBH_BIT_ENABLE
 #include "api/usb/host/usbh.h"
 #endif
+#if API_OTG_BIT_ENABLE
+#include "api/usb/api_otg.h"
+#endif
+
 
 //app
 #if APP_KEY_ENABLE

@@ -36,7 +36,7 @@ extern "C" {
 #define USBD_DISK_BLOCK_NUM	    64
 #endif
 
-#ifndef USBD_MSC_BLOCK_SIZE             //endp mtu
+#ifndef USBD_MSC_BLOCK_SIZE             //MIN endp mtu, moust 512
 #define USBD_MSC_BLOCK_SIZE		64
 #endif
 
@@ -79,9 +79,10 @@ typedef struct _msc_cfg {
     uint32_t start_sector;
     uint32_t nsectors;
     uint16_t sector_offset;
-    uint16_t scsi_blk_size;	//flash block size must <= USBD_MSC_BLOCK_SIZE
+    uint16_t scsi_blk_size;	//flash block size must
     uint32_t scsi_blk_nbr;	//flash block num
 
+    uint16_t block_index;
     uint8_t block_buffer[USBD_MSC_BLOCK_SIZE];
 } msc_cfg_t;
 
