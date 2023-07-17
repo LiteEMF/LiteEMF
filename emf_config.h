@@ -303,7 +303,7 @@ typedef struct{
 #define API_WDT_ENABLE		0
 #endif
 #ifndef API_STORAGE_ENABLE	
-#define API_STORAGE_ENABLE		1
+#define API_STORAGE_ENABLE		0
 #endif
 #ifndef API_PM_ENABLE
 #define API_PM_ENABLE			0

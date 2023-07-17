@@ -43,7 +43,7 @@ extern "C" {
 #define POWER_KEY_ACTIVE	0
 #endif
 #ifndef POWER_KEY_PULL							//pin_pull_t 
-#define POWER_KEY_PULL		PIN_PULLNONE		
+#define POWER_KEY_PULL		PIN_PULLUP		
 #endif
 #ifndef POWER_SWITCH_KEY						//used switch key
 #define POWER_SWITCH_KEY	0					
@@ -52,7 +52,7 @@ extern "C" {
 
 
 #ifndef KEY_POWER_GPIO
-#define KEY_POWER_GPIO 		PIN_NULL
+#define KEY_POWER_GPIO 		IO_PORTA_14
 #endif
 #ifndef KEY_USB_DET_GPIO
 #define KEY_USB_DET_GPIO	PIN_NULL
