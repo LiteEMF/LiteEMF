@@ -301,7 +301,7 @@ static uint32_t iokey_scan(void)
 	if(KEY_ACTIVE == api_gpio_in(KEY_M8_GPIO))	value |= HW_KEY_M8;
 	#endif
 	#if PIN_NULL != KEY_POWER_GPIO
-	if(KEY_ACTIVE == api_gpio_in(KEY_POWER_GPIO))	value |= HW_KEY_POWER;
+	if(POWER_KEY_ACTIVE == api_gpio_in(KEY_POWER_GPIO))	value |= HW_KEY_POWER;
 	#endif
 
 	return value;

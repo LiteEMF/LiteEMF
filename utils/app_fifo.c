@@ -88,6 +88,7 @@ uint8_t app_fifo_put(app_fifo_t * p_fifo, uint8_t byte)
 
 uint8_t app_fifo_get(app_fifo_t * p_fifo, uint8_t * p_byte)
 {
+    if(NULL == p_fifo) return ERROR_NULL;
     if(p_fifo->p_buf == NULL) return ERROR_NULL;
     if (FIFO_EMPTY != p_fifo->fifo_stu)
     {
@@ -115,6 +116,8 @@ uint8_t app_fifo_peek(app_fifo_t * p_fifo, uint16_t index, uint8_t * p_byte)
 
 uint8_t app_fifo_flush(app_fifo_t * p_fifo)
 {
+    if(NULL == p_fifo) return ERROR_NULL;
+
     p_fifo->read_pos = p_fifo->write_pos;
     p_fifo->fifo_stu = FIFO_EMPTY;
     return ERROR_SUCCESS;
