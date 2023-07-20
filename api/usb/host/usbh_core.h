@@ -34,8 +34,15 @@ extern "C" {
 #ifndef HUB_MAX_PORTS			//支持多少个usb
 #define HUB_MAX_PORTS			3
 #endif
-#ifndef USBH_LOOP_IN_ENABLE			//采样轮训方式读取USB数据
-#define USBH_LOOP_IN_ENABLE		1
+#ifndef USBH_ENDP_NUM
+#define USBH_ENDP_NUM			5
+#endif
+#ifndef USBH_ENUM_RETRY			//枚举重试次数
+#define USBH_ENUM_RETRY			3
+#endif
+
+#ifndef USBH_LOOP_ENABLE			//采样轮训方式读取USB数据
+#define USBH_LOOP_ENABLE		1
 #endif
 
 #define USBH0					0x00
@@ -97,7 +104,7 @@ error_t usbh_req_set_endp_feature(uint8_t id, uint8_t endp, usb_request_feature_
 
 usbh_dev_t* get_usbh_dev(uint8_t id);  
 error_t usbh_select_hub_port(uint8_t id);
-error_t usbh_port_reset(uint8_t id);
+error_t usbh_port_reset(uint8_t id,uint8_t reset_ms);
 error_t usbh_set_speed(uint8_t id, usb_speed_t speed);
 error_t usbh_set_addr(uint8_t id,uint8_t addr);
 error_t usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed);
@@ -110,8 +117,9 @@ error_t usbh_core_init( uint8_t id );
 error_t usbh_core_deinit( uint8_t id );
 
 //hal
+error_t hal_usbh_set_status(uint8_t id,usb_state_t usb_sta);
 error_t hal_usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed);		//用于打开/关闭usb口,防止多个设备在地址状态!!!
-error_t hal_usbh_port_reset(uint8_t id);
+error_t hal_usbh_port_reset(uint8_t id, uint8_t reset_ms);
 error_t hal_usbh_set_speed(uint8_t id, usb_speed_t speed);
 error_t hal_usbh_set_addr(uint8_t id,uint8_t addr);
 error_t hal_usbh_endp_unregister(uint8_t id,usb_endp_t *endpp);

@@ -51,20 +51,31 @@
 *******************************************************************/
 bool api_otg_init(uint8_t id, api_otg_t mode)
 {
-	void *pdev;
-
 	switch(mode){
 	case API_OTG_IDEL:
 		#if API_USBD_BIT_ENABLE
-		pdev = usbd_get_dev(id);
-		memset(pdev,0, sizeof(usbd_dev_t));
+		{
+			usbd_dev_t *pdev = usbd_get_dev(id);
+			usbd_req_t *preq = usbd_get_req(id);
+
+			memset(pdev,0, sizeof(usbd_dev_t));
+			memset(preq,0, sizeof(usbd_req_t));
+		}
 		#endif
 
 		#if API_USBH_BIT_ENABLE
-		pdev = get_usbh_dev(id);
-		memset(pdev,0, sizeof(usbd_dev_t));
-		for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
-			INIT_LIST_HEAD(((usbh_dev_t *)&pdev)->class_list);
+		{
+			uint8_t i;
+			usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
+			for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
+				memset(pdev, 0 ,sizeof(usbh_dev_t));
+				INIT_LIST_HEAD(&pdev->class_list);
+			}
+
+			usbh_class_buf_init();
+			#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+			usbh_hid_km_pa_init();
+			#endif
 		}
 		#endif
 		break;
@@ -108,11 +119,11 @@ void api_otgs_init(void)
 
 	for(id=0; id<OTG_NUM; id++){
 		if(API_OTG_BIT_ENABLE & BIT(id)){
-			api_otg_init(id, API_OTG_IDEL);
+			api_otg_init(id<<4, API_OTG_IDEL);
 		}else if(API_USBD_BIT_ENABLE & BIT(id)){
-			api_otg_init(id, API_OTG_DEV);
+			api_otg_init(id<<4, API_OTG_DEV);
 		}else if(API_USBH_BIT_ENABLE & BIT(id)){
-			api_otg_init(id, API_OTG_HOST);
+			api_otg_init(id<<4, API_OTG_HOST);
 		}
 	}
 }

@@ -256,7 +256,10 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
         // if(err) return err;          //note:  dev can STALL
 
         desc_buf = emf_malloc(desc_len);
-        if(NULL == desc_buf) return ERROR_NO_MEM;
+        if(NULL == desc_buf){
+            logd_r("malloc len=%d err!\n",desc_len);
+            return ERROR_NO_MEM;
+        }
         
         err = usbh_hid_get_report_desc(id, 0, pclass->itf.if_num, desc_buf, &desc_len);
         if(err) return err;

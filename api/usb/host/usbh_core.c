@@ -305,22 +305,22 @@ usbh_dev_t* get_usbh_dev(uint8_t id)
 
 error_t usbh_select_hub_port(uint8_t id)
 {
-    error_t err;
+    error_t err = ERROR_SUCCESS;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
     if((id>>4) >= USBH_NUM) return ERROR_FAILE;
 
-    err =  usbh_set_addr(id & 0xf0, pdev->addr );  // set root hub addr
-    err =  usbh_set_speed(id, pdev->speed );       // set usb speed
+    err = usbh_set_addr(id & 0xf0, pdev->addr );  // set root hub addr
+    err = usbh_set_speed(id, pdev->speed );       // set usb speed
     return err;
 }
 
 
-error_t usbh_port_reset(uint8_t id)
+error_t usbh_port_reset(uint8_t id,uint8_t reset_ms)
 {   
     error_t err;
     if((id>>4) >= USBH_NUM) return ERROR_FAILE;
-    err = hal_usbh_port_reset(id);
+    err = hal_usbh_port_reset(id,reset_ms);
     logd("usbh%x reset=%d\n",id,err);
     return err;
 }
@@ -387,12 +387,10 @@ error_t usbh_core_init( uint8_t id )
 {
 	uint8_t i;
     error_t err = ERROR_UNSUPPORT;
+    usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
 
-	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
-	
-    memset(m_usbh_dev[id], 0 ,sizeof(m_usbh_dev[id]));
-
-	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
+	for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
+        memset(pdev, 0 ,sizeof(usbh_dev_t));
 		INIT_LIST_HEAD(&pdev->class_list);
 	}
 

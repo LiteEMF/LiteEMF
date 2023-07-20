@@ -105,7 +105,7 @@ error_t usbh_disconnect(uint8_t id)
 }
 
 
-error_t usbh_reset(uint8_t id)
+error_t usbh_reset(uint8_t id,uint8_t reset_ms)
 {
 	error_t err = ERROR_STATE;
 	usb_speed_t speed;
@@ -114,7 +114,7 @@ error_t usbh_reset(uint8_t id)
 	if(NULL == pdev ) return err;
 	if(pdev->state >= TUSB_STA_POWERED){
 		if((id & 0X0F) == 0){
-			err = usbh_port_reset(id);
+			err = usbh_port_reset(id,reset_ms);
 			if(err) return err;
 			err = usbh_port_en(id, 1, &speed );
 			if(err) return err;
@@ -237,7 +237,10 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 		break;
 	}	
 	pdev->state = usb_sta;
-
+	if(0 == (id & 0x0f)){
+		hal_usbh_set_status(id, usb_sta);
+	}
+	
 	logd("usbh%d set status=%d\n",id,pdev->state);
     return ERROR_SUCCESS;
 }
@@ -263,7 +266,10 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 			pitf = (usb_desc_interface_t*)&buf[i];
 			if(pitf->bNumEndpoints){
 				pclass = malloc_usbh_class();
-				if(NULL == pclass) break;
+				if(NULL == pclass){
+					logd_r("err usbh class is full!");
+					break;
+				}
 
 				pclass->pdat = NULL;				//must null
 				pclass->itf.if_num = pitf->bInterfaceNumber;
@@ -301,11 +307,13 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 		if(err){					//释放资源
 			usbh_class_deinit(id);
 		}
+	}else{
+		err = ERROR_UNSUPPORT;
 	}
 	return err;
 }
 
-static error_t usbh_enum_device( uint8_t id )
+static error_t usbh_enum_device( uint8_t id, uint8_t reset_ms )
 {
 	error_t err = ERROR_UNKNOW;
     uint8_t i;
@@ -316,12 +324,11 @@ static error_t usbh_enum_device( uint8_t id )
 	usb_desc_configuration_t *pcfg_desc = (usb_desc_configuration_t *)tmp_buf;
 	uint8_t *pcfg_buf;
 
-
 	logd("\nusbh%x state=%d, enum start...\n",(uint16_t)id,pdev->state);
 
 	switch(pdev->state){
 	case TUSB_STA_POWERED:
-		err = usbh_reset(id);
+		err = usbh_reset(id,reset_ms);
 		if(ERROR_SUCCESS != err) return err;
 		logd("usbh%d powered=%d\n",id, err);
 		break;
@@ -378,7 +385,7 @@ static void usbh_enum_all_device( uint32_t period_10us )
 	error_t err;
 	uint8_t id;
     static timer_t s_enumtimer = 0;
-    static uint8d_t  s_retry = 0;        //失败时重试次数
+    static uint8_t  s_retry = 0;        //失败时重试次数
 	
 	if(m_task_tick10us - s_enumtimer >= period_10us){
 		s_enumtimer = m_task_tick10us;
@@ -397,13 +404,18 @@ static void usbh_enum_all_device( uint32_t period_10us )
 		}
 
 		if(USBH_NULL != id){
-			if(s_retry++ < 6){
-				err = usbh_enum_device( id );
+			usbh_dev_t* pdev = get_usbh_dev(id);
+			if(++s_retry <= USBH_ENUM_RETRY){
+				err = usbh_enum_device( id , MAX(60,s_retry*10));
+
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
 					logd( "usbh enum err = %X\n\n", (uint16_t)(err) );
 					usbh_set_status(id, TUSB_STA_POWERED, 0);		//枚举还未达到最大次数 重新枚举
-				}else{
-					logd("root enum ret=%X\n\n",(uint16_t)(err));
+				}else if(ERROR_UNSUPPORT == err){
+		    		usbh_disconnect( id );
+					logd_r("root enum unsupport \n\n");
+				}else if(pdev->state > TUSB_STA_ADDRESSING){
+					logd_g("root enum success...\n\n");
 				}
 			}else{
 				usbh_disconnect( id );
@@ -412,6 +424,49 @@ static void usbh_enum_all_device( uint32_t period_10us )
 		}
     }
 }
+
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb 事件, 在usb 中断事件产生后调用	
+	用户可消息多种处理方式,用户可以自定义修改:
+	1. 轮训方式	(默认)
+	2. 任务消息推送方式
+	3. 中断直接处理方式
+*******************************************************************/
+__WEAK void usbh_reset_event(uint8_t id)
+{
+}
+__WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
+{
+	#if !USBH_LOOP_ENABLE
+	error_t err;
+	usbh_dev_t* pdev = get_usbh_dev(id);
+	usbh_class_t *pclass = usbh_class_find_by_ep(id,ep);
+	uint8_t buf[64];
+	uint16_t len;
+
+	if(NULL != pclass){
+		uint8_t buf[64];
+		uint16_t len = pclass->endpin.mtu;
+
+		err = usbh_in(id, &pclass->endpin, buf, &len,0);
+		if((ERROR_SUCCESS == err) && len){
+			usbh_class_in_process(id, pclass, buf, len);
+		}
+	}
+	#endif
+}
+
+__WEAK void usbh_endp_out_event(uint8_t id, uint8_t ep)
+{
+
+}
+
+
+
 
 /*******************************************************************
 ** Parameters:		

@@ -84,6 +84,32 @@ usbh_class_t* get_usbh_class(uint8_t class_id)
 	return &usbh_dev_class[class_id];
 }
 
+
+/*******************************************************************
+** Parameters:
+** Returns:	
+** Description:	这里没有处理interface alt set 很少设备使用到
+*******************************************************************/
+usbh_class_t *usbh_class_find_by_ep(uint8_t id,uint8_t ep)
+{
+	usbh_dev_t* pdev = get_usbh_dev(id);
+	usbh_class_t *pos,*pclass = NULL;
+
+	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+		if((pos->endpin.addr | TUSB_DIR_IN_MASK) == ep){
+			pclass = pos;
+			break;
+		}else if(pos->endpout.addr == ep){
+			pclass = pos;
+			break;
+		}
+	
+	}
+
+	return pclass;
+}
+
+
 /*******************************************************************
 ** Parameters:	sub_type: hid 设备: hid_type_t, 其他设备传入sub_ift
 ** Returns:	
@@ -92,19 +118,20 @@ usbh_class_t* get_usbh_class(uint8_t class_id)
 usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_type)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
-	usbh_class_t *pclass = NULL;
+	usbh_class_t *pos,*pclass = NULL;
 
-	list_for_each_entry(pclass,&pdev->class_list,usbh_class_t,list){
-		if(pclass->dev_type == type){
+	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+		if(pos->dev_type == type){
 			if(DEV_TYPE_HID == type){
-				if(sub_type != pclass->hid_type) continue;
+				if(sub_type != pos->hid_type) continue;
 				if(HID_TYPE_XBOX == sub_type){		//xbox特殊处理,xbox音频不在这里处理
-					if(pclass->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
-					if(pclass->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
+					if(pos->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
+					if(pos->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
 				}
 			}else if(DEV_TYPE_AUDIO == type){
-				if(sub_type != pclass->itf.if_sub_cls) continue;
+				if(sub_type != pos->itf.if_sub_cls) continue;
 			}
+			pclass = pos;
 			break;
 		}
 	}
@@ -118,18 +145,18 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 ** Returns:	
 ** Description:	这里没有处理interface alt set 很少设备使用到
 *******************************************************************/
-uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class_t **ppcalss)
+uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class_t **ppclass)
 {
 	uint8_t i,id = USBH_NULL;
 	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
-	usbh_class_t *pcalss = NULL;
+	usbh_class_t *pclass = NULL;
 
 	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
 		uint8_t tmp_id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
-		pcalss = usbh_class_find_by_type(tmp_id,type,sub_type);
-		if(NULL != pcalss){
+		pclass = usbh_class_find_by_type(tmp_id,type,sub_type);
+		if(NULL != pclass){
 			id = tmp_id;
-			if(NULL != ppcalss) *ppcalss = pcalss;
+			if(NULL != ppclass) *ppclass = pclass;
 			break;
 		}
 	}
@@ -566,7 +593,6 @@ error_t usbh_class_deinit(uint8_t id)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
-
 		if(pos->endpout.addr){
 			err = usbh_endp_unregister(id,&pos->endpout);
 			if(err) continue;
@@ -653,7 +679,7 @@ void usbh_class_task(uint32_t dt_ms)
 	uint8_t i,id = USBH_NULL;
 	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
 	usbh_class_t *pos;
-	#if USBH_LOOP_IN_ENABLE
+	#if USBH_LOOP_ENABLE
 	static timer_t s_tick;
 	s_tick += dt_ms;
 	#endif
@@ -662,7 +688,7 @@ void usbh_class_task(uint32_t dt_ms)
 		list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
 			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
-			#if USBH_LOOP_IN_ENABLE
+			#if USBH_LOOP_ENABLE
 			if(TUSB_ENDP_TYPE_INTER == pos->endpin.type){			//only inter enpd
 				if(0 == (s_tick % pos->endpin.interval)){
 					uint8_t buf[64];

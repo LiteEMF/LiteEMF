@@ -42,9 +42,14 @@ extern uint16_t usbh_iap_hid_types;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+
+void usbh_reset_event(uint8_t id);						//__WEAK 
+void usbh_endp_in_event(uint8_t id, uint8_t ep);		//__WEAK 
+void usbh_endp_out_event(uint8_t id, uint8_t ep);		//__WEAK 
+
 void usbh_det_event(uint8_t id, uint8_t attached );
 error_t usbh_disconnect(uint8_t id);
-error_t usbh_reset(uint8_t id);
+error_t usbh_reset(uint8_t id,uint8_t reset_ms);
 error_t usbh_set_address(uint8_t id,uint8_t addr);
 uint8_t usbh_find_by_status(uint8_t usb_stas);   
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr) ; 

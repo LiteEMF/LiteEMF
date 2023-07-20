@@ -276,10 +276,13 @@ error_t usbd_reset(uint8_t id)
 error_t usbd_core_init(uint8_t id)
 {
 	error_t err = ERROR_UNSUPPORT;
-	memset((void*)&m_usbd_req[id],0, sizeof(usbd_req_t));
-	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
-	m_usbd_dev[id].state = TUSB_STA_ATTACHED;
-	m_usbd_dev[id].endp0_mtu = USBD_ENDP0_MTU;
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	memset(preq,0, sizeof(usbd_req_t));
+	memset(pdev,0, sizeof(usbd_dev_t));
+	pdev->state = TUSB_STA_ATTACHED;
+	pdev->endp0_mtu = USBD_ENDP0_MTU;
 	
 	if(API_USBD_BIT_ENABLE & BIT(id)){
     	err = hal_usbd_init(id);
@@ -289,9 +292,12 @@ error_t usbd_core_init(uint8_t id)
 error_t usbd_core_deinit(uint8_t id)
 {
 	error_t err = ERROR_UNSUPPORT;
-	usbd_free_setup_buffer(&m_usbd_req[id]);					//防止资源未被释放
-	memset((void*)&m_usbd_req[id],0, sizeof(usbd_req_t));
-	memset(&m_usbd_dev[id],0, sizeof(usbd_dev_t));
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	usbd_free_setup_buffer(preq);					//防止资源未被释放
+	memset(preq,0, sizeof(usbd_req_t));
+	memset(pdev,0, sizeof(usbd_dev_t));
 
 	if(API_USBD_BIT_ENABLE & BIT(id)){
     	err = hal_usbd_deinit(id);
