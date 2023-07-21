@@ -166,6 +166,9 @@ bool emf_init(void)
 	#if APP_RGB_ENABLE
 	app_rgb_init();
 	#endif
+	#if APP_WS2812FX_ENABLE
+//	app_rgb_init();
+	#endif
 	
 	#if API_OTG_BIT_ENABLE
 		api_otgs_init();
@@ -211,7 +214,7 @@ void emf_handler(uint32_t period_10us)
 	
 	if( m_systick - live_timer >= 5000){
 		live_timer = m_systick;
-		logd("t=%ld %ld\n", m_systick,m_task_tick10us);
+	//	logd("t=%ld %ld\n", m_systick,m_task_tick10us);
 	}
 
 	#ifdef HW_ADC_MAP

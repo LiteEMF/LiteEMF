@@ -133,7 +133,7 @@ void app_key_scan_task(void *pa)
 
     if(m_key_scan != key){
         m_key_scan = key;
-        app_key_dump(key);
+    //    app_key_dump(key);
     }
     UNUSED_PARAMETER(pa);
 }
@@ -175,6 +175,7 @@ void app_key_decode_task(uint32_t key_scan)
                 }else if(key_cnt[i] >= KEY_SHORT_TIME){
                     if(!(m_app_key.press_short & bits)){
                         m_app_key.press_short |= bits;
+                        logd("press_short=%x\n",m_app_key.press_short);
                         ret = true;
                     }
                 }
@@ -186,8 +187,9 @@ void app_key_decode_task(uint32_t key_scan)
                         if(m_app_key.pre_double_b & bits){
                             m_app_key.double_b |= bits;
                             m_app_key.pre_double_b &= ~bits;
+                            logd("m_app_key.double_b\n");
                         }else{
-                            m_app_key.pre_double_b |= bits;
+                            m_app_key.pre_double_b |= bits;                          
                         }
                     }else{
                         m_app_key.pre_double_b &= ~bits;
@@ -206,7 +208,7 @@ void app_key_decode_task(uint32_t key_scan)
                     key_cnt[i] = 0;
                     m_app_key.pre_double_b &= ~bits;
                     m_app_key.pressed_b |= bits;
-                    //logd("m_app_key.pressed_b\n");
+                    logd("m_app_key.pressed_b\n");
                     ret = true;
                 }
             }else if(((m_app_key.pressed_b | m_app_key.double_b) & bits)){

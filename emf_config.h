@@ -339,6 +339,9 @@ typedef struct{
 #ifndef APP_RGB_ENABLE
 #define APP_RGB_ENABLE			0
 #endif
+#ifndef APP_WS2812FX_ENABLE
+#define APP_WS2812FX_ENABLE		1
+#endif
 
 #ifndef APP_CMD_ENABLE
 #define APP_CMD_ENABLE			0
