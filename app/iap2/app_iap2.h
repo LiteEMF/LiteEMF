@@ -14,7 +14,7 @@
 #ifndef _app_iap2_h
 #define _app_iap2_h
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "iap2_packet.h"
 
 

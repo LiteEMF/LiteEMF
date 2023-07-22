@@ -12,7 +12,7 @@
 
 #ifndef _usbd_iap2_h
 #define _usbd_iap2_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/usb/device/usbd_core.h"
 
 #ifdef __cplusplus

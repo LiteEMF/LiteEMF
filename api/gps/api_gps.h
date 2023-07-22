@@ -12,7 +12,7 @@
 
 #ifndef _api_gps_h
 #define _api_gps_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

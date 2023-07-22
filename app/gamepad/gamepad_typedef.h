@@ -15,7 +15,7 @@
 #ifndef	_gamepad_typedef_H
 #define	_gamepad_typedef_H
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 /*******************************************************************************************************************
 **	Hardware  Defined

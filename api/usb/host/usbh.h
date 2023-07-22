@@ -12,7 +12,7 @@
 
 #ifndef _usbh_h
 #define _usbh_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/emf_utils.h"
 #include "utils/list.h"
 #include "api/usb/host/usbh_core.h"

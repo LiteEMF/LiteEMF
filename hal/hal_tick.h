@@ -12,7 +12,7 @@
 
 #ifndef _hal_tick_h
 #define _hal_tick_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

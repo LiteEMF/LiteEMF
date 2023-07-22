@@ -12,7 +12,7 @@
 
 #ifndef _app_adb_h
 #define _app_adb_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

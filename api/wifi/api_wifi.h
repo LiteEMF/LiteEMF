@@ -12,7 +12,7 @@
 
 #ifndef _api_wifi_h
 #define _api_wifi_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

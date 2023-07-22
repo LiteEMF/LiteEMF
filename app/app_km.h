@@ -12,7 +12,7 @@
 
 #ifndef _app_km_h
 #define _app_km_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "km_typedef.h"
 
 #ifdef __cplusplus

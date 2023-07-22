@@ -16,7 +16,7 @@
 #ifndef	_ps_crypt_h
 #define	_ps_crypt_h
 #include "hw_config.h"
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/api_transport.h"
 #include "api/api_tick.h"
 #include "app/app_rumble.h"

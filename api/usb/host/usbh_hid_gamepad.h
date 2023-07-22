@@ -12,7 +12,7 @@
 
 #ifndef _usbh_hid_gameapd_h
 #define _usbh_hid_gameapd_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/usb/usb_typedef.h"
 #include "api/usb/host/usbh_core.h"
 #include "api/hid/hid_desc_parser.h"

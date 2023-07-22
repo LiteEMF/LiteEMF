@@ -11,7 +11,7 @@
  */
  
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/app_fifo.h"
 
 /**@brief Put one byte to the FIFO. */

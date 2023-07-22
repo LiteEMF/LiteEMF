@@ -78,6 +78,8 @@ bool api_otg_init(uint8_t id, api_otg_t mode)
 			#endif
 		}
 		#endif
+
+		hal_otg_init(id);
 		break;
 	case API_OTG_DEV:
 		usbd_init(id);
@@ -100,6 +102,7 @@ bool api_otg_deinit(uint8_t id, api_otg_t mode)
 	switch(mode){
 	case API_OTG_IDEL:
 		api_otg_init(id,API_OTG_IDEL);
+		hal_otg_deinit(id);
 		break;
 	case API_OTG_DEV:
 		usbd_deinit(id);

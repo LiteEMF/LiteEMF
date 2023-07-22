@@ -1,7 +1,7 @@
 #ifndef __SH3001_H 
 #define __SH3001_H
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "app/imu/imu_driver.h"
 /******************************************************************
 *	SH3001 I2C address Macro Definition 

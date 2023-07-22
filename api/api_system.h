@@ -12,7 +12,7 @@
 
 #ifndef _api_system_h
 #define _api_system_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_system.h"
 

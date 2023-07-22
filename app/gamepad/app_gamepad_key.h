@@ -12,7 +12,7 @@
 
 #ifndef _app_gamepad_key_h
 #define _app_gamepad_key_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "app/key_typedef.h"
 #include "utils/emf_utils.h"
 #include "app/app_key.h"

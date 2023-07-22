@@ -12,7 +12,7 @@
 
 #ifndef _km_typedef_h
 #define _km_typedef_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

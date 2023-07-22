@@ -78,10 +78,10 @@
  * a custom header that defines or includes all this. In that case,
  * define PB_SYSTEM_HEADER to the path of this file.
  */
-#define PB_SYSTEM_HEADER "utils/emf_typedef.h" 
+#define PB_SYSTEM_HEADER "emf_typedef.h" 
 
 #ifdef PB_SYSTEM_HEADER
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #else
 #include <stdint.h>
 #include <stddef.h>

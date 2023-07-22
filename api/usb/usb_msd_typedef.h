@@ -8,7 +8,7 @@
 #ifndef USB_MSC_TYPEDEF_H
 #define USB_MSC_TYPEDEF_H
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/usb/usb_scsi.h"
 
 /* MSC Subclass Codes */

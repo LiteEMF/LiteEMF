@@ -12,7 +12,7 @@
 
 #ifndef _usbd_msd_scsi_h
 #define _usbd_msd_scsi_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/usb/usb_msd_typedef.h"
 
 #ifdef __cplusplus

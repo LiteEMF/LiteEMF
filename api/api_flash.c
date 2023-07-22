@@ -39,6 +39,16 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
+** Description:	
+*******************************************************************/
+bool api_flash_erase(uint16_t offset)
+{
+	return hal_flash_erase(offset);
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
 ** Description:	must call api_flash_erase befor write
 *******************************************************************/
 bool api_flash_write(uint16_t offset,uint8_t *buf,uint16_t len)
@@ -49,10 +59,7 @@ bool api_flash_read(uint16_t offset,uint8_t *buf,uint16_t len)
 {
 	return hal_flash_read(offset, buf, len);
 }
-bool api_flash_erase(uint16_t offset)
-{
-	return hal_flash_erase(offset);
-}
+
 bool api_flash_init(void)
 {
     return hal_flash_init();

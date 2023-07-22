@@ -12,7 +12,7 @@
 
 #ifndef _usbd_msd_ram_disk_h
 #define _usbd_msd_ram_disk_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

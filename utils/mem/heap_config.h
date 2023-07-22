@@ -15,7 +15,7 @@
 
 #ifndef _heap_config_h
 #define _heap_config_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/mem/emf_mem.h"
 #include "api/api_system.h"
 

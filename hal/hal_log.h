@@ -11,7 +11,7 @@
 
 #ifndef _hal_log_h
 #define _hal_log_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

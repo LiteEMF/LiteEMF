@@ -12,7 +12,7 @@
 
 #ifndef _api_uart_h
 #define _api_uart_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_uart.h"
 #include "api/api_gpio.h"

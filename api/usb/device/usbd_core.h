@@ -12,8 +12,9 @@
 
 #ifndef _usbd_core_h
 #define _usbd_core_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
+#include "api/api_transport.h"
 #include "api/usb/usb_typedef.h"
 #include "api/api_transport.h"
 

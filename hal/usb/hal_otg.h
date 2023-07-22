@@ -10,11 +10,9 @@
 */
 
 
-#ifndef _usbd_hid_km_h
-#define _usbd_hid_km_h
+#ifndef _hal_otg_h
+#define _hal_otg_h
 #include "emf_typedef.h" 
-#include "api/usb/device/usbd_core.h"
-#include "api/hid/hid_dev_desc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,12 +22,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef USBD_HID_KB_INTERVAL
-#define USBD_HID_KB_INTERVAL		2
-#endif
-#ifndef USBD_HID_MOUSE_INTERVAL
-#define USBD_HID_MOUSE_INTERVAL		1
-#endif
+
+
 
 /******************************************************************************************************
 **	Parameters
@@ -40,15 +34,6 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-error_t usbd_hid_km_reset(uint8_t id);
-error_t usbd_hid_km_suspend(uint8_t id);
-uint16_t usbd_hid_km_get_itf_desc(uint8_t id, uint8_t hid_type, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
-error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
-error_t usbd_hid_km_out_process(uint8_t id, usbd_class_t *pclass);
-void 	usbd_hid_km_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
-error_t usbd_hid_km_init(uint8_t id);
-error_t usbd_hid_km_deinit(uint8_t id);
-
 
 #ifdef __cplusplus
 }

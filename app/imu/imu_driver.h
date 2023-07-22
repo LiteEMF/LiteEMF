@@ -12,7 +12,7 @@
 
 #ifndef _imu_driver_h
 #define _imu_driver_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/emf_utils.h"
 #include "hw_config.h"
 #include "hw_board.h"

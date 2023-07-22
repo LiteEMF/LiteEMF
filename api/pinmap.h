@@ -11,7 +11,7 @@
 
 #ifndef _pinmap_h
 #define _pinmap_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

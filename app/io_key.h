@@ -12,7 +12,7 @@
 
 #ifndef _io_key_h
 #define _io_key_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hw_board.h"
 #include "api/pinmap.h"

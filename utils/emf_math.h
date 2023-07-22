@@ -11,7 +11,7 @@
 
 #ifndef _emf_math_h
 #define _emf_math_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h" 
 #ifdef __cplusplus
 extern "C" {

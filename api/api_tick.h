@@ -12,7 +12,7 @@
 
 #ifndef _api_tick_h
 #define _api_tick_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "api/api_system.h"
 #include "hal_tick.h"

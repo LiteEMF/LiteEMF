@@ -13,7 +13,7 @@
 
 #ifndef _hid_desc_parser_h
 #define _hid_desc_parser_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/hid/hid_typedef.h"
 
 #ifdef __cplusplus

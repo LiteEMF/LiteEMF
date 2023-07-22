@@ -12,7 +12,7 @@
 
 #ifndef _api_otg_h
 #define _api_otg_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #include "api/usb/device/usbd.h"
 #include "api/usb/host/usbh.h"
@@ -50,6 +50,11 @@ bool api_otg_deinit(uint8_t id, api_otg_t mode);
 void api_otgs_init(void);
 void api_otg_task(void* pa);
 void api_otg_handler(uint32_t period_10us);
+
+
+//hal
+error_t hal_otg_init(uint8_t id);
+error_t hal_otg_deinit(uint8_t id);
 
 #ifdef __cplusplus
 }

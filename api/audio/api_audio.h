@@ -12,7 +12,7 @@
 
 #ifndef _api_audio_h
 #define _api_audio_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hal_audio.h"
 
 #ifdef __cplusplus

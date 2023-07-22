@@ -13,7 +13,7 @@
 #ifndef _api_adc_h
 #define _api_adc_h
 #include "hw_config.h"
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hal_adc.h"
 #include "api/api_gpio.h"
 

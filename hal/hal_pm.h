@@ -12,7 +12,7 @@
 
 #ifndef _hal_pm_h
 #define _hal_pm_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

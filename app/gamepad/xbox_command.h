@@ -15,7 +15,7 @@
 #ifndef	_xbox_command_h
 #define	_xbox_command_h
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/api_transport.h"
 #include "api/api_tick.h"
 

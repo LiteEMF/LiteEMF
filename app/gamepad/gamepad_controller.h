@@ -15,7 +15,7 @@
 #ifndef	_gamepad_controller_H
 #define	_gamepad_controller_H
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/api_transport.h"
 #include "api/api_tick.h"
 #include "app/app_rumble.h"

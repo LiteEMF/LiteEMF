@@ -12,7 +12,7 @@
 
 #ifndef _app_imu_h
 #define _app_imu_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "app/imu/imu_driver.h"
 
 #ifdef __cplusplus

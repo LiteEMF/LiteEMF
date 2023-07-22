@@ -12,7 +12,7 @@
 
 #ifndef _app_rgb_h
 #define _app_rgb_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "app/rgb/color_utils.h"
 #ifdef __cplusplus
 extern "C" {

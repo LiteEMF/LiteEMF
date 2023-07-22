@@ -12,7 +12,7 @@
 
 #ifndef _hid_dev_desc_h
 #define _hid_dev_desc_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "api/api_transport.h"
 

@@ -12,7 +12,7 @@
 
 #ifndef _api_commander_h
 #define _api_commander_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include  "api/api_transport.h"
 
 #ifdef __cplusplus

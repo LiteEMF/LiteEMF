@@ -12,7 +12,7 @@
 
 #ifndef _app_key_h
 #define _app_key_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "key_typedef.h"
 #include "io_key.h"
 #include "utils/emf_utils.h"

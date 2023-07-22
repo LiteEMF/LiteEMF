@@ -11,7 +11,7 @@
 
 #ifndef _api_spi_host_h
 #define _api_spi_host_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_spi_host.h"
 #include "api/api_gpio.h"

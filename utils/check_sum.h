@@ -12,7 +12,7 @@
 
 #ifndef _check_sum_h
 #define _check_sum_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

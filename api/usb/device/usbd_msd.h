@@ -12,7 +12,7 @@
 
 #ifndef _usbd_msd_h
 #define _usbd_msd_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/usb/usb_msd_typedef.h"
 #include "api/usb/device/usbd_core.h"
 #include "api/usb/device/usbd_msd_scsi.h"

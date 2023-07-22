@@ -12,7 +12,7 @@
 
 #ifndef _api_pwm_h
 #define _api_pwm_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_pwm.h"
 #include "api/api_gpio.h"
@@ -33,6 +33,11 @@ extern "C" {
 #define PWM_RES_POS			(29)
 #define PWM_RES_MASK		0XE0000000
 
+// VAL2FLD(1|PWM_CH_H,0)
+#define PWM_CH_H			0X80			/*高通道*/
+#define PWM_CH_L			0X00			/*低通道*/
+
+
 #ifndef PWM_FREQ_ATT
 #define PWM_FREQ_ATT(id)  		(FLD2VAL(PWM_FREQ, m_pwm_map[id].att))
 #endif
@@ -46,6 +51,7 @@ extern "C" {
 #ifndef PWM_FREQ_DEFAULT
 #define PWM_FREQ_DEFAULT 1000
 #endif
+
 
 /******************************************************************************************************
 **	Parameters

@@ -12,7 +12,7 @@
 
 #ifndef _api_timer_h
 #define _api_timer_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_timer.h"
 

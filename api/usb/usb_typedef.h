@@ -12,7 +12,7 @@
 
 #ifndef _usb_typedef_h
 #define _usb_typedef_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/hid/hid_typedef.h"
 
 

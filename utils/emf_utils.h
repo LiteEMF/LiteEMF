@@ -11,7 +11,7 @@
 
 #ifndef _emf_utils_h
 #define _emf_utils_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/mem/emf_mem.h"
 #include "utils/app_fifo.h"
 #include "utils/at_commander.h"

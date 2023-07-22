@@ -12,7 +12,7 @@
 
 #ifndef _hal_audio_h
 #define _hal_audio_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

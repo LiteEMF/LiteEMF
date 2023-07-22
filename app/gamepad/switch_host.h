@@ -16,7 +16,7 @@
 #ifndef	_switch_host_h
 #define	_switch_host_h
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/api_transport.h"
 #include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"

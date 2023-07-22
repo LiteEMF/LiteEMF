@@ -50,21 +50,6 @@ extern "C" {
 #define DEF_TR_USBD			8
 #define DEF_TR_USBH			9
 #define DEF_TR_UART			10
-typedef enum{
-	TR_BLE		= 0,
-	TR_EDR		= 1,
-	TR_BLEC		= 2,
-	TR_EDRC		= 3,
-	TR_BLE_RF	= 4,				//BLE模拟2.4G	
-	TR_BLE_RFC	= 5,
-	TR_RF		= 6,
-	TR_RFC		= 7,
-	TR_USBD		= 8,
-	TR_USBH		= 9,
-	TR_UART		= 10,
-	TR_MAX,
-	TR_NULL = TR_MAX,
-}trp_t;
 
 //*********************************************************************************//
 //                          支持的设备类型                               		//
@@ -85,24 +70,6 @@ typedef enum{
 #define DEF_DEV_TYPE_IAP2				12
 #define DEF_DEV_TYPE_AUTO				15
 #define DEF_DEV_TYPE_NONE				16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
-//dev type
-typedef enum{
-	DEV_TYPE_HID	=	DEF_DEV_TYPE_HID	,	
-	DEV_TYPE_AUDIO	=	DEF_DEV_TYPE_AUDIO  , 
-	DEV_TYPE_PRINTER=	DEF_DEV_TYPE_PRINTER,
-	DEV_TYPE_MSD	=	DEF_DEV_TYPE_MSD   	,   	
-	DEV_TYPE_HUB	=	DEF_DEV_TYPE_HUB    ,     
-	DEV_TYPE_CDC	=	DEF_DEV_TYPE_CDC	,	
-	//
-	DEV_TYPE_VENDOR = 	DEF_DEV_TYPE_VENDOR , 
-	DEV_TYPE_ADB	=	DEF_DEV_TYPE_ADB    ,     
-	DEV_TYPE_AOA	=	DEF_DEV_TYPE_AOA    ,	    
-	DEV_TYPE_USBMUXD=	DEF_DEV_TYPE_USBMUXD,	
-	DEV_TYPE_IAP2	=	DEF_DEV_TYPE_IAP2	,		
-
-	DEV_TYPE_AUTO	=	DEF_DEV_TYPE_AUTO	,
-	DEV_TYPE_NONE 	= 	DEF_DEV_TYPE_NONE	,
-}dev_type_t;
 
 //hid type
 #define DEF_HID_TYPE_VENDOR			0
@@ -120,30 +87,6 @@ typedef enum{
 #define DEF_HID_TYPE_PS5			12
 //RES
 #define DEF_HID_TYPE_NONE 			16
-
-//hid type
-typedef enum{
-	HID_TYPE_VENDOR		=	DEF_HID_TYPE_VENDOR		,
-	HID_TYPE_KB 		=	DEF_HID_TYPE_KB 		,
-	HID_TYPE_MOUSE    	=	DEF_HID_TYPE_MOUSE    	,
-	HID_TYPE_CONSUMER   =	DEF_HID_TYPE_CONSUMER   ,
-	HID_TYPE_TOUCH		=	DEF_HID_TYPE_TOUCH		,		//单独触控
-	HID_TYPE_MT			=	DEF_HID_TYPE_MT			,		//多点触控
-	HID_TYPE_GAMEPADE	=	DEF_HID_TYPE_GAMEPADE	,
-	HID_TYPE_X360		=	DEF_HID_TYPE_X360		,
-	HID_TYPE_XBOX		=	DEF_HID_TYPE_XBOX		,
-	HID_TYPE_SWITCH		=	DEF_HID_TYPE_SWITCH		,
-	HID_TYPE_PS3		=	DEF_HID_TYPE_PS3		,
-	HID_TYPE_PS4		=	DEF_HID_TYPE_PS4		,
-	HID_TYPE_PS5		=	DEF_HID_TYPE_PS5		,
-	//
-	HID_TYPE_NONE    	=	DEF_HID_TYPE_NONE		,
-}hid_type_t;
-
-typedef struct{
-	dev_type_t dev;
-	hid_type_t hid;
-}emf_type_t;
 
 #define HID_SWITCH_MASK			BIT_ENUM(HID_TYPE_SWITCH)
 #define HID_PS_MASK				(BIT_ENUM(HID_TYPE_PS3) | BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5))

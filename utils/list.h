@@ -10,9 +10,9 @@
 */
 
 
-#ifndef _list_h
-#define _list_h
-#include "utils/emf_typedef.h" 
+#ifndef LIST_H
+#define LIST_H
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

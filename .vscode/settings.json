@@ -22,7 +22,7 @@
 		"usbd_socket.h": "c",
 		"template.h": "c",
 		"usbh.h": "c",
-		"utils/emf_typedef.h": "c",
+		"emf_typedef.h": "c",
 		"usbh_socket.h": "c",
 		"emf_math.h": "c",
 		"color_palette.h": "c",

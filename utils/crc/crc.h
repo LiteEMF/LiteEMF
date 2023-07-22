@@ -12,7 +12,7 @@
 
 #ifndef _crc_h
 #define _crc_h
-#include  "utils/emf_typedef.h" 
+#include  "emf_typedef.h" 
 #include  "hw_config.h"
 #include  "crc_poly.h"
 

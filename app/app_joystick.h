@@ -12,7 +12,7 @@
 
 #ifndef _app_joystick_h
 #define _app_joystick_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "utils/emf_utils.h"
 #include "key_typedef.h"
 #include "api/api_adc.h"

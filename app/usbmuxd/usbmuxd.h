@@ -19,7 +19,7 @@
 
 #ifndef USBMUXD_H
 #define USBMUXD_H
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "usbmuxd-proto.h"
 
 #define TCP_SPORT				0X1026

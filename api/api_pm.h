@@ -12,7 +12,7 @@
 
 #ifndef _api_pm_h
 #define _api_pm_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "api/api_tick.h"
 #include "hal_pm.h"
 

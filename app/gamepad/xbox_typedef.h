@@ -15,7 +15,7 @@
 #ifndef	_xbox_typedef_h
 #define	_xbox_typedef_h
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 /*******************************************************************************************************************
 **	Hardware  Defined

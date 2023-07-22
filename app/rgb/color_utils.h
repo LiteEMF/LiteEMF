@@ -12,7 +12,7 @@
 
 #ifndef _colors_utils_h
 #define _colors_utils_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

@@ -12,7 +12,7 @@
 
 #ifndef _api_gpio_h
 #define _api_gpio_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_gpio.h"
 #include "pinmap.h"

@@ -12,7 +12,7 @@
 
 #ifndef _api_flash_h
 #define _api_flash_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_flash.h"
 
@@ -42,15 +42,15 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+bool api_flash_erase(uint16_t offset);
 bool api_flash_write(uint16_t offset,uint8_t *buf,uint16_t len);
 bool api_flash_read(uint16_t offset,uint8_t *buf,uint16_t len);
-bool api_flash_erase(uint16_t offset);
 bool api_flash_init(void);
 
 //hal
+bool hal_flash_erase(uint16_t offset);
 bool hal_flash_write(uint16_t offset,uint8_t *buf,uint16_t len);
 bool hal_flash_read(uint16_t offset,uint8_t *buf,uint16_t len);
-bool hal_flash_erase(uint16_t offset);
 bool hal_flash_init(void);
 
 #ifdef __cplusplus

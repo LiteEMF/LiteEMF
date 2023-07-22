@@ -1,7 +1,7 @@
 #ifndef _CRC_CRC_POLY_H
 #define _CRC_CRC_POLY_H
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
 extern "C" {

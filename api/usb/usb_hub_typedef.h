@@ -36,7 +36,7 @@
 #ifndef _USB_HUB_TYPEDEF_H_
 #define _USB_HUB_TYPEDEF_H_
 
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 
 #ifdef __cplusplus
  extern "C" {

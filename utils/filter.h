@@ -11,7 +11,7 @@
 
 #ifndef _filter_h
 #define _filter_h
-#include "utils/emf_typedef.h" 
+#include "emf_typedef.h" 
 #include "vector.h"
 
 #ifdef __cplusplus
