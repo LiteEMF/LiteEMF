@@ -1,7 +1,7 @@
 #ifndef WS2812FX_h
 #define WS2812FX_h
 
-#include "typedef.h"
+#include "emf_typedef.h"
 #include "Adafruit_NeoPixel.h"
 #include "modes.h"
 

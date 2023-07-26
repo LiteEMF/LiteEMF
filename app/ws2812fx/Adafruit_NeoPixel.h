@@ -1,11 +1,8 @@
 #ifndef ADAFRUIT_NEOPIXEL_H
 #define ADAFRUIT_NEOPIXEL_H
 
-//#include "stdlib.h"
-//#include <stdbool.h>
-#include <stdint.h>
-#include "gpio.h"
-#include "my_malloc.h"
+#include "api/api_gpio.h"
+#include "emf_typedef.h"
 
 #ifdef __cplusplus
 extern "C" {

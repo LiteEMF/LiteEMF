@@ -95,7 +95,7 @@ usbh_class_t *usbh_class_find_by_ep(uint8_t id,uint8_t ep)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
 
-	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if((pos->endpin.addr | TUSB_DIR_IN_MASK) == ep){
 			pclass = pos;
 			break;
@@ -120,7 +120,7 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
 
-	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->dev_type == type){
 			if(DEV_TYPE_HID == type){
 				if(sub_type != pos->hid_type) continue;
@@ -177,7 +177,7 @@ __WEAK void usbh_class_itf_alt_select(uint8_t id,usbh_class_t* pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos;
 
-	list_for_each_entry(pos,&pdev->class_list, usbh_class_t, list){
+	list_for_each_entry_type(pos,&pdev->class_list, usbh_class_t, list){
 		if(pos->itf.if_num == pclass->itf.if_num){
 			free_usbh_class(pclass);			//默认使用alt 0
 			// free_usbh_class(pos);
@@ -418,7 +418,7 @@ error_t usbh_class_open(uint8_t id)
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		switch(pos->dev_type){
 			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 			case DEV_TYPE_HID	:
@@ -486,7 +486,7 @@ error_t usbh_class_open(uint8_t id)
 	}
 
 	if(ERROR_SUCCESS == err){				//open endp
-		list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+		list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 			if(pos->endpout.addr){
 				err = usbh_endp_register(id,&pos->endpout);
 				if(err) {
@@ -592,7 +592,7 @@ error_t usbh_class_deinit(uint8_t id)
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->endpout.addr){
 			err = usbh_endp_unregister(id,&pos->endpout);
 			if(err) continue;
@@ -685,7 +685,7 @@ void usbh_class_task(uint32_t dt_ms)
 	#endif
 
 	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
-		list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+		list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
 			#if USBH_LOOP_ENABLE

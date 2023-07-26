@@ -108,7 +108,7 @@ error_t usbh_disconnect(uint8_t id)
 error_t usbh_reset(uint8_t id,uint8_t reset_ms)
 {
 	error_t err = ERROR_STATE;
-	usb_speed_t speed;
+	usb_speed_t speed = TUSB_SPEED_FULL;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	if(NULL == pdev ) return err;
@@ -241,7 +241,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 		hal_usbh_set_status(id, usb_sta);
 	}
 	
-	logd("usbh%d set status=%d\n",id,pdev->state);
+	// logd("usbh%d set status=%d\n",id,pdev->state);
     return ERROR_SUCCESS;
 }
 
@@ -405,11 +405,12 @@ static void usbh_enum_all_device( uint32_t period_10us )
 
 		if(USBH_NULL != id){
 			usbh_dev_t* pdev = get_usbh_dev(id);
-			if(++s_retry <= USBH_ENUM_RETRY){
-				err = usbh_enum_device( id , MAX(60,s_retry*10));
+			if(s_retry <= USBH_ENUM_RETRY){
+				err = usbh_enum_device( id , MAX(60,(s_retry+1)*10));
 
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
 					logd( "usbh enum err = %X\n\n", (uint16_t)(err) );
+					s_retry++;
 					usbh_set_status(id, TUSB_STA_POWERED, 0);		//枚举还未达到最大次数 重新枚举
 				}else if(ERROR_UNSUPPORT == err){
 		    		usbh_disconnect( id );

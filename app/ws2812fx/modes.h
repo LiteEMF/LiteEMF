@@ -34,7 +34,7 @@
 #define mode_h
 
 #include "WS2812FX.h"
-#include <stdint.h>
+#include "emf_typedef.h"
 
 #define MODE_COUNT (sizeof(_modes)/sizeof(_modes[0]))
 #define MODE_PTR(x) _modes[x].mode_ptr

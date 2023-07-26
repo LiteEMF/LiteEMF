@@ -68,13 +68,13 @@ void list_test(void){
 
     //遍历
     logd("\nlist for each entry test:\n");
-    list_for_each_entry(studentp, &mylist, student_list_t, list){
+    list_for_each_entry_type(studentp, &mylist, student_list_t, list){
         logd("list entry:%x\n", studentp->val);
     }
 
     //delay
     logd("\nlist delay test:\n");
-    list_for_each_entry_safe(studentp, n, &mylist, student_list_t, list){
+    list_for_each_entry_type(studentp, n, &mylist, student_list_t, list){
         if(studentp->val % 2){
             logd("list delay:%x\n", studentp->val);
             list_del(&studentp->list);
@@ -84,7 +84,7 @@ void list_test(void){
 
     //重新遍历
     logd("list for each entry:\n");
-    list_for_each_entry(studentp, &mylist, student_list_t, list){
+    list_for_each_entry_type(studentp, &mylist, student_list_t, list){
         logd("list entry:%x\n", studentp->val);
     }
 }

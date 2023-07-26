@@ -66,7 +66,7 @@ bool api_otg_init(uint8_t id, api_otg_t mode)
 		#if API_USBH_BIT_ENABLE
 		{
 			uint8_t i;
-			usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
+			usbh_dev_t* pdev = get_usbh_dev(id<<4);
 			for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
 				memset(pdev, 0 ,sizeof(usbh_dev_t));
 				INIT_LIST_HEAD(&pdev->class_list);
@@ -85,7 +85,7 @@ bool api_otg_init(uint8_t id, api_otg_t mode)
 		usbd_init(id);
 		break;
 	case API_OTG_HOST:
-		usbh_init(id);
+		usbh_init(id<<4);
 		break;
 	}
 
@@ -108,7 +108,7 @@ bool api_otg_deinit(uint8_t id, api_otg_t mode)
 		usbd_deinit(id);
 		break;
 	case API_OTG_HOST:
-		usbh_deinit(id);
+		usbh_deinit(id<<4);
 		break;
 	}
 
@@ -122,11 +122,11 @@ void api_otgs_init(void)
 
 	for(id=0; id<OTG_NUM; id++){
 		if(API_OTG_BIT_ENABLE & BIT(id)){
-			api_otg_init(id<<4, API_OTG_IDEL);
+			api_otg_init(id, API_OTG_IDEL);
 		}else if(API_USBD_BIT_ENABLE & BIT(id)){
-			api_otg_init(id<<4, API_OTG_DEV);
+			api_otg_init(id, API_OTG_DEV);
 		}else if(API_USBH_BIT_ENABLE & BIT(id)){
-			api_otg_init(id<<4, API_OTG_HOST);
+			api_otg_init(id, API_OTG_HOST);
 		}
 	}
 }

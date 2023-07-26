@@ -33,8 +33,8 @@
 #include  "hw_config.h"
 #if APP_WS2812FX_ENABLE
 #include "WS2812FX.h"
-#include <stdlib.h>
-#include <string.h>
+#include "emf_typedef.h"
+
 /*
  * 闪烁/闪光功能。
  * 在Color1和Color2之间交替。

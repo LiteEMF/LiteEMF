@@ -1,8 +1,7 @@
 #include  "hw_config.h"
 #if APP_WS2812FX_ENABLE
 #include "Adafruit_NeoPixel.h"
-#include "stdlib.h"
-#include "string.h"
+#include "utils/mem/emf_mem.h"
 
 
 // 这两个表是在Adafruit_NeoPixel类之外声明的，因为一些主板可能需要不处理C++11 conexpr关键字的老式编译器。
@@ -87,7 +86,7 @@ static void Adafruit_NeoPixel_updateLength(uint16_t n)
 
     // 分配新数据--注意：所有像素都已清除
     adafruit_neopixel.numBytes = n * ((adafruit_neopixel.wOffset == adafruit_neopixel.rOffset) ? 3 : 4);
-    adafruit_neopixel.pixels = (uint8_t *)my_malloc(adafruit_neopixel.numBytes,MM_NONE);
+    adafruit_neopixel.pixels = (uint8_t *)emf_malloc(adafruit_neopixel.numBytes);
     if (adafruit_neopixel.pixels)
     {
         memset(adafruit_neopixel.pixels, 0, adafruit_neopixel.numBytes);

@@ -86,7 +86,7 @@ error_t soft_timer_delete(soft_timer_t *ptimer)
 
 	if(NULL == ptimer) return ERROR_NULL;
 
-	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			pos->ctrl &= ~TIMER_ACTIVE;
 			pos->ctrl |= TIMER_DEACTIVATED;
@@ -109,7 +109,7 @@ error_t soft_timer_start(soft_timer_t *ptimer)
 	soft_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl |= TIMER_ACTIVE;
 			ptimer->timer = m_systick;
@@ -131,7 +131,7 @@ error_t soft_timer_modify(soft_timer_t *ptimer, uint32_t timeout)
 	soft_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl |= TIMER_ACTIVE;
 			ptimer->timeout = timeout;
@@ -149,7 +149,7 @@ error_t soft_timer_stop(soft_timer_t *ptimer)
 	soft_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl &= ~TIMER_ACTIVE;
 			err = ERROR_SUCCESS;
@@ -169,7 +169,7 @@ void soft_timer_delete_all(void)
 {
 	soft_timer_t *pos;
 
-	list_for_each_entry(pos, &timer_head, soft_timer_t, list){
+	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){
 		pos->ctrl &= ~TIMER_ACTIVE;
 		pos->ctrl |= TIMER_DEACTIVATED;
 	}
@@ -203,7 +203,7 @@ void soft_timer_task(void *pa)
 {
 	soft_timer_t *pos, *n;
 
-	list_for_each_entry_safe(pos, n, &timer_head, soft_timer_t, list){
+	list_for_each_entry_type_safe(pos, n, &timer_head, soft_timer_t, list){
 		if(pos->ctrl & TIMER_ACTIVE){
 			if(m_systick - pos->timer >= pos->timeout){
 				pos->timer = m_systick;

@@ -89,7 +89,7 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_k
 		pled->val = led.val;
 
         for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
-            list_for_each_entry(pos,&pdev->class_list,usbh_class_t,list){
+            list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
                 if((pos->dev_type == DEV_TYPE_HID) && (pos->hid_type == HID_TYPE_KB)){
                     id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
