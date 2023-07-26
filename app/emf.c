@@ -73,6 +73,10 @@ bool emf_api_init(void)
 	// api_uart_init(UART_DEBUG_ID);			
 	// #endif
 
+	#if !API_PM_ENABLE
+	hal_get_reset_reson();
+	#endif
+
 	api_tick_init();
 	#if API_STORAGE_ENABLE
 	api_storage_init();

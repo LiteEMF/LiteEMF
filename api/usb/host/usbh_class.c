@@ -480,7 +480,7 @@ error_t usbh_class_open(uint8_t id)
 		}
 
 		if(err) {
-			loge("usbh class%d open err=%d\n", pos->dev_type, err);
+			loge("usbh class%d open err=%d\n", (uint16_t)pos->dev_type, (uint16_t)err);
 			break;
 		}
 	}

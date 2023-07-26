@@ -222,7 +222,6 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             err = usbh_hid_km_open(id, pclass);
-        logd("usbh_hid_open km %d\n",err);
             break;
         case HID_TYPE_GAMEPADE:
             #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
@@ -236,7 +235,7 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
     if(err) return err;
     err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(err) return err;
-logd("usbh_hid_open err= %d\n",err);
+
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
     return err;
 }

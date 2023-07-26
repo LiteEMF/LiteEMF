@@ -55,10 +55,10 @@ void usbh_det_event(uint8_t id, uint8_t attached )
 
 	if(NULL == pdev) return;
 
-	logd_g("\nusbh%d det=%x\n",id, attached);
+	logd_g("\nusbh%d det=%x\n",(uint16_t)id, (uint16_t)attached);
 	if(attached){
 		if(TUSB_STA_DETACHED == pdev->state){
-			logd("usbh%d TUSB_STA_ATTACHED\n",id);
+			logd("usbh%d TUSB_STA_ATTACHED\n",(uint16_t)id);
 			usbh_set_status(id, TUSB_STA_ATTACHED, 0);
 		}else{
 			// in enuming...
@@ -85,7 +85,7 @@ error_t usbh_disconnect(uint8_t id)
 	error_t err = ERROR_SUCCESS;
 	uint8_t i;
 
-	logd("usbh%d disconnect\n",id);
+	logd("usbh%d disconnect\n",(uint16_t)id);
 	if((id & 0X0F) == 0){  				//直接接的root端口
 		err = usbh_port_en(id,0,NULL);
 		if(ERROR_SUCCESS == err){			
@@ -238,7 +238,8 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 	}	
 	pdev->state = usb_sta;
 
-	// logd("usbh%d set status=%d\n",id,pdev->state);
+	
+	logd("usbh%d set status=%d\n",(uint16_t)id,(uint16_t)pdev->state);
     return ERROR_SUCCESS;
 }
 
@@ -321,18 +322,18 @@ static error_t usbh_enum_device( uint8_t id, uint8_t reset_ms )
 	usb_desc_configuration_t *pcfg_desc = (usb_desc_configuration_t *)tmp_buf;
 	uint8_t *pcfg_buf;
 
-	logd("\nusbh%x state=%d, enum start...\n",(uint16_t)id,pdev->state);
+	logd("\nusbh%x state=%d, enum start...\n",(uint16_t)id,(uint16_t)pdev->state);
 
 	switch(pdev->state){
 	case TUSB_STA_POWERED:
 		err = usbh_reset(id,reset_ms);
 		if(ERROR_SUCCESS != err) return err;
-		logd("usbh%d powered=%d\n",id, err);
+		logd("usbh%d powered=%d\n",(uint16_t)id, (uint16_t)err);
 		break;
 	case TUSB_STA_DEFAULT:
 		err = usbh_set_address(id, id | 0x20);
 		if(ERROR_SUCCESS != err) return err;
-		logd("usbh%d address=%d\n",id, err);
+		logd("usbh%d address=%d\n",(uint16_t)id, (uint16_t)err);
 		len = 8;
 		err = usbh_req_get_device_desc(id,tmp_buf,&len);
 		if(ERROR_SUCCESS != err) return err;

@@ -164,17 +164,19 @@ error_t usbh_hub_port_reset(uint8_t id)
 void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
     error_t err;
-    uint8_t i, hub_id;
+    uint8_t i, hub_id,port_num;
     uint8_t hub_stu[4];
     hub_status_response_t* phub_status = (hub_status_response_t*)hub_stu;
     hub_port_status_response_t* pport_status = (hub_port_status_response_t*)hub_stu;
 
     id &= 0xf0;
-    
+    port_num = (uint8_t)((uintptr_t)(pclass->pdat));
     if (buf[0] & BIT(0)){   // Hub bit 0 is for the hub device events
         err = usbh_hub_port_get_status(id, hub_stu);
         if(ERROR_SUCCESS == err){
             logd("hub%d_stu:",(uint16_t)id);dumpd(hub_stu,4);
+            phub_status->status.value = SWAP16_L(phub_status->status.value);
+            phub_status->change.value = SWAP16_L(phub_status->change.value);
             if(phub_status->change.bits.local_power_source){
                 err = usbh_hub_port_clear_feature(id,HUB_FEATURE_HUB_LOCAL_POWER_CHANGE); 
             }else if(phub_status->change.bits.over_current){
@@ -182,7 +184,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             }
         }
     }else{                  // Hub bits 1 to n are hub port events
-        for(i = 1; i < (uintptr_t)(pclass->pdat); i++){
+        for(i = 1; i <= port_num; i++){
             if(buf[0] & BIT(i)){
                 hub_id = id | i;
 
@@ -190,6 +192,8 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                 if(err) return;
 
                 logd("hubport%d_stu:",(uint16_t)hub_id);dumpd(hub_stu,4);
+                pport_status->status.value = SWAP16_L(pport_status->status.value);
+                pport_status->change.value = SWAP16_L(pport_status->change.value);
 
                 if(pport_status->change.bits.connection){         // Connection change
                     // Acknowledge Port Connection Change
@@ -222,7 +226,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                             }else{
                                 pdev->speed = TUSB_SPEED_FULL;
                             }
-                            logd("usbh%d speed=%d...\n", hub_id, pdev->speed);
+                            logd("usbh%d speed=%d...\n", (uint16_t)hub_id, (uint16_t)pdev->speed);
                         }
                     }
                 }
@@ -258,24 +262,25 @@ error_t usbh_match_hub( uint8_t id, usbh_class_t *pclass)
 error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass) 
 {
     error_t err;
-    uint8_t i;
+    uint8_t i,port_num;
     uint8_t buf[4];
     usbh_dev_t* pdev = get_usbh_dev(id);
     uint8_t hub_stu[4];
 
     id &= 0XF0;                             //not support hub connect hub
+    port_num = (uint8_t)((uintptr_t)(pclass->pdat));
     // May need to GET_STATUS
     err = usbh_hub_port_get_status(id, buf);
     if(err) return err;
     logd("hub%d_stu=",(uint16_t)id);	  dumpd(buf,4);
-  
+
     // Set Port Power to be able to detect connection, starting with port 1
-    for(i = 1; i <= (uintptr_t)(pclass->pdat); i++){
+    for(i = 1; i <= port_num; i++){
         err = usbh_hub_port_set_feature(id | i, HUB_FEATURE_PORT_POWER); 
         if(err) return err;
     }
 
-    for(i = 1; i <= (uintptr_t)(pclass->pdat); i++){
+    for(i = 1; i <= port_num; i++){
         usbh_hub_port_get_status(id | i, hub_stu);
     }
 
@@ -299,7 +304,7 @@ error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
 
     if(pclass->endpin.interval > 10) pclass->endpin.interval = 10;     //most hub interval is 0xff
     pclass->pdat = (void*)((uintptr_t)desc.bNbrPorts);
-    logd("hub port=%d\n",desc.bNbrPorts);
+    logd("hub port=%d\n",(uint16_t)desc.bNbrPorts);
 
     return err;
 }
