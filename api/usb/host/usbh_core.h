@@ -118,7 +118,6 @@ error_t usbh_core_init( uint8_t id );
 error_t usbh_core_deinit( uint8_t id );
 
 //hal
-error_t hal_usbh_set_status(uint8_t id,usb_state_t usb_sta);
 error_t hal_usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed);		//用于打开/关闭usb口,防止多个设备在地址状态!!!
 error_t hal_usbh_port_reset(uint8_t id, uint8_t reset_ms);
 error_t hal_usbh_set_speed(uint8_t id, usb_speed_t speed);

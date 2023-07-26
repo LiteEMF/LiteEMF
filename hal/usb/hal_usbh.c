@@ -45,16 +45,6 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t hal_usbh_set_status(uint8_t id,usb_state_t usb_sta)
-{
-	return ERROR_SUCCESS;
-}
-
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:		
-*******************************************************************/
 error_t hal_usbh_port_en(uint8_t id,uint8_t en, usb_speed_t* pspeed)
 {
 	return ERROR_SUCCESS;

@@ -237,10 +237,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 		break;
 	}	
 	pdev->state = usb_sta;
-	if(0 == (id & 0x0f)){
-		hal_usbh_set_status(id, usb_sta);
-	}
-	
+
 	// logd("usbh%d set status=%d\n",id,pdev->state);
     return ERROR_SUCCESS;
 }
