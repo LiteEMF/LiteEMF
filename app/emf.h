@@ -67,9 +67,9 @@
 #if API_SOFT_TIMER_ENABLE
 #include "api/api_soft_timer.h"
 #endif
-#if API_PM_ENABLE
+// #if API_PM_ENABLE
 #include "api/api_pm.h"
-#endif
+// #endif
 #if API_USBD_BIT_ENABLE
 #include "api/usb/device/usbd.h"
 #endif

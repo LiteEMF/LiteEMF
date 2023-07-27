@@ -455,6 +455,8 @@ __WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
 		if((ERROR_SUCCESS == err) && len){
 			usbh_class_in_process(id, pclass, buf, len);
 		}
+	}else{
+		logd("usbh%d ep%x null class!\n",(uint16_t)id, (uint16_t)ep);
 	}
 	#endif
 }
