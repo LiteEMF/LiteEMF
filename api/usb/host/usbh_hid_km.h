@@ -69,7 +69,7 @@ typedef union{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_hid_km_pa_init(void);
+void usbh_hid_km_pa_init(uint8_t id);
 void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len);
 void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_hid_km_open( uint8_t id, usbh_class_t *pclass) ;

@@ -218,7 +218,7 @@ void emf_handler(uint32_t period_10us)
 	
 	if( m_systick - live_timer >= 5000){
 		live_timer = m_systick;
-	//	logd("t=%ld %ld\n", m_systick,m_task_tick10us);
+		logd("t=%ld %ld\n", m_systick,m_task_tick10us);
 	}
 
 	#ifdef HW_ADC_MAP

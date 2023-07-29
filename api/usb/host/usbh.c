@@ -55,10 +55,10 @@ void usbh_det_event(uint8_t id, uint8_t attached )
 
 	if(NULL == pdev) return;
 
-	logd_g("\nusbh%d det=%x\n",(uint16_t)id, (uint16_t)attached);
+	logd_g("\nusbh%x det=%x\n",(uint16_t)id, (uint16_t)attached);
 	if(attached){
 		if(TUSB_STA_DETACHED == pdev->state){
-			logd("usbh%d TUSB_STA_ATTACHED\n",(uint16_t)id);
+			logd("usbh%x TUSB_STA_ATTACHED\n",(uint16_t)id);
 			usbh_set_status(id, TUSB_STA_ATTACHED, 0);
 		}else{
 			// in enuming...
@@ -85,7 +85,7 @@ error_t usbh_disconnect(uint8_t id)
 	error_t err = ERROR_SUCCESS;
 	uint8_t i;
 
-	logd("usbh%d disconnect\n",(uint16_t)id);
+	logd("usbh%x disconnect\n",(uint16_t)id);
 	if((id & 0X0F) == 0){  				//直接接的root端口
 		err = usbh_port_en(id,0,NULL);
 		if(ERROR_SUCCESS == err){			
@@ -239,7 +239,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 	pdev->state = usb_sta;
 
 	
-	logd("usbh%d set status=%d\n",(uint16_t)id,(uint16_t)pdev->state);
+	logd("usbh%x set status=%d\n",(uint16_t)id,(uint16_t)pdev->state);
     return ERROR_SUCCESS;
 }
 
@@ -263,7 +263,7 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
         if( buf[i+1] == TUSB_DESC_INTERFACE ){
 			pitf = (usb_desc_interface_t*)&buf[i];
 			if(pitf->bNumEndpoints){
-				pclass = malloc_usbh_class();
+				pclass = malloc_usbh_class(id);
 				if(NULL == pclass){
 					logd_r("err usbh class is full!");
 					break;
@@ -328,12 +328,12 @@ static error_t usbh_enum_device( uint8_t id, uint8_t reset_ms )
 	case TUSB_STA_POWERED:
 		err = usbh_reset(id,reset_ms);
 		if(ERROR_SUCCESS != err) return err;
-		logd("usbh%d powered=%d\n",(uint16_t)id, (uint16_t)err);
+		logd("usbh%x powered=%d t=%d\n",(uint16_t)id, (uint16_t)err, reset_ms);
 		break;
 	case TUSB_STA_DEFAULT:
 		err = usbh_set_address(id, id | 0x20);
 		if(ERROR_SUCCESS != err) return err;
-		logd("usbh%d address=%d\n",(uint16_t)id, (uint16_t)err);
+		logd("usbh%x address=%d\n",(uint16_t)id, (uint16_t)err);
 		len = 8;
 		err = usbh_req_get_device_desc(id,tmp_buf,&len);
 		if(ERROR_SUCCESS != err) return err;
@@ -404,7 +404,7 @@ static void usbh_enum_all_device( uint32_t period_10us )
 		if(USBH_NULL != id){
 			usbh_dev_t* pdev = get_usbh_dev(id);
 			if(s_retry <= USBH_ENUM_RETRY){
-				err = usbh_enum_device( id , MAX(60,(s_retry+1)*10));
+				err = usbh_enum_device( id , MIN(60,(s_retry+1)*10));
 
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
 					logd( "usbh enum err = %X\n\n", (uint16_t)(err) );
@@ -456,7 +456,7 @@ __WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
 			usbh_class_in_process(id, pclass, buf, len);
 		}
 	}else{
-		logd("usbh%d ep%x null class!\n",(uint16_t)id, (uint16_t)ep);
+		logd("usbh%x ep%x null class!\n",(uint16_t)id, (uint16_t)ep);
 	}
 	#endif
 }
@@ -478,9 +478,9 @@ error_t usbh_init( uint8_t id )
 {
 	if((id>>4) >= USBH_NUM) return ERROR_FAILE;
 
-	usbh_class_buf_init();
+	usbh_class_buf_init(id);
 	#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
-	usbh_hid_km_pa_init();		//TODO 放一个合理的位置
+	usbh_hid_km_pa_init(id);		//TODO 放一个合理的位置
 	#endif
 
 	m_usbh_types = 0;

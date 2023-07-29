@@ -33,26 +33,28 @@ app_mouse_t usbh_mouse;
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-km_items_t m_km_items[MAX_KM_ITEMS_NUM];
+km_items_t m_km_items[USBH_NUM][MAX_KM_ITEMS_NUM];
 
 
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-void usbh_hid_km_pa_init(void)
+void usbh_hid_km_pa_init(uint8_t id)
 {
-    memset(&m_km_items, 0, sizeof(m_km_items));
+    memset(&m_km_items[id>>4], 0, sizeof(m_km_items[id>>4]));
     memset(&usbh_kb, 0, sizeof(usbh_kb));
     memset(&usbh_mouse, 0, sizeof(usbh_mouse));
 }
 
-km_items_t* malloc_hid_km_items(void)
+km_items_t* malloc_hid_km_items(uint8_t id)
 {
 	uint8d_t i;
+
+    id >>= 4;
 	for(i=0; i<countof(m_km_items); i++){
-		if(m_km_items[i].magic == 0){
-			memset(&m_km_items[i],0,sizeof(m_km_items[i]));
-            m_km_items[i].magic = 1;
+		if(m_km_items[id][i].magic == 0){
+			memset(&m_km_items[id][i],0,sizeof(m_km_items[id][i]));
+            m_km_items[id][i].magic = 1;
 			return &m_km_items[i];
 		}
 	}
@@ -95,7 +97,7 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_k
 
                     pitem = &((km_items_t*)pos->pdat)->kb.led;
                     if( pitem->report_length){
-                        logd("usbh%d kb id%d set report=%x\n",id,pitem->report_id,set_port.val);
+                        logd("usbh%x kb id%d set report=%x\n",id,pitem->report_id,set_port.val);
                         usbh_hid_set_report(id, pos->itf.if_num, HID_REPORT_TYPE_OUTPUT, pitem->report_id, &set_port.val,1);  
                     }
                 }
@@ -333,7 +335,7 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
     error_t err = ERROR_NOT_FOUND;
     km_items_t *pitem;
 
-    pitem = malloc_hid_km_items();
+    pitem = malloc_hid_km_items(id);
     if(NULL != pitem){
         memset(pitem, 0, sizeof(km_items_t));
    

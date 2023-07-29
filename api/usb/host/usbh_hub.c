@@ -226,7 +226,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                             }else{
                                 pdev->speed = TUSB_SPEED_FULL;
                             }
-                            logd("usbh%d speed=%d...\n", (uint16_t)hub_id, (uint16_t)pdev->speed);
+                            logd("usbh%x speed=%d...\n", (uint16_t)hub_id, (uint16_t)pdev->speed);
                         }
                     }
                 }

@@ -32,7 +32,7 @@
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-usbh_class_t usbh_dev_class[8];
+usbh_class_t usbh_dev_class[USBH_NUM][8];
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -47,22 +47,25 @@ usbh_class_t usbh_dev_class[8];
 ** Description:	usbh_dev_class 采样动态分配的方式,枚举一个接口类分配一个
 	这样最节省内存,避免使用 malloc 导致内存碎片问题
 *******************************************************************/
-void usbh_class_buf_init(void)
+void usbh_class_buf_init(uint8_t id)
 {
 	uint8_t i;
-	memset(&usbh_dev_class, 0 ,sizeof(usbh_dev_class));
-	for(i=0; i<countof(usbh_dev_class); i++){
-		usbh_dev_class[i].id = USBH_NULL;
+	id >>= 4;
+	memset(&usbh_dev_class[id], 0 ,sizeof(usbh_dev_class[id]));
+	for(i=0; i<countof(usbh_dev_class[id]); i++){
+		usbh_dev_class[id][i].id = USBH_NULL;
 	}
 }
-usbh_class_t* malloc_usbh_class(void)
+usbh_class_t* malloc_usbh_class(uint8_t id)
 {
 	uint8_t i;
-	for(i=0; i<countof(usbh_dev_class); i++){
-		if(usbh_dev_class[i].id == USBH_NULL){
-			memset(&usbh_dev_class[i],0,sizeof(usbh_class_t));
-			usbh_dev_class[i].id = i;
-			return &usbh_dev_class[i];
+
+	id >>= 4;
+	for(i=0; i<countof(usbh_dev_class[id]); i++){
+		if(usbh_dev_class[id][i].id == USBH_NULL){
+			memset(&usbh_dev_class[id][i],0,sizeof(usbh_class_t));
+			usbh_dev_class[id][i].id = i;
+			return &usbh_dev_class[id][i];
 		}
 	}
 	return NULL;
@@ -72,17 +75,6 @@ void free_usbh_class(usbh_class_t* pclass)
 	if(NULL != pclass) pclass->id = USBH_NULL;
 }
 
-/*******************************************************************
-** Parameters:
-** Returns:	
-** Description:	
-*******************************************************************/
-usbh_class_t* get_usbh_class(uint8_t class_id)   
-{
-	if(class_id >= countof(usbh_dev_class)) return NULL;
-	if(USBH_NULL == usbh_dev_class[class_id].id) return NULL;	//未分配
-	return &usbh_dev_class[class_id];
-}
 
 
 /*******************************************************************

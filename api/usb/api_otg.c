@@ -72,9 +72,9 @@ bool api_otg_init(uint8_t id, api_otg_t mode)
 				INIT_LIST_HEAD(&pdev->class_list);
 			}
 
-			usbh_class_buf_init();
+			usbh_class_buf_init(id);
 			#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
-			usbh_hid_km_pa_init();
+			usbh_hid_km_pa_init(id);
 			#endif
 		}
 		#endif
