@@ -79,7 +79,9 @@
 #if API_OTG_BIT_ENABLE
 #include "api/usb/api_otg.h"
 #endif
-
+#if API_BT_ENABLE
+#include  "api/bt/api_bt.h"
+#endif
 
 //app
 #if APP_KEY_ENABLE

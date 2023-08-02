@@ -17,16 +17,18 @@
 #include "app/gamepad/app_gamepad_key.h"
 #include "app/app_rumble.h"
 
-#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_SWITCH_MASK
+
+
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK
 #include  "app/gamepad/switch_controller.h"
 #endif
-#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_PS_MASK
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
 #include  "app/gamepad/ps_controller.h"
 #endif
-#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & HID_XBOX_MASK
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
 #include  "app/gamepad/xbox_controller.h"
 #endif
-#if (USBH_HID_SUPPORT | USBD_HID_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
 #include  "app/gamepad/gamepad_controller.h"
 #endif
 
@@ -50,6 +52,8 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+void app_gamepad_get_special_vid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp);
+
 uint8_t app_gamepad_get_vendor_map(trp_handle_t *phandle,uint32_t(**mapp)[2]);			//__WEAK
 uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2]);
 uint32_t app_gamepad_map_convert(uint32_t key, uint32_t(* map)[2], uint8_t map_count);

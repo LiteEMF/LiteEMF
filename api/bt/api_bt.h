@@ -91,31 +91,31 @@ RF_EVT_TX事件接收后可以根据fifo长度来判断是否填充按键数据
 		1			4					257				3
 
 * PDU_Payload	range(27~251)
-* PDU_Payload =  APP_BT_LL_MTU + 3 + 4	 	Link layout 底层MTU
-* PDU_Payload  = APP_BT_ATT_MTU + 3 + 4	ATT层MTU
+* PDU_Payload =  API_BT_LL_MTU + 3 + 4	 	Link layout 底层MTU
+* PDU_Payload  = API_BT_ATT_MTU + 3 + 4	ATT层MTU
 ******************************************************************************************************/
 
 /*******************************************************************
- ** APP_BT_LL_MTU
- * APP_BT_LL_MTU 不一定要等于APP_BT_ATT_MTU,只有需要速度时候才需要增加
- * 如果 蓝牙发送单包数据长度>APP_BT_LL_MTU,底层就需要分包发送(分包间隔150us+其他包消耗)	
- * 如果 蓝牙发送单包数据长度<APP_BT_LL_MTU 就不需要底层分包
- * 范围 range(20~244) ,要求速度才需要开这个 APP_BT_LL_MTU feature，开了会多消耗RAM		
+ ** API_BT_LL_MTU
+ * API_BT_LL_MTU 不一定要等于APP_BT_ATT_MTU,只有需要速度时候才需要增加
+ * 如果 蓝牙发送单包数据长度>API_BT_LL_MTU,底层就需要分包发送(分包间隔150us+其他包消耗)	
+ * 如果 蓝牙发送单包数据长度<API_BT_LL_MTU 就不需要底层分包
+ * 范围 range(20~244) ,要求速度才需要开这个 API_BT_LL_MTU feature，开了会多消耗RAM		
 *******************************************************************/
-#ifndef APP_BT_LL_MTU		// Link layout MTU	
-#define APP_BT_LL_MTU		20
+#ifndef API_BT_LL_MTU		// Link layout MTU	
+#define API_BT_LL_MTU		20
 #endif
 
 /*******************************************************************
- **	APP_BT_ATT_MTU
- *	APP_BT_ATT_MTU 决定了一包数据最大能发送多少字节数据,ATT MUT影响了整个ATT通讯MTU,超过的只能moredata或者下一个连接发送
+ **	API_BT_ATT_MTU
+ *	API_BT_ATT_MTU 决定了一包数据最大能发送多少字节数据,ATT MUT影响了整个ATT通讯MTU,超过的只能moredata或者下一个连接发送
  *	范围 range(20~244)
 *******************************************************************/
-#ifndef APP_BT_ATT_MTU		//hid数据通道的MTU一般不超过32字节
+#ifndef API_BT_ATT_MTU		//hid数据通道的MTU一般不超过32字节
 	#if BLE_CMD_MTU > 61
-	#define APP_BT_ATT_MTU   (BLE_CMD_MTU)
+	#define API_BT_ATT_MTU   (BLE_CMD_MTU)
 	#else					//不清楚为什么超过61会导致ios13.4鼠标描述符无作用
-	#define APP_BT_ATT_MTU   (61)					
+	#define API_BT_ATT_MTU   (61)					
 	#endif
 #endif
 
@@ -183,7 +183,7 @@ typedef enum {
 	BT_EVT_CONNECT_FAIL,						//(回连)连接失败	(pa)
 	BT_EVT_READY,								//蓝牙notyif打开,可以接收数据
 
-	BT_EVT_RX,									//主机发送消息, (pa)
+	BT_EVT_RX,									//rx消息, (pa)
 	BT_EVT_TX,									//READ 事件
 	BT_EVT_TX_COMPLETE,							//发送完成
 } bt_evt_t;
@@ -269,7 +269,7 @@ typedef struct{
 	bt_tx_fifo_t* fifo_txp;
 }api_bt_ctb_t;
 
-extern bt_t api_bt_trs;			//bt_t
+
 #if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
 extern api_bt_ctb_t m_ble;
 #endif
@@ -286,7 +286,8 @@ extern bt_evt_scan_t blec_scan_result;
 extern api_bt_ctb_t m_ble_rf;
 #endif
 #if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)					//ble central
-extern api_bt_ctb_t m_blec_rf;
+extern api_bt_ctb_t m_ble_rfc;
+extern bt_evt_scan_t ble_rfc_scan_result;
 #endif
 #if BT_SUPPORT & BIT_ENUM(TR_EDRC)					//edr central
 extern api_bt_ctb_t m_edrc;

@@ -27,15 +27,10 @@ extern "C" {
 #define PROJECT_DEMO                1           //keyboard and mouse
 
 #if PROJECT_KM
-	/**********************************************************************************/
-	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))				/*产品传输层支持*/
-	#define DEV_TYPES_DEFAULT			BIT(DEV_TYPE_HID)
-	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_KB)
-
-	/**********************************************************************************/
-
 	#define HELLOW_KEYBOARD						1
+
 	#if HELLOW_KEYBOARD
+		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
 		#define SW_VERSION                     	0x01
         #define DEFAULT_NAME			       	"hellow_keyboard"
         #define DEFAULT_MODEL					"HKB"
@@ -43,20 +38,17 @@ extern "C" {
 
 	#endif
 #elif PROJECT_DEMO
-	/**********************************************************************************/
-	#define DEV_TRPS_DEFAULT			(BIT(TR_BLE)|BIT(TR_USBD))			//产品传输层支持
-	#define DEV_TYPES_DEFAULT			(BIT(DEV_TYPE_HID) | BIT(DEV_TYPE_CDC))
-	#define HID_TYPES_DEFAULT			BIT(HID_TYPE_VENDOR)
-	/**********************************************************************************/
 
 	#define DEMO1								0
 	#define DEMO_WIN32               			1
 
 	#if DEMO1
+		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
 		#define SW_VERSION                     	0x01
         #define DEFAULT_NAME			       	"demo01"
         #define DEFAULT_MODEL					"DEMO01"
 	#elif DEMO_WIN32
+		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
 		#define SW_VERSION                     	0x01
         #define DEFAULT_NAME			       	"win32"
         #define DEFAULT_MODEL					"win32"

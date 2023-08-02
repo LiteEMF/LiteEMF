@@ -38,7 +38,6 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-bt_t api_bt_trs;				//bt_t
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
 api_bt_ctb_t m_ble;
@@ -54,7 +53,8 @@ api_bt_ctb_t m_ble_rf;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)					//ble central
-api_bt_ctb_t m_blec_rf;
+api_bt_ctb_t m_ble_rfc;
+bt_evt_scan_t ble_rfc_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
@@ -110,61 +110,23 @@ bt_evt_scan_t* api_bt_get_scan_result(bt_t bt)
 			resultp = &blec_scan_result;
 			break;
 		#endif
+		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)
+		case BT_RFC:
+			resultp = &ble_rfc_scan_result;
+			break;
+		#endif
 		#if BT_SUPPORT & BIT_ENUM(TR_EDRC)
 		case BT_EDRC:
 			resultp = &edrc_scan_result;
 			break;
 		#endif
-		#if BT_SUPPORT & BIT_ENUM(TR_RFC)
-		case BT_RFC:
-			break;
-		#endif
+		
 		default:
 			break;
 	}
 	return resultp;
 }
 
-static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
-{
-	memset(txp,0,sizeof(bt_tx_fifo_t));
-	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
-	txp->tx_mtu = mtu;
-	txp->tx_buf = tx_buf;
-
-	return true;
-}
-static bool api_bt_ctb_init(void)
-{
-	uint8_t id;
-	api_bt_ctb_t* bt_ctbp;
-
-	for(id = 0; id < BT_MAX; id++){
-		if(id){
-			bt_ctbp = api_bt_get_ctb(id);
-			if(NULL != bt_ctbp){
-				memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
-				bt_ctbp->enable = true;
-				bt_ctbp->inteval = 12;
-
-				#if BT_SUPPORT & BIT_ENUM(TR_RF)
-				if(BT_RF == id){
-					bt_ctbp->fifo_txp = &app_rf_tx;
-					bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
-				}
-				#endif
-				#if BT_SUPPORT & BIT_ENUM(TR_RFC)
-				if(BT_RFC == id){
-					bt_ctbp->fifo_txp = &app_rfc_tx;
-					bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
-				}
-				#endif
-			}
-		}
-	}
-	
-	return true;
-}
 
 api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 {
@@ -188,7 +150,7 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 		#endif
 		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)
 		case BT_BLEC_RF:
-			api_btp = &m_blec_rf;
+			api_btp = &m_ble_rfc;
 			break;
 		#endif
 		#if BT_SUPPORT & BIT_ENUM(TR_EDR)
@@ -219,6 +181,15 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 }
 
 
+static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
+{
+	memset(txp,0,sizeof(bt_tx_fifo_t));
+	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
+	txp->tx_mtu = mtu;
+	txp->tx_buf = tx_buf;
+
+	return true;
+}
 
 bool api_bt_is_connected(bt_t bt)
 {
@@ -265,8 +236,8 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是publ
 		base_mac[0] += 1;								//edr address + 1
 	}
 
- 	#if (BT_TYPE_SUPPORT & BIT(TYPE_HID))					//优化代码,不支持HID不编译
-	if(bt_ctbp->types & BIT(TYPE_HID)){
+ 	#if (BT_TYPE_SUPPORT & BIT(DEV_TYPE_HID))					//优化代码,不支持HID不编译
+	if(bt_ctbp->types & BIT(DEV_TYPE_HID)){
 		switch(bt_ctbp->hid_types){
 			case BIT_ENUM(HID_TYPE_GAMEPADE):
 				base_mac[2] += HID_TYPE_GAMEPADE;
@@ -334,8 +305,8 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	memset(buf,0,len);
     memset(name,0,sizeof(name));
 
-	#if (BT_TYPE_SUPPORT & BIT_ENUM(TYPE_HID))
-	if(bt_ctbp->types & BIT_ENUM(TYPE_HID)){
+	#if (BT_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID))
+	if(bt_ctbp->types & BIT_ENUM(DEV_TYPE_HID)){
 		switch(bt_ctbp->hid_types){
 			#if (BT_HID_SUPPORT & HID_SWITCH_MASK)
 			case BIT_ENUM(HID_TYPE_SWITCH):
@@ -556,7 +527,6 @@ bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len)
 	if(NULL == bt_ctbp) return ret;
 	if(!bt_ctbp->init_ok || (BT_STA_READY !=  bt_ctbp->sta)) return ret;
 
-	ret = hal_bt_hid_tx(id, bt, buf, len);
 	if(id == BT_ID0){
 		ret = hal_bt_hid_tx(id, bt, buf, len);
 	}else{
@@ -611,7 +581,7 @@ __WEAK error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
 
 __WEAK void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
 {
-    logd("weak bt(%d) rx:%d:",bt,pa->len);    //dumpd(pa->buf,pa->len);
+    logd("weak bt%d rx:%d \n",bt,pa->len);    //dumpd(pa->buf,pa->len);
 
 	api_bt_ctb_t* bt_ctbp;
 
@@ -651,7 +621,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			}
 			break;
 		case BT_EVT_CONNECTED:
-			logd("bt(%d) connect...\n",bt);
+			logd_g("bt(%d) connect...\n",bt);
 			if(BT_STA_READY != bt_ctbp->sta){	//防止被改回去
 				bt_ctbp->sta = BT_STA_CONN;
 			}
@@ -811,15 +781,70 @@ void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 		return;
 	}
 
-	if((BT_BLE | BT_EDR) & bt){
-		bt_event(id, bt, event, pa);
-	}else if((BT_BLEC | BT_EDRC) & bt){
-		btc_event(id, bt, event, pa);
-	}else{
+	switch(bt){
+		case BT_BLE:
+		case TR_BLE_RF:
+		case BT_EDR:
+			bt_event(id, bt, event, pa);
+			break;
+		case BT_BLEC:
+		case TR_BLE_RFC:
+		case BT_EDRC:
+			btc_event(id, bt, event, pa);
+			break;
+		default:
+			break;
 	}
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+static bool api_bt_ctb_init(void)
+{
+	uint8_t id;
+	api_bt_ctb_t* bt_ctbp;
 
+	for(id = 0; id < BT_MAX; id++){
+		bt_ctbp = api_bt_get_ctb(id);
+		if(NULL != bt_ctbp){
+			memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
+			bt_ctbp->enable = true;
+			bt_ctbp->inteval = 12;
+			bt_ctbp->types = BIT(DEV_TYPE_VENDOR);		//default 私有协议
+			
+			//这里设置默认值, 可以在工程中修改
+			if(BT_BLE == id){
+				#if BLE_HID_SUPPORT
+				bt_ctbp->types = BIT(DEV_TYPE_HID);
+				bt_ctbp->hid_types = BLE_HID_SUPPORT;
+				#endif
+			}else if(BT_EDR == id){
+				#if EDR_HID_SUPPORT
+				bt_ctbp->types = BIT(DEV_TYPE_HID);
+				bt_ctbp->hid_types = EDR_HID_SUPPORT;
+				#endif
+			}
+
+			#if BT_SUPPORT & BIT_ENUM(TR_RF)
+			if(BT_RF == id){
+				bt_ctbp->fifo_txp = &app_rf_tx;
+				bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
+			}
+			#endif
+			#if BT_SUPPORT & BIT_ENUM(TR_RFC)
+			if(BT_RFC == id){
+				bt_ctbp->fifo_txp = &app_rfc_tx;
+				bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
+			}
+			#endif
+		}
+	}
+	
+	return true;
+}
 /*******************************************************************
 ** Parameters:		
 ** Returns:	

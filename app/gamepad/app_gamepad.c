@@ -192,6 +192,35 @@ __WEAK uint8_t app_gamepad_get_vendor_map(trp_handle_t *phandle,uint32_t(**mapp)
 	return 0;
 }
 #endif
+
+
+void app_gamepad_get_special_vid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp)
+{
+	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK
+	if(hid_types & BIT(HID_TYPE_SWITCH)){
+		*vidp = SWITCH_VID;
+		*pidp = SWITCH_PID;
+	}
+	#endif
+
+	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
+	if(hid_types & BIT(HID_TYPE_PS4)){
+		*vidp = PS_VID;
+		*pidp = PS4_PID;
+	}
+	#endif
+	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
+	if(hid_types & (BIT(HID_TYPE_XBOX) | BIT(HID_TYPE_X360))){
+		*vidp = XBOX_VID;
+		if(api_trp_is_usb(trp)){
+			*pidp = XBOX_PID;
+		}else{
+			*pidp = XBOX_BT_PID;
+		}
+	}
+	#endif
+}
+
 /*******************************************************************
 ** Function:
 ** Parameters:

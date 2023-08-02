@@ -98,12 +98,6 @@ extern "C" {
 #ifndef   DEV_TRPS_DEFAULT						//默认传输类型
 #define   DEV_TRPS_DEFAULT				0
 #endif
-#ifndef   DEV_TYPES_DEFAULT						//默认设备类型
-#define   DEV_TYPES_DEFAULT				0
-#endif
-#ifndef   HID_TYPES_DEFAULT						//默认HID设备类型
-#define   HID_TYPES_DEFAULT				0
-#endif
 //dev type support dev_type_t
 #ifndef BLE_TYPE_SUPPORT						//不能同时支持内部和外部蓝牙所以定义一个就可以
 #define BLE_TYPE_SUPPORT		0				
@@ -133,7 +127,7 @@ extern "C" {
 #ifndef BLE_HID_SUPPORT
 #define BLE_HID_SUPPORT			0
 #endif
-#ifndef BLE_RF_HID_SUPPORT
+#ifndef BLE_RF_HID_SUPPORT		//unused
 #define BLE_RF_HID_SUPPORT		0
 #endif
 #ifndef EDR_HID_SUPPORT
