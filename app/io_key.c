@@ -86,7 +86,7 @@ static uint32_t matrix_key_scan(void)
 #endif
 
 
-void iokey_init(void)
+static void iokey_init(void)
 {
 	pin_pull_t pull; 
 
