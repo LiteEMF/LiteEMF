@@ -609,6 +609,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 
 	switch(event){
 		case BT_EVT_INIT:			//蓝牙SDK自动广播
+			logd("bt(%d) init ok...\n",bt);
 			bt_ctbp->init_ok = true;
 			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 	
@@ -694,7 +695,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			}
 			break;
 		case BT_EVT_CONNECTED:
-			logd("btc(%d) connect...\n",bt);
+			logd_g("btc(%d) connect...\n",bt);
 			if(BT_STA_READY != bt_ctbp->sta){		//防止被改回去
 				bt_ctbp->sta = BT_STA_CONN;
 			}
@@ -708,19 +709,21 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			break;
 		case BT_EVT_SCAN:
 			bt_ctbp->sta = BT_STA_SCAN;
+			logd("btc(%d) scan...\n",bt);
 			#ifdef BTC_SEARCH_NAME
 			/*
 			1. 底层默认开启扫描地址,名字的广播,筛选由此处理
 			2. 当有绑定信息,使用的是扫描地址,否则扫面的是名字.
 			*/
 			if(pa != NULL){
-				logi("btc scan name: %s\n", pscanning->name);
+				bt_evt_scan_t *scanp = (bt_evt_scan_t*)pa;
+				logi("btc scan name: %s\n", scanp->name);
 				if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
 					#ifdef BTC_SEARCH_RSSI
 					&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 					#endif
 				){
-					*bt_scan_resultp = &(pa->scan);
+					*bt_scan_resultp = *scanp;
 					logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
 				}
 			}else{
@@ -785,11 +788,13 @@ void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 		case BT_BLE:
 		case TR_BLE_RF:
 		case BT_EDR:
+		case BT_RF:
 			bt_event(id, bt, event, pa);
 			break;
 		case BT_BLEC:
 		case TR_BLE_RFC:
 		case BT_EDRC:
+		case BT_RFC:
 			btc_event(id, bt, event, pa);
 			break;
 		default:

@@ -32,6 +32,14 @@
 /*****************************************************************************************************
 **  hal bt Function
 ******************************************************************************************************/
+bool bt_driver_select_mode(uint8_t id, uint16_t trps)
+{
+    if(BT_ID1 != id) return false;
+
+    return true;
+}
+
+
 bool bt_driver_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
 {
     bool ret = false;
