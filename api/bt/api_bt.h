@@ -64,22 +64,22 @@ extern "C" {
 /*******************************************************************
 ** Description: 2.4g数据发送说明,2.4G没有more data不能按照蓝牙的方式发送数据, 
 2.4G有两种发送数据方式:
-	1.调用api_bt_tx函数发送: 这种方式可以发送随机的指令或者非高频的数据,
+	1.直接调用 api_bt_uart_tx 函数发送: 这种方式可以发送随机的指令或者非高频的数据,
 		如果发送高频数据太快超过2.4g连接间隔要有fifo堆满和延时的风险(2.4g丢包或者多包)
 	2. RF_EVT_TX 事件中发送数据, 为了优化发送不阻塞和冗余,实时数据(比如按键)最好在 RF_EVT_TX 事件中处理,
-RF_EVT_TX事件接收后可以根据fifo长度来判断是否填充按键数据	
+RF_EVT_TX 事件接收后可以根据fifo长度来判断是否填充按键数据
 *******************************************************************/
 
 /*******************************************************************
- * RF_TX_LL_MTU : rf链路层MTU, 长度约大越容易被干扰
+ * RF_TX_LL_MTU / RFC_TX_LL_MTU: rf链路层MTU, 长度约大越容易被干扰
  * 如果 发送单包数据长度>RF_TX_LL_MTU,底层就需要分包发送,占用更多缓存	
  * 如果 发送单包数据长度<RF_TX_LL_MTU 就不需要底层分包	
 *******************************************************************/
 #ifndef RF_TX_LL_MTU
 #define RF_TX_LL_MTU		32
 #endif
-#ifndef RF_RX_LL_MTU
-#define RF_RX_LL_MTU		RF_TX_LL_MTU
+#ifndef RFC_TX_LL_MTU
+#define RFC_TX_LL_MTU		32
 #endif
 
 
@@ -185,7 +185,6 @@ typedef enum {
 
 	BT_EVT_RX,									//rx消息, (pa)
 	BT_EVT_TX,									//READ 事件
-	BT_EVT_TX_COMPLETE,							//发送完成
 } bt_evt_t;
 
 typedef struct{
@@ -210,6 +209,7 @@ typedef struct{
 }bt_evt_rx_t;
 typedef struct{
 	bt_server_t bts;
+	uint8_t ret;		//0:success, 1:fail 2: txing
 }bt_evt_tx_t;
 
 typedef union{

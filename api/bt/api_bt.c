@@ -77,7 +77,7 @@ static uint8_t rf_tx_buf[RF_TX_LL_MTU];
 api_bt_ctb_t m_rfc;
 static bt_tx_fifo_t app_rfc_tx;
 static uint8_t rfc_tx_fifo_buf[RF_FIFO_LEN];
-static uint8_t rfc_tx_buf[RF_TX_LL_MTU];
+static uint8_t rfc_tx_buf[RFC_TX_LL_MTU];
 #endif
 
 
@@ -184,7 +184,7 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 static bool bt_tx_fifo_init(bt_tx_fifo_t* txp, uint8_t *tx_buf, uint16_t mtu,uint8_t *fifo_buf,uint16_t fifo_len)
 {
 	memset(txp,0,sizeof(bt_tx_fifo_t));
-	app_fifo_init(&txp->fifo, fifo_buf, sizeof(fifo_len));
+	app_fifo_init(&txp->fifo, fifo_buf, fifo_len);
 	txp->tx_mtu = mtu;
 	txp->tx_buf = tx_buf;
 
@@ -378,7 +378,6 @@ bool api_bt_debond(uint8_t id,bt_t bt)
 	if(!bt_ctbp->init_ok) return ret;
 	logd("bt(%d) debond bt=%d\n",id,bt);
 
-	ret = hal_bt_debond(id, bt);
 	if(id == BT_ID0){
 		ret = hal_bt_debond(id, bt);
 	}else{
@@ -470,9 +469,8 @@ bool api_bt_uart_fifo_tx(app_fifo_t * fifop, uint8_t *buf, uint16_t len)
 	uint16_t fifo_len = len;
 	
 	if(fifop->p_buf == NULL) return false;
-
 	if(FIFO_EMPTY_LENGTH(fifop) < fifo_len){
-		// logd("fifo trp full!\n");
+		logd("fifo trp full %d %d %d!\n",fifop->buf_size_max,FIFO_EMPTY_LENGTH(fifop),fifo_len);
 		ret = false;
 	}else if(ERROR_SUCCESS == app_fifo_write(fifop, (uint8_t const *)buf, &fifo_len)){
 		ret = true;
@@ -497,11 +495,14 @@ bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
 	api_bt_ctb_t* bt_ctbp;
 
 	if(id >= BT_ID_MAX) return false;
+
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
-	if(!bt_ctbp->init_ok || (BT_STA_READY !=  bt_ctbp->sta)) return ret;
+
+	if(!bt_ctbp->init_ok || (BT_STA_READY != bt_ctbp->sta)) return ret;
 	if(NULL != bt_ctbp->fifo_txp){
 		ret = api_bt_uart_fifo_tx(&bt_ctbp->fifo_txp->fifo,buf, len);
+		if(ret) bt_ctbp->fifo_txp->tx_busy = true;
 	}else{
 		if(id == BT_ID0){
 			ret = hal_bt_uart_tx(id, bt, buf, len);
@@ -525,7 +526,7 @@ bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len)
 	if(id >= BT_ID_MAX) return false;
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
-	if(!bt_ctbp->init_ok || (BT_STA_READY !=  bt_ctbp->sta)) return ret;
+	if(!bt_ctbp->init_ok || (BT_STA_READY != bt_ctbp->sta)) return ret;
 
 	if(id == BT_ID0){
 		ret = hal_bt_hid_tx(id, bt, buf, len);
@@ -587,12 +588,16 @@ __WEAK void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
 
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return;
-	if(BT_UART == pa->bts){			//uart
-		// if(api_get_command(bt,buffer, length)){
-		//     device_decode(bt,m_ble_cmd.rx_buf,m_ble_cmd.rx_len);
+
+	if(BT_UART == pa->bts){					//uart
+		// uint8_t i;
+		// command_rx_t rx;
+		// for(i=0; i<pa->len; i++){
+		// 	if(api_command_rx_byte(&rx, RF_CMD_MTU, pa->buf[i], s_cmd_buf, &s_cmd_len)){
+		// 		logd("decode %d:",rx.len); dumpd(rx.pcmd, rx.len);
+		// 		command_rx_free(&rx);
+		// 	}
 		// }
-	}else{							//hid and other
-		
 	}
 }
 
@@ -659,12 +664,12 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			}
 			break;
 		case BT_EVT_TX:
-			if(NULL != bt_ctbp->fifo_txp){
+			if((NULL != bt_ctbp->fifo_txp) && (NULL != pa)){
+				if(0 == pa->tx.ret){
+					bt_ctbp->fifo_txp->tx_busy = false;
+				}
 				bt_tx_event_process(id, bt_ctbp->fifo_txp,(bt_evt_tx_t*)pa);
 			}
-			break;
-		case BT_EVT_TX_COMPLETE:
-			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 			break;
 		default:
 			break;
@@ -685,6 +690,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 
 	switch(event){
 		case BT_EVT_INIT:
+			logd("bt(%d) init ok...\n",bt);
 			bt_ctbp->init_ok = true;
 			bt_ctbp->sta = BT_STA_IDLE;
 			api_bt_enable(id, bt,bt_ctbp->enable);
@@ -754,12 +760,12 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			}
 			break;
 		case BT_EVT_TX:
-			if(NULL != bt_ctbp->fifo_txp){
-				bt_tx_event_process(id, bt_ctbp->fifo_txp,(bt_evt_tx_t*)pa);
+			if((NULL != bt_ctbp->fifo_txp) && (NULL != pa)){
+				if(0 == pa->tx.ret){
+					bt_ctbp->fifo_txp->tx_busy = false;
+				}
+				bt_tx_event_process(id, bt_ctbp->fifo_txp, (bt_evt_tx_t*)pa);
 			}
-			break;
-		case BT_EVT_TX_COMPLETE:
-			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 			break;
 		default:
 			break;
@@ -836,13 +842,13 @@ static bool api_bt_ctb_init(void)
 			#if BT_SUPPORT & BIT_ENUM(TR_RF)
 			if(BT_RF == id){
 				bt_ctbp->fifo_txp = &app_rf_tx;
-				bt_tx_fifo_init(&app_rf_tx,rf_tx_fifo_buf,RF_FIFO_LEN,rf_tx_buf,RF_TX_LL_MTU);
+				bt_tx_fifo_init(&app_rf_tx,rf_tx_buf,RF_TX_LL_MTU,rf_tx_fifo_buf,RF_FIFO_LEN);
 			}
 			#endif
 			#if BT_SUPPORT & BIT_ENUM(TR_RFC)
 			if(BT_RFC == id){
 				bt_ctbp->fifo_txp = &app_rfc_tx;
-				bt_tx_fifo_init(&app_rfc_tx,rfc_tx_fifo_buf,RF_FIFO_LEN,rfc_tx_buf,RF_TX_LL_MTU);
+				bt_tx_fifo_init(&app_rfc_tx,rfc_tx_buf,RFC_TX_LL_MTU,rfc_tx_fifo_buf,RF_FIFO_LEN);
 			}
 			#endif
 		}

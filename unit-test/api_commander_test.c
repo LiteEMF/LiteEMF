@@ -43,8 +43,7 @@ void api_commander_test(void)
 	command_rx_t rx;
 	static uint8_t s_cmd_buf[UART_CMD_MTU];
 	static uint8_t s_cmd_len = 0;
-	memset(&rx, 0, sizeof(rx));
-	
+
 	logd("\ncommander_rx test:\n");
 	for(i=0; i<sizeof(packet); i++){
 		if(api_command_rx_byte(&rx, UART_CMD_MTU, packet[i], s_cmd_buf, &s_cmd_len)){

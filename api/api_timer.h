@@ -26,10 +26,12 @@ extern "C" {
 *******************************************************************************************************/
 #define TIMER_FREQ_POS		(0)
 #define TIMER_FREQ_MASK		0X000FFFFF		/* HZ  max 1M*/
-#define TIMER_PRI_POS		(20)			/*Priority*/
-#define TIMER_PRI_MASK		0X00F00000
-#define TIMER_CH_POS		(24)
-#define TIMER_CH_MASK		0X0F000000
+#define TIMER_CH_POS		(20)
+#define TIMER_CH_MASK		0X00F00000
+#define TIMER_PRI_POS		(24)			/*Priority*/
+#define TIMER_PRI_MASK		0X0F000000
+#define TIMER_CPU_POS		(28)			/*select cpu*/
+#define TIMER_CPU_MASK		0XF0000000
 
 
 #ifndef TIMER_FREQ_ATT
@@ -40,6 +42,9 @@ extern "C" {
 #endif
 #ifndef TIMER_PRI_ATT
 #define TIMER_PRI_ATT(id)  			(FLD2VAL(TIMER_PRI, m_timer_map[id].att))
+#endif
+#ifndef TIMER_CPU_ATT
+#define TIMER_CPU_ATT(id)  			(FLD2VAL(TIMER_CPU, m_timer_map[id].att))
 #endif
 
 

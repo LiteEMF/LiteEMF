@@ -130,7 +130,6 @@ static bool command_frame_rx(uint8_t mtu,uint8_t c, uint8_t *s_buf, uint8_t *s_p
 			}else{
 				loge_r("cmd sum err except:%x but:%x\n",(uint16_t)s_buf[*s_plen - 1],(uint16_t)sum);
 				dumpe(s_buf,*s_plen);
-				emf_free_and_clear(s_buf);
 				*s_plen = 0;
 			}
 		}
@@ -290,7 +289,7 @@ bool api_command_rx(command_rx_t* rxp,uint8_t* buf,uint8_t len)
 	}
 	
 	if(CMD_SHEAD == buf[0]){									//start packet
-		command_rx_free(rxp);									//防止数据未释放
+		memset(rxp, 0, sizeof(command_rx_t));					//注意数据释放
 
 		cmd_max_len = (phead->pack_index) * phead->len;		//phead->len为单包接收数据长度,可以做为mtu
 		rxp->pcmd = emf_malloc(cmd_max_len);			

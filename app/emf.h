@@ -111,7 +111,7 @@
 #if APP_RGB_ENABLE
 #include "app/rgb/app_rgb.h"
 #endif
-
+#include  "app/app_command.h"
 
 #ifdef __cplusplus
 extern "C" {

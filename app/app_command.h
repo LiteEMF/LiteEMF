@@ -63,8 +63,12 @@ typedef enum{
 	CMD_RGB_MODE,
 	CMD_RGB_BRIGHT,
 	//res
+	
+	/*---- 0x30	设备扩展数据和控制 ----*/
+	CMD_MUSIC_VOL=0X30,				//设备音量
+	CMD_USB_STA,				//设备USB状态
 
-	/*---- 0x30	设备配置 ----*/
+	/*---- 0x50	设备配置 ----*/
 	
 
 	/*---- 0xE0	socket ----*/
