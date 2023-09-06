@@ -241,6 +241,9 @@ error_t usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
 		pdev->enpd_out_len[ep_addr] = 0;
 		err = hal_usbd_out(id, ep, buf, plen);
 	}
+	if(ERROR_SUCCESS != err){
+		*plen = 0;
+	}
 
 	return err;
 }

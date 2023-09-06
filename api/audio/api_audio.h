@@ -24,10 +24,10 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef API_AUDIO_SPK_VOL_PERCENT		 //0~100%
-#define API_AUDIO_SPK_VOL_PERCENT         100
+#define API_AUDIO_SPK_VOL_PERCENT         99
 #endif
 #ifndef API_AUDIO_MIC_VOL_PERCENT		 //0~100%
-#define API_AUDIO_MIC_VOL_PERCENT         100
+#define API_AUDIO_MIC_VOL_PERCENT         92
 #endif
 
 
@@ -53,7 +53,7 @@ extern "C" {
 
 //   Calculate wMaxPacketSize of Endpoints
 #define API_AUDIO_SIZE(_maxFrequency, _SampleResolution, _nChannels) \
-    ( ((((_maxFrequency + 999)) / 1000) + 1) * (_SampleResolution/8) * _nChannels )
+    ( ((((_maxFrequency + 999)) / 1000)) * (_SampleResolution/8) * _nChannels )
 
 #define API_AUDIO_SPK_SIZE(paudio)   \
     API_AUDIO_SIZE((paudio)->spk_sampel.rate, (paudio)->spk_sampel.resolution, (paudio)->spk_sampel.channel)
@@ -65,11 +65,11 @@ extern "C" {
 *******************************************************************************************************/
 typedef struct{
     uint8_t mute;
-    uint16_t max_vol;
+    uint16_t max_vol;       //0xe3a0 ~ 0xff0f
     uint16_t min_vol;
     uint16_t def_vol;
     uint16_t vol_res;
-    uint16_t cur_vol_l;
+    uint16_t cur_vol_l;     //0xe3a0 ~ 0xff0f
     uint16_t cur_vol_r;
 }audio_vol_t;
 

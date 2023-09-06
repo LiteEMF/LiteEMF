@@ -212,6 +212,12 @@ extern "C" {
 #define SOCKET_HID_TYPE_SUPPORT		(BIT_DEF(HID_TYPE_XBOX) | BIT_DEF(HID_TYPE_X360) | BIT_DEF(HID_TYPE_PS4))
 #endif
 
+
+#ifndef USB_CPU				
+#define USB_CPU				0
+#endif
+
+
 //*********************************************************************************//
 //                       	other API modules                  						//
 //*********************************************************************************//

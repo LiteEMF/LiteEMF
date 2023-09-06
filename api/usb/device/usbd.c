@@ -616,24 +616,23 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
 		}
 	}else{
+		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
 		usbd_endp_nak(id, TUSB_DIR_IN_MASK | ep);
 		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
-
-		#if !USBD_LOOP_ENABLE
-		{
-			usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
-
-			pdev->enpd_in_busy[ ep_addr ] = 0x00;
-			if(NULL != pclass){
+		if(NULL != pclass){
+			#if !USBD_LOOP_ENABLE
+			{
+				pdev->enpd_in_busy[ ep_addr ] = 0x00;
 				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
 			}
+			#endif
 		}
-		#endif
 	}
 }
 __WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
 {
 	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
 
 	ep &= ~TUSB_DIR_IN_MASK; 		//防止出错
 	if (len) {
@@ -641,14 +640,20 @@ __WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
 	}
 	pdev->enpd_out_len[ep] = len;
 
-	#if !USBD_LOOP_ENABLE
-	if(pdev->enpd_out_len[ep]){
-		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
-		if(NULL != pclass){
+	if(NULL != pclass){
+		#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
+		if(TUSB_ENDP_TYPE_ISOCH == pclass->endpout.type){			//TODO 同步传输直接处理
+			usbd_audio_spk_transfer(id,ep,len);
+			return;
+		}
+		#endif
+
+		#if !USBD_LOOP_ENABLE
+		if(pdev->enpd_out_len[ep]){
 			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
 		}
+		#endif
 	}
-	#endif
 			
 }
 __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len)

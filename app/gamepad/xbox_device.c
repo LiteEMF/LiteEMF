@@ -408,7 +408,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 							get_xbox_vol(0,&vol_ctrl);				//设置上电默认音量大小,必须设置否则无法设置xbox音频
 							xbox_command_fill(phandle,tx_cmdp,&xbox_dev_index,xbox_dev_uac_en,XBOX_VOLUME_CTRL_CMD,(uint8_t*)&vol_ctrl,sizeof(vol_ctrl));
 
-							api_audio_open_spk(0,&usbd_audio_info,XBOX_SPK_RATE,16,1);
+							api_audio_open_spk(0,&usbd_audio_info,XBOX_SPK_RATE,16,2);
 							if(NULL != pclass){
 								api_audio_open_mic(0,&usbd_audio_info,XBOX_MIC_RATE,16,1);
 								xbox_mic_transfer(phandle->id, pclass->endpin.addr, NULL, 0);	//开启USB device mic的传输

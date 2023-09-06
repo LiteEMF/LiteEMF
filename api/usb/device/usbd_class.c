@@ -141,10 +141,10 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 
 		if(TUSB_DESC_INTERFACE == pdesc[i+1]){
 			pitf = (usb_desc_interface_t*)(pdesc+i);
-			pitf->bInterfaceNumber = pindex->itf_num;
-			if(0 == pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
-				pindex->itf_num++;
+			if(pindex->itf_num && pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
+				pindex->itf_num--;
 			}
+			pitf->bInterfaceNumber = pindex->itf_num;
 			logd("assign itf =%d\n", pindex->itf_num);
 			pclass = &m_usbd_class[id][pindex->itf_index++];
 			pclass->dev_type = type;
@@ -155,7 +155,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pclass->itf.if_cls = pitf->bInterfaceClass;
 			pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
 			pclass->itf.if_pro = pitf->bInterfaceProtocol;
-
+			pindex->itf_num++;
         }else if(TUSB_DESC_ENDPOINT == pdesc[i+1]){
 			usb_endp_t *endp;
         	pep = (usb_desc_endpoint_t*)(pdesc+i);
@@ -257,7 +257,7 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, uint8_t *pdesc, uint16_t desc_len, 
 		}
 	}
 
-	return index.itf_index;
+	return index.itf_num;
 }
 
 

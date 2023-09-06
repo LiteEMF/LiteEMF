@@ -56,7 +56,7 @@ extern "C" {
 #define USBD_SELF_POWERED		0
 #endif
 
-#ifndef USBD_LOOP_ENABLE			//1 采样轮训方式处理usb
+#ifndef USBD_LOOP_ENABLE			//1 采样轮训方式处理usb //TODO优化兼容函数回调方式
 #define USBD_LOOP_ENABLE		1
 #endif
 

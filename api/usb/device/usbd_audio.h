@@ -77,6 +77,9 @@ extern api_audio_t usbd_audio_info;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+void usbd_audio_spk_transfer(uint8_t id, uint8_t ep, uint8_t len);
+void usbd_audio_spk_sof_transfer(uint8_t id, uint8_t ep);
+
 error_t usbd_audio_reset(uint8_t id);
 error_t usbd_audio_suspend(uint8_t id);
 uint16_t usbd_audio_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);

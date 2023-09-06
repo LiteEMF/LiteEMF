@@ -287,6 +287,60 @@ api_audio_t usbd_audio_info;
 
 
 /*****************************************************************************************************
+**  audio Function
+******************************************************************************************************/
+
+static uint32_t spk_transfer_len  = 0xffff;
+
+void usbd_audio_spk_transfer(uint8_t id, uint8_t ep, uint8_t len)
+{
+	uint16_t rx_len = len;
+	uint8_t* ep_buffer = usbd_get_endp_buffer(id, ep);
+	uint8_t *spk_buffer;
+
+	uint32_t spk_frame_len = API_AUDIO_SPK_SIZE(&usbd_audio_info);
+
+    if(NULL == ep_buffer) return;
+
+	usbd_out(id, ep, ep_buffer,&rx_len);		//非拷贝读,加快速度
+	
+	if(rx_len >= spk_frame_len){
+		spk_buffer = ep_buffer;
+		rx_len = spk_frame_len;
+
+		if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX))){
+			spk_buffer = ep_buffer+6;
+		}
+	}else{
+		rx_len = 0;
+	}
+
+	if(rx_len){
+		#if TCFG_USB_SLAVE_AUDIO_ENABLE
+		uac_speaker_stream_write(spk_buffer, rx_len);
+		#endif
+		spk_transfer_len = rx_len;
+	}
+}
+
+void usbd_audio_spk_sof_transfer(uint8_t id, uint8_t ep)
+{
+	uint32_t spk_frame_len = API_AUDIO_SPK_SIZE(&usbd_audio_info);
+
+    if (uac_speaker_stream_status() == 0) {
+        return ;
+    }
+
+    if (spk_transfer_len == 0) {
+        uint8_t buffer[192];
+        memset(buffer, 0, sizeof(buffer));
+        uac_speaker_stream_write(buffer, spk_frame_len);
+    }
+    spk_transfer_len = 0;
+}
+
+
+/*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
 error_t usbd_audio_reset(uint8_t id)
@@ -430,23 +484,12 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
     if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
         if(TUSB_REQ_SET_INTERFACE == preq->req.bRequest) {
             if(AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls){
-                #if API_AUDIO_ENABLE
                 if(pclass->endpout.addr){                   //out endp
-                    if (0 == pclass->itf.if_alt) {
-                        api_audio_close_spk(USBD_AUDIO_ID,&usbd_audio_info);
-                    }else{
-                        api_audio_open_spk(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_SPK_RATE,USBD_AUDIO_SPK_RESOLUTION,USBD_AUDIO_SPK_CHANNEL);
-                    }
+                    usbd_audio_spk_en(id,pclass->itf.if_alt);
                 }
                 if(pclass->endpin.addr){
-                    if (0 == pclass->itf.if_alt) {
-                        api_audio_close_mic(USBD_AUDIO_ID,&usbd_audio_info);
-                    }else {
-                        api_audio_open_mic(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_MIC_RATE,USBD_AUDIO_MIC_RESOLUTION,USBD_AUDIO_MIC_CHANNEL);
-                        usbd_in(id, pclass->endpin.addr, NULL , 0);				   //usb 启动发送
-                    }
+                    usbd_audio_mic_en(id,pclass->itf.if_alt);
                 }
-                #endif
                 err = ERROR_SUCCESS;
             }
 		}
@@ -513,7 +556,7 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
 
 error_t usbd_audio_out_process(uint8_t id, usbd_class_t* pclass)
 {
-    uint8_t  usb_rxbuf[64];
+    uint8_t  usb_rxbuf[192];
 	uint16_t usb_rxlen = sizeof(usb_rxbuf);
     error_t err;
 
@@ -558,7 +601,7 @@ usbd_class_t *usbd_audio_mic_find(uint8_t id)
 
 void usbd_audio_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 {
-	uint8_t  mic_buffer[64];
+	uint8_t  mic_buffer[96];
 	uint32_t mic_frame_len = API_AUDIO_MIC_SIZE(&usbd_audio_info);
 
 	memset(mic_buffer,0,sizeof(mic_buffer));
@@ -578,13 +621,15 @@ error_t usbd_audio_spk_en(uint8_t id,uint8_t en)
 {
     usbd_class_t* pclass;
 
-    pclass = usbd_class_find_by_type(id, DEV_TYPE_AUDIO,0);
+    pclass = usbd_class_find_by_type(id, DEV_TYPE_AUDIO,AUDIO_SUBCLASS_STREAMING);
     if(NULL == pclass) return ERROR_DISCON;
 
     #if API_AUDIO_ENABLE
     if(en){
         api_audio_open_spk(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_SPK_RATE,USBD_AUDIO_SPK_RESOLUTION,USBD_AUDIO_SPK_CHANNEL);
+        usbd_endp_open(id, &pclass->endpout);
     }else{
+        usbd_endp_close(id, &pclass->endpout);
 	    api_audio_close_spk(USBD_AUDIO_ID,&usbd_audio_info);
     }
     #endif
@@ -608,8 +653,10 @@ error_t usbd_audio_mic_en(uint8_t id,uint8_t en)
     #if API_AUDIO_ENABLE
     if(en){
         api_audio_open_mic(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_MIC_RATE,USBD_AUDIO_MIC_RESOLUTION,USBD_AUDIO_MIC_CHANNEL);
+        usbd_endp_open(id, &pclass->endpin);
         usbd_audio_mic_transfer(id, pclass->endpin.addr, NULL, 0);
     }else{
+        usbd_endp_close(id, &pclass->endpin);
 	    api_audio_close_mic(USBD_AUDIO_ID,&usbd_audio_info);
     }
     #endif
