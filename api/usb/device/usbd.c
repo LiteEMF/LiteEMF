@@ -337,6 +337,10 @@ static error_t usbd_control_request_process(uint8_t id)
 	usbd_req_t *preq = usbd_get_req(id);
 
 	if(NULL == pdev) return ERROR_PARAM;
+	
+	if(TUSB_DIR_IN == preq->req.bmRequestType.bits.direction){
+		preq->setup_len = preq->req.wLength;			//set default response len
+	}
 
     if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
 		switch (preq->req.bmRequestType.bits.recipient) {
