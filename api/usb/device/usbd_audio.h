@@ -79,6 +79,7 @@ extern api_audio_t usbd_audio_info;
 ******************************************************************************************************/
 void usbd_audio_spk_transfer(uint8_t id, uint8_t ep, uint8_t len);
 void usbd_audio_spk_sof_transfer(uint8_t id, uint8_t ep);
+void usbd_audio_mic_transfer(uint8_t id, uint8_t ep);
 
 error_t usbd_audio_reset(uint8_t id);
 error_t usbd_audio_suspend(uint8_t id);

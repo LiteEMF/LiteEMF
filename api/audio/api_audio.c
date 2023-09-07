@@ -163,11 +163,11 @@ void api_audio_mic_set_mute(uint8_t id,api_audio_t *paudio,uint8_t mute)
 
 void api_audio_open_spk(uint8_t id,api_audio_t *paudio,uint32_t rate,uint8_t resolution,uint8_t channel)
 {
-	logd("%s", __FUNCTION__);
+	logd("%s,rate=%d,res=%d,ch=%d", __FUNCTION__,rate,resolution,channel);
 
-    paudio->mic_sampel.rate = rate;
-    paudio->mic_sampel.resolution = resolution;
-    paudio->mic_sampel.channel = channel;
+    paudio->spk_sampel.rate = rate;
+    paudio->spk_sampel.resolution = resolution;
+    paudio->spk_sampel.channel = channel;
     #if API_AUDIO_ENABLE
     hal_audio_open_spk(id,paudio);
     #endif
@@ -181,10 +181,10 @@ void api_audio_close_spk(uint8_t id,api_audio_t *paudio)
 }
 void api_audio_open_mic(uint8_t id,api_audio_t *paudio,uint32_t rate,uint8_t resolution,uint8_t channel)
 {
-    logd("%s", __FUNCTION__);
-    paudio->spk_sampel.rate = rate;
-    paudio->spk_sampel.resolution = resolution;
-    paudio->spk_sampel.channel = channel;
+    logd("%s,rate=%d,res=%d,ch=%d", __FUNCTION__,rate,resolution,channel);
+    paudio->mic_sampel.rate = rate;
+    paudio->mic_sampel.resolution = resolution;
+    paudio->mic_sampel.channel = channel;
     #if API_AUDIO_ENABLE
     hal_audio_open_mic(id,paudio);
     #endif
@@ -195,6 +195,14 @@ void api_audio_close_mic(uint8_t id,api_audio_t *paudio)
     #if API_AUDIO_ENABLE
     hal_audio_close_mic(id);
     #endif
+}
+void api_audio_spk_stream_write(uint8_t id,uint8_t *buf, uint16_t len)
+{
+    uac_speaker_stream_write(buf,len);
+}
+uint16_t api_audio_mic_stream_read(uint8_t id,uint8_t *buf, uint16_t len)
+{
+    return uac_mic_stream_read(buf,len);
 }
 
 

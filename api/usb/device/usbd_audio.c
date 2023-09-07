@@ -24,6 +24,15 @@
 *******************************************************************************************************/
 
 static uint8c_t uac_itf_desc_tab[] = {
+    0x08,       // bLength
+    0x0B,       //INTERFACE ASSOCIATION
+    0x00,       //bFirstInterface 
+    0x03,       //bInterfaceCount
+    0x01,       //bFunctionClass
+    0x00,       //bFunctionSubClass
+    0x00,       //bFunctionProtocol
+    0x00,       //iFunction
+
     // uac_ac_standard_interface_desc  len = 191  bNumInterfaces num = 3
     0x09, /*bLength: Interface Descriptor size*/
     0x04, /*bDescriptorType: Interface descriptor type*/
@@ -316,9 +325,9 @@ void usbd_audio_spk_transfer(uint8_t id, uint8_t ep, uint8_t len)
 	}
 
 	if(rx_len){
-		#if TCFG_USB_SLAVE_AUDIO_ENABLE
-		uac_speaker_stream_write(spk_buffer, rx_len);
-		#endif
+		#if API_AUDIO_ENABLE
+		api_audio_spk_stream_write(USBD_AUDIO_ID,spk_buffer, rx_len);
+        #endif
 		spk_transfer_len = rx_len;
 	}
 }
@@ -334,10 +343,87 @@ void usbd_audio_spk_sof_transfer(uint8_t id, uint8_t ep)
     if (spk_transfer_len == 0) {
         uint8_t buffer[192];
         memset(buffer, 0, sizeof(buffer));
-        uac_speaker_stream_write(buffer, spk_frame_len);
+        #if API_AUDIO_ENABLE
+        api_audio_spk_stream_write(USBD_AUDIO_ID,buffer, spk_frame_len);
+        #endif
     }
     spk_transfer_len = 0;
 }
+
+
+
+/*******************************************************************
+** Parameters:
+** Returns:	
+** Description:		
+*******************************************************************/
+usbd_class_t *usbd_audio_mic_find(uint8_t id)
+{
+	uint8_t i;
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_class_t *pclass;
+	
+	if(NULL == pdev) return NULL;
+
+	for(i=0; i<countof(m_usbd_class[id]); i++){
+		pclass = &m_usbd_class[id][i];
+
+		if((pclass->dev_type == DEV_TYPE_AUDIO) && (AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls)){
+			if(0 == pclass->endpin.addr) continue;
+            if(pclass->endpin.type != TUSB_ENDP_TYPE_ISOCH) continue;
+            
+			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
+				return pclass;
+			}
+		}
+	}
+	
+	return NULL;
+}
+
+
+void usbd_audio_mic_transfer(uint8_t id, uint8_t ep)
+{
+    uint8_t* ep_buffer = usbd_get_endp_buffer(id, ep | TUSB_DIR_IN_MASK);
+	uint32_t mic_frame_len = API_AUDIO_MIC_SIZE(&usbd_audio_info);
+    uint8_t* mic_buf = ep_buffer;
+    uint32_t rlen,len=0;
+
+    if(NULL == ep_buffer) return;
+
+    if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX))){
+		static uint8_t mic_head[]={0x60,0x21,0x00,0x32,0xc0,0x00};
+		mic_head[2]++;
+		memcpy(ep_buffer,mic_head,6);
+		memset(ep_buffer+54,0,10);
+		mic_buf = ep_buffer+6;
+		len =  16;
+		// putchar('X');
+	}
+
+    //xbox 特殊处理
+    if((96 == mic_frame_len) && ((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX)))){	//简单特殊处理,支持48k重采样
+        uint16_t tmp_buf[48];
+        uint16_t* pout=(uint16_t*)mic_buf;
+        rlen = api_audio_mic_stream_read(USBD_AUDIO_ID,tmp_buf,mic_frame_len);           	//读取采样到ep_buffer
+        for(int i=0; i<24; i++){
+            pout[i] = tmp_buf[2*i];
+        }
+        mic_frame_len = 48;
+    }else{
+        rlen = api_audio_mic_stream_read(USBD_AUDIO_ID,mic_buf,mic_frame_len);       	//读取采样到ep_buffer
+    }
+
+	len += mic_frame_len;
+	if (rlen == 0) {												//必须发送空包,保证中断能一直进入
+		//putchar('C');
+		memset(mic_buf, 0x00, mic_frame_len);
+	}
+	// logd("mo=%d %d",rlen,len);
+			
+    usbd_in(id, ep, ep_buffer,len);
+}
+
 
 
 /*****************************************************************************************************
@@ -571,49 +657,6 @@ error_t usbd_audio_out_process(uint8_t id, usbd_class_t* pclass)
 
 /*******************************************************************
 ** Parameters:
-** Returns:	
-** Description:		
-*******************************************************************/
-usbd_class_t *usbd_audio_mic_find(uint8_t id)
-{
-	uint8_t i;
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_class_t *pclass;
-	
-	if(NULL == pdev) return NULL;
-
-	for(i=0; i<countof(m_usbd_class[id]); i++){
-		pclass = &m_usbd_class[id][i];
-
-		if((pclass->dev_type == DEV_TYPE_AUDIO) && (AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls)){
-			if(pclass->endpin.addr) continue;
-            if(pclass->endpin.type != TUSB_ENDP_TYPE_ISOCH) continue;
-            
-			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
-				return pclass;
-			}
-		}
-	}
-	
-	return NULL;
-}
-
-
-void usbd_audio_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
-{
-	uint8_t  mic_buffer[96];
-	uint32_t mic_frame_len = API_AUDIO_MIC_SIZE(&usbd_audio_info);
-
-	memset(mic_buffer,0,sizeof(mic_buffer));
-
-	if(mic_frame_len == frame_len){
-		memcpy(mic_buffer,buf,mic_frame_len);
-	}
-	usbd_in(id, ep, mic_buffer,sizeof(mic_buffer));
-}
-
-/*******************************************************************
-** Parameters:
 ** Returns: 
 ** Description:
 *******************************************************************/
@@ -626,7 +669,11 @@ error_t usbd_audio_spk_en(uint8_t id,uint8_t en)
 
     #if API_AUDIO_ENABLE
     if(en){
-        api_audio_open_spk(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_SPK_RATE,USBD_AUDIO_SPK_RESOLUTION,USBD_AUDIO_SPK_CHANNEL);
+        api_audio_open_spk(USBD_AUDIO_ID,
+            &usbd_audio_info,
+            usbd_audio_info.spk_sampel.rate,
+            usbd_audio_info.spk_sampel.resolution,
+            usbd_audio_info.spk_sampel.channel);
         usbd_endp_open(id, &pclass->endpout);
     }else{
         usbd_endp_close(id, &pclass->endpout);
@@ -652,9 +699,13 @@ error_t usbd_audio_mic_en(uint8_t id,uint8_t en)
 
     #if API_AUDIO_ENABLE
     if(en){
-        api_audio_open_mic(USBD_AUDIO_ID,&usbd_audio_info,USBD_AUDIO_MIC_RATE,USBD_AUDIO_MIC_RESOLUTION,USBD_AUDIO_MIC_CHANNEL);
+        api_audio_open_mic(USBD_AUDIO_ID,
+            &usbd_audio_info,
+            usbd_audio_info.mic_sampel.rate,
+            usbd_audio_info.mic_sampel.resolution,
+            usbd_audio_info.mic_sampel.channel);
         usbd_endp_open(id, &pclass->endpin);
-        usbd_audio_mic_transfer(id, pclass->endpin.addr, NULL, 0);
+        usbd_audio_mic_transfer(id, pclass->endpin.addr);
     }else{
         usbd_endp_close(id, &pclass->endpin);
 	    api_audio_close_mic(USBD_AUDIO_ID,&usbd_audio_info);

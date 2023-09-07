@@ -128,8 +128,6 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 {
 	error_t err = ERROR_UNKNOW;
     uint16_t i, l;
-	usb_desc_interface_t *pitf;
-    usb_desc_endpoint_t *pep;
 	usbd_class_t * pclass = NULL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
@@ -138,14 +136,20 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
     for ( i = 0; i < desc_len; i += l ){
         l = pdesc[i];
         if(0 == l) break;
-
-		if(TUSB_DESC_INTERFACE == pdesc[i+1]){
+		
+		if(TUSB_DESC_INTERFACE_ASSOCIATION == pdesc[i+1]){
+			usb_desc_interface_assoc_t *pitf_assoc = (usb_desc_interface_assoc_t*)(pdesc+i);
+			pitf_assoc->bFirstInterface = pindex->itf_num;
+			logd("itf assoc first=%d count=%d\n",pitf_assoc->bFirstInterface,pitf_assoc->bInterfaceCount);
+		}else if(TUSB_DESC_INTERFACE == pdesc[i+1]){
+			usb_desc_interface_t *pitf;
+    
 			pitf = (usb_desc_interface_t*)(pdesc+i);
 			if(pindex->itf_num && pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
 				pindex->itf_num--;
 			}
 			pitf->bInterfaceNumber = pindex->itf_num;
-			logd("assign itf =%d\n", pindex->itf_num);
+			logd("assign itf=%d\n", pindex->itf_num);
 			pclass = &m_usbd_class[id][pindex->itf_index++];
 			pclass->dev_type = type;
 			pclass->hid_type = hid_type;
@@ -158,7 +162,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pindex->itf_num++;
         }else if(TUSB_DESC_ENDPOINT == pdesc[i+1]){
 			usb_endp_t *endp;
-        	pep = (usb_desc_endpoint_t*)(pdesc+i);
+			usb_desc_endpoint_t *pep = (usb_desc_endpoint_t*)(pdesc+i);
 
 			if(NULL == pclass){
 				loge("usbd desc err!");
@@ -168,25 +172,40 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			if(pep->bEndpointAddress & TUSB_DIR_MASK){
 				endp = &pclass->endpin;
 				pep->bEndpointAddress = TUSB_DIR_IN_MASK | pindex->ep_in_num;
-				if(0 == pclass->itf.if_alt) {			//接口alt为0,表示接口号不相同才需要分配新端点
+				if(pindex->last_itf_num != pindex->itf_num) {			//接口alt为0,表示接口号不相同才需要分配新端点
 					pindex->ep_in_num++;
 				}
 			}else{
 				endp = &pclass->endpout;
 				pep->bEndpointAddress = pindex->ep_out_num;
-				if(0 == pclass->itf.if_alt) {
+				if(pindex->last_itf_num != pindex->itf_num) {
 					pindex->ep_out_num++;
 				}
 			}
-
+			logd("assign ep=%x\n",pep->bEndpointAddress);
 			endp->addr = pep->bEndpointAddress & 0x0F;
 			endp->type = pep->bmAttributes.xfer;
 			endp->sync = 0;
 			endp->dir = (pep->bEndpointAddress & TUSB_DIR_MASK)? TUSB_DIR_IN:TUSB_DIR_OUT;
 			endp->interval = pep->bInterval;
 			endp->mtu = SWAP16_L(pep->wMaxPacketSize);
+			pindex->last_itf_num = pindex->itf_num;
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+        }else if((TUSB_DESC_CS_INTERFACE == pdesc[i+1]) && (AUDIO_CS_AC_INTERFACE_HEADER == pdesc[i+2])){
+			uint16_t n;
+			uint8_t *pControls;
+			audio_desc_cs_ac_interface_t* paudio_ac = (audio_desc_cs_ac_interface_t*)(pdesc+i);
 			
-        }
+			if((SWAP16_H(paudio_ac->bcdADC) > 2) || (SWAP16_H(paudio_ac->wTotalLength) > 2)) continue;	//这里简单筛选
+			
+			pControls = &paudio_ac->bmControls;
+			for(n = 0; n < SWAP16_H(paudio_ac->wTotalLength); n++){
+				*pControls = n + pindex->itf_num;
+				logd("assign audio cs ac itf=%d\n",*pControls);
+				pControls++;
+			}
+		#endif
+		}
     }
     return( err );
 }
