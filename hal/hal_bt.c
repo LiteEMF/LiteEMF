@@ -32,6 +32,39 @@
 /*****************************************************************************************************
 **  hal bt Function
 ******************************************************************************************************/
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	大部分平台不支持热切换,需要在初始化的时候选择模式
+*******************************************************************/
+bool hal_bt_select_mode(uint8_t id, uint16_t trps)
+{
+    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
+    if(trps & BT0_SUPPORT & BIT(TR_RF)){
+    }else{
+        hal_bt_enable(BT_ID0, TR_RF, 0);
+    }
+    #endif
+
+    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
+    if(trps & BT0_SUPPORT & BIT(TR_BLE_RF)){    
+    }else if(trps & BT0_SUPPORT & BIT(TR_BLE)) {
+    }else{
+        hal_bt_enable(BT_ID0, BT_BLE, 0);
+    }
+    #endif
+
+    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    if(trps & BT0_SUPPORT & BIT(TR_EDR)) {
+    }else{
+        hal_bt_enable(BT_ID0, BT_EDR, 0);
+    }
+    #endif
+
+    return false;
+}
+
 bool hal_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
 {
     bool ret = false;

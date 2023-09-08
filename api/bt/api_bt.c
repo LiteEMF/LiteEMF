@@ -715,16 +715,15 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			break;
 		case BT_EVT_SCAN:
 			bt_ctbp->sta = BT_STA_SCAN;
-			logd("btc(%d) scan...\n",bt);
-			#ifdef BTC_SEARCH_NAME
 			/*
 			1. 底层默认开启扫描地址,名字的广播,筛选由此处理
 			2. 当有绑定信息,使用的是扫描地址,否则扫面的是名字.
 			*/
 			if(pa != NULL){
 				bt_evt_scan_t *scanp = (bt_evt_scan_t*)pa;
-				logi("btc scan name: %s\n", scanp->name);
-				if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+				
+				#if defined BTC_SEARCH_MAC
+				if(!memcmp(pa->scan.mac, BTC_SEARCH_MAC, 6)
 					#ifdef BTC_SEARCH_RSSI
 					&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 					#endif
@@ -732,10 +731,22 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 					*bt_scan_resultp = *scanp;
 					logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
 				}
+				#elif defined BTC_SEARCH_NAME
+				if(strlen(scanp->name)){
+					logi("btc scan name: %s,mac:", scanp->name);dumpd(scanp->mac,6);
+					if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+						#ifdef BTC_SEARCH_RSSI
+						&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
+						#endif
+					){
+						*bt_scan_resultp = *scanp;
+						logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
+					}
+				}
+            	#endif
 			}else{
 				memset(bt_scan_resultp,0,sizeof(bt_evt_scan_t));
 			}
-            #endif
 			break;
 		case BT_EVT_SCAN_DIR:
 			bt_ctbp->sta = BT_STA_DIR_ADV;

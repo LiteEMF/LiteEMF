@@ -61,6 +61,16 @@ extern "C" {
 #endif
 
 
+
+// demo search defined
+// #define BTC_SEARCH_NAME						"JL6321"
+// #define BTC_SEARCH_RSSI						-50
+// #define BTC_SEARCH_MAC						"\x01\x02\x03\x04\x05\x06"
+
+// #define BTC_SEARCH_UUID16			    	0xae30
+// #define BTC_SEARCH_WRITE_CHARA_UUID16		0xae01
+// #define BTC_SEARCH_NOTIFY_CHARA_UUID16		0xae01
+
 /*******************************************************************
 ** Description: 2.4g数据发送说明,2.4G没有more data不能按照蓝牙的方式发送数据, 
 2.4G有两种发送数据方式:
