@@ -332,7 +332,7 @@ void usbd_audio_spk_transfer(uint8_t id, uint8_t ep, uint8_t len)
 	}
 }
 
-void usbd_audio_spk_sof_transfer(uint8_t id, uint8_t ep)
+void usbd_audio_spk_sof_transfer(uint8_t id)
 {
 	uint32_t spk_frame_len = API_AUDIO_SPK_SIZE(&usbd_audio_info);
 

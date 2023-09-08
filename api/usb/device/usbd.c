@@ -494,6 +494,7 @@ void usbd_suspend_process( uint8_t id )
 	if(NULL != pdev){
 		pdev->dev.suspend = 0;
 		usbd_free_setup_buffer(preq);
+		pdev->ready= false;
 		if(TUSB_STA_CONFIGURED == pdev->state){
 			pdev->state = TUSB_STA_SUSPENDED;
 			usbd_class_notify_evt(id,USBD_EVENT_SUSPEND,0);
@@ -596,7 +597,9 @@ __WEAK void usbd_resume_event(uint8_t id)
 }
 __WEAK void usbd_sof_event(uint8_t id)
 {
-
+	#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
+	usbd_audio_spk_sof_transfer(id);
+	#endif
 }
 __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 {
