@@ -29,22 +29,28 @@
 *******************************************************************/
 void xbox_controller_init(trp_handle_t *phandle)
 {
-	#if (HIDD_SUPPORT & HID_XBOX_MASK)
-	xbox_device_init(phandle);
-	#endif
-	#if (HIDH_SUPPORT & HID_XBOX_MASK)
-	xbox_host_init(phandle);
-	#endif
+	if(api_trp_is_slave(phandle->trp)){
+		#if (HIDD_SUPPORT & HID_XBOX_MASK)
+		xbox_device_init(phandle);
+		#endif
+	}else{
+		#if (HIDH_SUPPORT & HID_XBOX_MASK)
+		xbox_host_init(phandle);
+		#endif
+	}
 }
 
 void xbox_controller_deinit(trp_handle_t *phandle)
 {
-	#if (HIDD_SUPPORT & HID_XBOX_MASK)
-	xbox_device_deinit(phandle);
-	#endif
-	#if (HIDH_SUPPORT & HID_XBOX_MASK)
-	xbox_host_deinit(phandle);
-	#endif
+	if(api_trp_is_slave(phandle->trp)){
+		#if (HIDD_SUPPORT & HID_XBOX_MASK)
+		xbox_device_deinit(phandle);
+		#endif
+	}else{
+		#if (HIDH_SUPPORT & HID_XBOX_MASK)
+		xbox_host_deinit(phandle);
+		#endif
+	}
 }
 
 void xbox_controller_task(trp_handle_t *phandle)

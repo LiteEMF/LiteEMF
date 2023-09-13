@@ -61,17 +61,17 @@ extern "C" {
 **	Parameters
 *******************************************************************************************************/
 typedef enum{
-	TR_BLE		= 0,
-	TR_EDR		= 1,
-	TR_BLEC		= 2,
-	TR_EDRC		= 3,
-	TR_BLE_RF	= 4,				//BLE模拟2.4G	
-	TR_BLE_RFC	= 5,
-	TR_RF		= 6,
-	TR_RFC		= 7,
-	TR_USBD		= 8,
-	TR_USBH		= 9,
-	TR_UART		= 10,
+	TR_BLE		= DEF_TR_BLE,
+	TR_EDR		= DEF_TR_EDR,
+	TR_BLEC		= DEF_TR_BLEC,
+	TR_EDRC		= DEF_TR_EDRC,
+	TR_BLE_RF	= DEF_TR_BLE_RF,				//BLE模拟2.4G	
+	TR_BLE_RFC	= DEF_TR_BLE_RFC,
+	TR_RF		= DEF_TR_RF,
+	TR_RFC		= DEF_TR_RFC,
+	TR_USBD		= DEF_TR_USBD,
+	TR_USBH		= DEF_TR_USBH,
+	TR_UART		= DEF_TR_UART,
 	TR_MAX,
 	TR_NULL = TR_MAX,
 }trp_t;
@@ -136,6 +136,8 @@ extern uint16_t m_trps;
 ******************************************************************************************************/
 bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
+bool api_trp_is_slave(trp_t trp);
+bool api_trp_is_host(trp_t trp);
 
 uint16_t api_transport_get_mtu(trp_handle_t* phandle);
 bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len);

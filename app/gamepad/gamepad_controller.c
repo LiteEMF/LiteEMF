@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (HID_GAMEPAD_MASK)
 #include  "gamepad_controller.h"
 
 
@@ -139,6 +139,7 @@ uint32_t gamepad_hatswitch_to_key(uint8_t hat_switch)
 	return tmp;
 }
 
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
 uint16_t gamepad_key_pack(trp_handle_t *phandle,app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
@@ -223,6 +224,7 @@ void gamepad_controller_deinit(trp_handle_t *phandle)
 void gamepad_controller_task(trp_handle_t *phandle)
 {
 }
+#endif
 
 #endif
 

@@ -55,26 +55,29 @@
 *******************************************************************/
 bool switch_controller_init(trp_handle_t *phandle)
 {
-    #if (HIDD_SUPPORT & HID_SWITCH_MASK)
-    switch_device_init(phandle);
-    #endif
-
-    #if (HIDH_SUPPORT & HID_SWITCH_MASK)
-    switch_host_init(phandle);
-    #endif
-
+    if(api_trp_is_slave(phandle->trp)){
+        #if (HIDD_SUPPORT & HID_SWITCH_MASK)
+        switch_device_init(phandle);
+        #endif
+    }else{
+        #if (HIDH_SUPPORT & HID_SWITCH_MASK)
+        switch_host_init(phandle);
+        #endif
+    }
     return true;
 }
 
 bool switch_controller_deinit(trp_handle_t *phandle)
 {
-    #if (HIDD_SUPPORT & HID_SWITCH_MASK)
-    switch_device_deinit(phandle);
-    #endif
-
-    #if (HIDH_SUPPORT & HID_SWITCH_MASK)
-    switch_host_deinit(phandle);
-    #endif
+    if(api_trp_is_slave(phandle->trp)){
+        #if (HIDD_SUPPORT & HID_SWITCH_MASK)
+        switch_device_deinit(phandle);
+        #endif
+    }else{
+        #if (HIDH_SUPPORT & HID_SWITCH_MASK)
+        switch_host_deinit(phandle);
+        #endif
+    }
 
     return true;
 }

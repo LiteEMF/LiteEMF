@@ -285,6 +285,7 @@ extern api_bt_ctb_t m_ble;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
+extern bool edr_sniff_by_remote;
 extern api_bt_ctb_t m_edr;
 #endif
 

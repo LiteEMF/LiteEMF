@@ -718,27 +718,32 @@ bool ps_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 *******************************************************************/
 void ps_controller_init(trp_handle_t *phandle)
 {
-	#if (HIDD_SUPPORT & HID_PS_MASK)
-	m_ps_series = PS_SERIES_NONE;
-	m_ps_enhanced_mode = false;
-	memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
-	memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
-	
-	#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
-	ps_encrypt.step	= PS_IDLE;
-	#endif
+	if(api_trp_is_slave(phandle->trp)){
+		#if (HIDD_SUPPORT & HID_PS_MASK)
+		m_ps_series = PS_SERIES_NONE;
+		m_ps_enhanced_mode = false;
+		memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
+		memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
+		
+		#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+		ps_encrypt.step	= PS_IDLE;
+		#endif
 
-	#if defined PS_7105_ENCRYPT_ENABLED
-	nxp7105_init();
-	#endif
-	#endif
+		#if defined PS_7105_ENCRYPT_ENABLED
+		nxp7105_init();
+		#endif
+
+		#endif
+	}
 }
 
 void ps_controller_deinit(trp_handle_t *phandle)
 {
-	#if (HIDD_SUPPORT & HID_PS_MASK)
-	m_ps_enhanced_mode = false;
-	#endif
+	if(api_trp_is_slave(phandle->trp)){
+		#if (HIDD_SUPPORT & HID_PS_MASK)
+		m_ps_enhanced_mode = false;
+		#endif
+	}
 }
 
 void ps_controller_task(trp_handle_t *phandle)

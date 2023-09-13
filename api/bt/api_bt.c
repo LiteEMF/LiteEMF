@@ -29,6 +29,11 @@
 #include  "api/bt/api_bt.h"
 #include  "api/api_tick.h"
 
+#if APP_GAMEAPD_ENABLE
+#include "app/gamepad/app_gamepad.h"
+#endif
+
+
 #include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
@@ -58,6 +63,7 @@ bt_evt_scan_t ble_rfc_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
+bool edr_sniff_by_remote = false; 					//switch模式下由主机发起进入sniff
 api_bt_ctb_t m_edr;
 #endif
 
@@ -282,6 +288,8 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是publ
 	}
 	#endif
 
+	memcpy(buf, base_mac, 6);
+
 	return ret;
 }
 
@@ -302,7 +310,6 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return false;
 
-	memset(buf,0,len);
     memset(name,0,sizeof(name));
 
 	#if (BT_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID))
@@ -345,6 +352,7 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		#endif
 	}
 	
+	memset(buf,0,len);
     len = MIN(len-1,(uint8_t)strlen(name));
     memcpy(buf, name, len);
 	return len;
@@ -415,7 +423,7 @@ bool api_bt_enable(uint8_t id,bt_t bt,bool en)
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
 	
-	logi("bt(%d) %d enable=%d\n", id, bt, en);	
+	logi("bt%d enable=%d\n", bt, en);	
 
 	bt_ctbp->enable = en;
 	if(!en) api_bt_disconnect(id,bt);
@@ -634,6 +642,15 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			break;		
 		case BT_EVT_READY:
 			bt_ctbp->sta = BT_STA_READY;
+
+			#if APP_GAMEAPD_ENABLE
+			if(BIT(DEV_TYPE_HID) & bt_ctbp->types){
+				hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
+				trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
+				app_gamepad_init( &handle ) ;
+			}
+			#endif
+
 			logd("bt(%d) ready...\n",bt);
 			break;		
 		case BT_EVT_IDLE:
@@ -839,14 +856,23 @@ static bool api_bt_ctb_init(void)
 			
 			//这里设置默认值, 可以在工程中修改
 			if(BT_BLE == id){
-				#if BLE_HID_SUPPORT
+				#if (BT_SUPPORT & BIT_ENUM(TR_BLE)) && BLE_HID_SUPPORT
 				bt_ctbp->types = BIT(DEV_TYPE_HID);
 				bt_ctbp->hid_types = BLE_HID_SUPPORT;
 				#endif
 			}else if(BT_EDR == id){
+				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
 				#if EDR_HID_SUPPORT
 				bt_ctbp->types = BIT(DEV_TYPE_HID);
 				bt_ctbp->hid_types = EDR_HID_SUPPORT;
+				#endif
+
+				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){
+					edr_sniff_by_remote = true;
+				}else{
+					edr_sniff_by_remote = false;
+				}
+				logd("edr_sniff_by_remote=%d",edr_sniff_by_remote);
 				#endif
 			}
 

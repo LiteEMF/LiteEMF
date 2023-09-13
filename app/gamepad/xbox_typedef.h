@@ -25,7 +25,7 @@
 #define   XBOX_UAC_PID      0X02F6		/* xbox/xboxx接音频后的PID */
 #define   X360_PID         	0X028E
 #define   XBOXX_PID         0X0B12		/* 0X02EA */
-#define   XBOX_BT_PID		0X02E0		/* 0X02FD */
+#define   XBOX_BT_PID		0X02E0		/* 0X02E0(PC显示unknow device,手机正常) 0X0B13(pc显示x360但android按键异常) */
 
 
 

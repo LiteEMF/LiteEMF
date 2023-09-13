@@ -68,7 +68,32 @@ bool api_trp_is_bt(trp_t trp)
 {	
 	return (TR_RFC >= trp);
 }
-
+bool api_trp_is_slave(trp_t trp)
+{	
+	switch(trp){
+		case TR_BLE:
+		case TR_EDR:
+		case TR_BLE_RF:
+		case TR_RF:
+		case TR_USBD:
+		case TR_UART:
+			return true;
+	}
+	return false;
+}
+bool api_trp_is_host(trp_t trp)
+{	
+	switch(trp){
+		case TR_BLEC:
+		case TR_EDRC:
+		case TR_BLE_RFC:
+		case TR_RFC:
+		case TR_USBH:
+		case TR_UART:
+			return true;
+	}
+	return false;
+}
 uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 {
 	switch(phandle->trp){

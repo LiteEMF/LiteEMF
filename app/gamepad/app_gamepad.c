@@ -155,7 +155,7 @@ static uint32c_t x360_key_map[20][2] =
 };
 #endif
 
-#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_XBOX))
 static uint32c_t gamepad_key_map[20][2] =
 {
 	{HW_KEY_A 			,GAMEPAD_A		},
@@ -193,32 +193,54 @@ __WEAK uint8_t app_gamepad_get_vendor_map(trp_handle_t *phandle,uint32_t(**mapp)
 }
 #endif
 
-
-void app_gamepad_get_special_vid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp)
+hid_type_t app_gamepad_get_hidtype(uint16_t hid_types)
 {
-	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK
-	if(hid_types & BIT(HID_TYPE_SWITCH)){
+	hid_type_t hid_type = HID_TYPE_NONE;
+
+	if(HID_GAMEPAD_MASK & hid_types){
+		if(BIT(HID_TYPE_GAMEPADE) & hid_types){
+			hid_type = HID_TYPE_GAMEPADE;
+		}else if(BIT(HID_TYPE_X360) & hid_types){
+			hid_type = HID_TYPE_X360;
+		}else if(BIT(HID_TYPE_XBOX) & hid_types){
+			hid_type = HID_TYPE_XBOX;
+		}else if(BIT(HID_TYPE_SWITCH) & hid_types){
+			hid_type = HID_TYPE_SWITCH;
+		}else if(BIT(HID_TYPE_PS3) & hid_types){
+			hid_type = HID_TYPE_PS3;
+		}else if(BIT(HID_TYPE_PS4) & hid_types){
+			hid_type = HID_TYPE_PS4;
+		}else if(BIT(HID_TYPE_PS5) & hid_types){
+			hid_type = HID_TYPE_PS5;
+		}
+	}
+	return hid_type;
+}
+
+void app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp)
+{
+	hid_type_t hid_type = app_gamepad_get_hidtype(hid_types);
+
+	if(hid_types & HID_SWITCH_MASK){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK
 		*vidp = SWITCH_VID;
 		*pidp = SWITCH_PID;
-	}
-	#endif
-
-	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
-	if(hid_types & BIT(HID_TYPE_PS4)){
+		#endif
+	}else if(hid_types & HID_PS_MASK){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
 		*vidp = PS_VID;
 		*pidp = PS4_PID;
-	}
-	#endif
-	#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
-	if(hid_types & (BIT(HID_TYPE_XBOX) | BIT(HID_TYPE_X360))){
+		#endif
+	}else if(hid_types & HID_XBOX_MASK){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
 		*vidp = XBOX_VID;
 		if(api_trp_is_usb(trp)){
 			*pidp = XBOX_PID;
 		}else{
 			*pidp = XBOX_BT_PID;
 		}
+		#endif
 	}
-	#endif
 }
 
 /*******************************************************************
@@ -395,23 +417,23 @@ bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 	bool ret = false;
 
 	switch(phandle->index & 0xff){
-        #if HIDH_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
         case HID_TYPE_GAMEPADE:
             ret = gamepad_dev_process(phandle,buf,len);
             break;
         #endif
-        #if (HIDH_SUPPORT & HID_XBOX_MASK)
+        #if (HIDD_SUPPORT & HID_XBOX_MASK)
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
             ret = xbox_dev_process(phandle,buf,len);
             break;
         #endif
-        #if HIDH_SUPPORT & HID_SWITCH_MASK
+        #if HIDD_SUPPORT & HID_SWITCH_MASK
         case HID_TYPE_SWITCH:
             ret = switch_dev_process(phandle,buf,len);
             break;
         #endif
-        #if HIDH_SUPPORT & HID_PS_MASK
+        #if HIDD_SUPPORT & HID_PS_MASK
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:

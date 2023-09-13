@@ -390,7 +390,7 @@ uint16_t switch_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, u
 
     if(TR_USBD == phandle->trp || SWITCH_STANDARD_REPORT_ID == switch_dev_ctb.report_mode){
         packet_len = switch_standard_key_pack(phandle,keyp,buf,len);
-    #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
+    #if	BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
     }else if(SWITCH_LARGE_REPORT_ID == switch_dev_ctb.report_mode){
         packet_len = switch_large_key_pack(phandle,keyp,buf,len);
     }else if(SWITCH_NORMAL_REPORT_ID == switch_dev_ctb.report_mode){
@@ -631,7 +631,7 @@ bool switch_ctrl_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
     int_to_bit12(ctrl_replies.r_xy, adc_x, adc_y);
 
     if(TR_EDR == phandle->trp){
-        ret = api_transport_tx(phandle,(uint8_t*)&ctrl_replies+1,49-1);     //蓝牙只发送48个字节
+        ret = api_transport_tx(phandle,(uint8_t*)&ctrl_replies,49);     //蓝牙只发送49个字节
     }else{
         ret = api_transport_tx(phandle,(uint8_t*)&ctrl_replies,sizeof(ctrl_replies));
     }
@@ -687,7 +687,7 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         switch_dump_cmd_in("dev:",replies,length);
 
         if(TR_EDR == phandle->trp){
-            ret = api_transport_tx(phandle,replies,49-1);     //蓝牙只发送48个字节
+            ret = api_transport_tx(phandle,replies,49);     //蓝牙只发送49个字节
         }else{
             ret = api_transport_tx(phandle,replies,length);
         }
