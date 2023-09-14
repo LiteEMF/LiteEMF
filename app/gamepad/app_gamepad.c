@@ -424,6 +424,8 @@ bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
         #endif
         #if (HIDD_SUPPORT & HID_XBOX_MASK)
         case HID_TYPE_X360	:
+			ret = x360_dev_process(phandle,buf,len);
+			break;
         case HID_TYPE_XBOX	:
             ret = xbox_dev_process(phandle,buf,len);
             break;

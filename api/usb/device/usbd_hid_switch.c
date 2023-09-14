@@ -114,6 +114,13 @@ error_t usbd_hid_switch_out_process(uint8_t id, usbd_class_t* pclass)
 *******************************************************************/
 error_t usbd_hid_switch_init(uint8_t id)
 {
+    trp_handle_t trp_handle;
+		
+	trp_handle.trp = TR_USBD;
+	trp_handle.id = id;
+	trp_handle.index = U16(DEV_TYPE_HID, HID_TYPE_SWITCH);
+	app_gamepad_init( &trp_handle );
+
     UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;
 }

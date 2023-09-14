@@ -39,7 +39,7 @@ static uint8c_t hid_desc_switch_bt_map[] =
 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
 static uint8c_t hid_desc_switch_usb_map[] =
 {
-    #include "hid_desc_switch_bt.h"
+    #include "hid_desc_switch_usb.h"
 };
 #endif
 

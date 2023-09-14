@@ -137,11 +137,13 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
         l = pdesc[i];
         if(0 == l) break;
 		
-		if(TUSB_DESC_INTERFACE_ASSOCIATION == pdesc[i+1]){
+		switch(pdesc[i+1]){
+		case TUSB_DESC_INTERFACE_ASSOCIATION:
 			usb_desc_interface_assoc_t *pitf_assoc = (usb_desc_interface_assoc_t*)(pdesc+i);
 			pitf_assoc->bFirstInterface = pindex->itf_num;
 			logd("itf assoc first=%d count=%d\n",pitf_assoc->bFirstInterface,pitf_assoc->bInterfaceCount);
-		}else if(TUSB_DESC_INTERFACE == pdesc[i+1]){
+			break;
+		case TUSB_DESC_INTERFACE:
 			usb_desc_interface_t *pitf;
     
 			pitf = (usb_desc_interface_t*)(pdesc+i);
@@ -160,7 +162,8 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
 			pclass->itf.if_pro = pitf->bInterfaceProtocol;
 			pindex->itf_num++;
-        }else if(TUSB_DESC_ENDPOINT == pdesc[i+1]){
+			break;
+		case TUSB_DESC_ENDPOINT:
 			usb_endp_t *endp;
 			usb_desc_endpoint_t *pep = (usb_desc_endpoint_t*)(pdesc+i);
 
@@ -190,21 +193,35 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			endp->interval = pep->bInterval;
 			endp->mtu = SWAP16_L(pep->wMaxPacketSize);
 			pindex->last_itf_num = pindex->itf_num;
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-        }else if((TUSB_DESC_CS_INTERFACE == pdesc[i+1]) && (AUDIO_CS_AC_INTERFACE_HEADER == pdesc[i+2])){
-			uint16_t n;
-			uint8_t *pControls;
-			audio_desc_cs_ac_interface_t* paudio_ac = (audio_desc_cs_ac_interface_t*)(pdesc+i);
-			
-			if((SWAP16_H(paudio_ac->bcdADC) > 2) || (SWAP16_H(paudio_ac->wTotalLength) > 2)) continue;	//这里简单筛选
-			
-			pControls = &paudio_ac->bmControls;
-			for(n = 0; n < SWAP16_H(paudio_ac->wTotalLength); n++){
-				*pControls = n + pindex->itf_num;
-				logd("assign audio cs ac itf=%d\n",*pControls);
-				pControls++;
+        	break;
+		case TUSB_DESC_CS_INTERFACE:
+			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+			if(AUDIO_CS_AC_INTERFACE_HEADER == pdesc[i+2]){
+				uint16_t n;
+				uint8_t *pControls;
+				audio_desc_cs_ac_interface_t* paudio_ac = (audio_desc_cs_ac_interface_t*)(pdesc+i);
+				
+				if((SWAP16_H(paudio_ac->bcdADC) > 2) || (SWAP16_H(paudio_ac->wTotalLength) > 2)) continue;	//这里简单筛选
+				
+				pControls = &paudio_ac->bmControls;
+				for(n = 0; n < SWAP16_H(paudio_ac->wTotalLength); n++){
+					*pControls = n + pindex->itf_num;
+					logd("assign audio cs ac itf=%d\n",*pControls);
+					pControls++;
+				}
 			}
-		#endif
+			#endif
+        	break;
+		case TUSB_DESC_FUNCTIONAL:
+			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+			if((DEV_TYPE_HID == type) && (HID_TYPE_X360 == hid_type)){
+				uint8_t *descp = (pdesc+i);
+				descp[6] |= pindex->ep_in_num;
+				descp[12] |= pindex->ep_out_num;
+				logd("assign x360 ep=%x %x\n",descp[6],descp[12]);
+			}
+			#endif
+			break;
 		}
     }
     return( err );
