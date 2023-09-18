@@ -112,7 +112,7 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
 
 error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_req_t* const preq)
 {
-    error_t err = ERROR_SUCCESS;
+    error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
 	if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
@@ -131,26 +131,25 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
                     pdev->ready = true;
                     logd_g("usbd%d ready...\n",id);
                 }
+                err = ERROR_SUCCESS;
 			}else if(HID_DESC_TYPE_HID == desc_type){
 				preq->setup_len = MIN(preq->req.wLength, 9);
 				memcpy((void*)preq->setup_buf,usbd_hid_descriptor_tab,preq->setup_len);
 				preq->setup_buf[7] = desc_len&0xff;            //set hid report desc
 				preq->setup_buf[8] = desc_len>>8;
-			}else{
-                err = ERROR_STALL;
-            }
-		}else{
-            err = ERROR_STALL;
-        }
+                err = ERROR_SUCCESS;
+			}
+		}
 	} else if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		switch(preq->req.bRequest){
             case HID_REQ_CONTROL_SET_IDLE:
+                err = ERROR_SUCCESS;
                 break;
             case HID_REQ_CONTROL_GET_IDLE:
                 preq->setup_buf[0] = 0;
+                err = ERROR_SUCCESS;
                 break;
 			default:
-				err = ERROR_STALL;
 				break;
 		}
     }

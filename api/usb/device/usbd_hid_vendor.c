@@ -30,9 +30,10 @@
 **	static Parameters
 *******************************************************************************************************/
 uint8c_t vendor_itf_desc_tab[] = {
-	0x09,0x04,0x00,0x00,0x01,0x03,0x00,0x00,0x00,             			//接口描述符,键盘
+	0x09,0x04,0x00,0x00,0x02,0x03,0x00,0x00,0x00,             			//接口描述符,键盘
     USBD_HID_DESC,           			//HID类描述符
     0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,			//端点描述符
+    0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,		//端点描述符
 };
 
 /*****************************************************************************************************
@@ -76,7 +77,7 @@ uint16_t usbd_hid_vendor_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_
 
 error_t usbd_hid_vendor_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_req_t* const preq)
 {
-    error_t err = ERROR_SUCCESS;
+    error_t err = ERROR_STALL;
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);
     return err;

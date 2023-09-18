@@ -572,11 +572,12 @@ error_t usbd_audio_control_request_process(uint8_t id, usbd_class_t *pclass, usb
             if(AUDIO_SUBCLASS_STREAMING == pclass->itf.if_sub_cls){
                 if(pclass->endpout.addr){                   //out endp
                     usbd_audio_spk_en(id,pclass->itf.if_alt);
+                    err = ERROR_SUCCESS;
                 }
                 if(pclass->endpin.addr){
                     usbd_audio_mic_en(id,pclass->itf.if_alt);
+                    err = ERROR_SUCCESS;
                 }
-                err = ERROR_SUCCESS;
             }
 		}
 	} else if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {

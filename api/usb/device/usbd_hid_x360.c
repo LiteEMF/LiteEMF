@@ -29,7 +29,7 @@
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-
+static uint8_t x360_itf_num = 0;
 	
 static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 	0x09,		 /*bLength: Interface Descriptor size*/
@@ -75,6 +75,16 @@ static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 	0x20,
 	0x00,			/* wMaxPacketSize: 2 Bytes max  */
 	0x08, 
+};
+
+
+//qwSignature :MSFT100 必须是这个
+//bMS_VendorCode:0X90
+static uint8c_t  x360_devdesc_string[] =
+{		//bMS_VendorCode:0X90
+	0x12,0x03,
+	0x4D,0x00,0x53,0x00,0x46,0x00,0x54,0x00,0x31,0x00,0x30,0x00,0x30,0x00,
+	0x90,0x00,
 };
 // Feature Descriptor	bMS_VendorCode:0X90
 static uint8c_t x360_compat_id[] = {
@@ -131,6 +141,8 @@ uint16_t usbd_hid_x360_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t*
 	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, x360_itf_desc_tab, len);
 		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_X360, pindex, pdesc + *pdesc_index, len);
+		x360_itf_num = pdesc[*pdesc_index + 2];
+		logd("set x360 itf num=%d\n",x360_itf_num);
 	}
 	*pdesc_index += len;
 
@@ -142,13 +154,38 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
     error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
-	if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
+	if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+
+		if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
+			if(TUSB_REQ_GET_DESCRIPTOR == preq->req.bRequest){
+				uint8_t desc_type = (uint8_t)(preq->req.wValue >> 8);
+				uint8_t desc_index = (uint8_t)(preq->req.wValue & 0xFF);
+
+				switch(desc_type){
+				case TUSB_DESC_DEVICE_QUALIFIER:
+					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_produck_qualif));
+					memcpy(preq->setup_buf, x360_produck_qualif, preq->setup_len);
+					err = ERROR_SUCCESS;
+					break;
+				case TUSB_DESC_STRING:
+					if(0XEE == desc_index){
+						preq->setup_len = MIN(preq->req.wLength,sizeof(x360_devdesc_string));
+						memcpy(preq->setup_buf, x360_devdesc_string, preq->setup_len);
+						err = ERROR_SUCCESS;
+					}
+					break;
+				}
+			}
+		}
+	}else if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
 		if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
 			if(0X90 == preq->req.bRequest){
-				switch(preq->req.wValue){
+				switch(preq->req.wIndex){
 				case 0X04:		//compat ID
 					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_compat_id));
 					memcpy(preq->setup_buf, x360_compat_id, preq->setup_len);
+					preq->setup_buf[16] = x360_itf_num;		//fix x360 itf num
+					logd("x360 itf num=%d\n",x360_itf_num);
 					err = ERROR_SUCCESS;
 					break;
 				case 0X05:		//properties图标等信息

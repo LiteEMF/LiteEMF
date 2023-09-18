@@ -149,6 +149,9 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pitf = (usb_desc_interface_t*)(pdesc+i);
 			if(pindex->itf_num && pitf->bAlternateSetting){			//接口alt为0,表示接口号不相同才需要分配接口号
 				pindex->itf_num--;
+				pindex->is_alt_itf = true;
+			}else{
+				pindex->is_alt_itf = false;
 			}
 			pitf->bInterfaceNumber = pindex->itf_num;
 			logd("assign itf=%d\n", pindex->itf_num);
@@ -175,15 +178,18 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			if(pep->bEndpointAddress & TUSB_DIR_MASK){
 				endp = &pclass->endpin;
 				pep->bEndpointAddress = TUSB_DIR_IN_MASK | pindex->ep_in_num;
-				if(pindex->last_itf_num != pindex->itf_num) {			//接口alt为0,表示接口号不相同才需要分配新端点
+				if(!pindex->is_alt_itf) {			//接口alt为0,表示接口号不相同才需要分配新端点
 					pindex->ep_in_num++;
+					
 				}
 			}else{
 				endp = &pclass->endpout;
 				pep->bEndpointAddress = pindex->ep_out_num;
-				if(pindex->last_itf_num != pindex->itf_num) {
+				if(!pindex->is_alt_itf) {
 					pindex->ep_out_num++;
 				}
+
+				
 			}
 			logd("assign ep=%x\n",pep->bEndpointAddress);
 			endp->addr = pep->bEndpointAddress & 0x0F;
@@ -192,7 +198,6 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			endp->dir = (pep->bEndpointAddress & TUSB_DIR_MASK)? TUSB_DIR_IN:TUSB_DIR_OUT;
 			endp->interval = pep->bInterval;
 			endp->mtu = SWAP16_L(pep->wMaxPacketSize);
-			pindex->last_itf_num = pindex->itf_num;
         	break;
 		case TUSB_DESC_CS_INTERFACE:
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
@@ -297,79 +302,73 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, uint8_t *pdesc, uint16_t desc_len, 
 }
 
 
-
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:usb请求分发给所以接口类处理
+	注意为了通用请求能被分发给所有的接口,接口类请求处理返回err的时候自己的类请求才返回成功
+	其他消息返回ERROR_STALL继续分发
+*******************************************************************/
 error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 {
+	uint8_t i;
 	error_t err = ERROR_STALL;
-
-	uint8_t itf;
 	usbd_class_t *pclass;
 
-	if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){	//vendor
-		if (TUSB_REQ_RCPT_DEVICE == preq->req.bmRequestType.bits.recipient) {
-			if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
-				if(m_usbd_hid_types[id] & (BIT(HID_TYPE_X360))){
-					#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-					pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_X360);
-					if(pclass){
-						err = usbd_hid_x360_control_request_process(id, pclass, preq);
-					}
-					#endif
-				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_XBOX))){
-					#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-					pclass = usbd_class_find_by_type(id, DEV_TYPE_HID, HID_TYPE_XBOX);
-					if(pclass){
-						err = usbd_hid_xbox_control_request_process(id, pclass, preq);
-					}
-					#endif
-				}
-			}
-		}
-	}else{
-		itf = (uint8_t)(preq->req.wIndex & 0xFF);
+	for(i=0; i<countof(m_usbd_class[id]); i++){
+		pclass = &m_usbd_class[id][i];
 
-		pclass = usbd_class_find_by_itf(id, itf);
-		if(NULL != pclass){
-			switch(pclass->dev_type){
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
-			case DEV_TYPE_HID	:
-				err = usbd_hid_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
-			case DEV_TYPE_AUDIO	:
-				err = usbd_audio_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
-			case DEV_TYPE_PRINTER:
-				err = usbd_printer_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
-			case DEV_TYPE_MSD	:
-				err = usbd_msd_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
-			case DEV_TYPE_CDC	:
-				err = usbd_cdc_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
-			case DEV_TYPE_IAP2 :
-				err = usbd_iap2_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-			case DEV_TYPE_AUTO :
-				err = usbd_auto_control_request_process(id,pclass,preq);
-				break;
-			#endif
-			default:
-				break;
-			}
+    	if((TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
+			&& (TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient)){	//接口请求只发给对应接口
+			uint8_t itf = preq->req.wIndex & 0XFF;
+
+			
+			if(pclass->itf.if_num != itf) continue;
+			if(NULL == usbd_class_find_by_itf(id, itf)) continue;
+
 		}
+
+		switch(pclass->dev_type){
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
+		case DEV_TYPE_HID	:
+			err = usbd_hid_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
+		case DEV_TYPE_AUDIO	:
+			err = usbd_audio_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_PRINTER)
+		case DEV_TYPE_PRINTER:
+			err = usbd_printer_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_MSD)
+		case DEV_TYPE_MSD	:
+			err = usbd_msd_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_CDC)
+		case DEV_TYPE_CDC	:
+			err = usbd_cdc_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+		case DEV_TYPE_IAP2 :
+			err = usbd_iap2_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+		case DEV_TYPE_AUTO :
+			err = usbd_auto_control_request_process(id,pclass,preq);
+			break;
+		#endif
+		default:
+			break;
+		}
+
+		if(err != ERROR_STALL) break;			//处理成功退出
 	}
 	
 	return err;

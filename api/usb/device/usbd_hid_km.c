@@ -134,6 +134,7 @@ uint16_t usbd_hid_km_get_itf_desc(uint8_t id, uint8_t hid_type, itf_ep_index_t* 
 error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_req_t* const preq)
 {
 	error_t err = ERROR_STALL;
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
 	if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
@@ -158,6 +159,7 @@ error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass, us
 			break;
 		}
     }
+	#endif
     return err;
 }
 
