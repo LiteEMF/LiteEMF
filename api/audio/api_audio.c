@@ -206,7 +206,7 @@ uint16_t api_audio_mic_stream_read(uint8_t id,uint8_t *buf, uint16_t len)
 }
 
 
-bool api_audio_init(api_audio_t *paudio)
+bool api_audio_init(uint8_t id,api_audio_t *paudio)
 {
     memset(paudio, 0 , sizeof(api_audio_t));
 
@@ -238,11 +238,11 @@ bool api_audio_init(api_audio_t *paudio)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool api_audio_deinit(api_audio_t *paudio)
+bool api_audio_deinit(uint8_t id,api_audio_t *paudio)
 {
 	api_audio_close_spk(0,paudio);
 	api_audio_close_mic(0,paudio);
-	return true;
+    return hal_audio_deinit(0,paudio);
 }
 
 

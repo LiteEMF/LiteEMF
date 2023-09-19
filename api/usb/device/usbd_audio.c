@@ -724,7 +724,7 @@ error_t usbd_audio_init(uint8_t id)
     memset(&usbd_audio_info, 0, sizeof(usbd_audio_info));
 
     #if API_AUDIO_ENABLE
-	api_audio_init(&usbd_audio_info);
+	api_audio_init(USBD_AUDIO_ID,&usbd_audio_info);
     #endif
 	UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;
@@ -740,6 +740,7 @@ error_t usbd_audio_deinit(uint8_t id)
     #if API_AUDIO_ENABLE
 	api_audio_close_spk(USBD_AUDIO_ID,&usbd_audio_info);
 	api_audio_close_mic(USBD_AUDIO_ID,&usbd_audio_info);
+    api_audio_deinit(USBD_AUDIO_ID,&usbd_audio_info);
     #endif
 	UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;

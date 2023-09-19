@@ -35,8 +35,18 @@ char const* usbd_string_desc[4] =
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t m_usbd_types[USBD_NUM] = {USBD_TYPE_SUPPORT};		//for default type, please fix in project
-uint16_t m_usbd_hid_types[USBD_NUM] = {USBD_HID_SUPPORT};
+uint16_t m_usbd_types[USBD_NUM] = {
+	USBD_TYPE_SUPPORT,
+	#if USBD_NUM == 2
+	USBD_TYPE_SUPPORT,
+	#endif
+};		//for default type, please fix in project
+uint16_t m_usbd_hid_types[USBD_NUM] = {
+	USBD_HID_SUPPORT,
+	#if USBD_NUM == 2
+	USBD_HID_SUPPORT,
+	#endif
+};
 
 /******************************************************************************************************
 **	static Parameters
@@ -208,7 +218,11 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 	dev.bDeviceProtocol    = 0;
 	dev.bMaxPacketSize0    = USBD_ENDP0_MTU; 
 	dev.idVendor           = SWAP16_L(USB_VID);
+	#ifdef USB_PID
 	dev.idProduct          = SWAP16_L(USB_PID);
+	#else
+	dev.idProduct          = SWAP16_L(m_usbd_types[id] | m_usbd_hid_types[id]);
+	#endif
 	dev.bcdDevice          = SWAP16_L(0x100);	//v1.0
 	dev.iManufacturer      = 1;
 	dev.iProduct           = 2;
@@ -528,7 +542,7 @@ void usbd_setup_process( uint8_t id )
 
 	if(preq->req.wLength && (NULL == preq->setup_buf)) return;
 
-	logd("steup:");dumpd((uint8_t*)&preq->req,8);
+	logd("setup:");dumpd((uint8_t*)&preq->req,8);
 	//等待接收完整数据
 	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){
 		rx_len = preq->req.wLength;

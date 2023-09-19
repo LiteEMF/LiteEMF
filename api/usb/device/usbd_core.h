@@ -64,9 +64,9 @@ extern "C" {
 #ifndef USB_VID
 #define USB_VID				VID_DEFAULT
 #endif
-#ifndef USB_PID	
-#define USB_PID				(USBD_HID_SUPPORT | USBD_TYPE_SUPPORT)
-#endif
+// #ifndef USB_PID	
+// #define USB_PID				(USBD_HID_SUPPORT | USBD_TYPE_SUPPORT)
+// #endif
 
 
 #ifndef USBD_MAX_ITF_NUM

@@ -112,8 +112,8 @@ void api_audio_open_mic(uint8_t id,api_audio_t *paudio,uint32_t rate,uint8_t res
 void api_audio_close_mic(uint8_t id,api_audio_t *paudio);
 void api_audio_spk_stream_write(uint8_t id,uint8_t *buf, uint16_t len);
 uint16_t api_audio_mic_stream_read(uint8_t id,uint8_t *buf, uint16_t len);
-bool api_audio_init(api_audio_t *paudio);
-bool api_audio_deinit(api_audio_t *paudio);
+bool api_audio_init(uint8_t id,api_audio_t *paudio);
+bool api_audio_deinit(uint8_t id,api_audio_t *paudio);
 void api_audio_task(void* pa);
 void api_audio_handler(uint32_t period_10us);
 
@@ -126,7 +126,7 @@ void hal_audio_close_spk(uint8_t id);
 void hal_audio_open_mic(uint8_t id,api_audio_t *paudio);
 void hal_audio_close_mic(uint8_t id);
 bool hal_audio_init(uint8_t id,api_audio_t *paudio);
-
+bool hal_audio_deinit(uint8_t id,api_audio_t *paudio);
 #ifdef __cplusplus
 }
 #endif

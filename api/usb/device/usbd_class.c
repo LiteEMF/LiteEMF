@@ -315,17 +315,23 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 	error_t err = ERROR_STALL;
 	usbd_class_t *pclass;
 
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+	if(m_usbd_types[id] == BIT(DEV_TYPE_AUTO)){		//auto 特殊处理
+		err = usbd_auto_control_request_process(id,NULL,preq);
+		return err;
+	}
+	#endif
+	
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
 
+		//接口请求只发给对应接口
     	if((TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
-			&& (TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient)){	//接口请求只发给对应接口
+			&& (TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient)){	
 			uint8_t itf = preq->req.wIndex & 0XFF;
 
-			
 			if(pclass->itf.if_num != itf) continue;
 			if(NULL == usbd_class_find_by_itf(id, itf)) continue;
-
 		}
 
 		switch(pclass->dev_type){
@@ -357,11 +363,6 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 		case DEV_TYPE_IAP2 :
 			err = usbd_iap2_control_request_process(id,pclass,preq);
-			break;
-		#endif
-		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-		case DEV_TYPE_AUTO :
-			err = usbd_auto_control_request_process(id,pclass,preq);
 			break;
 		#endif
 		default:
@@ -406,6 +407,13 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 {
 	uint8_t i;
 	usbd_class_t *pclass;
+
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
+	if(m_usbd_types[id] == BIT(DEV_TYPE_AUTO)){		//auto 特殊处理
+		usbd_auto_process(id, pclass, event, 0);
+		return ERROR_SUCCESS;
+	}
+	#endif
 
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
@@ -458,11 +466,6 @@ void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint
 		usbd_iap2_process(id, pclass, evt, val);
 		break;
 	#endif
-	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
-	case DEV_TYPE_AUTO :
-		usbd_auto_process(id, pclass, evt, val);
-		break;
-	#endif
 	default:
 		break;
 	}
@@ -473,6 +476,8 @@ error_t usbd_class_init(uint8_t id)
 {
 	uint8_t type;
 
+	logd_r("usbd types=%x hid_types=%x\n",m_usbd_types[id], m_usbd_hid_types[id]);
+	
 	memset(&m_usbd_class[id], 0, sizeof(m_usbd_class[id]));
 
 	for(type=0; type<DEV_TYPE_NONE; type++){

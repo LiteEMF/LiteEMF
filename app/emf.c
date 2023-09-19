@@ -296,6 +296,10 @@ void emf_handler(uint32_t period_10us)
 	usbh_handler(100);
 	#endif
 
+	#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO))
+	usbd_auto_handler(0, 100);
+	#endif
+
 	user_vender_handler();
 }
 
