@@ -215,7 +215,7 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 		pdev->enpd_in_busy[0] = 1;			//注意endp0开始发发送接触busy状态
 		preq->setup_len = len;
 		preq->setup_index = 0;
-		if(preq->setup_buf != buf){
+		if(preq->setup_buf != buf){			//TODO out 处理
 			memcpy((void*)preq->setup_buf, buf, len);
 		}
 		err = hal_usbd_in(id, ep, (void*)preq->setup_buf, preq->setup_len);

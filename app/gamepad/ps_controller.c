@@ -59,10 +59,27 @@ static uint8_t ps_report_index=0;
 static ps_touch_t m_ps_touch[PS4_SLOT_MAX];
 static uint8_t mcontact_id[PS4_SLOT_MAX];			//for find contact id不能为0
 
+static uint8_t	 pskey_auto_count=0;
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	 ps4刚枚举完成时  需要先报告30次以上任意数据以后才会识别ps按键	
+*******************************************************************/
+static void ps4_auto_ps_key(trp_handle_t *phandle, ps4_report_t *ps4p)
+{
+	if(!api_transport_ready(phandle)){
+		pskey_auto_count = 0;
+	}else if(pskey_auto_count < 50){
+		pskey_auto_count++;
+		if(pskey_auto_count == 50){
+			ps4p->buttonh |= PS4_PS>>16;
+		}
+	}
+}
 static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
@@ -152,6 +169,8 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	ps4p->touch_pad6_index=0x80;
 	ps4p->touch_pad7_index=0x80;
 
+
+	ps4_auto_ps_key(phandle, ps4p);
 	return packet_len;
 }
 
@@ -720,17 +739,14 @@ void ps_controller_init(trp_handle_t *phandle)
 {
 	if(api_trp_is_slave(phandle->trp)){
 		#if (HIDD_SUPPORT & HID_PS_MASK)
+		pskey_auto_count = 0;
 		m_ps_series = PS_SERIES_NONE;
 		m_ps_enhanced_mode = false;
 		memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
 		memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
 		
 		#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
-		ps_encrypt.step	= PS_IDLE;
-		#endif
-
-		#if defined PS_7105_ENCRYPT_ENABLED
-		nxp7105_init();
+		ps_encrypt_init();
 		#endif
 
 		#endif
@@ -740,6 +756,7 @@ void ps_controller_init(trp_handle_t *phandle)
 void ps_controller_deinit(trp_handle_t *phandle)
 {
 	if(api_trp_is_slave(phandle->trp)){
+		pskey_auto_count = 0;
 		#if (HIDD_SUPPORT & HID_PS_MASK)
 		m_ps_enhanced_mode = false;
 		#endif

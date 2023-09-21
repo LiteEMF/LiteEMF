@@ -8,6 +8,8 @@
 *       opensource.org/licenses/BSD-2-Clause
 * 
 */
+
+//hory ps4
 0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 0x09, 0x05,        // Usage (Game Pad)
 0xA1, 0x01,        // Collection (Application)

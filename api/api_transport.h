@@ -138,6 +138,7 @@ bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
 bool api_trp_is_slave(trp_t trp);
 bool api_trp_is_host(trp_t trp);
+bool api_transport_ready(trp_handle_t* phandle);
 
 uint16_t api_transport_get_mtu(trp_handle_t* phandle);
 bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len);

@@ -41,9 +41,9 @@ typedef enum {
 
 	TUSB_STA_POWERED,			//上电
 	TUSB_STA_DEFAULT,			//默认状态		usbh_reset() 中设置,设备在可寻址的默认地址0状态
-	TUSB_STA_ADDRESSING,			//地址状态		CtrlSetUsbAddress() 中设置
+	TUSB_STA_ADDRESSING,		//地址状态		CtrlSetUsbAddress() 中设置
 
-	TUSB_STA_CONFIGURED,			//配置状态 		枚举成功正确配置后设置
+	TUSB_STA_CONFIGURED,		//配置状态 		枚举成功正确配置后设置
 	TUSB_STA_SUSPENDED,			//挂起状态		未使用
 }usb_state_t;
 

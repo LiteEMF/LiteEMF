@@ -19,9 +19,9 @@
 #include "emf_typedef.h" 
 #include "api/api_transport.h"
 #include "api/api_tick.h"
-#include "app/app_rumble.h"
 #include "app/gamepad/app_gamepad_key.h"
-
+#include "app/gamepad/p2.h"
+#include "app/gamepad/nxp7105.h"
 /*******************************************************************************************************************
 **	Hardware  Defined
 ********************************************************************************************************************/
@@ -54,9 +54,11 @@ extern uint8_t ps_encrypt_buf[1040];
 /*******************************************************************************************************************
 **	Functions
 ********************************************************************************************************************/
-bool os_ps_post_msg(uint32_t msg);			//weak
+bool os_ps_task_en(bool en);				//weak
 bool ps_encrypt_start(uint8_t cmd_index);
+bool ps_encrypt_stop(void);
 void ps_encrypt_task(void *pa);
+bool ps_encrypt_init(void);
 
 #endif
 

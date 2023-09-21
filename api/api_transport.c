@@ -94,6 +94,55 @@ bool api_trp_is_host(trp_t trp)
 	}
 	return false;
 }
+
+bool api_transport_ready(trp_handle_t* phandle)
+{
+	bool ready = false;
+
+	switch(phandle->trp){
+	#if API_BT_ENABLE
+	case TR_BLE	:      
+	case TR_EDR	:
+	case TR_BLEC	:
+	case TR_EDRC	:
+	case TR_BLE_RF:		
+	case TR_BLE_RFC:
+	case TR_RF	:
+	case TR_RFC	:{
+		api_bt_ctb_t* bt_ctbp = api_bt_get_ctb(phandle->trp);
+		if(NULL == bt_ctbp) break;
+		if(BT_STA_READY == bt_ctbp->sta){
+			ready = true;
+		}
+		break;
+	}
+	#endif
+	#if API_USBD_BIT_ENABLE
+	case TR_USBD	:{
+		usbd_dev_t *pdev = usbd_get_dev(phandle->id);
+		ready = pdev->ready;
+		break;
+	}
+	#endif
+	#if API_USBH_BIT_ENABLE
+	case TR_USBH	:{
+		usbh_dev_t* pdev = get_usbh_dev(phandle->id);
+		if(TUSB_STA_CONFIGURED == pdev->state){
+			ready = true;
+		}
+		break;
+	}
+	#endif
+	case TR_UART	:
+		ready = true;
+		break;
+	default:
+		break;
+	}
+	return ready;
+}
+
+
 uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 {
 	switch(phandle->trp){
@@ -142,7 +191,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	if (NULL == buf)		return false;
 
 	if((TR_RF != phandle->trp) && (TR_RFC != phandle->trp)){
-		logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
+		//logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
 	}
 	switch(phandle->trp){
 		#if API_BT_ENABLE

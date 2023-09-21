@@ -217,21 +217,44 @@ hid_type_t app_gamepad_get_hidtype(uint16_t hid_types)
 	return hid_type;
 }
 
-void app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp)
+hid_type_t app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp)
 {
-	hid_type_t hid_type = app_gamepad_get_hidtype(hid_types);
+	hid_type_t gamepad_type = app_gamepad_get_hidtype(hid_types);
 
 	if(hid_types & HID_SWITCH_MASK){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_SWITCH_MASK
 		*vidp = SWITCH_VID;
 		*pidp = SWITCH_PID;
 		#endif
-	}else if(hid_types & HID_PS_MASK){
+	}else if(hid_types & BIT_ENUM(HID_TYPE_PS3)){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
 		*vidp = PS_VID;
-		*pidp = PS4_PID;
+		*pidp = PS3_PID;
 		#endif
-	}else if(hid_types & HID_XBOX_MASK){
+	}else if(hid_types & BIT_ENUM(HID_TYPE_PS4)){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
+		*vidp = PS_VID;
+		if(api_trp_is_usb(trp)){
+			*pidp = PS4_PART3_PID;
+		}else{
+			*pidp = PS4_PID;
+		}
+		#endif
+	}else if(hid_types & BIT_ENUM(HID_TYPE_PS5)){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
+		*vidp = PS_VID;
+		*pidp = PS5_PID;
+		#endif
+	}else if(hid_types & BIT_ENUM(HID_TYPE_X360)){
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
+		*vidp = XBOX_VID;
+		if(api_trp_is_usb(trp)){
+			*pidp = X360_PID;
+		}else{
+			*pidp = XBOX_BT_PID;
+		}
+		#endif
+	}else if(hid_types & BIT_ENUM(HID_TYPE_XBOX)){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
 		*vidp = XBOX_VID;
 		if(api_trp_is_usb(trp)){
@@ -241,6 +264,7 @@ void app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint
 		}
 		#endif
 	}
+	return  gamepad_type;
 }
 
 /*******************************************************************
@@ -379,25 +403,25 @@ bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp)
 	switch(phandle->index & 0xff){
         #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
         case HID_TYPE_GAMEPADE:
-            len = gamepad_key_pack(phandle, keyp, buf, sizeof(buf));
+            len = gamepad_key_pack(phandle, &key, buf, sizeof(buf));
             break;
         #endif
         #if (HIDD_SUPPORT & HID_XBOX_MASK)
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
-            len = xbox_key_pack(phandle, keyp, buf, sizeof(buf));
+            len = xbox_key_pack(phandle, &key, buf, sizeof(buf));
             break;
         #endif
         #if HIDD_SUPPORT & HID_SWITCH_MASK
         case HID_TYPE_SWITCH:
-            len = switch_key_pack(phandle, keyp, buf, sizeof(buf));
+            len = switch_key_pack(phandle, &key, buf, sizeof(buf));
             break;
         #endif
         #if HIDD_SUPPORT & HID_PS_MASK
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            len = ps_key_pack(phandle, keyp, buf, sizeof(buf));
+            len = ps_key_pack(phandle, &key, buf, sizeof(buf));
             break;
         #endif
         default:

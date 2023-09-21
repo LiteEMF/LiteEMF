@@ -20,6 +20,10 @@
 #include "api/api_transport.h"
 #include "app/app_rumble.h"
 #include "app/gamepad/app_gamepad_key.h"
+#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+#include "app/gamepad/ps_crypt.h"
+#endif
+
 
 #include "app/gamepad/ps_typedef.h"
 /*******************************************************************************************************************

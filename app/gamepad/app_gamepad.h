@@ -51,7 +51,7 @@ extern "C" {
 **  Function
 ******************************************************************************************************/
 hid_type_t app_gamepad_get_hidtype(uint16_t hid_types);
-void app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp);
+hid_type_t app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp, uint16_t* pidp);
 
 uint8_t app_gamepad_get_vendor_map(trp_handle_t *phandle,uint32_t(**mapp)[2]);			//__WEAK
 uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2]);

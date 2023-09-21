@@ -13,8 +13,9 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if (HIDD_SUPPORT & HID_PS_MASK) && (defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED)
-#include  "ps_controller.h"
+#if (defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED)
+#include  "app/gamepad/ps_controller.h"
+#include  "app/gamepad/ps_crypt.h"
 #include  "api/api_tick.h"
 #include "api/api_iic_host.h"
 
@@ -46,16 +47,16 @@ uint8_t ps_encrypt_buf[1040];
 **  Function
 ******************************************************************************************************/
 
-#if PS_P2_ENCRYPT_ENABLED
+#ifdef PS_P2_ENCRYPT_ENABLED
 bool p2_write_encrypt(uint8_t index, uint8_t* buf, uint8_t len)
 {
-	bool ret;
+	bool ret = false;
 	uint16_t addr;
-	uint8_t buf[17];
+	uint8_t cmd_buf[17];
 	if(0 == index){
 		addr = 0x109;
-		buf[0] = 0;
-		memcpy(buf+1,&buf,len);
+		cmd_buf[0] = 0;
+		memcpy(cmd_buf+1,&buf,len);
 		len =  17;
 	}else {
 		if(15 == index){
@@ -64,27 +65,32 @@ bool p2_write_encrypt(uint8_t index, uint8_t* buf, uint8_t len)
 			addr = 0x01;
 		}
 		len =  16;
-		memcpy(buf,buf,len);
+		memcpy(cmd_buf,buf,len);
 	}
-	ret = hw_iic_write(0x60,addr,buf,len);
+	#ifdef HW_IIC_MAP
+	ret = api_iic_host_write(P2_IIC_ID,0x60,addr,cmd_buf,len);
+	#endif
 	return ret;
 }
 bool p2_read_encrypt(uint8_t index, uint8_t* buf, uint8_t len)
 {
-	bool ret;
+	bool ret = false;
 	uint16_t addr;
 	if(15 == index){
 		addr = 0x82;
 	}else{
 		addr = 0x83;
 	}
-	ret = hw_iic_read(0x60,addr,buf,len);
+	#ifdef HW_IIC_MAP
+	ret = api_iic_host_read(P2_IIC_ID,0x60,addr,buf,len);
+	#endif
 	return ret;
 }
 #endif
 
 
-__WEAK bool os_ps_post_msg(uint32_t msg)		//如果使用os,并且需要发送消息通知任务开启时使用
+
+__WEAK bool os_ps_task_en(bool en)		//如果使用os,用于开始和停止任务
 {
 	return true;
 }
@@ -92,16 +98,33 @@ __WEAK bool os_ps_post_msg(uint32_t msg)		//如果使用os,并且需要发送消
 bool ps_encrypt_start(uint8_t cmd_index)
 {
 	bool ret = true;
-	//hw_iic_scan();
+
 	ps_encrypt.step = PS_CHALLENGE;
 	ps_encrypt.cmd_index = cmd_index;
 
-	ret = os_ps_post_msg(PS_CHALLENGE);
+	ret = os_ps_task_en(true);
 
-	logd("PS_CHALLENGE_start=%d\n",ps_encrypt.step);
+	logd("ps_encrypt_start\n");
 	return ret;
 }
 
+bool ps_encrypt_stop(void)
+{
+	bool ret = true;
+	ps_encrypt.step = PS_IDLE;
+	ret = os_ps_task_en(false);
+
+	logd("ps_encrypt_stop\n");
+	return ret;
+}
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	p2 PS_CALCULATE_PHASE2过程运算需要占用大量时间
+	建议创建低优先级任务进行处理
+*******************************************************************/
 void ps_encrypt_task(void *pa)
 {
 	uint16_t addr;
@@ -173,7 +196,7 @@ void ps_encrypt_task(void *pa)
 		break;
 	case PS_CALCULATE_PHASE2:
 	{
-		#if PS_P2_ENCRYPT_ENABLED
+		#ifdef PS_P2_ENCRYPT_ENABLED
 		extern int p2_test(void);
 		timer_t p2_time = m_systick;
 		logd("p2 start...");
@@ -192,6 +215,19 @@ void ps_encrypt_task(void *pa)
 	}
 }
 
+
+bool ps_encrypt_init(void)
+{
+	#if defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+	ps_encrypt.step	= PS_IDLE;
+	#endif
+
+	#if defined PS_7105_ENCRYPT_ENABLED
+	nxp7105_init();
+	#endif
+
+	return true;
+}
 
 #endif
 

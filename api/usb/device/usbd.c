@@ -115,37 +115,24 @@ __WEAK char* usbd_user_get_string(uint8_t id, uint8_t index)
 __WEAK void usbd_user_set_device_desc(uint8_t id, usb_desc_device_t *pdesc)
 {
 	if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
-		if(m_usbd_hid_types[id] & HID_SWITCH_MASK){
-			#if USBD_HID_SUPPORT & HID_SWITCH_MASK
-			pdesc->idVendor = SWITCH_VID;
-			pdesc->idProduct = SWITCH_PID;
-			#endif
-		}else if(m_usbd_hid_types[id] & HID_PS_MASK){
-			#if USBD_HID_SUPPORT & HID_PS_MASK
-			pdesc->idVendor = PS_VID;
-			if(m_usbd_hid_types[id] & BIT(HID_TYPE_PS3)){
-				pdesc->idProduct = PS3_PID;
-			}else{
-				pdesc->idProduct = PS4_PID;
-			}
-			#endif
-		}else if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
-			#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
-			pdesc->idVendor = XBOX_VID;	//0xFF,0x47,0xD0
-			pdesc->idProduct = XBOX_PID;
+
+		#if USBD_HID_SUPPORT & HID_GAMEPAD_MASK
+		//注意xinput 复合设备使用自定义vid
+		if((m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_X360)) && (m_usbd_hid_types[id] != BIT_ENUM(HID_TYPE_X360))){	
+			return;
+		}
+
+		app_gamepad_get_vid_pid(TR_USBD, m_usbd_hid_types[id], &pdesc->idVendor, &pdesc->idProduct);
+		if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
 			pdesc->bDeviceClass       = 0xFF;
 			pdesc->bDeviceSubClass    = 0x47;
 			pdesc->bDeviceProtocol    = 0xD0;
-			#endif
-		}else if(m_usbd_hid_types[id] == BIT_ENUM(HID_TYPE_X360)){		//xinput 复合设备使用自定义vid
-			#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)
-			pdesc->idVendor = XBOX_VID;	//0xFF,0x47,0xD0
-			pdesc->idProduct = X360_PID;	//0xff, 0xff, 0xff
+		}else if(m_usbd_hid_types[id] == BIT_ENUM(HID_TYPE_X360)){
 			pdesc->bDeviceClass       = 0xFF;
 			pdesc->bDeviceSubClass    = 0xff;
 			pdesc->bDeviceProtocol    = 0xff;
-			#endif
 		}
+		#endif
 	}
 }
 
@@ -699,7 +686,7 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 	}
 
 	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
-		usbd_endp_ack(id, 0x00, 0);
+		usbd_endp_ack(id, 0x00, preq->req.wLength);
 	}
 }
 

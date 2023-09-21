@@ -325,7 +325,7 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
 
-		//接口请求只发给对应接口
+		//接口请求只发给对应接口,注意 TUSB_REQ_TYPE_VENDOR 请求wIndex不一定是接口号
     	if((TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type)
 			&& (TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient)){	
 			uint8_t itf = preq->req.wIndex & 0XFF;

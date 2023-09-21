@@ -124,6 +124,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 {
 	error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
+	ps4_cmd_t* cmdp = (ps4_cmd_t*)preq->setup_buf;
 
 	if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t report_type = preq->req.wValue>>8;
@@ -132,40 +133,62 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 		switch(preq->req.bRequest){
 		case HID_REQ_CONTROL_GET_REPORT:
 			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->req.wLength){
+				memset(cmdp, 0, sizeof(ps4_cmd_t));
 				switch (report_id){
                 case 0X03:		//第三方手柄主机会发03,解决PS4体感键盘无法使用的问题
-					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_03));
+					preq->setup_len = preq->req.wLength;
 					memcpy(preq->setup_buf,class_reuqes_in_03,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break; 
 				case 0XF3:		//第三方手柄主机会发F3
-					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_f3));
+					preq->setup_len = preq->req.wLength;
 					memcpy(preq->setup_buf,class_reuqes_in_f3,preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
                 case 0X02:		//原装手柄主机会发02
-					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reuqes_in_02));
+					preq->setup_len = preq->req.wLength;
 					memcpy(preq->setup_buf,class_reuqes_in_02,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break;
 				case 0XA3:
-					preq->setup_len = MIN(preq->req.wLength, sizeof(class_reques_in_a3));
+					preq->setup_len = preq->req.wLength;
 					memcpy(preq->setup_buf,class_reques_in_a3,preq->setup_len);
 					err = ERROR_SUCCESS;
 					break;
                 case 0X12:{
 					ps_bt_mac_t ps_mac;
 					ps_get_bt_mac(&ps_mac);
-					preq->setup_len = MIN(preq->req.wLength, sizeof(ps_mac));
+					preq->setup_len = preq->req.wLength;
 					memcpy(preq->setup_buf,&ps_mac,preq->setup_len);
 					err = ERROR_SUCCESS;
                     break;
 				}
 				case 0XF1:	//responce key
-					//do encryption
+					#if  defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+					cmdp->cmd = PS_ANSWE_CMD;
+					cmdp->index = ps_encrypt.cmd_index;
+					cmdp->data_index = ps_encrypt.index;
+					memcpy(cmdp->buf, &ps_encrypt_buf[ps_encrypt.index*sizeof(cmdp->buf)],sizeof(cmdp->buf));
+					preq->setup_len = preq->req.wLength;
+					ps_encrypt.index++;
+					if(ps_encrypt.index > 18){
+						ps_encrypt_stop();
+					}
+					err = ERROR_SUCCESS;
+					#endif
 					break;
 				case 0XF2:	//caculate key
-					//do encryption
+					#if  defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+					cmdp->cmd = PS_CALCULATE_CHECK_CMD;
+					cmdp->index = ps_encrypt.cmd_index;
+					if(PS_ANSWER == ps_encrypt.step){
+						cmdp->data_index = 0;
+					}else{
+						cmdp->data_index = 0x10;
+					}
+					preq->setup_len = preq->req.wLength;
+					err = ERROR_SUCCESS;
+					#endif
 					break;
                 default:
                     break;
@@ -174,7 +197,7 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 			break;
 		case  HID_REQ_CONTROL_SET_REPORT:
 			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->req.wLength){
-				logd("usbd ps set report id=%d:",report_id);dumpd(preq->setup_buf,preq->req.wLength);
+				logd("usbd ps set report id=%x:",report_id);dumpd(preq->setup_buf,preq->req.wLength);
 				switch(report_id){
 				case 0X13:{
 					ps_set_bt_link((ps_bt_link_t*)preq->setup_buf);
@@ -184,7 +207,13 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 					err = ERROR_SUCCESS;
 					break;
 				case 0xF0: 	//set tocken key
-					//do encryption
+					#if  defined PS_P2_ENCRYPT_ENABLED || defined PS_7105_ENCRYPT_ENABLED
+					memcpy(&ps_encrypt_buf[cmdp->data_index*sizeof(cmdp->buf)], cmdp->buf,sizeof(cmdp->buf));
+					if(cmdp->data_index == 4){
+						ps_encrypt_start(cmdp->index);
+					}
+					err = ERROR_SUCCESS;
+					#endif
 					break;
 				}
 			}
@@ -240,6 +269,12 @@ error_t usbd_hid_ps_init(uint8_t id)
 *******************************************************************/
 error_t usbd_hid_ps_deinit(uint8_t id)
 {
+	trp_handle_t trp_handle;
+		
+	trp_handle.trp = TR_USBD;
+	trp_handle.id = id;
+	trp_handle.index = U16(DEV_TYPE_HID, HID_TYPE_PS4);
+	app_gamepad_deinit( &trp_handle ); 
     UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;
 }
