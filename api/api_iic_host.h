@@ -83,6 +83,7 @@ extern uint8c_t m_iic_num;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+bool hal_iic_scan_addr(uint8_t id,uint8_t dev_addr);
 bool api_iic_host_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);
 bool api_iic_host_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len);
 bool api_iic_host_isr_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len);

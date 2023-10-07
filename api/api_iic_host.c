@@ -100,7 +100,7 @@ static bool write(uint8_t id,uint8_t buf)
 	uint8_t i;
     IIC_SDA_DIR(id,PIN_OUT);
     for(i=0;i<8;i++){
-        write_bit(id,buf&0x80);
+        write_bit(id,BOOL_SET(buf&0x80));
         buf<<=1;
     }
     IIC_SDA_DIR(id,PIN_IN);
@@ -142,7 +142,7 @@ static bool write_dev_addr(uint8_t id,uint8_t addr)
 			if(ret) break;
         }
         IIC_DELAY(id);
-        logd("iic retry %d\n", i);
+        // logd("iic retry %d\n", i);
     }
 	return ret;
 }
@@ -322,13 +322,27 @@ bool api_iic_host_scan(uint8_t id)
 	bool ret = false;
   	logi("iic(%d) scan\n",(uint16_t)id);
 
+	if(os_iic_busy) return ret;
+	os_iic_busy = true;
+
+	api_gpio_out(m_iic_map[id].cs, 0);				//cs select
+
 	for ( addr = 1; addr < 0x80; addr++) {
-		ret = api_iic_host_write(id,addr<<1,0, NULL,0);
+		#if IIC_SOFT_ENABLE
+		start(id);
+		ret = write(id,addr<<1);
+		stop(id);
+		#else
+		ret = hal_iic_scan(id,addr<<1);
+		#endif
+
 		if (ret) break;
 	}
+	api_gpio_out(m_iic_map[id].cs, 1);			//cs select
+	os_iic_busy = false;
 
     if(ret){
-		logi("api iic found :0x%x\n",(uint16_t)addr);;
+		logi("api iic found :0x%x\n",(uint16_t)addr<<1);;
 	}else{
 		logi("api iic not found\n");
 	}
