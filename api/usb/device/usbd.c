@@ -532,11 +532,12 @@ void usbd_setup_process( uint8_t id )
 	logd("setup:");dumpd((uint8_t*)&preq->req,8);
 	//等待接收完整数据
 	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){
-		rx_len = preq->req.wLength;
+		rx_len = preq->req.wLength - preq->setup_index;
 		err = usbd_out(id, 0x00, preq->setup_buf, &rx_len);
 		if(ERROR_SUCCESS == err){
 			preq->setup_index += rx_len;
 			if(preq->req.wLength == preq->setup_index){		//rx finish
+				preq->setup_len = 0;			//进入in阶段清除setup_len
 				preq->setup_index = 0;
 				pdev->dev.setup = 0;	
 			}		
@@ -618,7 +619,7 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 			}
 		}
 
-		if(preq->setup_index <= preq->setup_len){
+		if((preq->setup_index <= preq->setup_len) && (TUSB_DIR_IN == preq->req.bmRequestType.bits.direction)){
 			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
 		}
 	}else{
@@ -686,7 +687,8 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 	}
 
 	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
-		usbd_endp_ack(id, 0x00, preq->req.wLength);
+		preq->setup_len = preq->req.wLength;
+		usbd_endp_ack(id, 0x00, 0);
 	}
 }
 

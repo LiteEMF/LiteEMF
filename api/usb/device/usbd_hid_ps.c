@@ -42,12 +42,8 @@ static uint8c_t ps_gamepade_itf_desc_tab[] = {
 
 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 //uint8c_t class_reuqes_in_03[20] ={0x03,0x21,0x27,0x04,0x41,0x00,0x2c,0x56,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x0D};	//HORY 手柄
-//uint8c_t class_reuqes_in_03[20] ={0x03,0x21,0x27,0x04,0x89,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x0D};
-static uint8c_t class_reuqes_in_03[] = {
-	0x03, 0x21, 0x27, 0x04, 0xCF, 0x00, 0x2C, 0x56, 0x08, 0x00, 0x3D, 0x00, 0xE8, 0x03, 0x04, 0x00, 
-	0xFF, 0x7F, 0x0D, 0x0D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-};
+uint8c_t class_reuqes_in_03[20] ={0x03,0x21,0x27,0x04,0x89,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x0D};
+// uint8c_t class_reuqes_in_03[] = {0x03,0x21,0x27,0x04,0xCF,0x00,0x2C,0x56,0x08,0x00,0x3D,0x00,0xE8,0x03,0x04,0x00,0xFF,0x7F,0x0D,0x0D};
 
 static uint8c_t class_reuqes_in_02[] = {
 	0x02, 0x06, 0x00, 0xF7, 0xFF, 0xFA, 0xFF, 0x0B, 0x22, 0xED, 0xDD, 0x6C, 0x22, 
@@ -133,33 +129,30 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 		switch(preq->req.bRequest){
 		case HID_REQ_CONTROL_GET_REPORT:
 			if ((report_type == HID_REPORT_TYPE_FEATURE) && preq->req.wLength){
-				memset(cmdp, 0, sizeof(ps4_cmd_t));
+				preq->setup_len = preq->req.wLength;
+				memset(cmdp, 0, MIN(preq->req.wLength,sizeof(ps4_cmd_t)));		//这里注意防止内存溢出
+
 				switch (report_id){
                 case 0X03:		//第三方手柄主机会发03,解决PS4体感键盘无法使用的问题
-					preq->setup_len = preq->req.wLength;
-					memcpy(preq->setup_buf,class_reuqes_in_03,preq->setup_len);
+					memcpy(preq->setup_buf,class_reuqes_in_03,MIN(preq->setup_len,sizeof(class_reuqes_in_03)));
 					err = ERROR_SUCCESS;
                     break; 
 				case 0XF3:		//第三方手柄主机会发F3
-					preq->setup_len = preq->req.wLength;
-					memcpy(preq->setup_buf,class_reuqes_in_f3,preq->setup_len);
+					memcpy(preq->setup_buf,class_reuqes_in_f3,MIN(preq->setup_len,sizeof(class_reuqes_in_f3)));
 					err = ERROR_SUCCESS;
 					break;
                 case 0X02:		//原装手柄主机会发02
-					preq->setup_len = preq->req.wLength;
-					memcpy(preq->setup_buf,class_reuqes_in_02,preq->setup_len);
+					memcpy(preq->setup_buf,class_reuqes_in_02,MIN(preq->setup_len,sizeof(class_reuqes_in_02)));
 					err = ERROR_SUCCESS;
                     break;
 				case 0XA3:
-					preq->setup_len = preq->req.wLength;
-					memcpy(preq->setup_buf,class_reques_in_a3,preq->setup_len);
+					memcpy(preq->setup_buf,class_reques_in_a3,MIN(preq->setup_len,sizeof(class_reques_in_a3)));
 					err = ERROR_SUCCESS;
 					break;
                 case 0X12:{
 					ps_bt_mac_t ps_mac;
 					ps_get_bt_mac(&ps_mac);
-					preq->setup_len = preq->req.wLength;
-					memcpy(preq->setup_buf,&ps_mac,preq->setup_len);
+					memcpy(preq->setup_buf,&ps_mac,MIN(preq->setup_len,sizeof(ps_mac)));
 					err = ERROR_SUCCESS;
                     break;
 				}
@@ -169,7 +162,6 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 					cmdp->index = ps_encrypt.cmd_index;
 					cmdp->data_index = ps_encrypt.index;
 					memcpy(cmdp->buf, &ps_encrypt_buf[ps_encrypt.index*sizeof(cmdp->buf)],sizeof(cmdp->buf));
-					preq->setup_len = preq->req.wLength;
 					ps_encrypt.index++;
 					if(ps_encrypt.index > 18){
 						ps_encrypt_stop();
@@ -186,7 +178,6 @@ error_t usbd_hid_ps_control_request_process(uint8_t id, usbd_class_t *pclass, us
 					}else{
 						cmdp->data_index = 0x10;
 					}
-					preq->setup_len = preq->req.wLength;
 					err = ERROR_SUCCESS;
 					#endif
 					break;

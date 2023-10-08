@@ -136,7 +136,7 @@ void ps_encrypt_task(void *pa)
 		ps_encrypt.len = 0;
 		ps_encrypt.index = 0;
 
-		#if definedPS_P2_ENCRYPT_ENABLED
+		#if defined PS_P2_ENCRYPT_ENABLED
 		ps_encrypt.step = PS_WRITE_SECURITY;
 		logd("set PS_WRITE_SECURITY\n");
 		#elif defined PS_7105_ENCRYPT_ENABLED
