@@ -12,7 +12,9 @@
 
 #ifndef _app_led_h
 #define _app_led_h
+#include "hw_config.h"
 #include "emf_typedef.h" 
+#include "api/api_gpio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,8 +51,10 @@ typedef struct{
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
-
+#if APP_LED_ENABLE
+extern const_t pin_t m_led_map[];
+extern uint8c_t m_led_num;
+#endif
 
 /*****************************************************************************************************
 **  Function

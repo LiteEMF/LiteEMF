@@ -47,6 +47,7 @@ bool m_key_power_on = false;
 ******************************************************************************************************/
 void app_key_dump(uint32_t key)
 {
+    #if KEY_DUMP_ENABLE
     logd("key=%x:",key);
     #if 1
     if(key & HW_KEY_A 		) logd("    A,");
@@ -83,6 +84,7 @@ void app_key_dump(uint32_t key)
     if(key & HW_KEY_POWER 	) logd("	POWER,");
     #endif
     logd("\n");
+    #endif
 }
 
 #if WEAK_ENABLE
@@ -132,8 +134,8 @@ void app_key_scan_task(void *pa)
     app_key_vendor_scan(&key);	
 
     if(m_key_scan != key){
-        m_key_scan = key;
-    //    app_key_dump(key);
+       m_key_scan = key;
+       app_key_dump(key);
     }
     UNUSED_PARAMETER(pa);
 }
@@ -163,19 +165,25 @@ void app_key_decode_task(uint32_t key_scan)
                 if(key_cnt[i] >= KEY_LONG_LONG_TIME){
                     if(!(m_app_key.long_long & bits)){
                         m_app_key.long_long |= bits;
+                        #if KEY_DUMP_ENABLE
                         logd("press_long_long: 0x%x\n", m_app_key.long_long);
+                        #endif
                         ret = true;
                     }                
                 }else if(key_cnt[i] >= KEY_LONG_TIME){
                     if(!(m_app_key.press_long & bits)){
                         m_app_key.press_long |= bits;
+                        #if KEY_DUMP_ENABLE
                         logd("press_long=%x\n",m_app_key.press_long);
+                        #endif
                         ret = true;
                     }
                 }else if(key_cnt[i] >= KEY_SHORT_TIME){
                     if(!(m_app_key.press_short & bits)){
                         m_app_key.press_short |= bits;
+                        #if KEY_DUMP_ENABLE
                         logd("press_short=%x\n",m_app_key.press_short);
+                        #endif
                         ret = true;
                     }
                 }
@@ -187,7 +195,9 @@ void app_key_decode_task(uint32_t key_scan)
                         if(m_app_key.pre_double_b & bits){
                             m_app_key.double_b |= bits;
                             m_app_key.pre_double_b &= ~bits;
+                            #if KEY_DUMP_ENABLE
                             logd("m_app_key.double_b\n");
+                            #endif
                         }else{
                             m_app_key.pre_double_b |= bits;                          
                         }
@@ -208,7 +218,9 @@ void app_key_decode_task(uint32_t key_scan)
                     key_cnt[i] = 0;
                     m_app_key.pre_double_b &= ~bits;
                     m_app_key.pressed_b |= bits;
+                    #if KEY_DUMP_ENABLE
                     logd("m_app_key.pressed_b\n");
+                    #endif
                     ret = true;
                 }
             }else if(((m_app_key.pressed_b | m_app_key.double_b) & bits)){

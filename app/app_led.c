@@ -41,6 +41,7 @@
 	#define HW_LED_NUM	3
 	#endif
 	uint8c_t m_led_num = HW_LED_NUM;
+	uint8c_t m_led_active_map[HW_LED_NUM];
 	led_ctb_t led_ctb[HW_LED_NUM];
 	uint8_t led_frame[HW_LED_NUM];
 #endif

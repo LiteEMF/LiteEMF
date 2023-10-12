@@ -261,7 +261,7 @@ error_t usbh_match_hub( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err;
+    error_t err = ERROR_UNSUPPORT;
     uint8_t i,port_num;
     uint8_t buf[4];
     usbh_dev_t* pdev = get_usbh_dev(id);

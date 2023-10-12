@@ -151,7 +151,7 @@ error_t usbh_match_audio( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err = ERROR_UNKNOW;
+    error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	if(pclass->itf.if_sub_cls == AUDIO_SUBCLASS_CONTROL){

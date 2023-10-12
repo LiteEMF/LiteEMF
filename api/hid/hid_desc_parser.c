@@ -51,11 +51,11 @@ static error_t hid_desc_parse_report_type(hid_desc_info_t *pinfo,hid_item_info_t
 
     //  Reality Check on the Report Main Item
     if (pinfo->globals.logicalMinimum >= ((int32_t)1<<pinfo->globals.reportsize)) {
-        logd("err%d\n",__LINE__);
+        logd("hid_desc_parse err%d\n",__LINE__);
         return(ERROR_DATA) ;
     }
     if (pinfo->globals.logicalMaximum >= ((int32_t)1<<pinfo->globals.reportsize)){
-        logd("err%d\n",__LINE__);
+        logd("hid_desc_parse err%d\n",__LINE__);
         return(ERROR_DATA);
     }
     // The barcode scanner has this issue.  We'll ignore it.

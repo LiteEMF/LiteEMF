@@ -216,8 +216,7 @@ static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, ap
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-
-#if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 void xbox_spk_transfer(uint8_t id, usb_endp_t *endpp, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t spk_buf[192+6];

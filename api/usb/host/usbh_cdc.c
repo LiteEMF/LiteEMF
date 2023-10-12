@@ -126,7 +126,7 @@ error_t usbh_match_cdc( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_cdc_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err = ERROR_UNKNOW;
+    error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	cdc_line_coding_t line_coding = CFG_TUH_CDC_LINE_CODING_ON_ENUM;
 

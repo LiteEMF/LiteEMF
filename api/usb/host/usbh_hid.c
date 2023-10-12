@@ -176,6 +176,12 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             usbh_hid_km_in_process(id, pclass, buf, len);
             break;
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_X360	:
+        case HID_TYPE_XBOX	:
+        case HID_TYPE_SWITCH:
+        case HID_TYPE_PS3	:
+        case HID_TYPE_PS4	:
+        case HID_TYPE_PS5	:
             #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_in_process(id, pclass, buf, len);
             #endif
@@ -199,7 +205,7 @@ error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_NOT_FOUND;
     if(TUSB_CLASS_HID == pclass->itf.if_cls){
         err = ERROR_SUCCESS;
-    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){
+    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){          //xbox 特殊处理
         if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) || (X360_SUBCLASS == pclass->itf.if_sub_cls)){
             if(pclass->endpin.addr && (TUSB_ENDP_TYPE_INTER == pclass->endpin.type)){
                 err = ERROR_SUCCESS;
@@ -215,7 +221,7 @@ error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err = ERROR_UNKNOW;
+    error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
     switch(pclass->hid_type){
@@ -224,6 +230,12 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
             err = usbh_hid_km_open(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_X360	:
+        case HID_TYPE_XBOX	:
+        case HID_TYPE_SWITCH:
+        case HID_TYPE_PS3	:
+        case HID_TYPE_PS4	:
+        case HID_TYPE_PS5	:
             #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_open(id, pclass);
             #endif
@@ -277,8 +289,11 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
             }
             hid_desc_info_free(&hid_info);
         }
+    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){          //xbox 特殊处理
+        if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) || (X360_SUBCLASS == pclass->itf.if_sub_cls)){
+            err = usbh_hid_gamepad_init(id, pclass, NULL);
+        }
     }
-
     return err;
 }
 
@@ -296,6 +311,12 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
             err = usbh_hid_km_deinit(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_X360	:
+        case HID_TYPE_XBOX	:
+        case HID_TYPE_SWITCH:
+        case HID_TYPE_PS3	:
+        case HID_TYPE_PS4	:
+        case HID_TYPE_PS5	:
             #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_deinit(id, pclass);
             #endif
@@ -319,6 +340,12 @@ void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
             usbh_hid_km_task(id, pclass);
             break;
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_X360	:
+        case HID_TYPE_XBOX	:
+        case HID_TYPE_SWITCH:
+        case HID_TYPE_PS3	:
+        case HID_TYPE_PS4	:
+        case HID_TYPE_PS5	:
             #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_task(id, pclass);
             #endif

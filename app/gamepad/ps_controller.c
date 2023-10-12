@@ -691,7 +691,7 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         app_rumble_set_duty(RUMBLE_L,peffects->effects.rumble_l,10000);
 		app_rumble_set_duty(RUMBLE_R,peffects->effects.rumble_r,10000);
 
-		#if API_AUDIO_ENABLE
+		#if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 		if(peffects->effects.volume_l || peffects->effects.volume_r){
 			api_audio_spk_set_vol(0, &usbd_audio_info,peffects->effects.volume_l, peffects->effects.volume_r);
 		}

@@ -219,7 +219,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
             logd("usbh x360\n");
             err = ERROR_SUCCESS;
         }
-    }else{          //TUSB_CLASS_HID识别ps4 switch dinput
+    }else if(NULL != pinfo){          //TUSB_CLASS_HID识别ps4 switch dinput
         uint8_t i;
         hid_items_t hat_switch,vendor;
 

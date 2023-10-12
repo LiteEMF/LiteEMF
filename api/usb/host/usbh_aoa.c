@@ -190,7 +190,7 @@ error_t usbh_match_aoa( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_aoa_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err = ERROR_UNKNOW;
+    error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	uint8_t *pdesc;
 	uint16_t len;

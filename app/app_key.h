@@ -12,6 +12,7 @@
 
 #ifndef _app_key_h
 #define _app_key_h
+#include "hw_config.h"
 #include "emf_typedef.h" 
 #include "key_typedef.h"
 #include "io_key.h"
@@ -25,7 +26,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef KEY_PERIOD_DEFAULT					//*ms
-#define KEY_PERIOD_DEFAULT 			(10)			
+#define KEY_PERIOD_DEFAULT 			(1)			
 #endif
 #ifndef KEY_LONG_LONG_TIME					//*(KEY_PERIOD_DEFAULT)ms
 #define KEY_LONG_LONG_TIME 			(5000 / ( KEY_PERIOD_DEFAULT) )
@@ -44,6 +45,9 @@ extern "C" {
 #endif
 
 
+#ifndef KEY_DUMP_ENABLE
+#define KEY_DUMP_ENABLE 			0
+#endif
 
 
 /******************************************************************************************************

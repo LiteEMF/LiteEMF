@@ -64,7 +64,7 @@ __WEAK void user_vender_handler(void)
 *******************************************************************/
 bool emf_api_init(void)
 {
-	logd("emf_api_init\n");
+	logi_g("emf_api_init,mode:%s\n",DEFAULT_MODEL);
 	// emf_mem_init();
 	// #ifdef HW_UART_MAP
 	// api_uart_init(UART_DEBUG_ID);			
@@ -268,7 +268,7 @@ void emf_handler(uint32_t period_10us)
 	#endif
 
 	#if APP_GAMEAPD_ENABLE && APP_KEY_ENABLE	 					//二选一
-	app_key_decode_handler(100,m_gamepad_key.key);
+	app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_gamepad_key.key);
 	#elif APP_KEY_ENABLE
     app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_key_scan);
 	#endif

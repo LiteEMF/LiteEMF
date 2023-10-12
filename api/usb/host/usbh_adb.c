@@ -76,7 +76,7 @@ error_t usbh_match_adb( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 error_t usbh_adb_open( uint8_t id, usbh_class_t *pclass) 
 {
-    error_t err = ERROR_UNKNOW;
+    error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
     err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);

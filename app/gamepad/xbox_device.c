@@ -253,7 +253,7 @@ void get_xbox_info(xbox_info_t* infp)
 	memcpy(infp->unknown,xbox_info_unknow,sizeof(xbox_info_unknow));
 }
 
-#if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
+#if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 void xbox_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 {
 	uint8_t  mic_buffer[64];
@@ -279,7 +279,7 @@ void xbox_mic_transfer(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t frame_len)
 void get_xbox_vol(uint8_t id,xbox_vol_ctrl_t* volp)
 {
 	uint16_t vol_l=100, vol_r=100, vol_mic=100;
-	#if API_AUDIO_ENABLE
+	#if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 	api_audio_spk_get_vol_percent(id,&usbd_audio_info,&vol_l, &vol_r);
 	vol_mic = api_audio_mic_get_vol_percent(id,&usbd_audio_info);
 	#endif
@@ -299,7 +299,7 @@ void get_xbox_vol(uint8_t id,xbox_vol_ctrl_t* volp)
 }
 void set_xbox_vol(uint8_t id,xbox_vol_ctrl_t*volp)
 {
-	#if API_AUDIO_ENABLE
+	#if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 	if(0x05 == volp->off){
 		logd_r("set_xbox_vol mult\n");
 		api_audio_spk_set_vol(id,&usbd_audio_info,0,0);
@@ -375,7 +375,7 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 					break;
 				}
 
-				#if API_AUDIO_ENABLE
+				#if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))
 				case XBOX_UNKNOWN_04_CMD:							//注意:引导手柄如果没有接耳机, 不会回复指令
 					if(rx_cmdp->bctrl & XBOX_CTRL_UAC){
 						xbox_command_fill(phandle,tx_cmdp,&xbox_dev_index,xbox_dev_uac_en,XBOX_UNKNOWN_04_CMD,(uint8_t*)xbox_uac_cmd_04,sizeof(xbox_uac_cmd_04));	//TODO 选择UAC和PUT 

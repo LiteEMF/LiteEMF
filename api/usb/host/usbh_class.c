@@ -406,7 +406,7 @@ void usbh_class_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint1
 *******************************************************************/
 error_t usbh_class_open(uint8_t id)
 {
-	error_t err = ERROR_UNKNOW;
+	error_t err = ERROR_UNSUPPORT;
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 

@@ -285,12 +285,14 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 				}
 
 				pclass->dev_type = usbh_match_class(id,pclass);
+				logd("usbh itft%d dev_type=%d\n",pclass->itf.if_num, pclass->dev_type);
 				usbh_class_itf_alt_select(id,pclass);			//user select
 
 				if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
 					err = usbh_class_init(id, pclass, buf + i, len - i);
 
 					if(ERROR_SUCCESS == err){
+						logd("usbh add dev_type=%d, hid_type=%d\n",pclass->dev_type, pclass->hid_type);
 						list_add(&pclass->list, &pdev->class_list);
 					}
 				}else{
@@ -407,7 +409,7 @@ static void usbh_enum_all_device( uint32_t period_10us )
 				err = usbh_enum_device( id , MIN(60,(s_retry+1)*10));
 
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
-					logd( "usbh enum err = %X\n\n", (uint16_t)(err) );
+					logd( "usbh enum err = %d\n\n", (uint16_t)(err) );
 					s_retry++;
 					usbh_set_status(id, TUSB_STA_POWERED, 0);		//枚举还未达到最大次数 重新枚举
 				}else if(ERROR_UNSUPPORT == err){
