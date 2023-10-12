@@ -35,12 +35,6 @@ extern "C" {
 #ifndef EDRC_CMD_MTU
 #define EDRC_CMD_MTU		64
 #endif
-#ifndef BLE_RF_CMD_MTU
-#define BLE_RF_CMD_MTU		48
-#endif
-#ifndef BLEC_RF_CMD_MTU
-#define BLEC_RF_CMD_MTU		48
-#endif
 #ifndef RF_CMD_MTU
 #define RF_CMD_MTU			32
 #endif

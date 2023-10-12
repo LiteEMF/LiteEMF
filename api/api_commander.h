@@ -13,6 +13,7 @@
 #ifndef _api_commander_h
 #define _api_commander_h
 #include "emf_typedef.h" 
+#include "utils/emf_utils.h"
 #include  "api/api_transport.h"
 
 #ifdef __cplusplus
@@ -51,13 +52,13 @@ typedef struct{
 }command_head_t;
 
 typedef struct{
-	uint8_t* pcmd;				// 动态分配内存, command_head_t + data + sum , pack_index:0, len:mtu
-	uint16_t len;				// 接收指令长度, 注意 和 pcmd 指针长度是不一样的
+	bytes_t sbuf;				//单字节接收缓存字节,大小为MTU大小			
+	bytes_t cmds;				// 动态分配内存, command_head_t + data + sum , pack_index:0, len:mtu, 注意, 数据和指针长度不是一样的
 }command_rx_t;
 
 
 typedef struct {
-	trp_handle_t *phandle;
+	trp_handle_t handle;
 	void * ptimer;			//长包数据定时发送定时器
 	uint8_t *buf;			//定时发送初始化保证为NULL
 	uint16_t len;
@@ -73,9 +74,8 @@ uint16_t api_command_pack_size(uint8_t mtu,uint16_t len);
 bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms);
 bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len);
 bool api_command_arg_tx(trp_handle_t* phandle,uint8_t cmd, uint16_t arg, uint8_t *buf,uint16_t len);
-bool command_rx_free(command_rx_t *rxp);			// free  api_command_rx or api_command_rx_byte 
-bool api_command_rx(command_rx_t* rxp,uint8_t* buf,uint8_t len);
-bool api_command_rx_byte(command_rx_t *rxp, uint8_t mtu, uint8_t c, uint8_t *s_buf, uint8_t *s_plen);
+bool command_frame_rx(bytes_t *cmdp, uint8_t mtu, uint8_t c);
+bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len);
 
 #ifdef __cplusplus
 }

@@ -167,6 +167,15 @@ extern "C" {
 	#endif
 #endif
 
+
+
+
+//byte[]数组结构体
+typedef struct {
+	uint8_t *buf;
+	uint16_t len;
+}bytes_t;
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,7 +13,7 @@
 #ifndef _app_command_h
 #define _app_command_h
 #include "emf_typedef.h" 
-#include  "api/api_commander.h"
+#include "api/api_commander.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,13 +60,14 @@ typedef enum{
 	CMD_GAMEPAD_KEY,
 	CMD_JOYSTICK_CAL,
 	CMD_SET_RUMBLE,
+	CMD_LED_PERIOD,					//app_led period
 	CMD_RGB_MODE,
 	CMD_RGB_BRIGHT,
 	//res
 	
 	/*---- 0x30	设备扩展数据和控制 ----*/
 	CMD_MUSIC_VOL=0X30,				//设备音量
-	CMD_USB_STA,				//设备USB状态
+	CMD_USB_STA,					//设备USB状态
 
 	/*---- 0x50	设备配置 ----*/
 	
@@ -90,10 +91,10 @@ typedef enum{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool template_init(void);
-bool template_deinit(void);
-void template_task(void* pa);
-void template_handler(uint32_t period_10us);
+void app_command_init(void);
+bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);		//WEAK
+bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c);		
+bool app_command_rx_fifo(trp_handle_t *phandle, app_fifo_t* fifop);
 
 #ifdef __cplusplus
 }

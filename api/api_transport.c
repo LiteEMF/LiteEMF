@@ -147,17 +147,15 @@ uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 {
 	switch(phandle->trp){
 	case TR_BLE		:
+	case TR_BLE_RF	:
 		return BLE_CMD_MTU;
 	case TR_EDR		:
 		return EDR_CMD_MTU;
 	case TR_BLEC	:
+	case TR_BLE_RFC :
 		return BLEC_CMD_MTU;
 	case TR_EDRC	:
 		return EDRC_CMD_MTU;
-	case TR_BLE_RF	:
-		return BLE_RF_CMD_MTU;
-	case TR_BLE_RFC	:
-		return BLEC_RF_CMD_MTU;
 	case TR_RF		:
 		return RF_CMD_MTU;
 	case TR_RFC		:

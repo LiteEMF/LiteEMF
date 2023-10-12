@@ -75,15 +75,15 @@ bt_evt_scan_t edrc_scan_result;
 #if BT_SUPPORT & BIT_ENUM(TR_RF)
 api_bt_ctb_t m_rf;
 static bt_tx_fifo_t app_rf_tx;
-static uint8_t rf_tx_fifo_buf[RF_FIFO_LEN];
 static uint8_t rf_tx_buf[RF_TX_LL_MTU];
+static uint8_t rf_tx_fifo_buf[RF_FIFO_LEN];
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_RFC)
 api_bt_ctb_t m_rfc;
 static bt_tx_fifo_t app_rfc_tx;
-static uint8_t rfc_tx_fifo_buf[RF_FIFO_LEN];
 static uint8_t rfc_tx_buf[RFC_TX_LL_MTU];
+static uint8_t rfc_tx_fifo_buf[RF_FIFO_LEN];
 #endif
 
 
@@ -588,7 +588,7 @@ __WEAK error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
 	return ERROR_UNSUPPORT;
 }
 
-__WEAK void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
+__WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 {
     logd("weak bt%d rx:%d \n",bt,pa->len);    //dumpd(pa->buf,pa->len);
 
@@ -598,14 +598,12 @@ __WEAK void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)
 	if(NULL == bt_ctbp) return;
 
 	if(BT_UART == pa->bts){					//uart
-		// uint8_t i;
-		// command_rx_t rx;
-		// for(i=0; i<pa->len; i++){
-		// 	if(api_command_rx_byte(&rx, RF_CMD_MTU, pa->buf[i], s_cmd_buf, &s_cmd_len)){
-		// 		logd("decode %d:",rx.len); dumpd(rx.pcmd, rx.len);
-		// 		command_rx_free(&rx);
-		// 	}
-		// }
+		uint8_t i;
+		trp_handle_t handle = {bt,id,U16(DEV_TYPE_VENDOR, 0)};
+
+		for(i=0; i<pa->len; i++){
+			app_command_rx_byte(&handle, pa->buf[i]);
+		}
 	}
 }
 

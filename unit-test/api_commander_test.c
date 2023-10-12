@@ -40,15 +40,20 @@ void api_commander_test(void)
 	api_command_arg_tx(&handle, cmd, 0xaabb, test_buf,sizeof(test_buf));
 
 	//rx
-	command_rx_t rx;
 	static uint8_t s_cmd_buf[UART_CMD_MTU];
-	static uint8_t s_cmd_len = 0;
+	command_rx_t rx={{s_cmd_buf,0},{NULL,0}};
+	
 
 	logd("\ncommander_rx test:\n");
 	for(i=0; i<sizeof(packet); i++){
-		if(api_command_rx_byte(&rx, UART_CMD_MTU, packet[i], s_cmd_buf, &s_cmd_len)){
-			logd("unpack %d:",rx.len); dumpd(rx.pcmd, rx.len);
-			command_rx_free(&rx);
+		trp_handle_t handle = {TR_UART, 0, 0};
+
+		if(command_frame_rx(&rx.sbuf, UART_CMD_MTU, packet[i])){
+			api_command_rx(&rx.cmds, rx.sbuf.buf,rx.sbuf.len);
+			rx.sbuf.len = 0;
+	
+			logd("unpack %d:", rx.cmds.len); dumpd(rx.cmds.buf, rx.cmds.len);
+			emf_free_and_clear(rx.cmds.buf);
 		}
 	}
 
