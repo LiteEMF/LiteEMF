@@ -190,14 +190,14 @@ typedef struct {
 
 
 typedef struct {
-    uint32_t	raw;              // Collection raw data
+    // uint32_t	raw;              // Collection raw data
     uint16_t	usagePage;         // Usage page associated with current level of collection
     uint8_t 	firstUsageItem;    // Index of First Usage Item in the current collection
     uint8_t 	usageItems;        // Number of Usage Items in the current collection
     uint8_t 	firstReportItem;   // Index of First report Item in the current collection
     uint8_t 	reportItems;       // Number of report Items in the current collection
     uint8_t 	parent;            // Index to Parent collection
-}hid_collection_item_t;
+}hid_collection_t;
 
 typedef struct {
     hid_report_type_t 	reportType;          // Type of Report Input/Output/Feature
@@ -223,6 +223,8 @@ typedef struct {
 
 typedef struct {
     hid_globals_item_t *globalsStack;      // List of global Items, see HID_GLOBALS for details in the structure
+    hid_collection_t *collectionList;
+    uint8_t *collectionStack;           // stores the array of parents ids for the collection
     hid_report_t *reportList;              // List of reports , see hid_report_t for details in the structure
     hid_report_item_t *reportItemList;     // List of report Items, see hid_report_item_t for details in the structure
     hid_usage_item_t *usageItemList;       // List of Usage item , see hid_usage_item_t for details in the structure
@@ -236,6 +238,10 @@ typedef struct{
     uint16_t usageMaximum;          // current usage maximum
     uint16_t usageMinimum;          // current usage minimum
     uint16_t usageRanges;           // current usage ranges
+    uint8_t collectionNesting;     // this number tells depth of collection nesting
+    uint8_t collections;           // total number of collections
+    uint8_t maxCollectionNesting;  // Maximum depth of collections
+    uint8_t parent;                // Parent collection
     uint8_t firstUsageItem;        // index of first usage item for the current collection
     uint8_t globalsNesting;        // On encountering every PUSH item , this is incremented , keep track of current depth of Globals
     uint8_t maxGlobalsNesting;     // Maximum depth of Globals
@@ -273,7 +279,9 @@ void hid_items_dump(hid_items_t *pitems);
 void hid_desc_dump(hid_desc_info_t *pinfo);
 error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t desc_len);
 void hid_desc_info_free(hid_desc_info_t *pinfo);
-bool hid_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems);
+bool hid_match_collection(hid_desc_info_t *pinfo, uint8_t collection_index, uint16_t usagePage, uint16_t usage);
+bool hid_collection_find_items(hid_desc_info_t *pinfo, hid_collection_t* pcollection, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems);
+bool hid_reportlist_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems);
 bool hid_items_match_id(hid_items_t *pitem, uint8_t* buf, uint16_t len);
 
 #ifdef __cplusplus

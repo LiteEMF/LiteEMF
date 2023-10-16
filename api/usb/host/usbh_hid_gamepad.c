@@ -221,19 +221,24 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
         }
     }else if(NULL != pinfo){          //TUSB_CLASS_HID识别ps4 switch dinput
         uint8_t i;
+        hid_collection_t* pcollection;
         hid_items_t hat_switch,vendor;
 
         memset(&hat_switch, 0, sizeof(hat_switch));
         memset(&vendor, 0, sizeof(vendor));
 
-        for(i=0; i<pinfo->reportItems; i++){
-            if(0 == hat_switch.report_length){
-                hid_find_items(pinfo,i,HID_REPORT_TYPE_INPUT,0X01, 0x39,&hat_switch);
-            }
-            if(0 == vendor.report_length){
-                if(hid_find_items(pinfo,i,HID_REPORT_TYPE_FEATURE,0xFFF0, 0x47,&vendor)){   //usb
-                    if((0x3F != vendor.bit_count) || (0x08 != vendor.bit_size)){
-                        memset(&vendor, 0, sizeof(vendor));
+        
+        for(i=0; i<pinfo->collections; i++){
+            if(hid_match_collection(pinfo, i, 0X01, 0X05)){ //0x05,0x01  0x09,0X05 fix gamepad
+                pcollection = &pinfo->item_list.collectionList[i];
+                if(0 == hat_switch.report_length){
+                    hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0x39,&hat_switch);
+                }
+                if(0 == vendor.report_length){
+                    if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_FEATURE,0xFFF0, 0x47,&vendor)){   //usb
+                        if((0x3F != vendor.bit_count) || (0x08 != vendor.bit_size)){
+                            memset(&vendor, 0, sizeof(vendor));
+                        }
                     }
                 }
             }

@@ -50,6 +50,7 @@ int16_t negative_int16(int16_t val);
 void int_to_bit12(uint8_t* buf, int16_t x, int16_t y);
 void  bit12_to_uint(uint8_t* buf, uint16_t* px, uint16_t*py);
 void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py);
+int32_t bits_to_int(uint16_t bit_offset, uint8_t bit_lens,  uint8_t* bbuf, uint8_t len);
 uint8_t get_bit_pos(uint32_t val);
 
 #ifdef __cplusplus

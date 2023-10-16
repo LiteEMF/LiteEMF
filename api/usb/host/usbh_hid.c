@@ -274,7 +274,7 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
         
         err = usbh_hid_get_report_desc(id, 0, pclass->itf.if_num, desc_buf, &desc_len);
         if(err) return err;
-
+        logd("usbh get report desc:");dumpd(desc_buf, desc_len);
         //pase report desc
         err = hid_desc_parse_report(&hid_info, desc_buf, desc_len);
         emf_free(desc_buf);

@@ -34,8 +34,52 @@
 **	static Function
 ******************************************************************************************************/
 
+static void hid_desc_parse_collection(hid_desc_info_t *pinfo,hid_item_info_t* item)
+{
+    hid_collection_t *lcollection;
+    uint16_t i;
 
+//  Initialize the new Collection Structure
 
+    i = pinfo->collections++;
+    lcollection = &pinfo->item_list.collectionList[i];
+    // lcollection->raw = item->Data.uItemData;
+    lcollection->firstUsageItem = pinfo->firstUsageItem;
+    lcollection->usageItems = pinfo->usageItems - pinfo->firstUsageItem;
+    
+    /*lcollection->nextSibling = pinfo->sibling;
+    lcollection->firstChild = 0;*/
+    lcollection->usagePage = pinfo->globals.usagePage;
+    lcollection->firstReportItem = pinfo->reportItems;
+
+    pinfo->firstUsageItem = pinfo->usageItems;
+    /*pinfo->sibling = 0;*/
+
+//  Set up the relationship with the Parent Collection
+    lcollection->parent = pinfo->parent;
+    /*pinfo->item_list.collectionList[pinfo->parent].firstChild = i;*/
+
+//  Save the Parent Collection Information on the stack
+    pinfo->item_list.collectionStack[pinfo->collectionNesting++] = pinfo->parent;
+    pinfo->parent = i+1;       //emf fix  = i to i+1 ,区分顶级集合和子集合
+}
+
+static void hid_desc_parse_endcollection(hid_desc_info_t *pinfo,hid_item_info_t* item)
+{
+    hid_collection_t *lcollection;
+    uint8_t i;
+
+//  Remember the number of reportItem MainItems in this Collection
+
+    lcollection = &pinfo->item_list.collectionList[pinfo->parent-1];    //emf fix
+    lcollection->reportItems = pinfo->reportItems - lcollection->firstReportItem;
+
+//  Restore the Parent Collection Data
+
+    i = pinfo->item_list.collectionStack[--pinfo->collectionNesting];
+    /*pinfo->sibling = pinfo->parent;*/
+    pinfo->parent = i;
+}
 
 /****************************************************************************
   Description:
@@ -54,10 +98,12 @@ static error_t hid_desc_parse_report_type(hid_desc_info_t *pinfo,hid_item_info_t
         logd("hid_desc_parse err%d\n",__LINE__);
         return(ERROR_DATA) ;
     }
-    if (pinfo->globals.logicalMaximum >= ((int32_t)1<<pinfo->globals.reportsize)){
-        logd("hid_desc_parse err%d\n",__LINE__);
-        return(ERROR_DATA);
-    }
+    // 0x25, 0x7F Logical Maximum (127)     >    0x75, 0x06 Report Size (6) 可以忽略禁告
+    // if (pinfo->globals.logicalMaximum >= ((int32_t)1<<pinfo->globals.reportsize)){
+    //     logd("hid_desc_parse err%d %d %d\n",__LINE__,pinfo->globals.logicalMaximum,pinfo->globals.reportsize);
+    //     return(ERROR_DATA);
+    // }
+
     // The barcode scanner has this issue.  We'll ignore it.
 	// if (pinfo->globals.logicalMinimum > pinfo->globals.logicalMaximum)return(ERROR_DATA);
     if (pinfo->haveUsageMin || pinfo->haveUsageMax)return(ERROR_UNKNOW);
@@ -66,6 +112,7 @@ static error_t hid_desc_parse_report_type(hid_desc_info_t *pinfo,hid_item_info_t
     lreportItem = &pinfo->item_list.reportItemList[pinfo->reportItems++];
     lreportItem->dataModes = item->Data.uItemData;
     lreportItem->globals = pinfo->globals;
+    /*lreportItem->parent = pinfo->parent;*/
     lreportItem->firstUsageItem = pinfo->firstUsageItem;
     pinfo->firstUsageItem = pinfo->usageItems;
     lreportItem->usageItems = pinfo->usageItems - lreportItem->firstUsageItem;
@@ -130,20 +177,36 @@ static void hid_desc_convert_to_signed(hid_item_info_t* item)
 ******************************************************************************************************/
 void hid_items_dump(hid_items_t *pitems)
 {
-    logd("pitems id=%d,len=%d\n",pitems->report_id,pitems->report_length);
+    logd("\tpitems id=%d,len=%d\n",pitems->report_id,pitems->report_length);
     logd("\tboffset=%d,blen=%d,count=%d\n",pitems->bit_offset,pitems->bit_size,pitems->bit_count);
 }
 void hid_desc_dump(hid_desc_info_t *pinfo)
 {
     hid_report_t *lreport;
     hid_report_item_t *lreportItem;
+    hid_collection_t *lcollection;
     // hid_usage_item_t *lusageItem;
     uint8_t i;
 
     logd("\n ======================= Report Descriptor Dump ======================= \n");
+    logd("Collections:%x\n",pinfo->collections );
+    logd("maxCollectionNesting:%x\n",pinfo->maxCollectionNesting );
     logd("Reports:%x\n",pinfo->reports );
     logd("ReportItems:%x\n",pinfo->reportItems );
     logd("UsageItems:%x\n",pinfo->usageItems );
+
+    
+    for (i=0; i<pinfo->collections; i++){
+        logd("------------------------\n");
+        logd("Collection   :%x\n",i);
+        lcollection = &pinfo->item_list.collectionList[i];
+        logd("\tusagePage :%x\n",lcollection->usagePage);
+        logd("\tfirstUsageItem :%x\n",lcollection->firstUsageItem);
+        logd("\tusageItems :%x\n",lcollection->usageItems);
+        logd("\tfirstReportItem :%x\n",lcollection->firstReportItem);
+        logd("\treportItems :%x\n",lcollection->reportItems);
+        logd("\tparent :%x\n",lcollection->parent);
+    }
 
     for (i=0; i<pinfo->reports; i++){
         logd("------------------------\n");
@@ -172,6 +235,7 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
         logd("\t1st Usage   :%x\n",lreportItem->firstUsageItem);
         logd("\tUsage Items :%x\n",lreportItem->usageItems);
         logd("\tusagePage   :%x\n",lreportItem->globals.usagePage);
+        logd("\tUsage       :%x\n",lreportItem->globals.logicalMinimum);
         logd("\treportsize  :%x\n",lreportItem->globals.reportsize);
         logd("\treportID    :%x\n",lreportItem->globals.report_id);
         logd("\treportCount :%x\n",lreportItem->globals.reportCount);
@@ -187,7 +251,7 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
 
 void hid_desc_info_free(hid_desc_info_t *pinfo)
 {
-    logd("hid_desc_info_free=%x\n", (uint32_t)pinfo->item_list.globalsStack);
+    // logd("hid_desc_info_free=%x\n", (uint32_t)pinfo->item_list.globalsStack);
     emf_free(pinfo->item_list.globalsStack);
 }
 /*******************************************************************
@@ -202,7 +266,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
     uint16_t  len_to_be_parsed =0;
     uint8_t* currentRptDescPtr = NULL;
     uint8_t* assignMem = NULL;
-
+    uint8_t tmp_maxCollectionNesting;
     /* Global Item Vars */
     hid_report_t *lreport = NULL;
     uint8_t lreportIndex = (uint8_t)0;
@@ -241,8 +305,15 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
             case HIDType_Main:           /* Main Items */
                 switch (item.ItemDetails.bits.ItemTag){
                     case HIDTag_Collection:
+                        pinfo->collections++;
+                        pinfo->collectionNesting++;
+                        if (pinfo->collectionNesting > pinfo->maxCollectionNesting)
+                            pinfo->maxCollectionNesting = pinfo->collectionNesting;
                         break;
                     case HIDTag_EndCollection:
+                        if (pinfo->collectionNesting-- == 0){
+                            err = ERROR_UNKNOW ;
+                        }
                         break;
                     case HIDTag_Input:
                     case HIDTag_Output:
@@ -309,6 +380,8 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
     pinfo->usages += (pinfo->usageRanges/2);
    /* Calculate space required */
     sizeRequired = (sizeof(hid_report_item_t) * pinfo->reportItems)
+                   + (sizeof(hid_collection_t) * pinfo->collections)
+                   + (sizeof(uint8_t) * pinfo->maxCollectionNesting)
                    + (sizeof(hid_report_t) * pinfo->reports)
                    + (sizeof(hid_usage_item_t) * pinfo->usages)
                    + (sizeof(hid_globals_item_t) * pinfo->maxGlobalsNesting);
@@ -324,6 +397,10 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
     /* Allocate Space */
     hid_item.globalsStack = (hid_globals_item_t *) assignMem;
     assignMem += (sizeof(hid_globals_item_t) * pinfo->maxGlobalsNesting);
+    hid_item.collectionList = (hid_collection_t *) assignMem;
+    assignMem += (sizeof(hid_collection_t) * pinfo->collections);
+    hid_item.collectionStack = (uint8_t *) assignMem;
+    assignMem += (sizeof(uint8_t) * pinfo->maxCollectionNesting);
     hid_item.reportItemList = (hid_report_item_t *) assignMem;
     assignMem += (sizeof(hid_report_item_t) * pinfo->reportItems);
     hid_item.reportList = (hid_report_t *) assignMem;
@@ -331,11 +408,12 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
     hid_item.usageItemList = (hid_usage_item_t *) assignMem;
     assignMem += (sizeof(hid_usage_item_t) * pinfo->usages);
 
+    tmp_maxCollectionNesting = pinfo->maxCollectionNesting;
     memset(pinfo, 0x00, sizeof( hid_desc_info_t ) );
     pinfo->reports = 1;
     pinfo->item_list = hid_item;
     pinfo->item_list_size = sizeRequired;
-
+    pinfo->maxCollectionNesting = tmp_maxCollectionNesting; //used for debug
 
    /* re-init ptr to Rpt Descp & Length of Descp */
     len_to_be_parsed = desc_len;
@@ -367,9 +445,10 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                         err = hid_desc_parse_report_type(pinfo, &item);
                     break;
                     case HIDTag_Collection :
-                        pinfo->firstUsageItem = pinfo->usageItems;
+                        hid_desc_parse_collection(pinfo, &item);
                     break;
                     case HIDTag_EndCollection :
+                        hid_desc_parse_endcollection(pinfo, &item);
                     break;
                 }
                 break;
@@ -577,42 +656,87 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
 }
 
 
-bool hid_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems)
+bool hid_match_collection(hid_desc_info_t *pinfo, uint8_t collection_index, uint16_t usagePage, uint16_t usage)
+{
+    bool ret = false;
+    hid_collection_t* pcollection;
+
+    pcollection = &pinfo->item_list.collectionList[collection_index];
+	//logd("index%d parent=%d, usag:%x %x",collection_index,pcollection->parent,pcollection->usagePage,pinfo->item_list.usageItemList[pcollection->firstUsageItem].usageMinimum);
+    if(0 == pcollection->parent){     //顶层集合确定设备类型
+        if((usagePage == pcollection->usagePage)
+            && (usage == pinfo->item_list.usageItemList[pcollection->firstUsageItem].usageMinimum)){
+
+            ret = true;
+        }
+    }
+    return ret;
+}
+
+
+bool hid_collection_find_items(hid_desc_info_t *pinfo, hid_collection_t* pcollection, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems)
+{
+    bool ret = false;
+    uint8_t i;
+
+    for(i=pcollection->firstReportItem; i<pcollection->reportItems; i++){
+        ret = hid_reportlist_find_items(pinfo, i, type, usagePage, usage, pitems);
+        if(ret) break;
+    }
+    return ret;
+}
+
+        
+
+bool hid_reportlist_find_items(hid_desc_info_t *pinfo, uint8_t item_index, hid_report_type_t type, uint16_t usagePage, uint16_t usage, hid_items_t *pitems)
 {
     bool ret = false;
     hid_report_item_t *reportItem;
     hid_usage_item_t *hidUsageItem;
     hid_report_t *preport; 
-    uint8_t usageIndex;
-    uint8_t reportIndex;
+    uint8_t usageIndex,i;           //item_list.reportList[] index
+    uint8_t reportIndex;            //item_list.usageItemList[] index
 
     reportItem = &pinfo->item_list.reportItemList[item_index];
+    usageIndex = reportItem->firstUsageItem;
     if((reportItem->reportType == type) && (reportItem->globals.usagePage == usagePage)){
+        
+        for(i = 0; i < reportItem->usageItems; i++){
+            hidUsageItem = &pinfo->item_list.usageItemList[usageIndex++];
+            if ((usage >= hidUsageItem->usageMinimum) && (usage <= hidUsageItem->usageMaximum)){
+                
+                reportIndex = reportItem->globals.reportIndex;
+                preport = &pinfo->item_list.reportList[reportIndex];
+                switch(type){
+                    case HID_REPORT_TYPE_INPUT:
+                        pitems->report_length = (preport->inputBits + 7)/8;
+                        break;
+                    case HID_REPORT_TYPE_OUTPUT:
+                        pitems->report_length = (preport->outputBits + 7)/8;
+                        break;
+                    case HID_REPORT_TYPE_FEATURE:
+                        pitems->report_length = (preport->featureBits + 7)/8;
+                        break;
+                    default:
+                        break;
+                }
 
-        usageIndex = reportItem->firstUsageItem;
-        hidUsageItem = &pinfo->item_list.usageItemList[usageIndex];
-        if ((usage >= hidUsageItem->usageMinimum) && (usage <= hidUsageItem->usageMaximum)){
-            reportIndex = reportItem->globals.reportIndex;
-            preport = &pinfo->item_list.reportList[reportIndex];
-            switch(type){
-                case HID_REPORT_TYPE_INPUT:
-                    pitems->report_length = (preport->inputBits + 7)/8;
-                    break;
-                case HID_REPORT_TYPE_OUTPUT:
-                    pitems->report_length = (preport->outputBits + 7)/8;
-                    break;
-                case HID_REPORT_TYPE_FEATURE:
-                    pitems->report_length = (preport->featureBits + 7)/8;
-                    break;
-                default:
-                    break;
+                if(hidUsageItem->usageMinimum == hidUsageItem->usageMaximum){
+                    pitems->report_id = (uint8_t)reportItem->globals.report_id;
+                    pitems->bit_offset = (uint8_t)reportItem->startBit + i * reportItem->globals.reportsize;
+                    pitems->bit_size = (uint8_t)reportItem->globals.reportsize;
+                    pitems->bit_count = (uint8_t)1;
+                    pitems->usageMinimum = (uint8_t)usage;
+                }else{          //is in range
+                    pitems->report_id = (uint8_t)reportItem->globals.report_id;
+                    pitems->bit_offset = (uint8_t)reportItem->startBit;
+                    pitems->bit_size = (uint8_t)reportItem->globals.reportsize;
+                    pitems->bit_count = (uint8_t)reportItem->globals.reportCount;
+                    pitems->usageMinimum = (uint8_t)hidUsageItem->usageMinimum;
+                }
+                ret = true;
+                break;
             }
-            pitems->report_id = (uint8_t)reportItem->globals.report_id;
-            pitems->bit_offset = (uint8_t)reportItem->startBit;
-            pitems->bit_size = (uint8_t)reportItem->globals.reportsize;
-            pitems->bit_count = (uint8_t)reportItem->globals.reportCount;
-            pitems->usageMinimum = (uint8_t)hidUsageItem->usageMinimum;
-            ret = true;
         }
     }
 

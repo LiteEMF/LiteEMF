@@ -150,6 +150,31 @@ void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py)
 	*py = y;
 }
 
+/*******************************************************************
+** Parameters:	bit_offset: 数据bit偏移
+                bit_lens: 数据 bit 长度, bit_lens < 32
+                buf: bit 数据流
+** Returns:	
+** Description:	从bit 数据流中获取int数据	
+*******************************************************************/
+int32_t bits_to_int(uint16_t bit_offset, uint8_t bit_lens,  uint8_t* bbuf, uint8_t len)
+{
+    uint32_t mask, val = 0;
+    int32_t ret = 0;
+    uint8_t byte_offset = bit_offset/8;
+
+    if(len > byte_offset){
+        bit_offset %= 8;
+        memcpy(&val, &bbuf[byte_offset], MIN(len - byte_offset, 4));
+        mask = (0X01UL << bit_lens) - 1;
+
+        ret = (val >> bit_offset) & mask;
+        ret = BVAL2INT(ret,bit_lens);
+    }
+    return ret;
+}
+
+
 uint8_t get_bit_pos(uint32_t val)
 {
     uint8_t i;

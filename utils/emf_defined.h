@@ -98,6 +98,10 @@ b(high): if x is greater than b.
 #define FLD2VAL(field_str, value) (((uint32_t)(value)&(field_str##_MASK)) >> (field_str##_POS))
 #endif
 
+//bit val to int. bit_len: bval bit len
+#define BVAL2INT(bval, bit_len) ((bval) & (0X01UL << ((bit_len) - 1)))? (int32_t)((bval) | (0XFFFFFFFF << (bit_len))) : (int32_t)(bval);
+
+
 
 
 
