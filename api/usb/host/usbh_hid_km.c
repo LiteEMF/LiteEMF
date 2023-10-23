@@ -13,11 +13,12 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA)))
+
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+
 #include "utils/emf_utils.h"
 #include "api/usb/host/usbh.h"
 #include "app/km_typedef.h"
-#include "app/app_km.h"
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -27,8 +28,8 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-kb_t usbh_kb;
-app_mouse_t usbh_mouse;
+app_km_t usbh_km;
+
 
 /******************************************************************************************************
 **	static Parameters
@@ -42,8 +43,7 @@ km_items_t m_km_items[USBH_NUM][MAX_KM_ITEMS_NUM];
 void usbh_hid_km_pa_init(uint8_t id)
 {
     memset(&m_km_items[id>>4], 0, sizeof(m_km_items[id>>4]));
-    memset(&usbh_kb, 0, sizeof(usbh_kb));
-    memset(&usbh_mouse, 0, sizeof(usbh_mouse));
+    memset(&usbh_km, 0, sizeof(usbh_km));
 }
 
 km_items_t* malloc_hid_km_items(uint8_t id)
@@ -70,7 +70,7 @@ km_items_t* malloc_hid_km_items(uint8_t id)
 ** Returns:	
 ** Description:	keyboard set led 
 *******************************************************************/
-void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO app_km call
+void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO km call
 {
 	kb_led_t led,set_port;
 
@@ -145,74 +145,74 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
     km_items_t *pkm_items = (km_items_t*)pclass->pdat;
     hid_items_t *pitem;
     bool match_id = false;
-    uint8_t i;
-    kb_t kb;
-    app_mouse_t mouse;
+    uint8_t i = 0;
+    app_km_t km;
 
     if(NULL == pkm_items) return;
+    memset(&km,0, sizeof(km));
 
     if(pkm_items->kb.find && !match_id){
-        memset(&kb,0, sizeof(kb));
-
+    
         pitem = &pkm_items->kb.kb_fun;
         if(hid_items_match_id(pitem, buf, len)){
-            kb.fn = buf[pitem->bit_offset / 8];
+            km.kb.fn = buf[pitem->bit_offset / 8];
             match_id = true;
         }
         pitem = &pkm_items->kb.kb_normal;
         if(hid_items_match_id(pitem, buf, len)){
-            i = kb_get_normal_key(pitem, kb.key, sizeof(kb.key), buf, len);
+            i = kb_get_normal_key(pitem, km.kb.key, sizeof(km.kb.key), buf, len);
             match_id = true;
         }
 
         pitem = &pkm_items->kb.kb2_normal;
         if(hid_items_match_id(pitem, buf, len)){
-            kb_get_normal_key(pitem, kb.key+i, sizeof(kb.key)-i, buf, len);
+            i += kb_get_normal_key(pitem, km.kb.key+i, sizeof(km.kb.key)-i, buf, len);
             match_id = true;
         }
 
         pitem = &pkm_items->kb.led;
         if(hid_items_match_id(pitem, buf, len)){
-            kb.fn = buf[pitem->bit_offset / 8];
+            km.kb.fn = buf[pitem->bit_offset / 8];
             match_id = true;
         }
         if(match_id){
-            usbh_kb = kb;
-            logd("usbh kb in:");dumpd(&kb,sizeof(kb));
+            usbh_km.active = true;
+            usbh_km.kb = km.kb;
+            logd("usbh kb in:");dumpd(&km.kb,sizeof(km.kb));
         }
     }
 
     if(pkm_items->mouse.find && !match_id){
-        memset(&mouse,0, sizeof(mouse));
-
         pitem = &pkm_items->mouse.button;
         if(hid_items_match_id(pitem, buf, len)){
-            mouse.but = buf[pitem->bit_offset / 8];
+            km.mouse.but = buf[pitem->bit_offset / 8];
             match_id = true;
         }
 
         pitem = &pkm_items->mouse.x;
         if(hid_items_match_id(pitem, buf, len)){
-            mouse.x = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
+            km.mouse.x = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
         }
 
         pitem = &pkm_items->mouse.y;
         if(hid_items_match_id(pitem, buf, len)){
-            mouse.y = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
+            km.mouse.y = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
         }
 
         pitem = &pkm_items->mouse.w;
         if(hid_items_match_id(pitem, buf, len)){
-            mouse.w = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
+            km.mouse.w = bits_to_int(pitem->bit_offset, pitem->bit_size,  buf, len);
             match_id = true;
         }
 
         if(match_id){
-            usbh_mouse.but = mouse.but;
-            usbh_mouse.x += mouse.x;
-            usbh_mouse.y += mouse.y;
-            usbh_mouse.w += mouse.w;
-            logd("usbh mouse in:");dumpd(&mouse,sizeof(mouse));
+            usbh_km.active = true;
+            
+            usbh_km.mouse.but = km.mouse.but;
+            usbh_km.mouse.x += km.mouse.x;
+            usbh_km.mouse.y += km.mouse.y;
+            usbh_km.mouse.w += km.mouse.w;
+            logd("usbh mouse in:");dumpd(&km.mouse,sizeof(km.mouse));
         }
     }
 }
@@ -376,10 +376,10 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
             && ((uintptr_t)pclass->pdat <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
             
             if(HID_TYPE_KB == pclass->hid_type){
-                memset(&usbh_kb, 0, sizeof(usbh_kb));
+                memset(&usbh_km.kb, 0, sizeof(usbh_km.kb));
             }
             if(HID_TYPE_MOUSE == pclass->hid_type){
-                memset(&usbh_mouse, 0, sizeof(usbh_mouse));
+                memset(&usbh_km.mouse, 0, sizeof(usbh_km.mouse));
             }
 
             memset(pclass->pdat, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出

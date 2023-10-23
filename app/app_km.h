@@ -14,6 +14,7 @@
 #define _app_km_h
 #include "emf_typedef.h" 
 #include "km_typedef.h"
+#include "api/api_transport.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,47 +24,40 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
-
+#ifndef APP_BIT_KB_ENABLE			//全键无冲使能
+#define APP_BIT_KB_ENABLE			0
+#endif
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
 typedef struct 
 {
-	uint8_t id;
-	uint8_t but;
-	int16_t x;	
-	int16_t y;	
-	int8_t w;	
-	int8_t res;		//占位
-} app_mouse_t;
-
-
-typedef struct 
-{
-	uint8_t id;
-	uint8_t but;
-	int16_t x;	
-	int16_t y;	
-	int8_t w;	
-	int8_t res;		//占位
-
-    uint8_t fn;
-    uint8_t key_res;
-	uint8_t key[6];
+	uint8_t active; 		//数据有改变
+	uint8_t res;
+	app_mouse_t mouse;
+	app_kb_t kb;
 } app_km_t;
+
+
+extern app_km_t m_app_km;
+
+#if APP_BIT_KB_ENABLE
+extern kb_bit_t m_kb_bit;			//全键无冲突
+#endif
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void app_kb_vendor_scan(kb_bit_t* keyp);			//__WEAK
-void app_mouse_vendor_scan(app_mouse_t* pmouse);	//__WEAK
-
+__WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit);			//__WEAK
+void app_km_clean(app_km_t* pkey);
+bool app_km_fill(app_km_t* pkey, app_km_t* pkey_in);
+bool app_km_cache(app_km_t* pkey, app_km_t* pkey_in);
+bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse);
+bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey);
 bool app_km_init(void);
 bool app_km_deinit(void);
-void app_kb_scan_task(void*pa);
-void app_mouse_scan_task(void*pa);
+void app_km_scan_task(void*pa);
 void app_km_handler(uint32_t period_10us);
 
 #ifdef __cplusplus

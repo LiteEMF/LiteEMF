@@ -265,7 +265,24 @@ typedef union{
         uint8_t res : 5;
     }bits;
     uint8_t val;
-}kb_ledd_t;
+}kb_led_t;
+
+
+
+typedef struct 
+{
+	uint8_t but;
+	int8_t  w;	
+	int16_t x;	
+	int16_t y;	
+} app_mouse_t;		//6
+
+typedef struct 
+{
+    uint8_t fn;
+	uint8_t res;
+	uint8_t key[6];
+} app_kb_t;		    //8
 
 
 #ifdef __cplusplus

@@ -147,7 +147,7 @@ error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass, us
 			if ((report_type == HID_REPORT_TYPE_OUTPUT) && preq->req.wLength){
 				// Set keyboard LED e.g Capslock, Numlock etc...
 				if (report_id == KB_REPORT_ID){
-					kb_ledd_t kb_leds;
+					kb_led_t kb_leds;
 					kb_leds.val = preq->setup_buf[0];
 					
 					logd("kb led set report=%x ,%d\n",kb_leds.val, preq->setup_len);

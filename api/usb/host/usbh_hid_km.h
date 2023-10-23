@@ -16,6 +16,7 @@
 #include "api/usb/usb_typedef.h"
 #include "api/usb/host/usbh_core.h"
 #include "api/hid/hid_desc_parser.h"
+#include "app/app_km.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,23 +50,15 @@ typedef struct{
 }mouse_items_t;
 
 typedef struct{					
-	uint8_t		magic;			//0: free, 非0: used
+	uint8_t	magic;			//0: free, 非0: used
 	kb_items_t kb;
 	mouse_items_t mouse;
 } km_items_t;	
 
 
-typedef union{
-    struct{
-        uint8_t numLock       : 1;
-        uint8_t capsLock      : 1;
-        uint8_t scrollLock    : 1;
-        uint8_t res : 5;
-    }bits;
-    uint8_t val;
-}kb_led_t;
 
 
+extern app_km_t usbh_km;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/

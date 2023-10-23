@@ -18,6 +18,14 @@
 #include  "api/api_tick.h"
 #include  "app/app_km.h"
 #include  "app/io_keyboard.h"
+#include  "api/api_system.h"
+#include  "api/api_commander.h"
+#include  "app/app_command.h"
+#include "api/hid/hid_dev_desc.h"
+
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+#include "api/usb/host/usbh_hid_km.h"
+#endif
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -25,10 +33,12 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-kb_bit_t app_bit_kb;			//全键无冲突
-kb_t app_std_kb;				//标准键盘
+app_km_t m_app_km;
 
-app_mouse_t app_mouse;
+#if APP_BIT_KB_ENABLE
+kb_bit_t m_kb_bit;			//全键无冲突
+#endif
+
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -40,19 +50,7 @@ app_mouse_t app_mouse;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-#if WEAK_ENABLE
-__WEAK void app_kb_vendor_scan(kb_bit_t* keyp)
-{
-	
-}
-__WEAK void app_mouse_vendor_scan(app_mouse_t* pmouse)
-{
-	
-}
-#endif
-
-
-void app_get_std_kb(kb_bit_t* pbit, kb_t* out)
+void app_bitkb_to_stdkb(kb_bit_t* pbit, kb_t* out)
 {
 	uint8_t i,v,k=0; 
 
@@ -70,6 +68,126 @@ void app_get_std_kb(kb_bit_t* pbit, kb_t* out)
 }
 
 
+void app_fill_bitkb(uint8_t key, kb_bit_t* pbit)
+{
+	if(key){
+		if(key & 0XE0 == 0XE0) {
+			pbit->fn |= 0X01 << (key-0xE0);
+		}else{
+			uint8_t index = key / 8;
+			if(index < sizeof(pbit->key)){
+				pbit->key[index] |= 0X01 << (key % 8);
+			}
+		}
+	}
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	合并km数据, 将不同数据来源的数据合并到一起
+*******************************************************************/
+bool app_km_fill(app_km_t* pkey, app_km_t* pkey_in)
+{
+	uint8_t i,k=0;
+	if(pkey_in->active){
+		pkey->active = true;
+
+		pkey->kb.fn |= pkey_in->kb.fn;
+
+		for(i=0; i<sizeof(pkey->kb.key); i++){
+			if(0 == pkey->kb.key[i]){
+				if(0 == pkey_in->kb.key[k]) break;
+				pkey->kb.key[i] = pkey_in->kb.key[k++];
+			}
+		}
+
+		pkey->mouse.but |= pkey_in->mouse.but;
+		pkey->mouse.x += pkey_in->mouse.x;
+		pkey->mouse.y += pkey_in->mouse.y;
+		pkey->mouse.w += pkey_in->mouse.w;
+	}
+	return pkey_in->active;
+}
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	缓存km数据, 将相同数据来源的数据暂存起来, 主要是鼠标数据特殊处理
+*******************************************************************/
+bool app_km_cache(app_km_t* pkey, app_km_t* pkey_in)
+{
+	uint8_t i;
+	if(pkey_in->active){
+		pkey->active = true;
+
+		pkey->kb = pkey_in->kb;
+		pkey->mouse.but = pkey_in->mouse.but;
+		pkey->mouse.x += pkey_in->mouse.x;
+		pkey->mouse.y += pkey_in->mouse.y;
+		pkey->mouse.w += pkey_in->mouse.w;
+	}
+	return pkey_in->active;
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	消费app km 数据, 清除active和鼠标数据
+*******************************************************************/
+void app_km_clean(app_km_t* pkey)
+{
+	uint8_t tmp_but = pkey->mouse.but;
+
+	pkey->active = false;
+	memset(&pkey->mouse, 0 ,sizeof(pkey->mouse));
+	pkey->mouse.but = tmp_but;
+}
+
+#if WEAK_ENABLE
+__WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit)
+{
+	#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+	API_ENTER_CRITICAL();
+
+	if(app_km_fill(pkey, &usbh_km)){
+		app_km_clean(&usbh_km);
+	}
+	API_EXIT_CRITICAL();
+	#endif
+}
+#endif
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	km report
+*******************************************************************/
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
+bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
+{
+	mouse_t mouse;
+	mouse.id = MOUSE_REPORT_ID;
+	mouse.but = pmouse->but;
+	mouse.x = SWAP16_L(pmouse->x);
+	mouse.y = SWAP16_L(pmouse->y);
+	mouse.w = SWAP16_L(pmouse->w);
+	return api_transport_tx(phandle,&mouse, sizeof(mouse));	
+}
+#endif
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
+bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
+{
+	kb_bit_t kb;    
+
+	kb.id = KB_REPORT_ID;
+	kb.fn = pkey->fn;
+	memcpy(kb.key,pkey->key, sizoef(kb.key));
+	return api_transport_tx(phandle,&kb, sizeof(kb));
+}
+#endif
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -77,6 +195,11 @@ void app_get_std_kb(kb_bit_t* pbit, kb_t* out)
 *******************************************************************/
 bool app_km_init(void)
 {
+	memset(&m_app_km, 0, sizeof(m_app_km));
+	#if APP_BIT_KB_ENABLE
+	memset(&m_kb_bit, 0, sizeof(m_kb_bit));
+	#endif
+	
 	io_keyboard_init();
 	return true;
 }
@@ -94,32 +217,33 @@ bool app_km_deinit(void)
 
 
 
-void app_kb_scan_task(void*pa)
+void app_km_scan_task(void*pa)
 {
-    kb_bit_t key_bit;
-
-	memset(&key_bit,0,sizeof(key_bit));
+    app_km_t key;
+	#if APP_BIT_KB_ENABLE
+	kb_bit_t kb_bit;			//全键无冲突
+	kb_bit_t* pkb_bit = &kb_bit;
 	
-	io_keyboard_scan(&key_bit);
-	app_kb_vendor_scan(&key_bit);
-	app_bit_kb = key_bit;
-	app_get_std_kb(&key_bit,&app_std_kb);		//获取标准键盘
+	memset(&kb_bit, 0, sizeof(kb_bit));
+	#else
+	kb_bit_t* pkb_bit = NULL;
+	#endif
+
+	memset(&key,0,sizeof(key));
+	
+	io_keyboard_scan(&key.kb, pkb_bit);
+	if(memcmp(&key.kb, &m_app_km.kb, sizeof(app_kb_t))){
+		m_app_km.active = true;
+	}
+	app_km_vendor_scan(&key,pkb_bit);
+	app_km_cache(&m_app_km, &key);
+
+	#if APP_BIT_KB_ENABLE
+	m_kb_bit = kb_bit;
+	#endif
+
 	UNUSED_PARAMETER(pa);
 }
-
-void app_mouse_scan_task(void*pa)
-{
-    app_mouse_t mouse;
-
-	memset(&mouse,0,sizeof(mouse));
-	
-	//add mouse driver
-
-	app_mouse_vendor_scan(&mouse);
-	app_mouse = mouse;
-	UNUSED_PARAMETER(pa);
-}
-
 
 
 #if TASK_HANDLER_ENABLE
@@ -133,8 +257,7 @@ void app_km_handler(uint32_t period_10us)
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){
 		s_timer = m_task_tick10us;
-		app_kb_scan_task(NULL);
-		app_mouse_scan_task(NULL);
+		app_km_scan_task(NULL);
 	}
 }
 #endif

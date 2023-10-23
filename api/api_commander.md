@@ -4,6 +4,8 @@
 
 * v1.0: original version
 
+## used `small endian` !
+
 ## packet format
 
 > 数据包帧(command frame):
