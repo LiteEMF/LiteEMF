@@ -442,6 +442,8 @@ static error_t usbd_control_request_process(uint8_t id)
 			err = ERROR_STALL;
 			break;
 		}
+	}else{
+		err = ERROR_STALL;
 	}
 
 	if(ERROR_STALL == err){
@@ -449,6 +451,27 @@ static error_t usbd_control_request_process(uint8_t id)
 	}else{				//枚举成功分发setup事件给需要的设备,比如 TUSB_REQ_SET_INTERFACE
 		usbd_class_control_request_process(id, preq);
 	}
+
+	#if USBD_SOCKET_ENABLE		//TODO
+	if(ERROR_STALL == err){
+		uint8_t* p;
+		uint8_t out_len = 0;
+
+		if(TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction){
+			out_len = preq->req.wLength;
+		}
+		p = emf_malloc(out_len + 8);
+		if(NULL != p){
+			memcpy(p, &preq->req, 8);
+			memcpy(p+8, preq->setup_buf, out_len);
+			if(usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_SETUP, p, out_len + 8)){
+				err = ERROR_NACK;
+			}
+			emf_free(p);
+		}
+	}
+	#endif
+
 
     return err;
 }

@@ -72,7 +72,7 @@ error_t usbd_malloc_setup_buffer(uint8_t id, usbd_req_t *preq)
 	error_t err = ERROR_SUCCESS;
 
 	if(NULL != preq->setup_buf){					//防止出错内存未释放
-		logd_r("usbd malloc err,please note it %lx!!!\n",(uint32_t)(preq->setup_buf));
+		logd_r("usbd free err,please note it %lx!!!\n",(uint32_t)(preq->setup_buf));
 		emf_free((void*)preq->setup_buf);
 	}
 

@@ -518,7 +518,7 @@ bool app_gamepad_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 ** Description:		
 *******************************************************************/
 
-bool app_gamepad_in_process(trp_handle_t* phandle,app_gamepad_key_t *keyp, uint8_t *buf, uint8_t len)
+bool app_gamepad_host_process(trp_handle_t* phandle,app_gamepad_key_t *keyp, uint8_t *buf, uint8_t len)
 {
 	bool ret = false;
 	bool key_decode = false;

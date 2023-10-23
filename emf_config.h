@@ -204,8 +204,8 @@ extern "C" {
 #ifndef USBD_SOCKET_ENABLE
 #define USBD_SOCKET_ENABLE		0
 #endif
-#ifndef USBH_SOCKET_ENABLED
-#define USBH_SOCKET_ENABLED		0
+#ifndef USBH_SOCKET_ENABLE
+#define USBH_SOCKET_ENABLE		0
 #endif
 
 #ifndef SOCKET_HID_TYPE_SUPPORT

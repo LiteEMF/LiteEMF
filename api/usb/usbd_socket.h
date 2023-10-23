@@ -14,6 +14,8 @@
 #define _usbd_socket_h
 #include "emf_typedef.h" 
 #include "api/api_transport.h"
+#include "app/app_command.h"
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,9 +38,9 @@ extern bool usbd_socket_configured;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool usbd_socket_art_cmd(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
-bool usbd_socket_arg_decode(trp_handle_t* phandle,uint8_t cmd,uint16_t dev_type,uint8_t* buf,uint16_t len);
-void usbd_socket_init(trp_handle_t* phandle, uint16_t dev_type);
+bool usbd_socket_cmd(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len);
+bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len);
+void usbd_socket_init(void);
 
 #ifdef __cplusplus
 }

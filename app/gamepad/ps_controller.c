@@ -250,6 +250,7 @@ static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 		effects.effects.led_b = 0x20;
 
 		return api_transport_tx(phandle,(uint8_t*)&effects,sizeof(effects));
+	#if BTC_HID_SUPPORT & HID_PS_MASK
 	}else{
 		ps4_bt_effects_t effects;
 		uint8_t ubHdr = 0xA2; /* hidp header is part of the CRC calculation */
@@ -265,10 +266,16 @@ static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 		effects.effects.led_b = 0x40;
 
 		/* Bluetooth reports need a CRC at the end of the packet (at least on Linux) */
+		#if  CRC32_TABLE_EANBLE
         unCRC = crc32(&ubHdr, 1);
         unCRC += crc32(&effects, (sizeof(effects) - sizeof(unCRC)));
+		#else
+		#error "ps controller need crc32!"
+		#endif
+
 		effects.crc = unCRC;
 		return api_transport_tx(phandle,(uint8_t*)&effects,sizeof(effects));
+	#endif
 	}
 }
 static bool ps3_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)

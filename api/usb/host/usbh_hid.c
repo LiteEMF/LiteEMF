@@ -93,7 +93,7 @@ error_t usbh_hid_get_report(uint8_t id, uint8_t itf, hid_report_type_t type, uin
 
     req.bmRequestType.bits.recipient = TUSB_REQ_RCPT_INTERFACE;
     req.bmRequestType.bits.type = TUSB_REQ_TYPE_CLASS;
-	req.bmRequestType.bits.direction = TUSB_DIR_OUT;
+	req.bmRequestType.bits.direction = TUSB_DIR_IN;
     req.bRequest = HID_REQ_CONTROL_GET_REPORT;
 
     req.wValue = SWAP16_L(U16(type,rep_id));

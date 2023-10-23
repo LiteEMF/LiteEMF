@@ -18,7 +18,9 @@
 #include "api/usb/host/usbh.h"
 
 #include "app/gamepad/app_gamepad.h"
-
+#if APP_RUMBLE_ENABLE
+#include  "app/app_rumble.h"
+#endif
 
 #include "api/api_log.h"
 
@@ -30,7 +32,7 @@
 **	public Parameters
 *******************************************************************************************************/
 app_gamepad_key_t usbh_gamepad_key;	   				//手柄按键信息
-
+hid_type_t usbh_gamepad_type = HID_TYPE_NONE;
 
 /******************************************************************************************************
 **	static Parameters
@@ -99,7 +101,7 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
 *******************************************************************/
 void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-	logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 
     trp_handle_t trp_handle;
 		
@@ -107,7 +109,7 @@ void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf,
     trp_handle.id = id;
     trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
 
-    app_gamepad_in_process(&trp_handle,&usbh_gamepad_key,buf,len);
+    app_gamepad_host_process(&trp_handle,&usbh_gamepad_key,buf,len);
 }
 
 error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
@@ -163,6 +165,10 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
                 len = 0X10;
                 usbh_hid_get_report(id, pclass->itf.if_num,HID_REPORT_TYPE_FEATURE, 0x12, buf, &len);
             }
+
+            #if APP_RUMBLE_ENABLE
+            app_rumble_set_duty(RUMBLE_L,0,1000);      //马达震动提示, 同时设置ps4灯光   
+            #endif
             break;
         case HID_TYPE_PS5	:
             ps_controller_init(&trp_handle);
@@ -185,6 +191,12 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
             break;
     }
     
+    #if USBH_SOCKET_ENABLE      //socket从这里开始触发引导
+    if(ERROR_SUCCESS == err){
+        usbh_socket_init(&usbh_socket_trp, pclass->hid_type);       //TODO 选择socket通讯协议
+    }
+	#endif
+
     return err;
 }
 
@@ -199,11 +211,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
     if(HID_TYPE_NONE != hid_type){
         pclass->hid_type = hid_type;
         err = ERROR_SUCCESS;
-        logd("usbh gamepad type=%d\n",pclass->hid_type);
-        return err;
-    }
-
-    if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){     //特殊识别xbox
+    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){     //特殊识别xbox
         if(XBOX_SUBCLASS == pclass->itf.if_sub_cls){
             pclass->hid_type = HID_TYPE_XBOX;
             if(XBOXX_PID == pdev->pid){
@@ -250,6 +258,11 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
         }
     }
 
+    if(ERROR_SUCCESS == err){
+        usbh_gamepad_type = pclass->hid_type;
+        logd("usbh gamepad type=%d\n",usbh_gamepad_type);
+    }
+
     return err;
 }
 
@@ -268,6 +281,7 @@ error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass)
     trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
 
     app_gamepad_deinit(&trp_handle);
+    usbh_gamepad_type = HID_TYPE_NONE;
     
     UNUSED_PARAMETER(id);
 	return 0;

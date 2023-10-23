@@ -16,6 +16,9 @@
 #include "utils/emf_utils.h"
 #include "api/usb/host/usbh_core.h"
 
+#if USBH_SOCKET_ENABLE
+#include "api/usb/usbh_socket.h"
+#endif
 
 #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 #include "api/usb/host/usbh_hid.h"

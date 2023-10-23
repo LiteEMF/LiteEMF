@@ -63,7 +63,7 @@ uint32_t app_gamepad_key_invconvert(trp_handle_t *phandle,uint32_t key_in);
 bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp);
 bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len);
 bool app_gamepad_rumble_send(trp_handle_t *phandle, rumble_t const *prumble);
-bool app_gamepad_in_process(trp_handle_t* phandle,app_gamepad_key_t *pkey, uint8_t *buf, uint8_t len);
+bool app_gamepad_host_process(trp_handle_t* phandle,app_gamepad_key_t *pkey, uint8_t *buf, uint8_t len);
 bool app_gamepad_init( trp_handle_t *phandle );
 bool app_gamepad_deinit( trp_handle_t *phandle );
 void app_gamepad_task(trp_handle_t *phandle);

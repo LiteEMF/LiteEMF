@@ -77,7 +77,7 @@ uint16_t usbd_hid_mt_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* p
 
 error_t usbd_hid_mt_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_req_t* const preq)
 {
-    error_t err = ERROR_SUCCESS;
+    error_t err = ERROR_STALL;
 	UNUSED_PARAMETER(id);
 	UNUSED_PARAMETER(pclass);
     return err;

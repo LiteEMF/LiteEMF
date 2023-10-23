@@ -56,7 +56,7 @@ typedef enum{
 	CMD_RECOVER_FACTORY=0X1F,
 
 	/*---- 0x20	设备数据和控制 ----*/
-	CMD_KM_KEY=0X20,
+	CMD_KM_KEY=0X20,		//kb + mouse
 	CMD_GAMEPAD_KEY,
 	CMD_JOYSTICK_CAL,
 	CMD_SET_RUMBLE,

@@ -27,7 +27,8 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];			//注意由于有itf_alt的存在,接口下标和接口号不是一一对应的
+// m_usbd_class 在 usbd_assign_configuration_desc 获取配置描述符的时候设置
+usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];	//注意由于有itf_alt的存在,接口下标和接口号不是一一对应的
 
 /******************************************************************************************************
 **	static Parameters
@@ -332,7 +333,7 @@ error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq)
 
 			if(pclass->itf.if_num != itf) continue;
 			if(NULL == usbd_class_find_by_itf(id, itf)) continue;
-		}
+		}	//其他请求全部设备都会分发
 
 		switch(pclass->dev_type){
 		#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)

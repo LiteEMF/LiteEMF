@@ -15,6 +15,7 @@
 #include "hw_config.h"
 #if APP_CMD_ENABLE
 #include "app/app_command.h"
+#include "app/emf.h"
 
 #include "api/api_log.h"
 
@@ -140,9 +141,27 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	default:
 		break;
 	}
+
+	#if API_USBH_BIT_ENABLE && USBH_SOCKET_ENABLE
+	if(!ret){
+		ret = usbh_socket_decode(phandle,phead->cmd, buf+COM_HEAD_LEN, len - (COM_HEAD_LEN+1));
+	}
+	#endif
+
+	#if API_USBD_BIT_ENABLE && USBD_SOCKET_ENABLE
+	if(!ret){
+		ret = usbd_socket_decode(phandle,phead->cmd, buf+COM_HEAD_LEN, len - (COM_HEAD_LEN+1));
+	}
+	#endif
+
 	return ret;
 }
 
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:	注意: 数据长度必须使用len , buf 中的长度不准确
+*******************************************************************/
 __WEAK bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 {
 	return app_command_std_decode(phandle,buf,len);
