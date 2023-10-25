@@ -51,19 +51,21 @@ extern "C" {
 #define DEF_TR_USBH			9
 #define DEF_TR_UART			10
 
+
+
 //*********************************************************************************//
 //                          支持的设备类型                               		//
 //*********************************************************************************//
 /*------------------------type defined-----------------------------*/
 //dev type
-#define DEF_DEV_TYPE_HID				0
+#define DEF_DEV_TYPE_VENDOR				0  			
 #define DEF_DEV_TYPE_AUDIO     			1
-#define DEF_DEV_TYPE_PRINTER   			2
-#define DEF_DEV_TYPE_MSD   				3		/*mass storage devices*/
-#define DEF_DEV_TYPE_HUB       			4
-#define DEF_DEV_TYPE_CDC				5		/*Communications Device Class*/
-//6,7
-#define DEF_DEV_TYPE_VENDOR    			8
+#define DEF_DEV_TYPE_CDC				2		/*Communications Device Class*/
+#define DEF_DEV_TYPE_HID				3
+#define DEF_DEV_TYPE_PRINTER   			4
+#define DEF_DEV_TYPE_MSD   				5		/*mass storage devices*/
+#define DEF_DEV_TYPE_HUB       			6
+//7, 8
 #define DEF_DEV_TYPE_ADB          		9
 #define DEF_DEV_TYPE_AOA          		10
 #define DEF_DEV_TYPE_USBMUXD	   		11

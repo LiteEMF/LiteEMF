@@ -266,7 +266,7 @@ bool api_command_arg_tx(trp_handle_t* phandle,uint8_t cmd, uint16_t arg, uint8_t
 ** Parameters:	bytep:接收数据缓存
 				buf:输入指令包
 ** Returns:	
-** Description:	从指令帧获取完整数据指令包
+** Description:	获取长包指令
 		注意:rxp 数据处理完后必须调用 emf_free_and_clear 释放内存!!!
 *******************************************************************/
 bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
@@ -275,12 +275,10 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 	uint16_t cmd_max_len;
 	command_head_t *phead = (command_head_t*)buf;
 
-	if((CMD_SHEAD != buf[0]) && (CMD_HEAD != buf[0])) return ret;	//包头判断
-	if(len < buf[1]) return ret;									//保证数据完整
-	if(buf[buf[1]-1] != (uint8_t)check_sum(buf,buf[1]-1)){			//可以忽略这一步方便调试
-		return ret;		
-	}
-
+	if((CMD_SHEAD != buf[0]) && (CMD_HEAD != buf[0])) return ret;		//包头判断
+	if(len < phead->len) return ret;									//保证数据完整
+	EMF_ASSERT(buf[phead->len-1] == check_sum(buf,phead->len-1));		//可以忽略这一步方便调试
+	
 	if(CMD_SHEAD == buf[0]){								//start packet
 		memset(rxp, 0, sizeof(bytes_t));					//注意数据释放
 

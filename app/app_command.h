@@ -72,8 +72,8 @@ typedef enum{
 	/*---- 0x50	设备配置 ----*/
 	
 
-	/*---- 0xE0	socket ----*/
-	CMD_SOCKET_SETUP=0XE0,
+	/*---- 0xD0	socket ----*/
+	CMD_SOCKET_SETUP=0XD0,
 	CMD_SOCKET_OUT,
 	CMD_SOCKET_IN,
 	CMD_SOCKET_SETUP_ACK,
@@ -81,10 +81,11 @@ typedef enum{
 	CMD_SOCKET_SYNC,
 	CMD_SOCKET_CONFIGURED,
 
-	/*---- 0xF0	自定义 ----*/
-	CMD_VENDOR_PACK=0XEF,
-	CMD_VENDOR=0XF0,
-	CMD_UNSUPPORT,
+	/*---- 自定义封装包 ----*/
+	CMD_VENDOR_PACK=0XDF,
+	/*---- 0xE0	自定义 ----*/
+	CMD_VENDOR=0XE0,
+	CMD_UNSUPPORT=0XFF,
 }app_cmd_t;
 
 
@@ -93,6 +94,7 @@ typedef enum{
 ******************************************************************************************************/
 void app_command_init(void);
 bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);		//WEAK
+bool app_command_rx(trp_handle_t *phandle,uint8_t *buf, uint8_t len);
 bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c);		
 bool app_command_rx_fifo(trp_handle_t *phandle, app_fifo_t* fifop);
 

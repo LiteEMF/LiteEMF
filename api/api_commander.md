@@ -4,9 +4,13 @@
 
 * v1.0: original version
 
-## used `small endian` !
+## 协议规范
+    本协议统一使用`小端`方式通讯!
+    协议中结构体都是单字节对齐!
 
 ## packet format
+
+通讯协议需要上层协商通讯最大MTU(单包最大长度),确定MTU后指令需要根据MTU大封包.
 
 > 数据包帧(command frame):
 
@@ -27,9 +31,9 @@
 
 * > 发送数据:*0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08 0x09 0x0a 0x0b 0x0c*
   >
-  >> `0xa5 0x0a 0x03 0xcc 0x01 0x02 0x03 0x04 0x05 0x8d`
-  >> `0xa4 0x0a 0x02 0xcc 0x06 0x07 0x08 0x09 0x0a 0xa4`
-  >> `0xa4 0x07 0x01 0xcc 0x0b 0x0c 0x8f`
+  >> `0xa5 0x0a 0x03 0xcc 0x01 0x02 0x03 0x04 0x05 0x8d`  
+  >> `0xa4 0x0a 0x02 0xcc 0x06 0x07 0x08 0x09 0x0a 0xa4`  
+  >> `0xa4 0x07 0x01 0xcc 0x0b 0x0c 0x8f`  
   >>
   >
 
@@ -365,23 +369,21 @@ typedef struct{
 设备类型定义
 
 ```c
-
-
 //dev type
-#define DEF_DEV_TYPE_HID		0
-#define DEF_DEV_TYPE_AUDIO     	1
-#define DEF_DEV_TYPE_PRINTER   	2
-#define DEF_DEV_TYPE_MSD   		3		/*mass storage devices*/
-#define DEF_DEV_TYPE_HUB       	4
-#define DEF_DEV_TYPE_CDC		5		/*Communications Device Class*/
-//6
-#define DEF_DEV_TYPE_VENDOR    	8
-#define DEF_DEV_TYPE_ADB        9
-#define DEF_DEV_TYPE_AOA        10
-#define DEF_DEV_TYPE_USBMUXD	11
-#define DEF_DEV_TYPE_IAP2		12
-#define DEF_DEV_TYPE_AUTO		15
-#define DEF_DEV_TYPE_NONE		16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
+#define DEF_DEV_TYPE_VENDOR				0  			
+#define DEF_DEV_TYPE_AUDIO     			1
+#define DEF_DEV_TYPE_CDC				2		/*Communications Device Class*/
+#define DEF_DEV_TYPE_HID				3
+#define DEF_DEV_TYPE_PRINTER   			4
+#define DEF_DEV_TYPE_MSD   				5		/*mass storage devices*/
+#define DEF_DEV_TYPE_HUB       			6
+//7, 8
+#define DEF_DEV_TYPE_ADB          		9
+#define DEF_DEV_TYPE_AOA          		10
+#define DEF_DEV_TYPE_USBMUXD	   		11
+#define DEF_DEV_TYPE_IAP2				12
+#define DEF_DEV_TYPE_AUTO				15
+#define DEF_DEV_TYPE_NONE				16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
 
 //hid type
 #define DEF_HID_TYPE_VENDOR		0
@@ -800,7 +802,8 @@ typedef struct{
 
 ### //设置设备 保存配置到flash
 
-### 自定义协议封装(0XEF)
+
+### 自定义协议封装(0XD0)
 
 > 为了emf command 协议和sdk平台协议兼容,使用0XEF指令来封装SDK自定义协议
 
@@ -824,6 +827,9 @@ typedef struct{
     uint8_t sum;
 };
 ```
+
+### 用户自定义(0XE0~0XFE)
+
 
 ### 不支持该指令(0XFF)
 

@@ -218,6 +218,29 @@ command_rx_t* app_get_command_rx(trp_handle_t* phandle)
 	return NULL;
 }
 
+/*******************************************************************
+** Parameters:	buf: 必须是完整端包指令
+** Returns:	
+** Description:	解析短包指令, 
+*******************************************************************/
+bool app_command_rx(trp_handle_t *phandle,uint8_t *buf, uint8_t len)
+{	
+	uint8_t ret = false;
+	command_rx_t* cmd_rxp = app_get_command_rx(phandle);
+	uint8_t mtu = api_transport_get_mtu(phandle);
+
+	if(NULL == cmd_rxp) return false;
+
+	ret = api_command_rx(&cmd_rxp->cmds, buf,len);
+	if(ret){
+		cmd_rxp->sbuf.len = 0;
+		app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);
+		emf_free_and_clear(cmd_rxp->cmds.buf);
+	}
+
+	return ret;
+}
+
 
 /*******************************************************************
 ** Parameters:	
@@ -232,11 +255,14 @@ bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c)
 	uint8_t mtu = api_transport_get_mtu(phandle);
 
 	if(NULL == cmd_rxp) return false;
+
 	if(command_frame_rx(&cmd_rxp->sbuf, mtu, c)){
 		ret = api_command_rx(&cmd_rxp->cmds, cmd_rxp->sbuf.buf,cmd_rxp->sbuf.len);
-		cmd_rxp->sbuf.len = 0;
-		app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);
-		emf_free_and_clear(cmd_rxp->cmds.buf);
+		if(ret){
+			cmd_rxp->sbuf.len = 0;
+			app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);
+			emf_free_and_clear(cmd_rxp->cmds.buf);
+		}
 	}
 
 	return ret;
@@ -253,10 +279,12 @@ bool app_command_rx_fifo(trp_handle_t *phandle, app_fifo_t* fifop)
 	while(ERROR_SUCCESS == app_fifo_get(fifop, &c)){
 		if(command_frame_rx(&cmd_rxp->sbuf, mtu, c)){
 			ret = api_command_rx(&cmd_rxp->cmds, cmd_rxp->sbuf.buf, cmd_rxp->sbuf.len);
-			cmd_rxp->sbuf.len = 0;
-
-			app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);
-			emf_free_and_clear(cmd_rxp->cmds.buf);
+			
+			if(ret){
+				cmd_rxp->sbuf.len = 0;
+				app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);
+				emf_free_and_clear(cmd_rxp->cmds.buf);
+			}
 		}
 	}
 
