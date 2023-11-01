@@ -222,8 +222,9 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 
 		API_EXIT_CRITICAL();
 	}else{
+		if(TUSB_STA_CONFIGURED != pdev->state) return ERROR_DISCON;	//保证端点已经正常打开
 		if (pdev->enpd_in_busy[ep_addr] & 0X01) return ERROR_BUSY;
-
+	
 		pdev->enpd_in_busy[ep_addr] = 1;
 		err = hal_usbd_in(id, ep, buf, len);
 	}
@@ -258,6 +259,21 @@ error_t usbd_set_address(uint8_t id, uint8_t address)
 	pdev->state = TUSB_STA_ADDRESSING;
 
     return hal_usbd_set_address(id, address);
+}
+
+error_t usbd_set_ready(uint8_t id, uint8_t ready)
+{
+	error_t err = ERROR_NOT_FOUND;
+	usbd_dev_t *pdev = usbd_get_dev(id);
+
+	if(NULL == pdev) return ERROR_PARAM;
+
+	if(TUSB_STA_CONFIGURED == pdev->state){
+		pdev->ready = true;       //枚举完
+		logd_g("usbd%d ready...\n",id);
+		err = ERROR_SUCCESS;
+	}
+    return err;
 }
 
 extern void usbd_reset_event(uint8_t id);

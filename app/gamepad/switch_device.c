@@ -666,9 +666,7 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
         break;
     case SWITCH_USB_DIS_TIMEOUT: {      //0x04
         #if API_USBD_BIT_ENABLE && (USBD_HID_SUPPORT & HID_SWITCH_MASK)
-        usbd_dev_t *pdev = usbd_get_dev(phandle->id);
-        pdev->ready = true;
-        logd_g("usbd%d ready...\n",phandle->id);
+        usbd_set_ready(phandle->id, true);
         #endif
 
         logi("switch dev Handshake start\n");

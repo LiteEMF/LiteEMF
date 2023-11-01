@@ -65,10 +65,7 @@ uint16_t usbd_cdc_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
         memcpy(pdesc + *pdesc_index, cdc_itf_desc_tab, len);
         usbd_assign_configuration_desc(id, DEV_TYPE_CDC, 0, pindex, pdesc + *pdesc_index, len);
         
-        if(TUSB_STA_CONFIGURED == pdev->state){
-            pdev->ready = true;       //枚举完
-            logd_g("usbd%d ready...\n",id);
-        }
+        usbd_set_ready(id, true);
     }
     *pdesc_index += len;
 

@@ -38,7 +38,7 @@ uint8c_t xbox_set_motor[]={0x00,0x0F,0x00,0x00,0x00,0x00,0xFF,0x00,0x00};
 **	public Parameters
 *******************************************************************************************************/
 uint8_t m_xbox_enum_step = 0;
-
+xbox_info_t m_xbox_host_info;
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -284,6 +284,8 @@ bool xbox_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 		switch(rx_cmdp->cmd) {
 		case XBOX_INFO_CMD:{
 			xbox_info_t* infp = (xbox_info_t*)(rx_cmdp->pbuf);
+			m_xbox_host_info = *infp;
+			uint32_t version = U32(infp->version[0],infp->version[2],infp->version[3],infp->version[4]);
 			if(rx_cmdp->bctrl & XBOX_CTRL_UAC){
 				#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 				xbox_host_uac_en = true;
@@ -292,9 +294,11 @@ bool xbox_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 				ret = true;
 				#endif
 			}else{
+				#if !USBH_SOCKET_ENABLE
 				m_xbox_enum_step = 1;
+				#endif
 			}
-			logd("xbox info:step=%d,pid=%x,version=%x mac:",m_xbox_enum_step,infp->pid,infp->version);dumpd(infp->mac,6);
+			logd("xboxh info:step=%d,pid=%x,version=%x mac:",m_xbox_enum_step,infp->pid,version);dumpd(infp->mac,6);
 			break;
 		}
 		case XBOX_UNKNOWN_04_CMD:
@@ -314,7 +318,7 @@ bool xbox_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 				uint8_t val = 0;
 				xbox_command_fill(phandle,&tx_cmd,&xbox_host_index,xbox_host_uac_en,XBOX_START_CMD,&val,1);
 				if(xbox_command_send(&tx_cmd)){
-					logi("xbox earphone in\n");
+					logi("xboxh earphone in\n");
 				}
 				#else		//不支持音频不需回复
 				ret = true;
@@ -331,16 +335,16 @@ bool xbox_in_process(trp_handle_t* phandle, uint8_t *buf, uint8_t len)
 					if(xbox_command_send(&tx_cmd)){
 						xbox_host_uac_en = false;
 					}
-					logi("xbox earphone out\n");
+					logi("xboxh earphone out\n");
 				}
 				#else		//不支持音频不需回复
 				ret = true;
 				#endif
 			}
-			logd("xbox state:");dumpd(rx_cmdp->pbuf,rx_cmdp->len);
+			logd("xboxh state:");dumpd(rx_cmdp->pbuf,rx_cmdp->len);
 			break;
 		default:
-			logd("xbox cmd in:%x",rx_cmdp->cmd);dumpd(rx_cmdp->pbuf,8);		
+			logd("xboxh cmd in:%x",rx_cmdp->cmd);dumpd(rx_cmdp->pbuf,8);		
 			break;
 		}
 	}

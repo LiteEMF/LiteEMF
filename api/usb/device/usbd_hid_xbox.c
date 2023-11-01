@@ -33,18 +33,18 @@
 static uint8c_t  xbox_itf_desc_tab[] =
 {
 	0x09,0x04,0x00,0x00,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x02,
-	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), TUSB_ENDP_TYPE_INTER,0x40,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),TUSB_ENDP_TYPE_INTER,0x40,0x00,0x04,
 
 	0x09,0x04,0x01,0x00,0x00,0xFF,0x47,0xD0,0x00,
 	0x09,0x04,0x01,0x01,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x01,0xE4,0x00,0x01,
-	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x01,0x40,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), TUSB_ENDP_TYPE_ISOCH,0xE4,0x00,0x01,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),TUSB_ENDP_TYPE_ISOCH,0x40,0x00,0x01,
 
 	0x09,0x04,0x02,0x00,0x00,0xFF,0x47,0xD0,0x00,
 	0x09,0x04,0x02,0x01,0x02,0xFF,0x47,0xD0,0x00,
-	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x02,0x40,0x00,0x00,
-	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x02,0x40,0x00,0x00
+	0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), TUSB_ENDP_TYPE_BULK,0x40,0x00,0x00,
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),TUSB_ENDP_TYPE_BULK,0x40,0x00,0x00
 };
 
 // Feature Descriptor	bMS_VendorCode:0X90
@@ -119,11 +119,9 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	// uint8_t itf = preq->req.wIndex & 0XFF;
 
-	if(TUSB_REQ_RCPT_INTERFACE != preq->req.bmRequestType.bits.recipient) return err;
-
     if (TUSB_REQ_TYPE_VENDOR == preq->req.bmRequestType.bits.type){
 		if(0X90 == preq->req.bRequest){
-			switch(preq->req.wValue){
+			switch(preq->req.wIndex){
 			case 0X04:		//compat ID
 				preq->setup_len = MIN(preq->req.wLength,sizeof(xbox_compat_id));
 				memcpy(preq->setup_buf, xbox_compat_id, preq->setup_len);
@@ -139,9 +137,7 @@ error_t usbd_hid_xbox_control_request_process(uint8_t id, usbd_class_t *pclass, 
 		}
 	}else if(TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
         if(TUSB_REQ_SET_INTERFACE == preq->req.bRequest) {
-			pdev->ready = true;			//xbox set interface 后打开端点
-			logd_g("usbd%d ready...\n",id);
-           	err = ERROR_SUCCESS;
+			err = usbd_set_ready(id, true);
 		}
 	}
 
@@ -161,7 +157,12 @@ error_t usbd_hid_xbox_out_process(uint8_t id, usbd_class_t* pclass)
 		trp_handle.trp = TR_USBD;
 		trp_handle.id = id;
 		trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
-		app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen);
+
+		if(!app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen)){
+			#if USBD_SOCKET_ENABLE
+			usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_OUT, usb_rxbuf,usb_rxlen);
+			#endif
+		}
     }
 
     return ERROR_SUCCESS;

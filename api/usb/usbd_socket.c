@@ -39,7 +39,6 @@
 **	static Parameters
 *******************************************************************************************************/
 trp_handle_t usbd_socket_trp={TR_NULL}; //记录当前通讯trp, 由主机发起通讯,自动记录通讯trp,project不需要修改!!
-bool usbd_socket_configured=false;
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -63,6 +62,28 @@ bool usbd_socket_cmd(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len
 }
 
 
+
+error_t usbd_socket_control_request_process(uint8_t id, usbd_req_t* const preq)
+{
+	error_t err = ERROR_STALL;
+	uint8_t* p;
+	uint8_t out_len = 0;
+
+	if(TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction){
+		out_len = preq->req.wLength;
+	}
+	p = emf_malloc(out_len + 8);
+	if(NULL != p){
+		memcpy(p, &preq->req, 8);
+		memcpy(p+8, preq->setup_buf, out_len);
+		if(usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_SETUP, p, out_len + 8)){
+			err = ERROR_NACK;
+		}
+		emf_free(p);
+	}
+	return err;
+}
+
 bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len)
 {
 	uint8_t err = ERROR_FAILE;
@@ -75,7 +96,6 @@ bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 		memcpy(&dev_type, buf, 2);
 		usbd_socket_dev = SWAP16_L(dev_type);
 		logd("usbd socket sync type=%x ...\n",usbd_socket_dev);
-		usbd_socket_configured = true;
 		usbd_socket_trp = *phandle;
 		id = usbd_socket_trp.id;
 		m_usbd_hid_types[id] = BIT(usbd_socket_dev&0XFF);
@@ -95,6 +115,7 @@ bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 		err = usbd_in(id, 0x00, buf, len);
 		break;
 	case CMD_SOCKET_IN:
+		// logd("CMD_SOCKET_IN");dumpd(buf, len);
 		pclass = usbd_class_find_by_type(id, usbd_socket_dev>>8, usbd_socket_dev&0XFF);
 		if(pclass){
 			err = usbd_in(id, pclass->endpin.addr, buf, len);
@@ -106,6 +127,6 @@ bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 
 void usbd_socket_init(void)
 {
-	usbd_socket_configured = false;
+
 }
 #endif

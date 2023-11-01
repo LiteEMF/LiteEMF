@@ -31,7 +31,13 @@ char const* usbd_string_desc[4] =
 	"123456789012",           		// 3: Serials, should use chip ID
 };
 
-
+char const* usbd_xbox_string_desc[4] =
+{
+	"\x09\x04",  					// 0: is supported language is English (0x0409)
+	"Microsoft",                	// 1: Manufacturer
+	"Controller",         			// 2: Product
+	"3032363030353234313134363430", // 3: Serials, should use chip ID
+};
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
@@ -74,66 +80,12 @@ uint16_t m_usbd_hid_types[USBD_NUM] = {
 __WEAK char* usbd_user_get_string(uint8_t id, uint8_t index)
 {
 	char *pstr = NULL;
-
-	if(2 == index){		//product string
-		if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
-			if(m_usbd_hid_types[id] & HID_SWITCH_MASK){
-				pstr = "Pro Controller";
-			}else if(m_usbd_hid_types[id] & HID_PS_MASK){
-				pstr = "Wireless Controller";
-			}else if(m_usbd_hid_types[id] & HID_XBOX_MASK){
-				pstr = "Controller";
-			}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_GAMEPADE)){
-				pstr = "Hid Gamepade";
-			}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_MT) | BIT(HID_TYPE_TOUCH))){
-				pstr = "Touch Screen";
-			}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_MOUSE)){
-				pstr = "mouse";
-			}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_KB)){
-				pstr = "keyboard";
-			}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_VENDOR)){
-				pstr = "Hid Vendor";
-			}
-		}else if(m_usbd_types[id] & BIT(DEV_TYPE_IAP2)){
-			pstr = "iap";
-		}else if(m_usbd_types[id] & BIT(DEV_TYPE_MSD)){
-			pstr = "msd";
-		}else if(m_usbd_types[id] & BIT(DEV_TYPE_PRINTER)){
-			pstr = "printer";
-		}else if(m_usbd_types[id] & BIT(DEV_TYPE_CDC)){
-			pstr = "cdc";
-		}else if(m_usbd_types[id] & BIT(DEV_TYPE_AUDIO)){
-			pstr = "uac";
-		}else{
-			pstr = (char*)usbd_string_desc[index];
-		}
-	}
-		
 	return pstr;
 }
 
 __WEAK void usbd_user_set_device_desc(uint8_t id, usb_desc_device_t *pdesc)
 {
-	if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
-
-		#if USBD_HID_SUPPORT & HID_GAMEPAD_MASK
-		//注意xinput 复合设备使用自定义vid
-		if((m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_X360)) && (m_usbd_hid_types[id] != BIT_ENUM(HID_TYPE_X360))){	
-			return;
-		}
-
-		app_gamepad_get_vid_pid(TR_USBD, m_usbd_hid_types[id], &pdesc->idVendor, &pdesc->idProduct);
-		if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
-			pdesc->bDeviceClass       = 0xFF;
-			pdesc->bDeviceSubClass    = 0x47;
-			pdesc->bDeviceProtocol    = 0xD0;
-		}else if(m_usbd_hid_types[id] == BIT_ENUM(HID_TYPE_X360)){
-			pdesc->bDeviceClass       = 0xFF;
-			pdesc->bDeviceSubClass    = 0xff;
-			pdesc->bDeviceProtocol    = 0xff;
-		}
-		#endif
-	}
+	
 }
 
 #endif
@@ -148,8 +100,9 @@ error_t usbd_pack_unicode_string( char *str, uint8_t *pdesc, uint16_t *pdesc_len
 	uint16_t i;
 
 	if(*pdesc_len < 2) return ERROR_STALL;
+	if(NULL == str) return ERROR_PARAM;
 
-	pdesc[0] = 2 * strlen(str) + 2;;
+	pdesc[0] = 2 * strlen(str) + 2;
 	pdesc[1] = 0x03;
 
 	for(i=0; i<strlen(str); i++){
@@ -163,6 +116,7 @@ error_t usbd_pack_unicode_string( char *str, uint8_t *pdesc, uint16_t *pdesc_len
 	return ERROR_SUCCESS;
 }
 
+
 error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t *pdesc_len)
 {
 	error_t err;
@@ -171,21 +125,63 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 	if(index > 3) return ERROR_STALL;
 	if(*pdesc_len < 2) return ERROR_STALL;
 
+	if(0 == index){
+		pdesc[0] = 0x04;
+		pdesc[1] = 0x03;
+		pdesc[2] = 0x09;
+		pdesc[3] = 0x04;
+		*pdesc_len = 4;
+		err = ERROR_SUCCESS;
+		return err;
+	}
+	
 	pstr = usbd_user_get_string(id, index);	//user vendor get string 
+
+	//默认分配string
+	if(NULL == pstr){
+		if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
+			pstr = usbd_xbox_string_desc[index];
+		}else if(2 == index){		//product string
+			if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
+				if(m_usbd_hid_types[id] & HID_SWITCH_MASK){
+					pstr = "Pro Controller";
+				}else if(m_usbd_hid_types[id] & HID_PS_MASK){
+					pstr = "Wireless Controller";
+				}else if(m_usbd_hid_types[id] & HID_XBOX_MASK){
+					pstr = "Controller";
+				}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_GAMEPADE)){
+					pstr = "Hid Gamepade";
+				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_MT) | BIT(HID_TYPE_TOUCH))){
+					pstr = "Touch Screen";
+				}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_MOUSE)){
+					pstr = "mouse";
+				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_KB) | BIT(HID_TYPE_CONSUMER))){
+					pstr = "keyboard";
+				}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_VENDOR)){
+					pstr = "Hid Vendor";
+				}
+			}else if(m_usbd_types[id] & BIT(DEV_TYPE_IAP2)){
+				pstr = "iap";
+			}else if(m_usbd_types[id] & BIT(DEV_TYPE_MSD)){
+				pstr = "msd";
+			}else if(m_usbd_types[id] & BIT(DEV_TYPE_PRINTER)){
+				pstr = "printer";
+			}else if(m_usbd_types[id] & BIT(DEV_TYPE_CDC)){
+				pstr = "cdc";
+			}else if(m_usbd_types[id] & BIT(DEV_TYPE_AUDIO)){
+				pstr = "uac";
+			}else{
+				pstr = usbd_string_desc[index];
+			}
+		}
+	}
+
+	if(NULL == pstr){
+		pstr = usbd_string_desc[index];
+	}
 
 	if(NULL != pstr){
 		err = usbd_pack_unicode_string(pstr,pdesc,pdesc_len);
-	}else{
-		if(0 == index){
-			pdesc[0] = 0x04;
-			pdesc[1] = 0x03;
-			pdesc[2] = 0x09;
-			pdesc[3] = 0x04;
-			*pdesc_len = 4;
-			err = ERROR_SUCCESS;
-		}else{
-			err = usbd_pack_unicode_string((char*)usbd_string_desc[index],pdesc,pdesc_len);
-		}
 	}
 
 	return err;
@@ -215,6 +211,27 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 	dev.iProduct           = 2;
 	dev.iSerialNumber      = 3;
 	dev.bNumConfigurations = 1; 
+
+	// xbox 特殊处理
+	#if USBD_HID_SUPPORT & HID_GAMEPAD_MASK
+	if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & HID_GAMEPAD_MASK)){
+		if((m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_X360)) && (m_usbd_hid_types[id] != BIT_ENUM(HID_TYPE_X360))){	
+			//注意xinput 复合设备使用自定义vid, 这里不修改
+		}else{
+			app_gamepad_get_vid_pid(TR_USBD, m_usbd_hid_types[id], &dev.idVendor, &dev.idProduct);
+			if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
+				dev.bDeviceClass       = 0xFF;
+				dev.bDeviceSubClass    = 0x47;
+				dev.bDeviceProtocol    = 0xD0;
+				dev.bcdDevice    	   = 0X408;
+			}else if(m_usbd_hid_types[id] == BIT_ENUM(HID_TYPE_X360)){
+				dev.bDeviceClass       = 0xFF;
+				dev.bDeviceSubClass    = 0xff;
+				dev.bDeviceProtocol    = 0xff;
+			}
+		}
+	}
+	#endif
 
 	usbd_user_set_device_desc(id, &dev);			//user vendor set dev desc
 
@@ -333,7 +350,7 @@ error_t usbd_cfg_endp_all(uint8_t id)
 *******************************************************************/
 static error_t usbd_control_request_process(uint8_t id)
 {
-    error_t err = ERROR_SUCCESS;
+    error_t err = ERROR_STALL;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	usbd_req_t *preq = usbd_get_req(id);
 
@@ -343,15 +360,18 @@ static error_t usbd_control_request_process(uint8_t id)
 		preq->setup_len = preq->req.wLength;			//set default response len
 	}
 
+
     if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
 		switch (preq->req.bmRequestType.bits.recipient) {
 		case TUSB_REQ_RCPT_DEVICE:
 			switch (preq->req.bRequest) {
 			case TUSB_REQ_SET_ADDRESS:
 				// Depending on mcu, status phase could be sent either before or after changing device address,
+				err = ERROR_SUCCESS;
 				break;
 			case TUSB_REQ_GET_CONFIGURATION:
 				preq->setup_buf[0] = pdev->cfg_num;
+				err = ERROR_SUCCESS;
 				break;
 			case TUSB_REQ_SET_CONFIGURATION:
 				// Only process if new configure is different
@@ -365,7 +385,7 @@ static error_t usbd_control_request_process(uint8_t id)
 				}
 
 				pdev->state = TUSB_STA_CONFIGURED;
-				pdev->ready = false;
+				usbd_set_ready(id, false);
 				pdev->cfg_num = preq->req.wValue;
 				err = ERROR_SUCCESS;			//must success
 				break;
@@ -380,6 +400,7 @@ static error_t usbd_control_request_process(uint8_t id)
 
 				// Host may enable remote wake up before suspending especially HID device
 				pdev->dev.remote_wakeup_en = true;
+				err = ERROR_SUCCESS;
 				break;
 			case TUSB_REQ_CLEAR_FEATURE:
 				// Only support remote wakeup for device feature
@@ -389,11 +410,13 @@ static error_t usbd_control_request_process(uint8_t id)
 
 				// Host may disable remote wake up after resuming
 				pdev->dev.remote_wakeup_en = false;
+				err = ERROR_SUCCESS;
 				break;
 			case TUSB_REQ_GET_STATUS:
 				// Device status bit mask,Bit 0: Self Powered,Bit 1: Remote Wakeup enabled
 				preq->setup_buf[0] = (pdev->dev.self_powered ? 1 : 0) | (pdev->dev.remote_wakeup_en ? 2 : 0);
 				preq->setup_buf[1] = 0;
+				err = ERROR_SUCCESS;
 				break;
 			default:
 				err = ERROR_STALL;
@@ -406,9 +429,11 @@ static error_t usbd_control_request_process(uint8_t id)
 			switch (preq->req.bRequest) {
 			case TUSB_REQ_SET_INTERFACE:		//注意是否需要切换和配置端点?
 				pdev->itf_alt[preq->req.wIndex & 0xff] = preq->req.wValue & 0xff;
+				err = ERROR_SUCCESS;
 				break;
 			case TUSB_REQ_GET_INTERFACE:
 				preq->setup_buf[0] = pdev->itf_alt[preq->req.wIndex & 0xff];
+				err = ERROR_SUCCESS;
 				break;
 			default:
 				err = ERROR_STALL;
@@ -419,9 +444,10 @@ static error_t usbd_control_request_process(uint8_t id)
 		case TUSB_REQ_RCPT_ENDPOINT:
 			// Handle STD request to endpoint
 			switch (preq->req.bRequest) {
-			case TUSB_REQ_GET_STATUS: {
+			case TUSB_REQ_GET_STATUS:
 				preq->setup_buf[0] = usbd_get_endp_stalled(id, preq->req.wIndex) ? 1 : 0;
-			} break;
+				err = ERROR_SUCCESS;
+				break;
 			case TUSB_REQ_CLEAR_FEATURE:
 				if (TUSB_REQ_FEATURE_EDPT_HALT == preq->req.wValue) {
 					err = usbd_clear_endp_stall(id, preq->req.wIndex);
@@ -442,8 +468,6 @@ static error_t usbd_control_request_process(uint8_t id)
 			err = ERROR_STALL;
 			break;
 		}
-	}else{
-		err = ERROR_STALL;
 	}
 
 	if(ERROR_STALL == err){
@@ -452,23 +476,9 @@ static error_t usbd_control_request_process(uint8_t id)
 		usbd_class_control_request_process(id, preq);
 	}
 
-	#if USBD_SOCKET_ENABLE		//TODO
+	#if USBD_SOCKET_ENABLE
 	if(ERROR_STALL == err){
-		uint8_t* p;
-		uint8_t out_len = 0;
-
-		if(TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction){
-			out_len = preq->req.wLength;
-		}
-		p = emf_malloc(out_len + 8);
-		if(NULL != p){
-			memcpy(p, &preq->req, 8);
-			memcpy(p+8, preq->setup_buf, out_len);
-			if(usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_SETUP, p, out_len + 8)){
-				err = ERROR_NACK;
-			}
-			emf_free(p);
-		}
+		err = usbd_socket_control_request_process(id, preq);
 	}
 	#endif
 
@@ -518,7 +528,7 @@ void usbd_suspend_process( uint8_t id )
 	if(NULL != pdev){
 		pdev->dev.suspend = 0;
 		usbd_free_setup_buffer(preq);
-		pdev->ready= false;
+		usbd_set_ready(id, false);
 		if(TUSB_STA_CONFIGURED == pdev->state){
 			pdev->state = TUSB_STA_SUSPENDED;
 			usbd_class_notify_evt(id,USBD_EVENT_SUSPEND,0);

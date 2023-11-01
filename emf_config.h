@@ -65,11 +65,11 @@ extern "C" {
 #define DEF_DEV_TYPE_PRINTER   			4
 #define DEF_DEV_TYPE_MSD   				5		/*mass storage devices*/
 #define DEF_DEV_TYPE_HUB       			6
-//7, 8
-#define DEF_DEV_TYPE_ADB          		9
-#define DEF_DEV_TYPE_AOA          		10
-#define DEF_DEV_TYPE_USBMUXD	   		11
-#define DEF_DEV_TYPE_IAP2				12
+//7, 8 ,9, 10
+#define DEF_DEV_TYPE_ADB          		11
+#define DEF_DEV_TYPE_AOA          		12
+#define DEF_DEV_TYPE_USBMUXD	   		13
+#define DEF_DEV_TYPE_IAP2				14
 #define DEF_DEV_TYPE_AUTO				15
 #define DEF_DEV_TYPE_NONE				16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
 

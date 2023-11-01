@@ -102,14 +102,20 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
 void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
-
+    bool ret;
     trp_handle_t trp_handle;
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
     trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
 
-    app_gamepad_host_process(&trp_handle,&usbh_gamepad_key,buf,len);
+   ret = app_gamepad_host_process(&trp_handle,&usbh_gamepad_key,buf,len);
+
+    #if USBH_SOCKET_ENABLE
+	if(!ret){
+        usbh_socket_cmd(&usbh_socket_trp,CMD_SOCKET_IN,buf,len);
+	}
+	#endif
 }
 
 error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
@@ -135,7 +141,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
             if(pclass->itf.if_num){
                 if(pclass->endpin.type == TUSB_ENDP_TYPE_INTER){             //gamepad
                     xbox_controller_init(&trp_handle);
-                }else if(pclass->endpin.type == TUSB_ENDP_TYPE_ISOCH){       //audio
+                }else if(pclass->endpin.type == TUSB_ENDP_TYPE_ISOCH){       //audio //TODO 这里进不来
                     #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)        //如果支持打开audio接口,xbox默认一直打开
                     usbh_req_set_itf(id, pclass->itf.if_num, 1);
                     #endif
@@ -193,7 +199,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
     
     #if USBH_SOCKET_ENABLE      //socket从这里开始触发引导
     if(ERROR_SUCCESS == err){
-        usbh_socket_init(&usbh_socket_trp, pclass->hid_type);       //TODO 选择socket通讯协议
+        usbh_socket_init(&usbh_socket_trp, U16(DEV_TYPE_HID, pclass->hid_type));       //TODO 选择socket通讯协议
     }
 	#endif
 

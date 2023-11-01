@@ -226,7 +226,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 		default:
 			break;
 	}
-	if(!ret) logd("trp err!\n");
+	if(!ret) logd("trp%d len=%d err\n",(uint16_t)phandle->trp,len);
 	return ret;
 }
 

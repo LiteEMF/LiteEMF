@@ -168,6 +168,7 @@ void 	*usbd_get_endp_buffer(uint8_t id, uint8_t ep);
 error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len);
 error_t usbd_out(uint8_t id, uint8_t ep,uint8_t* buf, uint16_t* plen);
 error_t usbd_set_address(uint8_t id,uint8_t address);
+error_t usbd_set_ready(uint8_t id, uint8_t ready);
 error_t usbd_reset(uint8_t id);
 error_t usbd_core_init(uint8_t id);
 error_t usbd_core_deinit(uint8_t id);

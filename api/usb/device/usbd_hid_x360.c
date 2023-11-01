@@ -199,9 +199,7 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 				if(0x00 == preq->req.wValue){
 					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_null));
 					memcpy(preq->setup_buf, x360_null, preq->setup_len);
-					pdev->ready = true;
-					logd_g("usbd%d ready...\n",id);
-					err = ERROR_SUCCESS;
+					err = usbd_set_ready(id, true);
 				}
 			}
 		}else if(TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {

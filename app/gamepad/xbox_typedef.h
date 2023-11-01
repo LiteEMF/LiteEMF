@@ -23,9 +23,9 @@
 #define   XBOX_VID    		0X045E
 #define   XBOX_PID         	0X02EA		/* 0X02D1(不带3.5手柄)	0X0B00 */
 #define   XBOX_UAC_PID      0X02F6		/* xbox/xboxx接音频后的PID */
-#define   X360_PID         	0X028E
 #define   XBOXX_PID         0X0B12		/* 0X02EA */
 #define   XBOX_BT_PID		0X02E0		/* 0X02E0(PC显示unknow device,手机正常) 0X0B13(pc显示x360但android按键异常) */
+#define   X360_PID         	0X028E
 
 
 
@@ -325,6 +325,7 @@ typedef struct
 	uint8_t home_key;		//1:按下,0:抬起
 }xbox_bt_logo_report_t;		//2
 
+//xbox version < 5.xxx 
 typedef struct {
 	uint8_t id;				//0x20
 	uint8_t bctrl;				//0x00
@@ -339,6 +340,7 @@ typedef struct {
 	int16_t ry;
 }xboxone_report_t;			//18
 
+//xbox version > 5.xxx 
 typedef struct {
 	uint8_t id;				//0x20
 	uint8_t bctrl;				//0x00
@@ -350,8 +352,8 @@ typedef struct {
 	int16_t x; /* -32768 ~ 32767 */ 		//小端
 	int16_t y;
 	int16_t rx;
-	int16_t ry; 				//18
-	uint8_t res[22]; 			//res[4] share key 1 按下, 0 抬起
+	int16_t ry; 			//18
+	uint8_t res[22]; 		//res[4] share key 1 按下, 0 抬起
 	uint16_t time_us; 		//1us为一个单位
 	uint16_t time_ms; 		//65ms 为一个单位time_us 的溢出		16
 	uint16_t time_us2; 		//同上

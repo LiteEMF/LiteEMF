@@ -88,15 +88,15 @@ bool usbh_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 
 	id = usbh_class_find_by_type_all(usbh_socket_dev>>8,usbh_socket_dev&0XFF, &pcalss);
     if (id == USBH_NULL){
-		if(CMD_SOCKET_SETUP == cmd){
+		if(CMD_SOCKET_SETUP == cmd){		//防止未接手柄时指令一直不回复
 			usbh_socket_cmd(phandle,CMD_SOCKET_SETUP_STALL,NULL,0);
 		}
-		logd( "usbh socket not find!\n");
+		logd( "usbh socket=%X not find!\n",usbh_socket_dev);
 		return err;
 	}
 
 	switch(cmd){
-		case CMD_SOCKET_CONFIGURED:
+		case CMD_SOCKET_READY:
 			usbh_socket_configured = buf[0];
 			break;
 		case CMD_SOCKET_SETUP:
@@ -128,7 +128,8 @@ bool usbh_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 			}
 			emf_free(req_buf);
 			break;
-		case CMD_SOCKET_OUT:			
+		case CMD_SOCKET_OUT:	
+			// logd("usbh CMD_SOCKET_OUT");dumpd(buf, len);	
 			err = usbh_out(id, &pcalss->endpout ,buf, len);
 			break;
 		
@@ -137,14 +138,15 @@ bool usbh_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 }
 
 
-void usbh_socket_init(trp_handle_t* phandle, uint16_t dev_type)
+void usbh_socket_init(trp_handle_t* phandle, uint16_t trp_index)
 {
 	usbh_socket_configured = false;
 	usbh_socket_trp = *phandle;
-	usbh_socket_dev = dev_type;
+	usbh_socket_dev = trp_index;
+	logd_r("usbh socket init=%x",usbh_socket_dev);
 
-	dev_type = SWAP16_L(usbh_socket_dev);
-	usbh_socket_cmd(phandle,CMD_SOCKET_SYNC,&dev_type,2);
+	trp_index = SWAP16_L(usbh_socket_dev);
+	usbh_socket_cmd(phandle,CMD_SOCKET_SYNC,&trp_index,2);
 }
 #endif
 

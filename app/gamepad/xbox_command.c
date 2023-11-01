@@ -211,7 +211,8 @@ bool xbox_get_cmd(trp_handle_t *phandle, xbox_command_t *rx_cmdp, uint8_t* buf,u
 	bool ret = false;
 	xbox_usb_pack_t* p = (xbox_usb_pack_t*)buf;
 
-	if(0 == len) return false;
+
+	if(4 > len) return false;
 	
 	if(p->bctrl & XBOX_CTRL_LPACKET){				//长包
 		uint16_t pack_len;

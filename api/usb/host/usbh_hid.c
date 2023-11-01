@@ -198,7 +198,7 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	xbox模式只有中断端点才会被识别	
 *******************************************************************/
 error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
 {

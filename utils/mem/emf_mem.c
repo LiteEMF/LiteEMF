@@ -96,6 +96,8 @@ void emf_mem_init(void)
 void* emf_malloc(uint32_t size)
 {
 	void* p = NULL;
+	if(0 == size) return p;
+
 	#if HEAP_ID
 	p = pvPortMalloc(size);
 	#else
@@ -106,6 +108,8 @@ void* emf_malloc(uint32_t size)
 }
 void emf_free(void* p)
 {
+	if(NULL == p) return;
+	
 	#if HEAP_ID
 	vPortFree(p);
 	#else
