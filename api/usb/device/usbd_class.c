@@ -189,8 +189,6 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 				if(!pindex->is_alt_itf) {
 					pindex->ep_out_num++;
 				}
-
-				
 			}
 			logd("assign ep=%x\n",pep->bEndpointAddress);
 			endp->addr = pep->bEndpointAddress & 0x0F;
@@ -222,9 +220,24 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 			if((DEV_TYPE_HID == type) && (HID_TYPE_X360 == hid_type)){
 				uint8_t *descp = (pdesc+i);
-				descp[6] |= pindex->ep_in_num;
-				descp[12] |= pindex->ep_out_num;
-				logd("assign x360 ep=%x %x\n",descp[6],descp[12]);
+				uint8_t j,len,assign_ep_num=0;	//x360端点分配
+				for(j=5; j < l; ){				//从第五个开始
+					len = (descp[j] & 0x0F) + 2;	
+
+					assign_ep_num++;
+					if(descp[j+1] & TUSB_DIR_MASK){
+						descp[j+1] = TUSB_DIR_IN_MASK | pindex->ep_in_num;
+					}else {
+						descp[j+1] = pindex->ep_out_num;
+					}
+					if(3 == assign_ep_num || 4 == assign_ep_num){		//超过2个端点,简单特殊处理
+						descp[j+1]++;
+					}
+
+					logd("x360 assign ep=%x\n",descp[j+1]);
+					
+					j += len;
+				}
 			}
 			#endif
 			break;

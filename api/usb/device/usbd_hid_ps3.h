@@ -10,15 +10,11 @@
 */
 
 
-#ifndef _usbh_hid_h
-#define _usbh_hid_h
+#ifndef _usbd_hid_ps3_h
+#define _usbd_hid_ps3_h
 #include "emf_typedef.h" 
-#include "api/usb/usb_typedef.h"
-#include "api/hid/hid_typedef.h"
-#include "api/usb/host/usbh_core.h"
-
-#include  "api/usb/host/usbh_hid_km.h"
-#include  "api/usb/host/usbh_hid_gamepad.h"
+#include "api/usb/device/usbd_core.h"
+#include "api/hid/hid_dev_desc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,19 +35,15 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-error_t usbh_hid_set_idle(uint8_t id, uint8_t itf);  
-error_t usbh_hid_set_report(uint8_t id, uint8_t itf, hid_report_type_t type, uint8_t rep_id, uint8_t* buf, uint16_t len);  
-error_t usbh_hid_get_report(uint8_t id, uint8_t itf, hid_report_type_t type, uint8_t rep_id, uint8_t* buf, uint16_t *plen);  
-error_t usbh_hid_get_report_desc( uint8_t id, uint8_t index, uint16_t itf, uint8_t* buf, uint16_t *plen);  
-uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len);
+error_t usbd_hid_ps3_reset(uint8_t id);
+error_t usbd_hid_ps3_suspend(uint8_t id);
+uint16_t usbd_hid_ps3_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
+error_t usbd_hid_ps3_control_request_process(uint8_t id, usbd_class_t *pclass,  usbd_req_t* const preq);
+error_t usbd_hid_ps3_out_process(uint8_t id, usbd_class_t *pclass);
+void 	usbd_hid_ps3_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
+error_t usbd_hid_ps3_init(uint8_t id);
+error_t usbd_hid_ps3_deinit(uint8_t id);
 
-
-void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
-error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass);
-error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass);
-error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
-error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass); 
-void usbh_hid_task(uint8_t id, usbh_class_t *pclass);
 
 #ifdef __cplusplus
 }

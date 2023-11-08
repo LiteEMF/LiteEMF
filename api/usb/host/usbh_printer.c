@@ -90,7 +90,7 @@ error_t usbh_printer_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uin
 	UNUSED_PARAMETER(pclass);
 	UNUSED_PARAMETER(pdesc);
 	UNUSED_PARAMETER(len);
-    return 0;
+    return ERROR_UNKNOW;
 }
 
 /*******************************************************************

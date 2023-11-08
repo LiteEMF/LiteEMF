@@ -13,7 +13,7 @@
 #include "hw_config.h"
 #if API_USBD_BIT_ENABLE && \
 	(USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)) \
-	&& ( USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_PS3) | BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5)) )
+	&& ( USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5)) )
 
 #include "api/usb/device/usbd.h"
 #include "app/gamepad/app_gamepad.h"
@@ -35,12 +35,11 @@
 static uint8c_t ps_gamepade_itf_desc_tab[] = {
 	0x09,0x04,0x00,0x00,0x02,0x03,0x00,0x00,0x00,             			//usb_desc_interface_t
     USBD_HID_DESC,          			//usb_hid_descriptor_hid_t
-    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x02,			//usb_desc_endpoint_t
-	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x04,			//usb_desc_endpoint_t
+    0x07,0x05,(TUSB_DIR_IN<<TUSB_DIR_POST), 0x03,0x40,0x00,0x01,			//usb_desc_endpoint_t
+	0x07,0x05,(TUSB_DIR_OUT<<TUSB_DIR_POST),0x03,0x40,0x00,0x01,			//usb_desc_endpoint_t
 };
 
 
-#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 //uint8c_t class_reuqes_in_03[20] ={0x03,0x21,0x27,0x04,0x41,0x00,0x2c,0x56,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x0D};	//HORY 手柄
 uint8c_t class_reuqes_in_03[20] ={0x03,0x21,0x27,0x04,0x89,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0D,0x0D};
 // uint8c_t class_reuqes_in_03[] = {0x03,0x21,0x27,0x04,0xCF,0x00,0x2C,0x56,0x08,0x00,0x3D,0x00,0xE8,0x03,0x04,0x00,0xFF,0x7F,0x0D,0x0D};
@@ -59,8 +58,6 @@ static uint8c_t class_reques_in_a3[] = {
 };
 
 uint8c_t class_reuqes_in_f3[4] ={0xF3,0x00,0x38,0x38};		//b8 不支持F2,改成38
-
-#endif
 
 
 /*****************************************************************************************************
@@ -243,11 +240,9 @@ error_t usbd_hid_ps_out_process(uint8_t id, usbd_class_t* pclass)
 *******************************************************************/
 error_t usbd_hid_ps_init(uint8_t id)
 {
-	trp_handle_t trp_handle;
+	trp_handle_t trp_handle={TR_USBD,0,U16(DEV_TYPE_HID, HID_TYPE_PS4)};
 		
-	trp_handle.trp = TR_USBD;
 	trp_handle.id = id;
-	trp_handle.index = U16(DEV_TYPE_HID, HID_TYPE_PS4);
 	app_gamepad_init( &trp_handle ); 
     UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;
@@ -260,11 +255,9 @@ error_t usbd_hid_ps_init(uint8_t id)
 *******************************************************************/
 error_t usbd_hid_ps_deinit(uint8_t id)
 {
-	trp_handle_t trp_handle;
+	trp_handle_t trp_handle={TR_USBD,0,U16(DEV_TYPE_HID, HID_TYPE_PS4)};
 		
-	trp_handle.trp = TR_USBD;
 	trp_handle.id = id;
-	trp_handle.index = U16(DEV_TYPE_HID, HID_TYPE_PS4);
 	app_gamepad_deinit( &trp_handle ); 
     UNUSED_PARAMETER(id);
     return ERROR_SUCCESS;

@@ -270,9 +270,11 @@ bool xbox_get_cmd(trp_handle_t *phandle, xbox_command_t *rx_cmdp, uint8_t* buf,u
 		ret = true;
 	}
 
+	#if !USBD_SOCKET_ENABLE && !USBH_SOCKET_ENABLE
 	if( p->bctrl & XBOX_CTRL_NEED_ACK ){		//回复接收ACK
 		xbox_cmd_ack(phandle,rx_cmdp);
 	}
+	#endif
 	
 	return ret;
 }

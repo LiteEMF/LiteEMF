@@ -270,7 +270,7 @@ error_t usbd_set_ready(uint8_t id, uint8_t ready)
 
 	if(TUSB_STA_CONFIGURED == pdev->state){
 		pdev->ready = true;       //枚举完
-		logd_g("usbd%d ready...\n",id);
+		logd_g("usbd%d ready=%d...\n",(uint16_t)id,(uint16_t)ready);
 		err = ERROR_SUCCESS;
 	}
     return err;

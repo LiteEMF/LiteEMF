@@ -40,6 +40,7 @@ extern uint16_t m_usbd_hid_types[USBD_NUM];
 ******************************************************************************************************/
 char* usbd_user_get_string(uint8_t id, uint8_t index);		//__WEAK 
 void usbd_user_set_device_desc(uint8_t id, usb_desc_device_t *pdesc); //__WEAK 
+error_t usbd_pack_unicode_string( char *str, uint8_t *pdesc, uint16_t *pdesc_len); 
 
 void usbd_reset_event(uint8_t id);								              //__WEAK
 void usbd_suspend_event(uint8_t id);							              //__WEAK

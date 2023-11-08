@@ -28,6 +28,17 @@
 #define   X360_PID         	0X028E
 
 
+//itf clsss
+#define XBOX_CLASS              0xff
+#define XBOX_SUBCLASS           0x47
+#define X360_SUBCLASS           0x5D
+#define X360_PROTOCOL           0x01	/*1~3*/
+
+#define X360_IDENTIFY_SUBCLASS	0xFD	/*用于识别主机认证*/
+#define X360_IDENTIFY_PROTOCOL	0x13	
+
+//xbox 从机使用 0X50D,or 0X408
+#define XBOX_DEV_VERSION	0X50D
 
 #ifndef XBOX_SPK_RATE
 #define XBOX_SPK_RATE           48000
@@ -315,7 +326,7 @@ typedef struct
 	uint8_t index;			//帧号  每次自增1
 	uint8_t len;			//0x02
 	uint8_t button; 		//bit0 表示logo是否按下  bit1-bit7保留
-	uint8_t home_key;		 //key  固定为0x5b
+	uint8_t home_key;		//key  固定为0x5b
 }xbox_logo_report_t;		// bit0,1:press,0:up,  xbox 手柄logo键报告数据
 
 
@@ -328,13 +339,13 @@ typedef struct
 //xbox version < 5.xxx 
 typedef struct {
 	uint8_t id;				//0x20
-	uint8_t bctrl;				//0x00
+	uint8_t bctrl;			//0x00
 	uint8_t index;
-	uint8_t len;						//接下来数据长度不包含护自己
-	uint16_t button; /* Button 1 ~ 16 */
-	int16_t l2; /* 0 ~ 0x3FF */
-	int16_t r2; /* 0 ~ 0x3FF */
-	int16_t x; /* -32768 ~ 32767 */ 		//小端
+	uint8_t len;			//接下来数据长度不包含护自己
+	uint16_t button; 		/* Button 1 ~ 16 */
+	int16_t l2; 			/* 0 ~ 0x3FF */
+	int16_t r2; 			/* 0 ~ 0x3FF */
+	int16_t x; 				/* -32768 ~ 32767 */ 		//小端
 	int16_t y;
 	int16_t rx;
 	int16_t ry;
@@ -343,13 +354,13 @@ typedef struct {
 //xbox version > 5.xxx 
 typedef struct {
 	uint8_t id;				//0x20
-	uint8_t bctrl;				//0x00
+	uint8_t bctrl;			//0x00
 	uint8_t index;
-	uint8_t len;		//0x2c
-	uint16_t button; /* Button 1 ~ 16 */
-	int16_t l2; /* 0 ~ 0x3FF */
-	int16_t r2; /* 0 ~ 0x3FF */
-	int16_t x; /* -32768 ~ 32767 */ 		//小端
+	uint8_t len;			//0x2c
+	uint16_t button; 		/* Button 1 ~ 16 */
+	int16_t l2; 			/* 0 ~ 0x3FF */
+	int16_t r2; 			/* 0 ~ 0x3FF */
+	int16_t x; 				/* -32768 ~ 32767 */ 		//小端
 	int16_t y;
 	int16_t rx;
 	int16_t ry; 			//18
@@ -358,7 +369,7 @@ typedef struct {
 	uint16_t time_ms; 		//65ms 为一个单位time_us 的溢出		16
 	uint16_t time_us2; 		//同上
 	uint16_t time_ms2; 		//同上
-}xbox_report_t;			//48
+}xbox_report_t;				//48
 
 
 typedef struct {

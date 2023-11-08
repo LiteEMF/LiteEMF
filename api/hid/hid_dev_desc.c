@@ -50,6 +50,12 @@ static uint8c_t hid_desc_xbox_bt_map[] =
 };
 #endif
 
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
+static uint8c_t hid_desc_ps3_map[] =
+{
+    #include "hid_desc_ps3.h"
+};
+#endif
 #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 static uint8c_t hid_desc_ps4_bt_map[] =
 {
@@ -139,6 +145,12 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
                 #endif
             }
             break;
+        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
+        case HID_TYPE_PS3	:
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps3_map;
+            map_len = sizeof(hid_desc_ps3_map);
+            break;
+        #endif
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
             if(api_trp_is_bt(trp)){

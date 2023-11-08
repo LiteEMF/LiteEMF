@@ -206,10 +206,10 @@ error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
     if(TUSB_CLASS_HID == pclass->itf.if_cls){
         err = ERROR_SUCCESS;
     }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){          //xbox 特殊处理
-        if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) || (X360_SUBCLASS == pclass->itf.if_sub_cls)){
-            if(pclass->endpin.addr && (TUSB_ENDP_TYPE_INTER == pclass->endpin.type)){
-                err = ERROR_SUCCESS;
-            }
+        if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) 
+            || (X360_SUBCLASS == pclass->itf.if_sub_cls)
+            || (X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls)){
+            err = ERROR_SUCCESS;
         }
     }
 	return err;
@@ -254,12 +254,14 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
 
 error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len)
 {
-    error_t err = ERROR_SUCCESS;
+    error_t err = ERROR_UNKNOW;
     uint16_t desc_len; 
     uint8_t *desc_buf;
     hid_desc_info_t hid_info;
 
-    if(TUSB_CLASS_HID == pclass->itf.if_cls){            //except xbox
+    if(TUSB_CLASS_HID == pclass->itf.if_cls){                   //except xbox
+        if(0 == pclass->itf.num_endp) return ERROR_NOT_FOUND;   //排除无端点接口
+
         desc_len = usbh_get_hid_desc_len(pdesc, len);
         if(0 == desc_len) return ERROR_UNSUPPORT;
 
@@ -289,8 +291,10 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
             }
             hid_desc_info_free(&hid_info);
         }
-    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){          //xbox 特殊处理
-        if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) || (X360_SUBCLASS == pclass->itf.if_sub_cls)){
+    }else if(XBOX_CLASS == pclass->itf.if_cls){          //xbox 特殊处理, x360 if_pro 必须是X360_PROTOCOL
+        if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) 
+            || (X360_SUBCLASS == pclass->itf.if_sub_cls)
+            || (X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls)){
             err = usbh_hid_gamepad_init(id, pclass, NULL);
         }
     }

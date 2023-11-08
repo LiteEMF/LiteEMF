@@ -30,18 +30,20 @@
 #include  "api/api_log.h"
 
 
-#define XBOX_VERSION	4
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
 #if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 
 //xboxx 的音频在PC上是调整的是数字音音量,xbox one发的是指令调整音量但mic无法调整
-#if 5 == XBOX_VERSION
-uint8c_t xbox_version[8] = {0x05, 0x00, 0x0D, 0x00, 0x47, 0x0C, 0x00, 0x00};		//firmware version 5.5.2641.0 xboxx
+// xbox 不同版本数据可以混着发送
+#if 0X500 <= XBOX_DEV_VERSION
+//50D
+uint8c_t xbox_version[8] = {XBOX_DEV_VERSION>>8, 0x00, XBOX_DEV_VERSION&0XFF, 0x00, 0x47, 0x0C, 0x00, 0x00};		//firmware version 5.5.2641.0 xboxx
 uint8c_t xbox_info_unknow[8] = {0x08,0x04,0x01,0x00,0x01,0x00,0x01,0x00};
 #else
-uint8c_t xbox_version[8] = {0x04, 0x00, 0x08, 0x00, 0x83, 0x07, 0x00, 0x00};		//firmware version 5.5.2641.0 xboxone
+//V408
+uint8c_t xbox_version[8] = {XBOX_DEV_VERSION>>8, 0x00, XBOX_DEV_VERSION&0XFF, 0x00, 0x83, 0x07, 0x00, 0x00};		//firmware version 5.5.2641.0 xboxone
 uint8c_t xbox_info_unknow[8] = {0x04,0x05,0x01,0x00,0x01,0x00,0x01,0x00};
 #endif
 // uint8c_t xbox_cmd_04[] = {	
@@ -151,7 +153,7 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *k
 			xboxp->len = 0x0e;
 			packet_len = sizeof(xboxone_report_t);
 
-			if(XBOXX_PID == pdev->pid){
+			if(XBOX_DEV_VERSION >= 0X500){				//根据xbox 版本发送数据
 				xboxp->button |= SWAP16_L( 1 );
 				if(keyp->key & XBOX_SHARE){		//only xboxx
 					xboxp->res[4]=1;

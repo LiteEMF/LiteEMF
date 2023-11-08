@@ -87,7 +87,7 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
 				case HID_TYPE_PS3	:
-                    len += usbd_hid_ps_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
+                    len += usbd_hid_ps3_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
@@ -128,8 +128,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 				memcpy((void*)preq->setup_buf,desc_buf,preq->setup_len);
 
                 if(HID_TYPE_SWITCH != pclass->hid_type){        //switch ready 在 switch_controller 中设置
-                    pdev->ready = true;
-                    logd_g("usbd%d ready...\n",id);
+                    usbd_set_ready(id, true);
                 }
                 err = ERROR_SUCCESS;
 			}else if(HID_DESC_TYPE_HID == desc_type){
@@ -195,7 +194,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
         case HID_TYPE_PS3	:
-            err = usbd_hid_ps_control_request_process(id, pclass, preq);
+            err = usbd_hid_ps3_control_request_process(id, pclass, preq);
             break;
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
@@ -268,7 +267,7 @@ error_t usbd_hid_init(uint8_t id)
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
             case HID_TYPE_PS3	:
-                usbd_hid_ps_init(id);
+                usbd_hid_ps3_init(id);
                 break;
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
@@ -340,7 +339,7 @@ error_t usbd_hid_deinit(uint8_t id)
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
             case HID_TYPE_PS3	:
-                usbd_hid_ps_deinit(id);
+                usbd_hid_ps3_deinit(id);
                 break;
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
@@ -409,7 +408,7 @@ void usbd_hid_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3)
         case HID_TYPE_PS3	:
-            usbd_hid_ps_process(id, pclass, evt, val);
+            usbd_hid_ps3_process(id, pclass, evt, val);
             break;
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)

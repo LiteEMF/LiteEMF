@@ -23,7 +23,7 @@
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-char const* usbd_string_desc[4] =
+char const_t* usbd_string_desc[4] =
 {
 	"\x09\x04",  					// 0: is supported language is English (0x0409)
 	"LiteEMF",                		// 1: Manufacturer
@@ -31,7 +31,7 @@ char const* usbd_string_desc[4] =
 	"123456789012",           		// 3: Serials, should use chip ID
 };
 
-char const* usbd_xbox_string_desc[4] =
+char const_t* usbd_xbox_string_desc[4] =
 {
 	"\x09\x04",  					// 0: is supported language is English (0x0409)
 	"Microsoft",                	// 1: Manufacturer
@@ -106,7 +106,7 @@ error_t usbd_pack_unicode_string( char *str, uint8_t *pdesc, uint16_t *pdesc_len
 	pdesc[1] = 0x03;
 
 	for(i=0; i<strlen(str); i++){
-		if(*pdesc_len < len + 2) break;
+		if(*pdesc_len < len + 2) break;		//pdesc 溢出判断
 
 		pdesc[len++] = str[i];
 		pdesc[len++] = 0;
@@ -219,16 +219,19 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 			//注意xinput 复合设备使用自定义vid, 这里不修改
 		}else{
 			app_gamepad_get_vid_pid(TR_USBD, m_usbd_hid_types[id], &dev.idVendor, &dev.idProduct);
+			
+			#if USBD_HID_SUPPORT && HID_XBOX_MASK
 			if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
 				dev.bDeviceClass       = 0xFF;
 				dev.bDeviceSubClass    = 0x47;
 				dev.bDeviceProtocol    = 0xD0;
-				dev.bcdDevice    	   = 0X408;
+				dev.bcdDevice    	   = XBOX_DEV_VERSION;
 			}else if(m_usbd_hid_types[id] == BIT_ENUM(HID_TYPE_X360)){
 				dev.bDeviceClass       = 0xFF;
 				dev.bDeviceSubClass    = 0xff;
 				dev.bDeviceProtocol    = 0xff;
 			}
+			#endif
 		}
 	}
 	#endif
@@ -252,24 +255,22 @@ error_t usbd_get_configuration_desc(uint8_t id, uint8_t cfg, uint8_t *pdesc, uin
 {
 	uint8_t itf_num;
 	uint16_t desc_index = 9;
-	usb_desc_configuration_t* pcfg_desc = (usb_desc_configuration_t*)pdesc;
+	usb_desc_configuration_t cfg_desc;
 
-	if(*pdesc_len < 9) 	return ERROR_STALL;
-
-	pcfg_desc->bLength = 0x09;
-	pcfg_desc->bDescriptorType = 0x02;
-	pcfg_desc->wTotalLength = SWAP16_L(desc_index);
-	pcfg_desc->bNumInterfaces = 1;
-	pcfg_desc->bConfigurationValue = 0x01;
-	pcfg_desc->iConfiguration = 0x00;		//string index	 
-	pcfg_desc->bmAttributes = 0x80 | (USBD_REMOTE_WAKEUP << 6) | (USBD_SELF_POWERED << 5);	//D6: Self-powered, remote wakeup, D5
-	pcfg_desc->bMaxPower = 0xfa;			//500mA
+	EMF_ASSERT(NULL != pdesc);
 	
 	/*遍历设备接口描述符*/
 	itf_num = usbd_class_get_itf_desc(id, pdesc, *pdesc_len, &desc_index);
 
-	pcfg_desc->wTotalLength = SWAP16_L(desc_index);
-	pcfg_desc->bNumInterfaces = itf_num;
+	cfg_desc.bLength = 0x09;
+	cfg_desc.bDescriptorType = 0x02;
+	cfg_desc.wTotalLength = SWAP16_L(desc_index);
+	cfg_desc.bNumInterfaces = itf_num;
+	cfg_desc.bConfigurationValue = 0x01;
+	cfg_desc.iConfiguration = 0x00;		//string index	 
+	cfg_desc.bmAttributes = 0x80 | (USBD_REMOTE_WAKEUP << 6) | (USBD_SELF_POWERED << 5);	//D6: Self-powered, remote wakeup, D5
+	cfg_desc.bMaxPower = 0xfa;			//500mA
+	memcpy(pdesc, &cfg_desc, MIN(9, *pdesc_len));
 
 	*pdesc_len = MIN(*pdesc_len, desc_index);
 
@@ -342,6 +343,134 @@ error_t usbd_cfg_endp_all(uint8_t id)
 	
 	return ERROR_SUCCESS;
 }
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb 事件, 在usb 中断事件产生后调用	
+	用户可消息多种处理方式,用户可以自定义修改:
+	1. 轮训方式	(默认)
+	2. 任务消息推送方式
+	3. 中断直接处理方式
+*******************************************************************/
+__WEAK void usbd_reset_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.reset = 1;
+	}
+}
+__WEAK void usbd_suspend_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.suspend = 1;
+	}
+}
+__WEAK void usbd_resume_event(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	if(NULL != pdev){
+		pdev->dev.resume = 1;
+	}
+}
+__WEAK void usbd_sof_event(uint8_t id)
+{
+	#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
+	usbd_audio_spk_sof_transfer(id);
+	#endif
+}
+__WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	uint8_t ep_addr = ep & 0x7f;
+
+	ep |= TUSB_DIR_IN_MASK; 		//防止出错
+	if(0 == ep_addr){
+		usbd_req_t *preq = usbd_get_req(id);
+		usbd_dev_t *pdev = usbd_get_dev(id);
+
+		 if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
+			if (TUSB_REQ_SET_ADDRESS == preq->req.bRequest) {
+				usbd_set_address(id, (uint8_t)preq->req.wValue);
+			}
+		}
+
+		if((preq->setup_index <= preq->setup_len) && (TUSB_DIR_IN == preq->req.bmRequestType.bits.direction)){
+			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
+		}
+	}else{
+		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+		usbd_endp_nak(id, TUSB_DIR_IN_MASK | ep);
+		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
+		if(NULL != pclass){
+			#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
+			if(TUSB_ENDP_TYPE_ISOCH == pclass->endpin.type){			//TODO 同步传输直接处理
+				usbd_audio_mic_transfer(id, ep);
+				return;
+			}
+			#endif
+
+			#if !USBD_LOOP_ENABLE
+			{
+				pdev->enpd_in_busy[ ep_addr ] = 0x00;
+				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
+			}
+			#endif
+		}
+	}
+}
+__WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+
+	ep &= ~TUSB_DIR_IN_MASK; 		//防止出错
+	if (len) {
+		usbd_endp_nak(id,ep);
+	}
+	pdev->enpd_out_len[ep] = len;
+
+	if(NULL != pclass){
+		#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
+		if(TUSB_ENDP_TYPE_ISOCH == pclass->endpout.type){			//TODO 同步传输直接处理
+			usbd_audio_spk_transfer(id,ep,len);
+			return;
+		}
+		#endif
+
+		#if !USBD_LOOP_ENABLE
+		if(pdev->enpd_out_len[ep]){
+			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
+		}
+		#endif
+	}
+			
+}
+__WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
+
+	pdev->enpd_in_busy[0] = 1;
+	pdev->enpd_out_len[0] = 0;
+	if(NULL != pdev){
+		pdev->dev.setup = 1;
+		preq->req = *pctrl_req;
+		preq->req.wValue = SWAP16_L(preq->req.wValue);
+		preq->req.wIndex = SWAP16_L(preq->req.wIndex);
+		preq->req.wLength = SWAP16_L(preq->req.wLength);
+		usbd_malloc_setup_buffer(id, preq);
+	}
+
+	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
+		preq->setup_len = preq->req.wLength;
+		usbd_endp_ack(id, 0x00, 0);
+	}
+}
+
+
 
 /*******************************************************************
 ** Parameters:
@@ -475,14 +604,6 @@ static error_t usbd_control_request_process(uint8_t id)
 	}else{				//枚举成功分发setup事件给需要的设备,比如 TUSB_REQ_SET_INTERFACE
 		usbd_class_control_request_process(id, preq);
 	}
-
-	#if USBD_SOCKET_ENABLE
-	if(ERROR_STALL == err){
-		err = usbd_socket_control_request_process(id, preq);
-	}
-	#endif
-
-
     return err;
 }
 
@@ -582,6 +703,16 @@ void usbd_setup_process( uint8_t id )
 	//setup处理
 	if(0 == pdev->dev.setup){
 		err = usbd_control_request_process(id);
+
+		#if USBD_SOCKET_ENABLE
+		if(ERROR_STALL == err){
+			err = usbd_socket_control_request_process(id, preq);
+			if(ERROR_NACK == err){		//socket 发送后释放usb内存, 由socket自己分配处理内存
+				usbd_free_setup_buffer(preq);
+			}
+		}
+		#endif
+		
 		if(ERROR_SUCCESS == err){
 			if(preq->setup_len > preq->req.wLength) preq->setup_len = preq->req.wLength;
 
@@ -598,132 +729,6 @@ void usbd_setup_process( uint8_t id )
 	}
 }
 
-
-
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:	usb 事件, 在usb 中断事件产生后调用	
-	用户可消息多种处理方式,用户可以自定义修改:
-	1. 轮训方式	(默认)
-	2. 任务消息推送方式
-	3. 中断直接处理方式
-*******************************************************************/
-__WEAK void usbd_reset_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.reset = 1;
-	}
-}
-__WEAK void usbd_suspend_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.suspend = 1;
-	}
-}
-__WEAK void usbd_resume_event(uint8_t id)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	if(NULL != pdev){
-		pdev->dev.resume = 1;
-	}
-}
-__WEAK void usbd_sof_event(uint8_t id)
-{
-	#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
-	usbd_audio_spk_sof_transfer(id);
-	#endif
-}
-__WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	uint8_t ep_addr = ep & 0x7f;
-
-	ep |= TUSB_DIR_IN_MASK; 		//防止出错
-	if(0 == ep_addr){
-		usbd_req_t *preq = usbd_get_req(id);
-		usbd_dev_t *pdev = usbd_get_dev(id);
-
-		 if (TUSB_REQ_TYPE_STANDARD == preq->req.bmRequestType.bits.type){
-			if (TUSB_REQ_SET_ADDRESS == preq->req.bRequest) {
-				usbd_set_address(id, (uint8_t)preq->req.wValue);
-			}
-		}
-
-		if((preq->setup_index <= preq->setup_len) && (TUSB_DIR_IN == preq->req.bmRequestType.bits.direction)){
-			hal_usbd_in(id, ep, NULL,0);			//must call hal_usbd_in //TODO 考虑简化
-		}
-	}else{
-		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
-		usbd_endp_nak(id, TUSB_DIR_IN_MASK | ep);
-		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
-		if(NULL != pclass){
-			#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
-			if(TUSB_ENDP_TYPE_ISOCH == pclass->endpin.type){			//TODO 同步传输直接处理
-				usbd_audio_mic_transfer(id, ep);
-				return;
-			}
-			#endif
-
-			#if !USBD_LOOP_ENABLE
-			{
-				pdev->enpd_in_busy[ ep_addr ] = 0x00;
-				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
-			}
-			#endif
-		}
-	}
-}
-__WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
-
-	ep &= ~TUSB_DIR_IN_MASK; 		//防止出错
-	if (len) {
-		usbd_endp_nak(id,ep);
-	}
-	pdev->enpd_out_len[ep] = len;
-
-	if(NULL != pclass){
-		#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
-		if(TUSB_ENDP_TYPE_ISOCH == pclass->endpout.type){			//TODO 同步传输直接处理
-			usbd_audio_spk_transfer(id,ep,len);
-			return;
-		}
-		#endif
-
-		#if !USBD_LOOP_ENABLE
-		if(pdev->enpd_out_len[ep]){
-			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
-		}
-		#endif
-	}
-			
-}
-__WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_t pctrl_len)
-{
-	usbd_dev_t *pdev = usbd_get_dev(id);
-	usbd_req_t *preq = usbd_get_req(id);
-
-	pdev->enpd_in_busy[0] = 1;
-	pdev->enpd_out_len[0] = 0;
-	if(NULL != pdev){
-		pdev->dev.setup = 1;
-		preq->req = *pctrl_req;
-		preq->req.wValue = SWAP16_L(preq->req.wValue);
-		preq->req.wIndex = SWAP16_L(preq->req.wIndex);
-		preq->req.wLength = SWAP16_L(preq->req.wLength);
-		usbd_malloc_setup_buffer(id, preq);
-	}
-
-	if((TUSB_DIR_OUT == preq->req.bmRequestType.bits.direction) && preq->req.wLength){		//设置out ack 继续接收OUT数据
-		preq->setup_len = preq->req.wLength;
-		usbd_endp_ack(id, 0x00, 0);
-	}
-}
 
 
 

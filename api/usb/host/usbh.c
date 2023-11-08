@@ -262,42 +262,40 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 
         if( buf[i+1] == TUSB_DESC_INTERFACE ){
 			pitf = (usb_desc_interface_t*)&buf[i];
-			if(pitf->bNumEndpoints){
-				pclass = malloc_usbh_class(id);
-				if(NULL == pclass){
-					logd_r("err usbh class is full!");
-					break;
+			pclass = malloc_usbh_class(id);
+			if(NULL == pclass){
+				logd_r("err usbh class is full!");
+				break;
+			}
+
+			pclass->pdat = NULL;				//must null
+			pclass->itf.if_num = pitf->bInterfaceNumber;
+			pclass->itf.if_alt = pitf->bAlternateSetting;
+			pclass->itf.num_endp = pitf->bNumEndpoints;
+			pclass->itf.if_cls = pitf->bInterfaceClass;
+			pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
+			pclass->itf.if_pro = pitf->bInterfaceProtocol;
+
+			if(ERROR_SUCCESS == usbh_get_endp(&endp, buf + i, len - i, TUSB_DIR_IN)){
+				pclass->endpin = endp;
+			}
+			if(ERROR_SUCCESS == usbh_get_endp(&endp, buf + i, len - i, TUSB_DIR_OUT)){
+				pclass->endpout = endp;
+			}
+
+			//这里区分usb class
+			pclass->dev_type = usbh_match_class(id,pclass);
+			logd("usbh match itft%d dev_type=%d\n",pclass->itf.if_num, pclass->dev_type);
+			usbh_class_itf_alt_select(id,pclass);			//user select
+
+			if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
+				err = usbh_class_init(id, pclass, buf + i, len - i);
+				if(ERROR_SUCCESS == err){
+					logd("usbh match dev_type=%d, hid_type=%d\n",pclass->dev_type, pclass->hid_type);
+					list_add(&pclass->list, &pdev->class_list);
 				}
-
-				pclass->pdat = NULL;				//must null
-				pclass->itf.if_num = pitf->bInterfaceNumber;
-				pclass->itf.if_alt = pitf->bAlternateSetting;
-				pclass->itf.num_endp = pitf->bNumEndpoints;
-				pclass->itf.if_cls = pitf->bInterfaceClass;
-				pclass->itf.if_sub_cls = pitf->bInterfaceSubClass;
-				pclass->itf.if_pro = pitf->bInterfaceProtocol;
-
-				if(ERROR_SUCCESS == usbh_get_endp(&endp, buf + i, len - i, TUSB_DIR_IN)){
-					pclass->endpin = endp;
-				}
-				if(ERROR_SUCCESS == usbh_get_endp(&endp, buf + i, len - i, TUSB_DIR_OUT)){
-					pclass->endpout = endp;
-				}
-
-				pclass->dev_type = usbh_match_class(id,pclass);
-				logd("usbh itft%d dev_type=%d\n",pclass->itf.if_num, pclass->dev_type);
-				usbh_class_itf_alt_select(id,pclass);			//user select
-
-				if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
-					err = usbh_class_init(id, pclass, buf + i, len - i);
-
-					if(ERROR_SUCCESS == err){
-						logd("usbh add dev_type=%d, hid_type=%d\n",pclass->dev_type, pclass->hid_type);
-						list_add(&pclass->list, &pdev->class_list);
-					}
-				}else{
-					free_usbh_class(pclass);		//free pclass
-				}
+			}else{
+				free_usbh_class(pclass);		//free pclass
 			}
 		}
 	}

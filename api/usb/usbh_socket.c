@@ -17,6 +17,9 @@
 #include "api/usb/usbh_socket.h"
 #include "api/usb/host/usbh.h"
 #include "apP/app_command.h"
+#if APP_GAMEAPD_ENABLE
+#include "app/gamepad/app_gamepad.h"
+#endif
 #if USBD_SOCKET_ENABLE		//共享内存方式通讯
 #include "api/usb/usbd_socket.h"
 #endif
@@ -102,11 +105,24 @@ bool usbh_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 		case CMD_SOCKET_SETUP:
 			preq = (usb_control_request_t*)buf;
 
-			//简单处理替换接口号 //TODO 不是所有itf recpt 请求的windexL都是接口号
-			if((TUSB_REQ_RCPT_INTERFACE == preq->bmRequestType.bits.recipient)){	
-				uint8_t itf = preq->wIndex & 0XFF;
-				preq->wIndex = (preq->wIndex & 0XFF00) | pcalss->itf.if_num;
-			}	
+			//简单处理替换接口号 //TODO 在对应设备中处理
+			if((TUSB_REQ_RCPT_INTERFACE == preq->bmRequestType.bits.recipient)){
+				uint8_t itf = preq->wIndex & 0XFF;	
+
+				if(TUSB_REQ_TYPE_STANDARD == preq->bmRequestType.bits.type){
+					preq->wIndex = (preq->wIndex & 0XFF00) | pcalss->itf.if_num;
+				}else{	//不是所有itf recpt 请求的windexL都是接口号, 这里特殊处理
+					if(usbh_socket_dev == U16(DEV_TYPE_HID, HID_TYPE_X360)){	//x360 特殊处理	
+						#if HIDH_SUPPORT & HID_XBOX_MASK
+						if(0X81 <= preq->bRequest && 0X87 >= preq->bRequest){
+							preq->wIndex = (preq->wIndex & 0XFF00) | m_x360_identify_itf;
+						}
+						#endif
+					}else{		//ps4走这里
+						preq->wIndex = (preq->wIndex & 0XFF00) | pcalss->itf.if_num;
+					}
+				}
+			}
 
 			if(TUSB_DIR_IN == preq->bmRequestType.bits.direction){
 				req_buf = emf_malloc(preq->wLength);

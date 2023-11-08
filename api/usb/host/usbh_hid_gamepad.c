@@ -64,8 +64,6 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
         case XBOX_VID:
 			if(X360_PID == pid){
 				dev = HID_TYPE_X360;
-			}else if(XBOXX_PID == pid){
-				dev = HID_TYPE_XBOX;
         	}else{
 	            dev = HID_TYPE_XBOX;
             }
@@ -138,14 +136,17 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
         #if (HIDD_SUPPORT & HID_XBOX_MASK)
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
-            if(pclass->itf.if_num){
-                if(pclass->endpin.type == TUSB_ENDP_TYPE_INTER){             //gamepad
-                    xbox_controller_init(&trp_handle);
-                }else if(pclass->endpin.type == TUSB_ENDP_TYPE_ISOCH){       //audio //TODO 这里进不来
-                    #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)        //如果支持打开audio接口,xbox默认一直打开
-                    usbh_req_set_itf(id, pclass->itf.if_num, 1);
-                    #endif
-                }
+            if(pclass->endpin.type == TUSB_ENDP_TYPE_INTER){             //gamepad
+                // if(HID_TYPE_X360 == pclass->hid_type){
+                //     uint8_t x360_ift_str[0XB2];
+                //     uint16_t str_len = sizeof(x360_ift_str);
+                //     usbh_req_get_string_desc(id, 4, 0X409, x360_ift_str, &str_len);
+                // }
+                xbox_controller_init(&trp_handle);
+            }else if(pclass->endpin.type == TUSB_ENDP_TYPE_ISOCH){       //audio //TODO 这里进不来
+                #if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)        //如果支持打开audio接口,xbox默认一直打开
+                usbh_req_set_itf(id, pclass->itf.if_num, 1);
+                #endif
             }
             break;
         #endif
@@ -156,6 +157,12 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
         #endif
         #if USBH_HID_SUPPORT & HID_PS_MASK
         case HID_TYPE_PS3	:
+            len = 4;
+            memset(buf,0,0x11);
+    
+            buf[0] = PS3_CMD_ON >> 4;
+            buf[1] = PS3_CMD_ON & 0XFF;
+            usbh_hid_set_report(id, pclass->itf.if_num, HID_REPORT_TYPE_FEATURE,0XF4, buf, len);
             ps_controller_init(&trp_handle);
             break;
         case HID_TYPE_PS4	:
@@ -206,67 +213,77 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
     return err;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	这里只做识别
+*******************************************************************/
 error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo)
 {
     error_t err = ERROR_NOT_FOUND;
     usbh_dev_t* pdev = get_usbh_dev(id);
     hid_type_t 	hid_type;
 
-    hid_type = usbh_hid_vendor_gamepad(pdev->vid, pdev->pid);       //先通过vid 获取设备类型
+    hid_type = usbh_hid_vendor_gamepad(pdev->vid, pdev->pid);   //先通过vid 获取设备类型
 
-    if(HID_TYPE_NONE != hid_type){
-        pclass->hid_type = hid_type;
-        err = ERROR_SUCCESS;
-    }else if(TUSB_CLASS_VENDOR == pclass->itf.if_cls){     //特殊识别xbox
-        if(XBOX_SUBCLASS == pclass->itf.if_sub_cls){
-            pclass->hid_type = HID_TYPE_XBOX;
-            if(XBOXX_PID == pdev->pid){
-                logd("usbh xbox seriesx\n");
-				// xbox_series = XBOX_SERIESX;
-                err = ERROR_SUCCESS;
-            }else{
-                logd("usbh xbox one\n");
-                err = ERROR_SUCCESS;
+    if(HID_TYPE_NONE == hid_type){
+        if(XBOX_CLASS == pclass->itf.if_cls){          //特殊识别xbox
+            if(XBOX_SUBCLASS == pclass->itf.if_sub_cls){
+                hid_type = HID_TYPE_XBOX;
+            }else if (X360_SUBCLASS == pclass->itf.if_sub_cls 
+                || X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls){
+                hid_type = HID_TYPE_X360;
             }
-        }else if (X360_SUBCLASS == pclass->itf.if_sub_cls){
-            pclass->hid_type = HID_TYPE_X360;
-            logd("usbh x360\n");
-            err = ERROR_SUCCESS;
-        }
-    }else if(NULL != pinfo){          //TUSB_CLASS_HID识别ps4 switch dinput
-        uint8_t i;
-        hid_collection_t* pcollection;
-        hid_items_t hat_switch,vendor;
+        }else if(NULL != pinfo){          //TUSB_CLASS_HID识别ps4 switch dinput
+            uint8_t i;
+            hid_collection_t* pcollection;
+            hid_items_t hat_switch,vendor;
 
-        memset(&hat_switch, 0, sizeof(hat_switch));
-        memset(&vendor, 0, sizeof(vendor));
+            memset(&hat_switch, 0, sizeof(hat_switch));
+            memset(&vendor, 0, sizeof(vendor));
 
-        
-        for(i=0; i<pinfo->collections; i++){
-            if(hid_match_collection(pinfo, i, 0X01, 0X05)){ //0x05,0x01  0x09,0X05 fix gamepad
-                pcollection = &pinfo->item_list.collectionList[i];
-                if(0 == hat_switch.report_length){
-                    hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0x39,&hat_switch);
-                }
-                if(0 == vendor.report_length){
-                    if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_FEATURE,0xFFF0, 0x47,&vendor)){   //usb
-                        if((0x3F != vendor.bit_count) || (0x08 != vendor.bit_size)){
-                            memset(&vendor, 0, sizeof(vendor));
+            
+            for(i=0; i<pinfo->collections; i++){
+                if(hid_match_collection(pinfo, i, 0X01, 0X05)){ //0x05,0x01  0x09,0X05 fix gamepad
+                    pcollection = &pinfo->item_list.collectionList[i];
+                    if(0 == hat_switch.report_length){
+                        hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0x39,&hat_switch);
+                    }
+                    if(0 == vendor.report_length){
+                        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_FEATURE,0xFFF0, 0x47,&vendor)){   //usb
+                            if((0x3F != vendor.bit_count) || (0x08 != vendor.bit_size)){
+                                memset(&vendor, 0, sizeof(vendor));
+                            }
                         }
                     }
                 }
             }
-        }
-
-        if((1 == vendor.report_id) && (1 == hat_switch.report_id)){
-            pclass->hid_type = HID_TYPE_PS4;
-            err = ERROR_SUCCESS;
+            if((1 == vendor.report_id) && (1 == hat_switch.report_id)){
+                hid_type = HID_TYPE_PS4;
+            }
         }
     }
 
-    if(ERROR_SUCCESS == err){
-        usbh_gamepad_type = pclass->hid_type;
-        logd("usbh gamepad type=%d\n",usbh_gamepad_type);
+    if(HID_TYPE_NONE != hid_type){
+        #if HIDH_SUPPORT & HID_XBOX_MASK
+        if(HID_TYPE_X360 == hid_type){      //x360 特殊处理
+            if(X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls){
+                m_x360_identify_itf = pclass->itf.if_num;
+                logd("m_x360_identify_itf=%d\n",m_x360_identify_itf);
+            }else if(pclass->endpin.addr && (X360_PROTOCOL == pclass->itf.if_pro)){
+                err = ERROR_SUCCESS;
+            }
+        #endif
+        }else if(pclass->endpin.addr && (TUSB_ENDP_TYPE_INTER == pclass->endpin.type)){
+            err = ERROR_SUCCESS;
+        }   
+
+        if(ERROR_SUCCESS == err){
+            pclass->hid_type = hid_type;
+            usbh_gamepad_type = hid_type;
+            // logd("usbh gamepad init type=%d\n",usbh_gamepad_type);
+        }
+
     }
 
     return err;

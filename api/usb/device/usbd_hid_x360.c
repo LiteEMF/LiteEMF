@@ -30,34 +30,144 @@
 **	static Parameters
 *******************************************************************************************************/
 static uint8_t x360_itf_num = 0;
-	
-static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
-	0x09,		 /*bLength: Interface Descriptor size*/
-	0x04,		 /*bDescriptorType: Interface descriptor type*/
-	0x00,		 /*bInterfaceNumber: Number of Interface*/
-	0x00,		 /*bAlternateSetting: Alternate setting*/
-	0x02,		 /*bNumEndpoints*/
-	0xFF,		 /*bInterfaceClass: HID*/
-	0x5D,		 /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
-	0x01,		 /*nInterfaceProtocol*/
-	0x00,		 /*iInterface: Index of string descriptor*/
 
-	0x10,
-	0x21,
-	0x10,
-	0x01,
-	0x01,
-	0x24,
-	(TUSB_DIR_IN<<TUSB_DIR_POST),
-	0x14,
-	0x03,   		/* wDescriptorLength*/
-	0x00,
-	0x03,
-	0x13,
-	(TUSB_DIR_OUT<<TUSB_DIR_POST),
-	0x00,   		/*bDescriptorType*/
-	0x03,
-	0x00,   		/* wDescriptorLength*/
+#if 0	//完整描述符用于参考
+static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x00,        // bInterfaceNumber 0
+	0x00,        // bAlternateSetting
+	0x02,        // bNumEndpoints 2
+	0xFF,        // bInterfaceClass
+	0x5D,        // bInterfaceSubClass
+	0x01,        // bInterfaceProtocol
+	0x00,        // iInterface (String Index)
+
+	0x11,        // bLength
+	0x21,        // bDescriptorType (HID)
+	0x10, 0x01,  // bcdHID 1.10
+	0x01,        // bCountryCode
+	0x25, 0x81, 0x14,0x03,0x03,0x03, 0x04,
+	0x13, 0x02, 0x08,0x03,0x03, 
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x81,        // bEndpointAddress (IN/D2H)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x04,        // bInterval 4 (unit depends on device speed)
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x02,        // bEndpointAddress (OUT/H2D)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x08,        // bInterval 8 (unit depends on device speed)
+
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x01,        // bInterfaceNumber 1
+	0x00,        // bAlternateSetting
+	0x04,        // bNumEndpoints 4
+	0xFF,        // bInterfaceClass
+	0x5D,        // bInterfaceSubClass
+	0x03,        // bInterfaceProtocol
+	0x00,        // iInterface (String Index)
+
+	0x1B,        // bLength
+	0x21,        // bDescriptorType (HID)
+	0x00, 0x01,  // bcdHID 1.00
+	0x01,        // bCountryCode
+	0x01, 0x83, 0x40, 
+	0x01, 0x04, 0x20, 
+	0x16, 0x85, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x16, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x83,        // bEndpointAddress (IN/D2H)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x02,        // bInterval 2 (unit depends on device speed)
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x04,        // bEndpointAddress (OUT/H2D)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x04,        // bInterval 4 (unit depends on device speed)
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x85,        // bEndpointAddress (IN/D2H)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x40,        // bInterval 64 (unit depends on device speed)
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x05,        // bEndpointAddress (OUT/H2D)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x10,        // bInterval 16 (unit depends on device speed)
+
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x02,        // bInterfaceNumber 2
+	0x00,        // bAlternateSetting
+	0x01,        // bNumEndpoints 1
+	0xFF,        // bInterfaceClass
+	0x5D,        // bInterfaceSubClass
+	0x02,        // bInterfaceProtocol
+	0x00,        // iInterface (String Index)
+
+	0x09,        // bLength
+	0x21,        // bDescriptorType (HID)
+	0x00, 0x01,  // bcdHID 1.00
+	0x01,        // bCountryCode
+	0x22,0x86, 0x07, 0x00,
+
+	0x07,        // bLength
+	0x05,        // bDescriptorType (Endpoint)
+	0x86,        // bEndpointAddress (IN/D2H)
+	0x03,        // bmAttributes (Interrupt)
+	0x20, 0x00,  // wMaxPacketSize 32
+	0x10,        // bInterval 16 (unit depends on device speed)
+
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x03,        // bInterfaceNumber 3
+	0x00,        // bAlternateSetting
+	0x00,        // bNumEndpoints 0
+	0xFF,        // bInterfaceClass
+	0xFD,        // bInterfaceSubClass
+	0x13,        // bInterfaceProtocol
+	0x04,        // iInterface (String Index)
+
+	0x06,        // bLength
+	0x41,        // bDescriptorType (Unknown)
+	0x00, 0x01, 0x01, 0x03, 
+	// 144 bytes
+};
+#endif
+
+static uint8c_t x360_itf_desc_tab[] = {
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x00,        // bInterfaceNumber 0
+	0x00,        // bAlternateSetting
+	0x02,        // bNumEndpoints 2
+	0xFF,        // bInterfaceClass
+	0x5D,        // bInterfaceSubClass
+	0x01,        // bInterfaceProtocol
+	0x00,        // iInterface (String Index)
+
+	0x11,        // bLength
+	0x21,        // bDescriptorType (HID)
+	0x10, 0x01,  // bcdHID 1.10
+	0x01,        // bCountryCode
+	0x25, (TUSB_DIR_IN<<TUSB_DIR_POST),  0x14,0x00,0x00,0x00,0x00,
+	0x13, (TUSB_DIR_OUT<<TUSB_DIR_POST), 0x08,0x00,0x00, 
 
 	/******************** Descriptor of Custom HID endpoints ***********/
 	0x07,		  	/* bLength: Endpoint Descriptor size */
@@ -75,17 +185,31 @@ static uint8c_t x360_itf_desc_tab[] = {		//TODO 描述符内容不同?
 	0x20,
 	0x00,			/* wMaxPacketSize: 2 Bytes max  */
 	0x08, 
+
+	// used for x360 identify
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x01,        // bInterfaceNumber 3
+	0x00,        // bAlternateSetting
+	0x00,        // bNumEndpoints 0
+	0xFF,        // bInterfaceClass
+	0xFD,        // bInterfaceSubClass
+	0x13,        // bInterfaceProtocol
+	0x04,        // iInterface (String Index)
+
+	0x06,        // bLength
+	0x41,        // bDescriptorType (Unknown)
+	0x00, 0x01, 0x01, 0x03, 
+
 };
 
+
+char const_t* x360_itf_string = "Xbox Security Method 3, Version 1.00, \xA9 2005 Microsoft Corporation. All rights reserved.";
 
 //qwSignature :MSFT100 必须是这个
 //bMS_VendorCode:0X90
-static uint8c_t  x360_devdesc_string[] =
-{		//bMS_VendorCode:0X90
-	0x12,0x03,
-	0x4D,0x00,0x53,0x00,0x46,0x00,0x54,0x00,0x31,0x00,0x30,0x00,0x30,0x00,
-	0x90,0x00,
-};
+char const_t* x360_devdesc_string = "MSFT100\x90";
+
 // Feature Descriptor	bMS_VendorCode:0X90
 static uint8c_t x360_compat_id[] = {
 	//head
@@ -169,9 +293,9 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 					break;
 				case TUSB_DESC_STRING:
 					if(0XEE == desc_index){
-						preq->setup_len = MIN(preq->req.wLength,sizeof(x360_devdesc_string));
-						memcpy(preq->setup_buf, x360_devdesc_string, preq->setup_len);
-						err = ERROR_SUCCESS;
+						err = usbd_pack_unicode_string(x360_devdesc_string, preq->setup_buf, &preq->req.wLength);
+					}else if(4 == desc_index){		//inf string
+						err = usbd_pack_unicode_string(x360_itf_string, preq->setup_buf, &preq->req.wLength);
 					}
 					break;
 				}
@@ -195,13 +319,16 @@ error_t usbd_hid_x360_control_request_process(uint8_t id, usbd_class_t *pclass, 
 				default:
 					break;
 				}
-			}else if(0x01 == preq->req.bRequest){
+			}else if(0x01 == preq->req.bRequest){		//接PC会发送0X01请求
 				if(0x00 == preq->req.wValue){
 					preq->setup_len = MIN(preq->req.wLength,sizeof(x360_null));
 					memcpy(preq->setup_buf, x360_null, preq->setup_len);
 					err = usbd_set_ready(id, true);
 				}
+			// }else if(0xA1 == preq->req.bRequest){		//接主机会发送0xA1请求
+				// usbd_set_ready(id, true);				//这里只判断ready
 			}
+
 		}else if(TUSB_REQ_RCPT_INTERFACE == preq->req.bmRequestType.bits.recipient) {
 			uint8_t itf = preq->req.wIndex & 0XFF;
 
@@ -240,7 +367,11 @@ error_t usbd_hid_x360_out_process(uint8_t id, usbd_class_t* pclass)
 		trp_handle.trp = TR_USBD;
 		trp_handle.id = id;
 		trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
-		app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen);
+		if(!app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen)){
+			#if USBD_SOCKET_ENABLE
+			usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_OUT, usb_rxbuf,usb_rxlen);
+			#endif
+		}
     }
     return ERROR_SUCCESS;
 }

@@ -149,7 +149,7 @@ error_t usbh_cdc_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
 	UNUSED_PARAMETER(pclass);
 	UNUSED_PARAMETER(pdesc);
 	UNUSED_PARAMETER(len);
-    return 0;
+    return ERROR_UNKNOW;
 }
 
 

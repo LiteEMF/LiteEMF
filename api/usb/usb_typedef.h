@@ -70,7 +70,7 @@ typedef enum
 
 #define  TUSB_DIR_POST  		7
 #define  TUSB_DIR_MASK  		0x80
-#define  TUSB_DIR_IN_MASK  	0x80
+#define  TUSB_DIR_IN_MASK  		0x80
 typedef enum
 {
 	TUSB_DIR_OUT = 0,
@@ -177,7 +177,7 @@ typedef enum
 	TUSB_CLASS_WIRELESS_CONTROLLER  	= 0xE0 ,			//无线控制器
 	TUSB_CLASS_MISC                 	= 0xEF ,			//杂项
 	TUSB_CLASS_APP_SPECIFIC 		   	= 0xFE ,
-	TUSB_CLASS_VENDOR      		   	= 0xFF
+	TUSB_CLASS_VENDOR      		   		= 0xFF
 }usb_class_code_t;
 
 

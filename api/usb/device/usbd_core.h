@@ -101,7 +101,7 @@ typedef struct
 typedef struct {
 	uint8_t itf_index;			//m_usbd_class 下标序号, 和接口号不是一一对应关系(itf_alt原因)
 	uint8_t itf_num;			//接口号
-	uint8_t is_alt_itf;		//最新接口号,用于分配端点
+	uint8_t is_alt_itf;			//最新接口号,用于分配端点
 	uint8_t ep_in_num;			//端点号
 	uint8_t ep_out_num;			//端点号
 }itf_ep_index_t;
@@ -170,6 +170,7 @@ error_t usbd_out(uint8_t id, uint8_t ep,uint8_t* buf, uint16_t* plen);
 error_t usbd_set_address(uint8_t id,uint8_t address);
 error_t usbd_set_ready(uint8_t id, uint8_t ready);
 error_t usbd_reset(uint8_t id);
+error_t usbd_core_pa_init(uint8_t id);
 error_t usbd_core_init(uint8_t id);
 error_t usbd_core_deinit(uint8_t id);
 
