@@ -97,7 +97,14 @@ error_t usbd_hid_ps3_control_request_process(uint8_t id, usbd_class_t *pclass, u
 		switch(preq->req.bRequest){
 		case  HID_REQ_CONTROL_SET_REPORT:
 			if(0XF4 == report_id && HID_REPORT_TYPE_FEATURE == report_type){
-				usbd_set_ready(id, true);		//接ps3主机这里设置ready
+				uint8_t ps_on = false;
+
+				if(U16(preq->setup_buf[0], preq->setup_buf[1]) == PS3_CMD_ON){
+					ps_on = true;
+				}
+				usbd_set_ready(id, ps_on);		//接ps3主机控制
+			}else if(pclass->endpout.addr == report_id && HID_REPORT_TYPE_OUTPUT == report_type){
+				if(!pdev->ready) usbd_set_ready(id, true);		//接ps3主机开机走这里
 			}
 			break;
 		default:

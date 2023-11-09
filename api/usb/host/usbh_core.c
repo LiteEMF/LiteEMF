@@ -379,7 +379,6 @@ error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
 error_t usbh_core_pa_init( uint8_t id )
 {
 	uint8_t i;
-    error_t err = ERROR_UNSUPPORT;
     usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
 
 	for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
@@ -387,7 +386,7 @@ error_t usbh_core_pa_init( uint8_t id )
 		INIT_LIST_HEAD(&pdev->class_list);
 	}
 
-	return err;
+	return ERROR_SUCCESS;
 }
 
 /*******************************************************************
@@ -399,12 +398,8 @@ error_t usbh_core_init( uint8_t id )
 {
 	uint8_t i;
     error_t err = ERROR_UNSUPPORT;
-    usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
-
-	for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
-        memset(pdev, 0 ,sizeof(usbh_dev_t));
-		INIT_LIST_HEAD(&pdev->class_list);
-	}
+    
+	usbh_core_pa_init(id);
 
     if(API_USBH_BIT_ENABLE & BIT(id>>4)){
     	err = hal_usbh_driver_init(id);

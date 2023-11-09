@@ -299,13 +299,13 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t ly;
 	uint8_t rx;
 	uint8_t ry;
-	uint16_t buttonl;
+	uint16_t buttonl;			//小端
 	uint8_t  buttonh:2;
 	uint8_t index:6;	  		//"帧号 普通按键数据+4, PS按键按下+5, 按键抬起+3
 	uint8_t l2; 				//0-0XFF
 	uint8_t r2; 				//0-0XFF
 
-	uint16_t time_index; 		// 默认4ms对应704
+	uint16_t time_index; 		// 默认4ms对应704,//小端
 	int8_t mark;				//默认0x13		0x12 0x13 0x0d都有
 
 	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
@@ -470,7 +470,7 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t ly;
 	uint8_t rx;
 	uint8_t ry;
-	uint8_t res3[4];	// 0
+	uint8_t res1[4];	// 0
 	uint8_t up; 		//0~ff
 	uint8_t right;		//0~ff
 	uint8_t down;		//0~ff
@@ -484,17 +484,18 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t bd; 	//X形
 	uint8_t bl; 	//方
 
-	uint8_t res4[3];
+	uint8_t res2[3];
 	uint8_t charge1;		//0x03
 	uint8_t charge2;		//0xef
 	uint8_t charge3;		//0x14
-	uint8_t res5[8];		//ox
+	uint8_t res3[4];
+	uint8_t charge4;		//0x23
+	uint8_t constant[3];	//0x03,0x77,0x01
 	uint8_t port_data;		//0x1d
-	uint16_t sensor_x;
-	uint16_t sensor_y;
-	uint16_t sensor_z;
-	uint16_t sensor_speed;
-
+	uint16_t sensor_x;		//0X0002
+	uint16_t sensor_y;		//0X0002
+	uint16_t sensor_z;		//0X8001
+	uint16_t sensor_speed;	//0X0002
 }ps3_report_t;
 
 

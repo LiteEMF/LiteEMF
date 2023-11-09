@@ -201,6 +201,19 @@ static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	if(PS3_X & keyp->key) ps3p->bd = 0xff;
 	if(PS3_SQUARE & keyp->key) ps3p->bl = 0xff;
 
+	ps3p->id = 0x01;
+	ps3p->charge1 = 0x03;		//0x03
+	ps3p->charge2 = 0xef;		//0xef
+	ps3p->charge3 = 0x14;		//0x14
+	ps3p->charge4 = 0x23;		//0x23
+	ps3p->constant[0] = 0x03;
+	ps3p->constant[1] = 0x77;
+	ps3p->constant[2] = 0x01;
+	ps3p->port_data = 0x1d;		//0x1d
+	ps3p->sensor_x = SWAP16(0X0002);
+	ps3p->sensor_y = SWAP16(0X0002);
+	ps3p->sensor_z = SWAP16(0X8001);
+	ps3p->sensor_speed = SWAP16(0X0002);
 	packet_len = sizeof(ps3_report_t);
 
 	return packet_len;

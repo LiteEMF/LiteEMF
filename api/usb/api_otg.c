@@ -51,34 +51,15 @@
 *******************************************************************/
 bool api_otg_init(uint8_t id, api_otg_t mode)
 {
+	#if API_USBD_BIT_ENABLE
+	usbd_core_pa_init(id);
+	#endif
+	#if API_USBH_BIT_ENABLE
+	usbh_core_pa_init(id<<4);
+	#endif
+	
 	switch(mode){
 	case API_OTG_IDEL:
-		#if API_USBD_BIT_ENABLE
-		{
-			usbd_dev_t *pdev = usbd_get_dev(id);
-			usbd_req_t *preq = usbd_get_req(id);
-
-			memset(pdev,0, sizeof(usbd_dev_t));
-			memset(preq,0, sizeof(usbd_req_t));
-		}
-		#endif
-
-		#if API_USBH_BIT_ENABLE
-		{
-			uint8_t i;
-			usbh_dev_t* pdev = get_usbh_dev(id<<4);
-			for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
-				memset(pdev, 0 ,sizeof(usbh_dev_t));
-				INIT_LIST_HEAD(&pdev->class_list);
-			}
-
-			usbh_class_buf_init(id);
-			#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
-			usbh_hid_km_pa_init(id);
-			#endif
-		}
-		#endif
-
 		hal_otg_init(id);
 		break;
 	case API_OTG_DEV:

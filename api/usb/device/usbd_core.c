@@ -269,7 +269,7 @@ error_t usbd_set_ready(uint8_t id, uint8_t ready)
 	if(NULL == pdev) return ERROR_PARAM;
 
 	if(TUSB_STA_CONFIGURED == pdev->state){
-		pdev->ready = true;       //枚举完
+		pdev->ready = ready;       //枚举完
 		logd_g("usbd%d ready=%d...\n",(uint16_t)id,(uint16_t)ready);
 		err = ERROR_SUCCESS;
 	}
@@ -288,9 +288,16 @@ error_t usbd_reset(uint8_t id)
     return err;
 }
 
+error_t usbd_core_pa_init(uint8_t id)
+{
+	usbd_dev_t *pdev = usbd_get_dev(id);
+	usbd_req_t *preq = usbd_get_req(id);
 
+	memset(preq,0, sizeof(usbd_req_t));
+	memset(pdev,0, sizeof(usbd_dev_t));
 
-
+	return ERROR_SUCCESS;
+}
 
 error_t usbd_core_init(uint8_t id)
 {
@@ -300,6 +307,7 @@ error_t usbd_core_init(uint8_t id)
 
 	memset(preq,0, sizeof(usbd_req_t));
 	memset(pdev,0, sizeof(usbd_dev_t));
+	
 	pdev->state = TUSB_STA_ATTACHED;
 	pdev->endp0_mtu = USBD_ENDP0_MTU;
 	
