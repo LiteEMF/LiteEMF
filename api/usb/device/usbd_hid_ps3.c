@@ -23,10 +23,18 @@
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#define PS3_CMD01  	"\x00\x01\x04\x00\x0B\x0C\x01\x02\x18\x18\x18\x18\x09\x0A\x10\x11\x12\x13\x00\x00\x00\x00\x04\x00\x02\x02\x02\x02\x00\x00\x00\x04\x04\x04\x04\x00\x00\x03\x00\x01\x02\x00\x00\x17"
+#define PS3_CMDF2 	"\xF2\xFF\xFF\x00\x64\xD4\xBD\x9F\xFE\x4C\x00\x03\x55\x03\xC3\x01\x8A"
+#define PS3_CMDEF_A0 "\x00\xEF\x04\x00\x0B\x03\x01\xA0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x8A\x00\x00\x01\x90\x01\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06"
+#define PS3_CMDEF_B0 "\x00\xEF\x04\x00\x0B\x03\x01\xB0\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x6B\x02\x72\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06"
+#define PS3_CMDF7	 "\x01\x00\xB3\x02\x0A\x02\xF1\xFF\x04\x03"
 
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
+uint8_t PS3_host_mac[6] = {"x00\x13\xA9\x6D\x1F\x59"};
+uint8_t ps3_cmd_EF = 0;
+
 
 /******************************************************************************************************
 **	static Parameters
@@ -93,24 +101,83 @@ error_t usbd_hid_ps3_control_request_process(uint8_t id, usbd_class_t *pclass, u
 	if (TUSB_REQ_TYPE_CLASS == preq->req.bmRequestType.bits.type) {
 		uint8_t report_type = preq->req.wValue>>8;
 		uint8_t report_id   = preq->req.wValue & 0XFF;
-
+	
 		switch(preq->req.bRequest){
 		case  HID_REQ_CONTROL_SET_REPORT:
-			if(0XF4 == report_id && HID_REPORT_TYPE_FEATURE == report_type){
-				uint8_t ps_on = false;
+			if(HID_REPORT_TYPE_FEATURE == report_type){
+				switch(report_id){
+				case 0XF4:			//set report ready
+					uint8_t ps_on = false;
 
-				if(U16(preq->setup_buf[0], preq->setup_buf[1]) == PS3_CMD_ON){
-					ps_on = true;
+					if(U16(preq->setup_buf[0], preq->setup_buf[1]) == PS3_CMD_ON){
+						ps_on = true;
+					}
+					usbd_set_ready(id, ps_on);		//接ps3主机控制
+					err = ERROR_SUCCESS;
+					break;
+				case 0XF5:			//set host mac
+					memcpy(PS3_host_mac, preq->setup_buf + 2, 6);
+					logd("ps3 host mac:"); dumpd(PS3_host_mac, 6);
+					err = ERROR_SUCCESS;
+					break;
+				case 0xEF:			//unknow A0, B0 请求
+					ps3_cmd_EF = preq->setup_buf[6];
+					logd("ps3_cmd_EF %d",ps3_cmd_EF); 
+					err = ERROR_SUCCESS;
+					break;
 				}
-				usbd_set_ready(id, ps_on);		//接ps3主机控制
-			}else if(pclass->endpout.addr == report_id && HID_REPORT_TYPE_OUTPUT == report_type){
-				if(!pdev->ready) usbd_set_ready(id, true);		//接ps3主机开机走这里
+			}else if(HID_REPORT_TYPE_OUTPUT == report_type){
+				if(pclass->endpout.addr == report_id){
+					if(!pdev->ready) usbd_set_ready(id, true);		//接ps3主机开机走这里
+					err = ERROR_SUCCESS;
+				}
+			}
+			break;
+		case HID_REQ_CONTROL_GET_REPORT:
+			if(HID_REPORT_TYPE_FEATURE == report_type){
+				switch(report_id){
+				case 0x01:			//req info 
+					memcpy(preq->setup_buf, PS3_CMD01, sizeof(PS3_CMD01));
+					err = ERROR_SUCCESS;
+					break;
+				case 0XF2:			//req ps id byte5 len 5
+					memcpy(preq->setup_buf, PS3_CMDF2, sizeof(PS3_CMDF2));
+					// memcpy(preq->setup_buf+5, mac, 5);
+					err = ERROR_SUCCESS;
+					break;
+				case 0XF5:			//req host mac 0x01 0x00 + mac
+					preq->setup_buf[0] = 0x01;
+					memcpy(preq->setup_buf+2, PS3_host_mac, 6);
+					err = ERROR_SUCCESS;
+					break;
+				case 0xEF:			//unknow A0, B0 请求
+					if(0XB0 == ps3_cmd_EF){
+						memcpy(preq->setup_buf, PS3_CMDEF_B0, sizeof(PS3_CMDEF_B0));
+					}else{
+						memcpy(preq->setup_buf, PS3_CMDEF_A0, sizeof(PS3_CMDEF_A0));
+					}
+					err = ERROR_SUCCESS;
+					break;
+				case 0xF8:			//0x00 0x01 ready 状态?
+					preq->setup_buf[1] = 1;
+					err = ERROR_SUCCESS;
+					break;
+				case 0xF7:			//unknown 新增指令
+					memcpy(preq->setup_buf, PS3_CMDF7, sizeof(PS3_CMDF7));
+					err = ERROR_SUCCESS;
+					break;
+				}
 			}
 			break;
 		default:
 			break;
 		}
     }
+
+	#if USBD_SOCKET_ENABLE		//socket 模式下走引导
+	err = ERROR_STALL;
+	#endif
+
     return err;
 }
 

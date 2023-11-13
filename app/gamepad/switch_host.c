@@ -299,7 +299,7 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
 
         if(ret){
             switch_dump_cmd_out("enum:",(uint8_t*)switch_ctrlp,len);
-            enump->cmd = 0;
+            if(SWITCH_USB_ID != enump->cmd) enump->cmd = 0;
             enump->retry = 0;
         }
     }
@@ -355,7 +355,7 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
             break;
         case SUB_SET_INPUT_REPORT_MODE:         //0x03
             if(TR_USBH == phandle->trp){             //蓝牙不需要发0X80 04指令
-                switch_set_emu(enump,SWITCH_CTRL_ID,SWITCH_USB_ID,SWITCH_USB_DIS_TIMEOUT);   //0X80
+                switch_set_emu(enump,SWITCH_USB_ID,0,SWITCH_USB_DIS_TIMEOUT);   //0X80
             }
             break;
         case SUB_SET_SHIPMENT_LOW_POWER_STATE:           //0x08

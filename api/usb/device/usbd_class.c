@@ -49,6 +49,7 @@ usbd_class_t *usbd_class_find_by_ep(uint8_t id, uint8_t ep)
 	usbd_class_t *pclass;
 	
 	if(NULL == pdev) return NULL;
+	if(0 == (API_USBD_BIT_ENABLE & BIT(id))) return NULL;
 	if(!ep) return NULL;
 
 	for(i=0; i<countof(m_usbd_class[id]); i++){
@@ -71,6 +72,7 @@ usbd_class_t *usbd_class_find_by_itf(uint8_t id, uint8_t itf)
 	usbd_class_t *pclass;
 	
 	if(NULL == pdev) return NULL;
+	if(0 == (API_USBD_BIT_ENABLE & BIT(id))) return NULL;
 
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
@@ -96,6 +98,7 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 	usbd_class_t *pclass;
 	
 	if(NULL == pdev) return NULL;
+	if(0 == (API_USBD_BIT_ENABLE & BIT(id))) return NULL;
 
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
@@ -488,11 +491,15 @@ void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint
 
 error_t usbd_class_init(uint8_t id)
 {
-	uint8_t type;
+	uint8_t type, i;
 
 	logd_r("usbd types=%x hid_types=%x\n",m_usbd_types[id], m_usbd_hid_types[id]);
 	
 	memset(&m_usbd_class[id], 0, sizeof(m_usbd_class[id]));
+	for(i=0; i<countof(m_usbd_class[id]); i++){
+		usbd_class_t *pclass = &m_usbd_class[id][i];
+		pclass->dev_type = DEV_TYPE_NONE;
+	}
 
 	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){

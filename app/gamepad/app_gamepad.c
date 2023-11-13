@@ -545,9 +545,7 @@ bool app_gamepad_host_process(trp_handle_t* phandle,app_gamepad_key_t *keyp, uin
         #if HIDH_SUPPORT & HID_SWITCH_MASK
         case HID_TYPE_SWITCH:
 			key_decode = switch_key_decode(phandle,buf,len,&key);
-            if(!key_decode){
-                ret = switch_in_process(phandle, buf, len);
-            }
+            ret = switch_in_process(phandle, buf, len);				//注意: switch 按键数据需要用于控制枚举
             break;
         #endif
         #if HIDH_SUPPORT & HID_PS_MASK

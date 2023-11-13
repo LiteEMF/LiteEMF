@@ -38,11 +38,11 @@
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-trp_handle_t usbd_socket_trp={TR_NULL}; //记录当前通讯trp, 由主机发起通讯,自动记录通讯trp,project不需要修改!!
+trp_handle_t usbd_socket_trp={TR_NULL, 0, 0}; //记录当前通讯trp, 由主机发起通讯,自动记录通讯trp,project不需要修改!!
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
-static uint16_t usbd_socket_dev;
+static uint16_t usbd_socket_dev = U16(DEV_TYPE_NONE, DEF_HID_TYPE_NONE);
 
 /*****************************************************************************************************
 **  Function
@@ -127,6 +127,7 @@ bool usbd_socket_decode(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t 
 
 void usbd_socket_init(void)
 {
-
+	usbd_socket_trp.trp = TR_NULL;
+	usbd_socket_dev = U16(DEV_TYPE_NONE, DEF_HID_TYPE_NONE);
 }
 #endif

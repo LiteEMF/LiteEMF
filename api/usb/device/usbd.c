@@ -487,6 +487,7 @@ static error_t usbd_control_request_process(uint8_t id)
 	
 	if(TUSB_DIR_IN == preq->req.bmRequestType.bits.direction){
 		preq->setup_len = preq->req.wLength;			//set default response len
+		memset(preq->setup_buf, 0, preq->setup_len);
 	}
 
 

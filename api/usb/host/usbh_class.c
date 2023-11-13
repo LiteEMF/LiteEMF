@@ -87,6 +87,8 @@ usbh_class_t *usbh_class_find_by_ep(uint8_t id,uint8_t ep)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
 
+	if(0 == (API_USBH_BIT_ENABLE & BIT(id>>4))) return NULL; 
+
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if((pos->endpin.addr | TUSB_DIR_IN_MASK) == ep){
 			pclass = pos;
@@ -111,6 +113,8 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
+
+	if(0 == (API_USBH_BIT_ENABLE & BIT(id>>4))) return NULL; 
 
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->dev_type == type){
