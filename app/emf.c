@@ -260,8 +260,8 @@ void emf_handler(uint32_t period_10us)
 	#if APP_IMU_ENABLE
 	imu_driver_handler(800);					//内部有延时,建议在低优先级任务中运行
 	#endif
-	#ifndef APP_JOYSTICK_ENABLE
-	app_joystick_init(400);
+	#ifdef APP_JOYSTICK_ENABLE
+	app_joystick_handler(400);
 	#endif
 	#if APP_GAMEAPD_ENABLE
 	app_gamepad_key_handler(400);

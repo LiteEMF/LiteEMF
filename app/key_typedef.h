@@ -93,7 +93,7 @@ extern "C" {
 #define HW_KEY_M8 		    BIT(30)
 #define HW_KEY_POWER 		BIT(31)
 
-// 摇杆
+// 摇杆 固定写死
 #define APP_STICK_L_ID	  	0
 #define APP_STICK_R_ID	  	1
 #define APP_STICK_NUMS		2

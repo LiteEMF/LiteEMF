@@ -270,6 +270,7 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 	rgb_cbt_t *pcbt;
 
 	if(id >= APP_RGB_NUMS) return false;
+	if(0 == palette_size) return false;
 
 	pcbt = &m_rgb_cbt[id];
 	memset(pcbt, 0, sizeof(rgb_cbt_t));
@@ -283,8 +284,8 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 	}
 
 	pcbt->offset = offset;
-	pcbt->palette_step = 256 / pcbt->palette_size;
 	pcbt->palette_size = palette_size;
+	pcbt->palette_step = 256 / palette_size;
 	pcbt->palette = palette;
 
 	return true;
@@ -336,13 +337,17 @@ void app_rgb_task(void *pa)
 	rgb_cbt_t *pcbt;
 	int8_t i;
 	uint16_t step;						//rgb period step * 256 (放大256倍,低8位为小数)
-
+	uint16_t period;
 	static bool rgb_show = false;		//if rgb hw show led faile retry show
 
 	rgb_tick++;
 	for(i=0; i< APP_RGB_NUMS; i++){
 		pcbt = &m_rgb_cbt[i];
-		step = 256 * APP_RGB_SLICE * rgb_tick / pcbt->period;
+		period = pcbt->period;
+		if(0 == pcbt->period){		//avoid div 0
+			period = APP_RGB_SLICE;
+		}
+		step = 256 * APP_RGB_SLICE * rgb_tick / period;
 		
 		// logd("rgb%d, mode=%d,step=%x\n", i, pcbt->mode, step);
 		if(pcbt->times){						//定时显示次数

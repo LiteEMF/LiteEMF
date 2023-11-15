@@ -41,13 +41,13 @@ char const_t* usbd_xbox_string_desc[4] =
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t m_usbd_types[USBD_NUM] = {
+uint16_t m_usbd_types[USBD_NUM] = {		//for default type, please fix in project
 	USBD_TYPE_SUPPORT,
 	#if USBD_NUM == 2
 	USBD_TYPE_SUPPORT,
 	#endif
-};		//for default type, please fix in project
-uint16_t m_usbd_hid_types[USBD_NUM] = {
+};		
+uint16_t m_usbd_hid_types[USBD_NUM] = {	//for default type, please fix in project
 	USBD_HID_SUPPORT,
 	#if USBD_NUM == 2
 	USBD_HID_SUPPORT,

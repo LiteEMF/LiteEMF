@@ -26,7 +26,7 @@ extern "C" {
 *******************************************************************************************************/
 
 #ifndef JOYSTICK_CAL_TIMEOUT
-#define JOYSTICK_CAL_TIMEOUT 4000
+#define JOYSTICK_CAL_TIMEOUT    12000
 #endif
 #ifndef STICK_DIR_VAL
 #define STICK_DIR_VAL			10900
@@ -105,6 +105,7 @@ bool app_joystick_get_adc(joystick_t* joystickp);       //__WEAK
 void app_joystick_event(joystick_cal_sta_t event);   //__WEAK
 
 void app_joystack_cal_start(void);
+void app_joystack_cal_end(void);
 uint8_t get_stick_dir(axis2i_t* stickp);
 void get_stick_val(uint8_t dir, axis2i_t* stickp);
 void app_stick_deadzone(joystick_cfg_t* cfgp,axis2i_t* stickp);

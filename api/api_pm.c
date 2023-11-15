@@ -51,7 +51,7 @@
 pm_sta_t m_pm_sta = PM_STA_NORMAL;
 timer_t m_pm_sleep_timer;								//休眠定时器
 uint32_t m_pm_sleep_timerout = DISCONNECTED_SLEEP_TIME;	//休眠超时时间
-bool app_pm_key_sleep = 0;								//是否是按键进入休眠
+bool app_pm_key_sleep = 0;								//是否是按键进入休眠, 用于波动开关开关机
 
 /******************************************************************************************************
 **	static Parameters
@@ -65,12 +65,18 @@ pm_reson_t m_reset_reson;
 **  Function
 ******************************************************************************************************/
 #if WEAK_ENABLE
+
+/*******************************************************************
+** Parameters:
+** Returns:	true: 继续等待,  false: 操作完成可以用休眠
+** Description: 在系统休眠之前, 用于等待特殊用户操作
+*******************************************************************/
 __WEAK bool api_pm_sleep_hook(void)
 {
 	return false;
 }
 
-__WEAK bool api_pm_sleep_deinit(void)
+__WEAK bool api_pm_sleep_deinit(void)			//api_sleep call
 {
 	if(PM_STA_SLEEP == m_pm_sta){
 		#ifdef HW_ADC_MAP
@@ -97,6 +103,22 @@ __WEAK bool api_pm_sleep_deinit(void)
 	user_vender_deinit();
 
 	return true;
+}
+
+
+__WEAK void api_weakup_init(void)			//系统休眠前初始化唤醒IO
+{
+	#if PIN_NULL != KEY_POWER_GPIO	
+	api_gpio_dir(KEY_POWER_GPIO, PIN_IN, POWER_KEY_PULL);
+	#endif
+
+	#if PIN_NULL != KEY_USB_DET_GPIO
+	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLNONE);
+	#endif
+
+	#if !POWER_SWITCH_KEY	//只在非拨动开关情况下做判断
+	while(KEY_POWER);
+	#endif
 }
 #endif
 
@@ -136,15 +158,20 @@ void api_pm_weakup_check(void)
 	logi_r("m_pm_sta=%d\n",m_pm_sta);   
 }
 
+/*******************************************************************
+** Parameters:index : 1: first boot, 2 : second boot		
+** Returns:	
+** Description:
+*******************************************************************/
 void api_boot(uint8_t index)
 {
-	logd("boot %d\n",(uint16_t)index);
+	logd("api boot %d\n",(uint16_t)index);
 	hal_boot(index);
 }
 
 void api_reset(void)
 {
-	logd("rest\n");
+	logd("api rest\n");
 	m_pm_sta = PM_STA_RESET;
 }
 
@@ -153,10 +180,7 @@ void api_reset(void)
 ** Returns:	
 ** Description:	used in SDK befor stop 
 *******************************************************************/
-void api_weakup_init(void)
-{
-   hal_weakup_init();
-}
+
 
 void api_sleep(void)
 {
@@ -171,7 +195,7 @@ void api_sleep(void)
 	else
 	#endif
 	{									//无充电，直接休眠
-		logd_r("sleep...\n");
+		logd_r("api sleep...\n");
 		m_pm_sta = PM_STA_SLEEP;
 	}
 

@@ -27,9 +27,7 @@
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void hal_weakup_init(void)
-{
-}
+
 
 pm_reson_t hal_get_reset_reson(void)
 {

@@ -49,6 +49,7 @@ static bool command_frame_tx(command_tx_t *txp)
 
 	if(txp->len <= txp->index) return ret;
 	if(NULL == txp->buf) return ret;
+	if(mtu < 5) return ret;
 
 	mtu = api_transport_get_mtu(&txp->handle);
 	data_mtu = mtu - 5;

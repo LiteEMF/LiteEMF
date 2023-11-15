@@ -69,6 +69,7 @@ extern bool app_pm_key_sleep;
 ******************************************************************************************************/
 bool api_pm_sleep_hook(void);				//__WEAK 
 bool api_pm_sleep_deinit(void);				//__WEAK
+void api_weakup_init(void);					//__WEAK
 
 void api_pm_weakup_check(void);
 void api_boot(uint8_t index);
@@ -80,7 +81,6 @@ void api_pm_handler(uint32_t period_10us);
 
 
 //hal 
-void hal_weakup_init(void);
 pm_reson_t hal_get_reset_reson(void);
 void hal_boot(uint8_t index);
 void hal_reset(void);

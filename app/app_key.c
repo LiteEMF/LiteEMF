@@ -135,7 +135,10 @@ void app_key_scan_task(void *pa)
 
     if(m_key_scan != key){
        m_key_scan = key;
+
+       #if !APP_GAMEAPD_ENABLE
        app_key_dump(key);
+       #endif
     }
     UNUSED_PARAMETER(pa);
 }

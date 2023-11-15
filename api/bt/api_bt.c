@@ -45,42 +45,42 @@
 *******************************************************************************************************/
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
-api_bt_ctb_t m_ble;
+api_bt_ctb_t m_ble = {BLE_TYPE_SUPPORT, BLE_HID_SUPPORT, true};
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLEC)					//ble central
-api_bt_ctb_t m_blec;
+api_bt_ctb_t m_blec = {BIT(DEV_TYPE_VENDOR), 0, true};
 bt_evt_scan_t blec_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE_RF)
-api_bt_ctb_t m_ble_rf;
+api_bt_ctb_t m_ble_rf = {BIT(DEV_TYPE_VENDOR), 0, true};
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)					//ble central
-api_bt_ctb_t m_ble_rfc;
+api_bt_ctb_t m_ble_rfc = {BIT(DEV_TYPE_VENDOR), 0, true};
 bt_evt_scan_t ble_rfc_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
 bool edr_sniff_by_remote = false; 					//switch模式下由主机发起进入sniff
-api_bt_ctb_t m_edr;
+api_bt_ctb_t m_edr = {EDR_TYPE_SUPPORT, EDR_HID_SUPPORT, true};
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDRC)					//edr central
-api_bt_ctb_t m_edrc;
+api_bt_ctb_t m_edrc = {BIT(DEV_TYPE_VENDOR), 0, true};
 bt_evt_scan_t edrc_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_RF)
-api_bt_ctb_t m_rf;
+api_bt_ctb_t m_rf = {BIT(DEV_TYPE_VENDOR), 0, true};
 static bt_tx_fifo_t app_rf_tx;
 static uint8_t rf_tx_buf[RF_TX_LL_MTU];
 static uint8_t rf_tx_fifo_buf[RF_FIFO_LEN];
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_RFC)
-api_bt_ctb_t m_rfc;
+api_bt_ctb_t m_rfc = {BIT(DEV_TYPE_VENDOR), 0, true};
 static bt_tx_fifo_t app_rfc_tx;
 static uint8_t rfc_tx_buf[RFC_TX_LL_MTU];
 static uint8_t rfc_tx_fifo_buf[RF_FIFO_LEN];
@@ -136,7 +136,6 @@ bt_evt_scan_t* api_bt_get_scan_result(bt_t bt)
 
 api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 {
-	bool ret = false;
 	api_bt_ctb_t* api_btp = NULL;
 	switch(bt){
 		#if BT_SUPPORT & BIT_ENUM(TR_BLE)
@@ -847,25 +846,14 @@ static bool api_bt_ctb_init(void)
 	for(id = 0; id < BT_MAX; id++){
 		bt_ctbp = api_bt_get_ctb(id);
 		if(NULL != bt_ctbp){
-			memset(bt_ctbp,0,sizeof(api_bt_ctb_t));
-			bt_ctbp->enable = true;
-			bt_ctbp->inteval = 12;
-			bt_ctbp->types = BIT(DEV_TYPE_VENDOR);		//default 私有协议
-			
-			//这里设置默认值, 可以在工程中修改
-			if(BT_BLE == id){
-				#if (BT_SUPPORT & BIT_ENUM(TR_BLE)) && BLE_HID_SUPPORT
-				bt_ctbp->types = BIT(DEV_TYPE_HID);
-				bt_ctbp->hid_types = BLE_HID_SUPPORT;
-				#endif
-			}else if(BT_EDR == id){
-				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
-				#if EDR_HID_SUPPORT
-				bt_ctbp->types = BIT(DEV_TYPE_HID);
-				bt_ctbp->hid_types = EDR_HID_SUPPORT;
-				#endif
+			bt_ctbp->init_ok = false;
+			bt_ctbp->inteval_10us = 1500;
+			bt_ctbp->sta = BT_STA_UNKNOW;
+			bt_ctbp->fifo_txp = NULL;
 
-				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){
+			if(BT_EDR == id){
+				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
+				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){		//switch sniff by remote
 					edr_sniff_by_remote = true;
 				}else{
 					edr_sniff_by_remote = false;

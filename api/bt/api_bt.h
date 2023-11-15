@@ -144,14 +144,14 @@ typedef enum{
 	BT_ID_MAX
 }bt_id_t;
 typedef enum {
-	BT_BLE 		= TR_BLE,		
-	BT_EDR 		= TR_EDR,		
-	BT_BLEC 	= TR_BLEC,		
-	BT_EDRC 	= TR_EDRC,		
-	BT_BLE_RF 	= TR_BLE_RF,					//BLE模拟2.4G
-	BT_BLEC_RF 	= TR_BLE_RFC,	
-	BT_RF 		= TR_RF,			
-	BT_RFC 		= TR_RFC,	
+	BT_BLE 		= DEF_TR_BLE,		
+	BT_EDR 		= DEF_TR_EDR,		
+	BT_BLEC 	= DEF_TR_BLEC,		
+	BT_EDRC 	= DEF_TR_EDRC,		
+	BT_BLE_RF 	= DEF_TR_BLE_RF,					//BLE模拟2.4G
+	BT_BLEC_RF 	= DEF_TR_BLE_RFC,	
+	BT_RF 		= DEF_TR_RF,			
+	BT_RFC 		= DEF_TR_RFC,	
 	BT_MAX 		= 8,
 } bt_t;
 
@@ -268,13 +268,13 @@ typedef struct{
 
 
 typedef struct{
-	uint8_t init_ok:1;
+	uint16_t types;				//for default type, please fix in project
+	uint16_t hid_types;			//for default type, please fix in project
 	uint8_t enable:1;
+	uint8_t init_ok:1;
 	uint8_t res:6;
-	uint16_t inteval;	//1.25ms
+	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
-	uint16_t types;
-	uint16_t hid_types;
 
 	bt_tx_fifo_t* fifo_txp;
 }api_bt_ctb_t;

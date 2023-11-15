@@ -146,7 +146,7 @@ for x in range(256):
     print("{:3},".format(int(math.pow((x)/255.0,gamma)*255.0+0.5))),
     if x&15 == 15: print
 */
-#if MODULE_ENABLE( COLOR_GAMMA_TABLE )
+#if defined( COLOR_GAMMA_TABLE )
 static uint8c_t GammaTable[256] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,   1,   1,   1,
@@ -596,8 +596,9 @@ uint32_t color_from_palette(uint8_t index, uint8_t brightness, blend_type_t blen
     uint8_t step;                       //调色板颜色之间步长
 
 	if(0 == brightness) return 0;
+    if(0 == palette_size) return 0;     //avoid div 0
 
-    step = 256/palette_size;
+    step = 256 / palette_size;
 	if ( blend_type == LINEARBLEND_NOWRAP) {
 		index = REMAP( index, 0, 255, 0, step * palette_size -1);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
 	}

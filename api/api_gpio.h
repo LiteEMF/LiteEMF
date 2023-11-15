@@ -15,7 +15,7 @@
 #include "emf_typedef.h" 
 #include "hw_config.h"
 #include "hal_gpio.h"
-#include "pinmap.h"
+#include "api/pinmap.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

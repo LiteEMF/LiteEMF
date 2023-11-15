@@ -16,6 +16,9 @@
 #include  "app/io_key.h"
 #include  "api/api_tick.h"
 #include  "app/key_typedef.h"
+
+#include  "api/api_log.h"
+
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -54,9 +57,9 @@ static void matrix_key_init(void)
 		
 		for(in = 0; in < countof(matrix_key_in_gpio); in++){
 			#if MATRIX_KEY_ACTIVE
-			api_gpio_dir(matrix_key_in_gpio[out], PIN_IN, PIN_PULLDOWN);
+			api_gpio_dir(matrix_key_in_gpio[in], PIN_IN, PIN_PULLDOWN);
 			#else
-			api_gpio_dir(matrix_key_in_gpio[out], PIN_IN, PIN_PULLUP);
+			api_gpio_dir(matrix_key_in_gpio[in], PIN_IN, PIN_PULLUP);
 			#endif
 		}
 		

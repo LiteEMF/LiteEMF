@@ -73,7 +73,13 @@ __WEAK bool rgb_driver_show(uint8_t* frame, uint8_t len)
 	
 	for(i=0; i<len; i++){
 		//show frame[i];
-		//ret = true;
+		#ifdef HW_SPI_HOST_MAP
+		brightness = remap(frame[i], 0, 255, 0, 63);
+		ret = api_spi_host_write(0,led_channel[i], &brightness, 1);
+		#endif
+		#ifdef HW_PWM_MAP
+		ret = api_pwm_set_duty(i, frame[i]);
+		#endif
 	}
 
 	return ret;

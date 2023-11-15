@@ -215,7 +215,7 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
 
 void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
 {
-    int32_t x,y;
+    int32_t x,y,calx_r,caly_r;
 
     if(id >= APP_STICK_NUMS) return;
 
@@ -223,15 +223,22 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
     x = 32768 * (adcp->stick[id].x - joystick_calp->mid.stick[id].x);
     y = 32768 * (adcp->stick[id].y - joystick_calp->mid.stick[id].y);
     if(x > 0){
-        x /=  (joystick_calp->max.stick[id].x - joystick_calp->mid.stick[id].x);
+        calx_r = joystick_calp->max.stick[id].x - joystick_calp->mid.stick[id].x;
     }else{
-        x /=  (joystick_calp->mid.stick[id].x - joystick_calp->min.stick[id].x);
+        calx_r =  (joystick_calp->mid.stick[id].x - joystick_calp->min.stick[id].x);
     }
     if(y > 0){
-        y /=  (joystick_calp->max.stick[id].y - joystick_calp->mid.stick[id].y);
+        caly_r =  (joystick_calp->max.stick[id].y - joystick_calp->mid.stick[id].y);
     }else{
-        y /=  (joystick_calp->mid.stick[id].y - joystick_calp->min.stick[id].y);
+        caly_r =  (joystick_calp->mid.stick[id].y - joystick_calp->min.stick[id].y);
     }
+    
+    if(0 == calx_r) calx_r = 1;         //avoid div 0
+    if(0 == caly_r) caly_r = 1;         //avoid div 0
+    x /=  calx_r;
+    y /=  caly_r;
+    
+
     if (!stick_active[id].x)    x = -x;
     if (!stick_active[id].y)    y = -y;
         
@@ -302,7 +309,7 @@ static void joystick_do_cal(joystick_t* adcp)
         joystick_cal_sta = JOYSTICK_CAL_MID;
         break;
     case JOYSTICK_CAL_MID:
-        if(m_systick - cal_timer > 3*JOYSTICK_CAL_TIMEOUT){
+        if(m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT){
             cal_timer = m_systick;
             joystick_cal_sta = JOYSTICK_CAL_FAILED;
         }else{
@@ -323,11 +330,11 @@ static void joystick_do_cal(joystick_t* adcp)
         for (id = 0; id < APP_STICK_NUMS; id++){    //check
             if((r.stick[id].x < STICK_LIMIT_MIN_R) || (r.stick[id].y < STICK_LIMIT_MIN_R)){
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
-                logi("stick[%d] cal fail\n", id);
+                logi("stick[%d] cal fail, %d %d\n", id,r.stick[id].x, r.stick[id].y);
             }
             if(r.tarigger[id] < TRIGGER_LIMIT_MIN_R){
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
-                logi("tarigger[%d] cal fail\n", id);
+                logi("tarigger[%d] cal fail, %d %d %d\n", id, r.tarigger[id], s_cal.min.tarigger[id], s_cal.max.tarigger[id]);
             }
         }
 
@@ -372,8 +379,22 @@ static void joystick_do_cal(joystick_t* adcp)
 }
 void app_joystack_cal_start(void)
 {
-	joystick_cal_sta = JOYSTICK_CAL_START;
+    if(JOYSTICK_CAL_NONE == joystick_cal_sta){
+        logd("app_joystack_cal_start\n");
+	    joystick_cal_sta = JOYSTICK_CAL_START;
+    }
 }
+
+void app_joystack_cal_end(void)
+{
+    if((joystick_cal_sta == JOYSTICK_CAL_START) 
+        || (joystick_cal_sta == JOYSTICK_CAL_MID) 
+        || (joystick_cal_sta == JOYSTICK_CAL_SID)) {
+        logd("app_joystack_cal_end\n");
+        joystick_cal_sta = JOYSTICK_CAL_CHECK;
+    }
+}
+
 
 /*******************************************************************
 ** Parameters:		
