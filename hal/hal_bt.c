@@ -262,7 +262,7 @@ bool hal_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     case BT_BLEC_RF:
         break;
     #endif
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
+    #if (BT0_SUPPORT & BIT_ENUM(TR_EDR)) && (EDR_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
     case BT_EDR: 	    
         break;
     #endif

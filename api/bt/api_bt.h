@@ -173,7 +173,6 @@ typedef enum  {
 	BT_STA_SCAN		=	BT_STA_ADV,
 	BT_STA_DIR_SCAN	=	BT_STA_DIR_ADV,
 	BT_STA_CONN,
-	BT_STA_READY,
 } bt_sta_t;
 
 
@@ -212,6 +211,12 @@ typedef struct{
 typedef struct{
 	uint8_t resion;
 }bt_evt_discon_t,bt_evt_fail_t;
+
+typedef struct{
+	bt_server_t bts;
+	uint8_t ready;		//0:success, 1:fail 2: txing
+}bt_evt_ready_t;
+
 typedef struct{
 	bt_server_t bts;
 	uint8_t* buf;
@@ -230,6 +235,7 @@ typedef union{
 	bt_evt_fail_t fail;
 	bt_evt_rx_t rx;
 	bt_evt_tx_t tx;
+	bt_evt_ready_t ready;
 }bt_evt_pa_t;
 
 
@@ -272,7 +278,8 @@ typedef struct{
 	uint16_t hid_types;			//for default type, please fix in project
 	uint8_t enable:1;
 	uint8_t init_ok:1;
-	uint8_t res:6;
+	uint8_t vendor_ready:1;		//ble vendor uuid, edr SPP ready
+	uint8_t res:5;
 	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
 

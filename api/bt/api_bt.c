@@ -506,7 +506,7 @@ bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
 
-	if(!bt_ctbp->init_ok || (BT_STA_READY != bt_ctbp->sta)) return ret;
+	if(!bt_ctbp->init_ok || !bt_ctbp->vendor_ready) return ret;
 	if(NULL != bt_ctbp->fifo_txp){
 		ret = api_bt_uart_fifo_tx(&bt_ctbp->fifo_txp->fifo,buf, len);
 		if(ret) bt_ctbp->fifo_txp->tx_busy = true;
@@ -533,7 +533,7 @@ bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len)
 	if(id >= BT_ID_MAX) return false;
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
-	if(!bt_ctbp->init_ok || (BT_STA_READY != bt_ctbp->sta)) return ret;
+	if(!bt_ctbp->init_ok || (BT_STA_CONN != bt_ctbp->sta)) return ret;
 
 	if(id == BT_ID0){
 		ret = hal_bt_hid_tx(id, bt, buf, len);
@@ -633,12 +633,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("bt(%d) connect...\n",bt);
-			if(BT_STA_READY != bt_ctbp->sta){	//防止被改回去
-				bt_ctbp->sta = BT_STA_CONN;
-			}
-			break;		
-		case BT_EVT_READY:
-			bt_ctbp->sta = BT_STA_READY;
+			bt_ctbp->sta = BT_STA_CONN;
 
 			#if APP_GAMEAPD_ENABLE
 			if(BIT(DEV_TYPE_HID) & bt_ctbp->types){
@@ -648,7 +643,12 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			}
 			#endif
 
-			logd("bt(%d) ready...\n",bt);
+			break;		
+		case BT_EVT_READY:
+			if(NULL != pa){
+				bt_ctbp->vendor_ready = pa->ready.ready;
+				logd("bt(%d) ready=%d...\n",bt,pa->ready.ready);
+			}
 			break;		
 		case BT_EVT_IDLE:
 			bt_ctbp->sta = BT_STA_IDLE;
@@ -716,13 +716,14 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("btc(%d) connect...\n",bt);
-			if(BT_STA_READY != bt_ctbp->sta){		//防止被改回去
-				bt_ctbp->sta = BT_STA_CONN;
-			}
+			bt_ctbp->sta = BT_STA_CONN;
+		
 			break;		
 		case BT_EVT_READY:
-			bt_ctbp->sta = BT_STA_READY;
-			logd("btc(%d) ready...\n",bt);
+			if(NULL != pa){
+				bt_ctbp->vendor_ready = pa->ready.ready;
+				logd("btc(%d) ready=%d...\n",bt,pa->ready.ready);
+			}
 			break;		
 		case BT_EVT_IDLE:
 			bt_ctbp->sta = BT_STA_IDLE;
@@ -847,6 +848,7 @@ static bool api_bt_ctb_init(void)
 		bt_ctbp = api_bt_get_ctb(id);
 		if(NULL != bt_ctbp){
 			bt_ctbp->init_ok = false;
+			bt_ctbp->vendor_ready = false;
 			bt_ctbp->inteval_10us = 1500;
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;

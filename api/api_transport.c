@@ -111,8 +111,12 @@ bool api_transport_ready(trp_handle_t* phandle)
 	case TR_RFC	:{
 		api_bt_ctb_t* bt_ctbp = api_bt_get_ctb(phandle->trp);
 		if(NULL == bt_ctbp) break;
-		if(BT_STA_READY == bt_ctbp->sta){
-			ready = true;
+		if(BT_STA_CONN == bt_ctbp->sta){
+			if((phandle->index >> 8) == DEV_TYPE_HID){
+				ready = true;
+			}else{
+				ready = bt_ctbp->vendor_ready;
+			}
 		}
 		break;
 	}
@@ -189,7 +193,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	if (NULL == buf)		return false;
 
 	if((TR_RF != phandle->trp) && (TR_RFC != phandle->trp)){
-		//logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick;dumpd(buf,len);
+		//logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick; //dumpd(buf,len);
 	}
 	switch(phandle->trp){
 		#if API_BT_ENABLE
