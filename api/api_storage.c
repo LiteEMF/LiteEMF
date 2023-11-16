@@ -209,7 +209,7 @@ bool api_storage_init(void)
 void api_storage_sync_task(void* pa)
 {
 	if(is_stg_auto_sync){
-		logd("api_storage_sync_task =%d\n",(uint16_t)is_stg_auto_sync);
+		logd("is_stg_auto_sync=%d\n",(uint16_t)is_stg_auto_sync);
 		api_storage_sync();
 	}
 }

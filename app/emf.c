@@ -152,7 +152,7 @@ bool emf_init(void)
 	#if APP_IMU_ENABLE
 	app_imu_init();
 	#endif
-	#ifndef APP_JOYSTICK_ENABLE
+	#if APP_JOYSTICK_ENABLE
 	app_joystick_init();
 	#endif
 	#if APP_GAMEAPD_ENABLE
@@ -260,7 +260,7 @@ void emf_handler(uint32_t period_10us)
 	#if APP_IMU_ENABLE
 	imu_driver_handler(800);					//内部有延时,建议在低优先级任务中运行
 	#endif
-	#ifdef APP_JOYSTICK_ENABLE
+	#if APP_JOYSTICK_ENABLE
 	app_joystick_handler(400);
 	#endif
 	#if APP_GAMEAPD_ENABLE

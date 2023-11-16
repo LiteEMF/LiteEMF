@@ -14,6 +14,7 @@
 #define _api_pm_h
 #include "emf_typedef.h" 
 #include "api/api_tick.h"
+#include "api/api_storage.h"
 #include "hal_pm.h"
 
 #ifdef __cplusplus
@@ -35,6 +36,7 @@ extern "C" {
 #endif
 
 
+#define SOFT_RESET_MASK		('r')
 
 /******************************************************************************************************
 **	Parameters

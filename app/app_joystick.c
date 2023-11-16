@@ -48,7 +48,7 @@ const_t uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;
 joystick_cal_t *const joystick_calp = (joystick_cal_t*)m_storage.joystick_cal;
 #else
 joystick_cal_t joystick_cal_default = {{{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX},ADC_RES_MAX}};
-joystick_cal_t *const joystick_calp = NULL;
+joystick_cal_t *const joystick_calp = &joystick_cal_default;
 #endif
 
 
@@ -265,7 +265,7 @@ static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp,joystick_t
         calp->max.stick[i].x = MAX(adcp->stick[i].x, calp->max.stick[i].x);
         calp->max.stick[i].y = MAX(adcp->stick[i].y, calp->max.stick[i].y);
 
-        calp->min.tarigger[i] = MAX(adcp->tarigger[i], calp->min.tarigger[i]);
+        calp->min.tarigger[i] = MIN(adcp->tarigger[i], calp->min.tarigger[i]);
         calp->max.tarigger[i] = MAX(adcp->tarigger[i], calp->max.tarigger[i]);
 
         rp->stick[i].x = calp->max.stick[i].x - calp->min.stick[i].x;
@@ -370,6 +370,11 @@ static void joystick_do_cal(joystick_t* adcp)
     case JOYSTICK_CAL_SUCCEED:
     case JOYSTICK_CAL_FAILED:
         if (m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT){
+            if(JOYSTICK_CAL_SUCCEED == joystick_cal_sta){
+                logi("joystick cal successed!\n");
+            }else{
+                logi("joystick cal failed!\n");
+            }
             joystick_cal_sta = JOYSTICK_CAL_NONE;
         }
         break;
@@ -405,6 +410,14 @@ bool app_joystick_init(void)
 {
     joystick_cal_sta = JOYSTICK_CAL_NONE;
     memset(&m_joystick,0,sizeof(m_joystick));
+
+    logd("joystick cal:\n");
+    logd("stick lx: %d %d %d\n", joystick_calp->min.stick[0].x,joystick_calp->mid.stick[0].x,joystick_calp->max.stick[0].x);
+    logd("stick ly: %d %d %d\n", joystick_calp->min.stick[0].y,joystick_calp->mid.stick[0].y,joystick_calp->max.stick[0].y);
+    logd("stick rx: %d %d %d\n", joystick_calp->min.stick[1].x,joystick_calp->mid.stick[1].x,joystick_calp->max.stick[1].x);
+    logd("stick ry: %d %d %d\n", joystick_calp->min.stick[1].y,joystick_calp->mid.stick[1].y,joystick_calp->max.stick[1].y);
+    logd("tarigger l: %d  %d\n", joystick_calp->min.tarigger[0],joystick_calp->max.tarigger[0]);
+    logd("tarigger r: %d  %d\n", joystick_calp->min.tarigger[1],joystick_calp->max.tarigger[1]);
 
 	return true;
 }
