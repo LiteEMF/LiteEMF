@@ -533,7 +533,7 @@ bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t*buf, uint16_t len)
 	if(id >= BT_ID_MAX) return false;
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
-	if(!bt_ctbp->init_ok || (BT_STA_CONN != bt_ctbp->sta)) return ret;
+	if(!bt_ctbp->init_ok || !bt_ctbp->hid_ready || (BT_STA_CONN != bt_ctbp->sta)) return ret;
 
 	if(id == BT_ID0){
 		ret = hal_bt_hid_tx(id, bt, buf, len);
@@ -624,6 +624,8 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 	
 			bt_ctbp->sta = BT_STA_IDLE;
+			bt_ctbp->vendor_ready = false;
+			bt_ctbp->hid_ready = false;
 			api_bt_enable(id, bt,bt_ctbp->enable);
 			if(api_bt_is_bonded(id, bt)){					//TODO
 				bt_ctbp->sta = BT_STA_DIR_ADV;
@@ -645,9 +647,12 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 
 			break;		
 		case BT_EVT_READY:
-			if(NULL != pa){
+			if(BT_UART == pa->ready.bts){
 				bt_ctbp->vendor_ready = pa->ready.ready;
-				logd("bt(%d) ready=%d...\n",bt,pa->ready.ready);
+				logd("bt(%d) vendor ready=%d...\n",bt,pa->ready.ready);
+			}else{
+				bt_ctbp->hid_ready = pa->ready.ready;
+				logd("bt(%d) hid ready=%d...\n",bt,pa->ready.ready);
 			}
 			break;		
 		case BT_EVT_IDLE:
@@ -662,6 +667,8 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 		case BT_EVT_DISCONNECTED:
 			logd("bt(%d) disconnected...\n",bt);
 			api_bt_enable(id, bt,bt_ctbp->enable);
+			bt_ctbp->vendor_ready = false;
+			bt_ctbp->hid_ready = false;
 			if(bt_ctbp->enable){
 				if(api_bt_is_bonded(id, bt)){
 					bt_ctbp->sta = BT_STA_DIR_ADV;
@@ -707,6 +714,8 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			logd("bt(%d) init ok...\n",bt);
 			bt_ctbp->init_ok = true;
 			bt_ctbp->sta = BT_STA_IDLE;
+			bt_ctbp->vendor_ready = false;
+			bt_ctbp->hid_ready = false;
 			api_bt_enable(id, bt,bt_ctbp->enable);
 			if(api_bt_is_bonded(id, bt)){					//TODO
 				bt_ctbp->sta = BT_STA_DIR_ADV;
@@ -721,10 +730,15 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			break;		
 		case BT_EVT_READY:
 			if(NULL != pa){
-				bt_ctbp->vendor_ready = pa->ready.ready;
-				logd("btc(%d) ready=%d...\n",bt,pa->ready.ready);
+				if(BT_UART == pa->ready.bts){
+					bt_ctbp->vendor_ready = pa->ready.ready;
+					logd("btc(%d) vendor ready=%d...\n",bt,pa->ready.ready);
+				}else{
+					bt_ctbp->hid_ready = pa->ready.ready;
+					logd("btc(%d) hid ready=%d...\n",bt,pa->ready.ready);
+				}
 			}
-			break;		
+			break;
 		case BT_EVT_IDLE:
 			bt_ctbp->sta = BT_STA_IDLE;
 			break;
@@ -769,7 +783,8 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 		case BT_EVT_DISCONNECTED:
 			logd("btc(%d) disconnected...\n",bt);
 			api_bt_enable(id, bt,bt_ctbp->enable);
-
+			bt_ctbp->vendor_ready = false;
+			bt_ctbp->hid_ready = false;
 			if(bt_ctbp->enable){
 				if(api_bt_is_bonded(id, bt)){
 					bt_ctbp->sta = BT_STA_DIR_SCAN;
@@ -849,6 +864,7 @@ static bool api_bt_ctb_init(void)
 		if(NULL != bt_ctbp){
 			bt_ctbp->init_ok = false;
 			bt_ctbp->vendor_ready = false;
+			bt_ctbp->hid_ready = false;
 			bt_ctbp->inteval_10us = 1500;
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;

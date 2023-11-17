@@ -278,8 +278,9 @@ typedef struct{
 	uint16_t hid_types;			//for default type, please fix in project
 	uint8_t enable:1;
 	uint8_t init_ok:1;
+	uint8_t hid_ready:1;		//ble edr hid ready
 	uint8_t vendor_ready:1;		//ble vendor uuid, edr SPP ready
-	uint8_t res:5;
+	uint8_t res:4;
 	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
 

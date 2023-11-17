@@ -335,6 +335,7 @@ uint32_t app_gamepad_map_convert(uint32_t key, uint32_t(* map)[2], uint8_t map_c
 	uint8_t i;
 	uint32_t keyout = 0;
 
+	if(NULL == map) return key;
 	for(i=0; i<map_count;i++){
 		if(map[i][0] & key){
 			keyout |= map[i][1];

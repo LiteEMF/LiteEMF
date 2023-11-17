@@ -113,7 +113,7 @@ bool api_transport_ready(trp_handle_t* phandle)
 		if(NULL == bt_ctbp) break;
 		if(BT_STA_CONN == bt_ctbp->sta){
 			if((phandle->index >> 8) == DEV_TYPE_HID){
-				ready = true;
+				ready = bt_ctbp->hid_ready;
 			}else{
 				ready = bt_ctbp->vendor_ready;
 			}

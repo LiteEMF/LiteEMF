@@ -28,6 +28,9 @@ extern "C" {
 
 enum {					//为了节省蓝牙服务通过宏定义枚举类型
 	DEFAULT_REPORT_ID = 0,
+	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
+	VENDOR_REPORT_ID,
+	#endif
 	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
 	GAMEPAD_REPORT_ID,
 	#endif
@@ -42,9 +45,6 @@ enum {					//为了节省蓝牙服务通过宏定义枚举类型
 	#endif
 	#if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_MT) | BIT_ENUM(HID_TYPE_TOUCH))
 	TOUCH_REPORT_ID,
-	#endif
-	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
-	VENDOR_REPORT_ID,
 	#endif
 	REPORT_ID_NUM,
 };
