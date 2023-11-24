@@ -65,7 +65,7 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 		map_offset = map_addr - page_addr;
 		merge_len = MIN(*lenp, (page_end - map_addr));
 
-		if(memcpy(page_buf+map_offset,buf,merge_len)){
+		if(memcmp(page_buf+map_offset,buf,merge_len)){
 			memcpy(page_buf+map_offset,buf,merge_len);
 			ret = true;
 		}
