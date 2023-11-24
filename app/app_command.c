@@ -81,7 +81,7 @@ command_rx_t usbh_cmd_rx = {{NULL,0},{NULL,0}};
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-
+trp_t test_trp = TR_NULL;
 
 /*****************************************************************************************************
 **	static Function
@@ -100,43 +100,144 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 {
 	bool ret = false;
 	command_head_t *phead = (command_head_t*)buf;
+	uint8_t replay[16];
 
 	switch(phead->cmd){
 	/*---- 0x00	设备信息 ----*/
 	case CMD_GET_EMF_VERSION:
+		replay[0] = EMF_CMD_VERSION;
+		api_command_tx(phandle,phead->cmd, replay, 1);
+		ret = true;
 		break;
 	case CMD_GET_UUID:
+		if(hal_get_uuid(replay, 16)){
+			api_command_tx(phandle,phead->cmd, replay, 16);
+			ret = true;
+		}
 		break;
 	case CMD_GET_DEV_VERSION:
+		#ifdef SW_VERSION
+		replay[0] = SW_VERSION>>8;
+		replay[1] = SW_VERSION;
+		replay[2] = 0;
+		replay[3] = 0;
+		api_command_tx(phandle,phead->cmd, replay, 4);
+		ret = true;
+		#endif
 		break;
-	case CMD_GET_MODE:
+	case CMD_GET_MODEL:
+		#ifdef DEFAULT_MODEL
+		api_command_tx(phandle,phead->cmd, DEFAULT_MODEL, strlen(DEFAULT_MODEL));
+		ret = true;
+		#endif
 		break;
 	case CMD_GET_MTU:
+
+		if(len > CMD_PACK_LEN){
+			replay[0] = buf[4];
+			replay[1] = api_transport_get_mtu(buf[4]);
+		}else{			//获取指令当前传输协议mtu
+			replay[0] = phandle->trp;
+			replay[1] = api_transport_get_mtu(phandle->trp);
+		}
+		app_send_command(phandle,phead->cmd, replay, 2);
+		ret = true;
 		break;
-	//case //6,7
 	case CMD_DEV_PID_VID:
 		break;
 	case CMD_DEV_SN:
 		break;
 	case CMD_DEV_MAC:
+		#if API_BT_ENABLE
+		if(len > CMD_PACK_LEN+1){
+			replay[0] = buf[4];
+			replay[1] = buf[5];
+			if(api_bt_get_mac(buf[4], buf[5], replay+2)){
+				app_send_command(phandle,phead->cmd, replay, 8);
+				ret = true;
+			}
+		}
+		#endif
 		break;
 	case CMD_DEV_EID:
 		break;
 	case CMD_DEV_NAME:
+		#ifdef DEFAULT_NAME
+		if(len == CMD_PACK_LEN){		//read
+			app_send_command(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
+			ret = true;
+		}else{				//write
+
+		}
+		#endif
 		break;
 
 	/*---- 0x10	设备信息 ----*/
-	case CMD_DEV_MODE:
+	case CMD_DEV_MODE:			//TODO 功能待完善修改
+		if(len >= CMD_PACK_LEN + 8){
+			uint16_t type;
+			uint16_t trps = U16(buf[4],buf[5]);
+			m_dev_mode = U16(buf[6],buf[7]);
+			m_hid_mode = U16(buf[8],buf[9]);
+		}
+		replay[0] = m_trps>>8;
+		replay[1] = m_trps;
+		replay[2] = TYPED_SUPPORT>>8;
+		replay[3] = TYPED_SUPPORT & 0xff;
+		replay[4] = m_dev_mode>>8;
+		replay[5] = m_dev_mode;
+		replay[6] = m_hid_mode>>8;
+		replay[7] = m_hid_mode;
+		app_send_command(phandle,phead->cmd, replay, 10);
+		ret = true;
 		break;
 	case CMD_TEST_MODE:
+		if(len > CMD_PACK_LEN){
+			test_trp = buf[4];
+		}else{
+			test_trp = phandle->trp;
+		}
+		ret = true;
 		break;
 	case CMD_DEV_CTRL:
+		if(len > CMD_PACK_LEN){
+			dev_ctrl_t ctrl = buf[4];
+			switch(ctrl){
+		    case CTRL_RESET:
+				api_reset();
+				ret = true;
+				break;
+			case CTRL_STOP:
+				api_stop();
+				ret = true;
+				break;
+			case CTRL_BOOT:
+				if(len > 6){
+					api_boot(buf[5]);
+				}else{
+					api_boot(0);
+				}
+				ret = true;
+				break;
+			}
+			if(ret){
+				replay[0] = ctrl;
+				replay[1] = 0;
+				app_send_command(phandle,phead->cmd, replay, 2);
+			}
+		}
 		break;
 	case CMD_STORAGE_SYNC:
+		#if API_STORAGE_ENABLE
+		ret = api_storage_sync();
+		app_send_command(phandle,phead->cmd, &ret, 1);
+		#endif
 		break;
 	case CMD_HEART_BEAT:
+		app_send_command(phandle,phead->cmd, &ret, 1);
 		break;
 	case CMD_RECOVER_FACTORY:
+		app_send_command(phandle,phead->cmd, &ret, 1);
 		break;
 	default:
 		break;
@@ -144,13 +245,13 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 
 	#if API_USBH_BIT_ENABLE && USBH_SOCKET_ENABLE
 	if(!ret){
-		ret = usbh_socket_decode(phandle,phead->cmd, buf+COM_HEAD_LEN, len - (COM_HEAD_LEN+1));
+		ret = usbh_socket_decode(phandle,phead->cmd, buf+CMD_HEAD_LEN, len - (CMD_HEAD_LEN+1));
 	}
 	#endif
 
 	#if API_USBD_BIT_ENABLE && USBD_SOCKET_ENABLE
 	if(!ret){
-		ret = usbd_socket_decode(phandle,phead->cmd, buf+COM_HEAD_LEN, len - (COM_HEAD_LEN+1));
+		ret = usbd_socket_decode(phandle,phead->cmd, buf+CMD_HEAD_LEN, len - (CMD_HEAD_LEN+1));
 	}
 	#endif
 

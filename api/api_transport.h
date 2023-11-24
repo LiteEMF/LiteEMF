@@ -125,6 +125,11 @@ typedef struct{
 
 extern uint16_t m_trps;
 
+
+//产品模式
+extern uint16_t m_dev_mode;
+extern uint16_t m_hid_mode;	
+
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
@@ -132,8 +137,8 @@ bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
 bool api_trp_is_slave(trp_t trp);
 bool api_trp_is_host(trp_t trp);
+bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t hid_types);
 bool api_transport_ready(trp_handle_t* phandle);
-
 uint16_t api_transport_get_mtu(trp_handle_t* phandle);
 bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len);
 bool api_trp_init(void);

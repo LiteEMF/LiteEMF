@@ -22,8 +22,8 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef EMF_CMD_VERSION		//emf command版本号
-#define EMF_CMD_VERSION		0x32					
+#ifndef EMF_CMD_VERSION		//emf 版本号
+#define EMF_CMD_VERSION		0x01				
 #endif
 
 
@@ -36,7 +36,7 @@ typedef enum{
 	CMD_GET_EMF_VERSION,
 	CMD_GET_UUID,
 	CMD_GET_DEV_VERSION,
-	CMD_GET_MODE,
+	CMD_GET_MODEL,
 	CMD_GET_MTU,
 	//6,7
 	CMD_DEV_PID_VID=8,
@@ -48,8 +48,8 @@ typedef enum{
 
 	/*---- 0x10	设备信息 ----*/
 	CMD_DEV_MODE=0X10,
-	CMD_TEST_MODE,
 	CMD_DEV_CTRL,
+	CMD_TEST_MODE,
 	//res
 	CMD_STORAGE_SYNC=0X1D,
 	CMD_HEART_BEAT=0X1E,
@@ -89,6 +89,14 @@ typedef enum{
 }app_cmd_t;
 
 
+#define CTRL_SUB_DEV	0X80	//控制从机单片机
+typedef enum{
+    CTRL_RESET=0,               //设备重新启动
+    CTRL_STOP,                  //设备关机
+	CTRL_BOOT,
+}dev_ctrl_t;
+
+extern trp_t test_trp;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/

@@ -26,7 +26,7 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t aoa_hid_types;
+uint16_t m_aoa_hid_types = AOA_HID_SUPPORT;
 
 /******************************************************************************************************
 **	static Parameters
@@ -198,21 +198,21 @@ error_t usbh_aoa_open( uint8_t id, usbh_class_t *pclass)
 	if ((pdev->vid  == GOOGLE_VID) && ((pdev->pid&0xff00) == GOOGLE_PID_ACCESSORY)) {
 		
 		#if AOA_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
-		if(aoa_hid_types & HID_TYPE_GAMEPADE){
+		if(m_aoa_hid_types & HID_TYPE_GAMEPADE){
 			len = get_hid_desc_map(TR_USBH, HID_TYPE_GAMEPADE,&pdesc);
 			err = usbh_aoa_register_hid(id, GAMEPAD_REPORT_ID, pdesc, len);
 			if(err) return err;
 		}
 		#endif
 		#if AOA_HID_SUPPORT & BIT_ENUM(HID_TYPE_KB)
-		if(aoa_hid_types & HID_TYPE_KB){
+		if(m_aoa_hid_types & HID_TYPE_KB){
 			len = get_hid_desc_map(TR_USBH, HID_TYPE_KB,&pdesc);
 			err = usbh_aoa_register_hid(id, KB_REPORT_ID, pdesc, len);
 			if(err) return err;
 		}
 		#endif
 		#if AOA_HID_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
-		if(aoa_hid_types & HID_TYPE_MOUSE){
+		if(m_aoa_hid_types & HID_TYPE_MOUSE){
 			len = get_hid_desc_map(TR_USBH, HID_TYPE_MOUSE,&pdesc);
 			err = usbh_aoa_register_hid(id, MOUSE_REPORT_ID, pdesc, len);
 			if(err) return err;

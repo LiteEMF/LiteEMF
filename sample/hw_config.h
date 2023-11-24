@@ -31,7 +31,7 @@ extern "C" {
 
 	#if HELLOW_KEYBOARD
 		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
-		#define SW_VERSION                     	0x01
+		#define SW_VERSION                     	0x0100
         #define DEFAULT_NAME			       	"hellow_keyboard"
         #define DEFAULT_MODEL					"HKB"
 	#else
@@ -44,12 +44,12 @@ extern "C" {
 
 	#if DEMO1
 		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
-		#define SW_VERSION                     	0x01
+		#define SW_VERSION                     	0x0100
         #define DEFAULT_NAME			       	"demo01"
         #define DEFAULT_MODEL					"DEMO01"
 	#elif DEMO_WIN32
 		#define DEV_TRPS_DEFAULT				(BIT(TR_BLE)|BIT(TR_USBD))		/*产品传输层支持*/
-		#define SW_VERSION                     	0x01
+		#define SW_VERSION                     	0x0100
         #define DEFAULT_NAME			       	"win32"
         #define DEFAULT_MODEL					"win32"
 

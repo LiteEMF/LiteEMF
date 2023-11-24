@@ -27,9 +27,8 @@
 **	public Parameters
 *******************************************************************************************************/
 
-uint16_t m_usbh_types;			//TODO 是否需要使用
-uint16_t m_usbh_hid_types;
-uint16_t usbh_iap_hid_types;
+uint16_t m_usbh_types = USBH_TYPE_SUPPORT;			//TODO 可用于动态调整usbh 枚举的设备类型
+uint16_t m_usbh_hid_types = USBH_TYPE_SUPPORT;		//TODO 可用于动态调整usbh 枚举的设备类型
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -486,7 +485,7 @@ error_t usbh_init( uint8_t id )
 	m_usbh_types = 0;
 	m_usbh_hid_types = 0;
 	#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
-	aoa_hid_types = 0;
+	m_aoa_hid_types = 0;
 	#endif
 	usbh_iap_hid_types = 0;
 

@@ -37,7 +37,6 @@ extern "C" {
 
 extern uint16_t m_usbh_types;
 extern uint16_t m_usbh_hid_types;
-extern uint16_t usbh_iap_hid_types;
 
 /*****************************************************************************************************
 **  Function

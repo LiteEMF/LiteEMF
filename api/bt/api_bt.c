@@ -856,11 +856,11 @@ void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 *******************************************************************/
 static bool api_bt_ctb_init(void)
 {
-	uint8_t id;
+	uint8_t bt;
 	api_bt_ctb_t* bt_ctbp;
 
-	for(id = 0; id < BT_MAX; id++){
-		bt_ctbp = api_bt_get_ctb(id);
+	for(bt = 0; bt < BT_MAX; bt++){
+		bt_ctbp = api_bt_get_ctb(bt);
 		if(NULL != bt_ctbp){
 			bt_ctbp->init_ok = false;
 			bt_ctbp->vendor_ready = false;
@@ -869,7 +869,7 @@ static bool api_bt_ctb_init(void)
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;
 
-			if(BT_EDR == id){
+			if(BT_EDR == bt){
 				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
 				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){		//switch sniff by remote
 					edr_sniff_by_remote = true;
@@ -881,13 +881,13 @@ static bool api_bt_ctb_init(void)
 			}
 
 			#if BT_SUPPORT & BIT_ENUM(TR_RF)
-			if(BT_RF == id){
+			if(BT_RF == bt){
 				bt_ctbp->fifo_txp = &app_rf_tx;
 				bt_tx_fifo_init(&app_rf_tx,rf_tx_buf,RF_TX_LL_MTU,rf_tx_fifo_buf,RF_FIFO_LEN);
 			}
 			#endif
 			#if BT_SUPPORT & BIT_ENUM(TR_RFC)
-			if(BT_RFC == id){
+			if(BT_RFC == bt){
 				bt_ctbp->fifo_txp = &app_rfc_tx;
 				bt_tx_fifo_init(&app_rfc_tx,rfc_tx_buf,RFC_TX_LL_MTU,rfc_tx_fifo_buf,RF_FIFO_LEN);
 			}

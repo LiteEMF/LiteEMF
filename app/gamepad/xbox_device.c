@@ -257,8 +257,10 @@ void get_xbox_info(xbox_info_t* infp)
 	}else{
 		infp->pid = SWAP16_L(XBOX_PID);
 	}
+	#if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 	memcpy(infp->version,xbox_version,sizeof(xbox_version));
 	memcpy(infp->unknown,xbox_info_unknow,sizeof(xbox_info_unknow));
+	#endif
 }
 
 #if API_AUDIO_ENABLE && API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO))

@@ -36,8 +36,6 @@ void api_commander_test(void)
 	logd("buf:"); dumpd(test_buf,sizeof(test_buf));
 	api_command_tx(&handle, cmd, test_buf,sizeof(test_buf));
 	
-	logd("\ncommander arg tx test:\n");
-	api_command_arg_tx(&handle, cmd, 0xaabb, test_buf,sizeof(test_buf));
 
 	//rx
 	static uint8_t s_cmd_buf[UART_CMD_MTU];

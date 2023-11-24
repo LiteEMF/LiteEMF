@@ -41,7 +41,6 @@ static bool command_frame_tx(command_tx_t *txp)
 	bool ret = false;
 	uint8_t mtu,data_mtu;
 	uint8_t pack_num;
-	uint8_t sub_cmd_len = ((txp->cmd & CMD_ARG_EN_MASK)? 2:0);
 
 	uint8_t send_data_len;	
 	uint8_t index = 0;
@@ -49,10 +48,10 @@ static bool command_frame_tx(command_tx_t *txp)
 
 	if(txp->len <= txp->index) return ret;
 	if(NULL == txp->buf) return ret;
-	if(mtu < 5) return ret;
 
 	mtu = api_transport_get_mtu(&txp->handle);
 	data_mtu = mtu - 5;
+	if(mtu < 5) return ret;
 	
 	cmd_buf = emf_malloc(mtu);
 	if(NULL == cmd_buf){
@@ -62,19 +61,13 @@ static bool command_frame_tx(command_tx_t *txp)
 
 	if(txp->index){
 		cmd_buf[index++] = CMD_HEAD;
-		pack_num = (txp->len - txp->index + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
 	}else{
 		cmd_buf[index++] = CMD_SHEAD;
-		pack_num = (txp->len + sub_cmd_len + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
 	}
+	pack_num = (txp->len - txp->index + (data_mtu - 1) ) / data_mtu;		//data_mtu-1 是为了保存余数
 	cmd_buf[index++] = 0;								//len 占位
 	cmd_buf[index++] = pack_num;						//residue packet number
 	cmd_buf[index++] = (uint8_t)txp->cmd;				//cmd
-
-	if(sub_cmd_len && (0 == txp->index)){				//pack cmd arg
-		cmd_buf[index++] = (uint8_t)(txp->cmd >> (CMD_ARG_POS+8));
-		cmd_buf[index++] = (uint8_t)(txp->cmd >> CMD_ARG_POS);
-	}
 
 	send_data_len = MIN(mtu - index - 1, txp->len - txp->index);
 	memcpy(&cmd_buf[index], txp->buf+txp->index, send_data_len);	//data
@@ -160,7 +153,7 @@ uint16_t api_command_pack_size(uint8_t mtu,uint16_t len)
 	return packet_len;
 }
 
-static void api_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint32_t cmd, uint8_t *buf,uint16_t len)
+static void api_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len)
 {
 	txp->cmd = cmd;
 	txp->handle = *phandle;
@@ -247,20 +240,6 @@ bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len
 	}
 	return ret;
 }
-bool api_command_arg_tx(trp_handle_t* phandle,uint8_t cmd, uint16_t arg, uint8_t *buf,uint16_t len)
-{
-	bool ret = false;
-	command_tx_t tx;
-	uint8_t mtu = api_transport_get_mtu(phandle);
-
-	api_command_tx_fill(&tx, phandle, CMD_ARG_EN_MASK | ((uint32_t)arg<<16) | cmd, buf, len);
-	
-	while(tx.index < tx.len){
-		ret = command_frame_tx(&tx);
-		if(!ret) break;
-	}
-	return ret;
-}
 
 
 /*******************************************************************
@@ -287,8 +266,8 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 		rxp->buf = emf_malloc(cmd_max_len);			
 		if(NULL != rxp->buf){
 			rxp->buf[0] = phead->cmd;							//cmd
-			memcpy(rxp->buf, buf, COM_HEAD_LEN);
-			rxp->len = COM_HEAD_LEN;
+			memcpy(rxp->buf, buf, CMD_HEAD_LEN);
+			rxp->len = CMD_HEAD_LEN;
 		}else{
 			loge_r("command_rx ERROR_NO_MEM!\n");
 		}
@@ -299,8 +278,8 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 			&& (rxp->buf[2] == phead->pack_index)
 			&& (rxp->buf[1] >= phead->len) ){			//MTU保证buf不溢出
 
-			memcpy(rxp->buf+rxp->len, buf+4, len-5);
-			rxp->len += len-5;
+			memcpy(rxp->buf+rxp->len, buf+4, phead->len-5);
+			rxp->len += phead->len-5;
 			rxp->buf[2]--;
 			
 			if(1 == phead->pack_index){

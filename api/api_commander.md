@@ -41,7 +41,7 @@
 
 ## command
 
-### error 数据结构:
+### 基本数据结构:
 
 ```c
 typedef enum{
@@ -62,6 +62,23 @@ typedef enum{
   ERROR_UNSUPPORT   = 14 ,     //< Not supported
   ERROR_UNKNOW      = 15 ,     //< Busy
 }error_t;
+
+
+trp定义:
+typedef enum{
+    TR_BLE		= 0,
+    TR_EDR		= 1,
+    TR_BLEC		= 2,
+    TR_EDRC		= 3,
+    TR_BLE_RF	= 4,				//BLE模拟2.4G
+    TR_BLE_RFC	= 5,
+    TR_RF		= 6,
+    TR_RFC		= 7,
+    TR_USBD		= 8,
+    TR_USBH		= 9,
+    TR_UART		= 10,
+    TR_MAX,
+}trp_t;
 ```
 
 ### 获取EMF cmd版本号(0X01)
@@ -130,7 +147,7 @@ typedef struct{
 };
 ```
 
-### 获取设备设备mode(0X04)
+### 获取设备设备model(0X04)
 
 ```c
 //获取设备mode
@@ -155,32 +172,15 @@ typedef struct{
 
 ### 获取设备通讯MTU大小(0X05)
 
-trp定义:
 
 ```c
-typedef enum{
-    TR_BLE		= 0,
-    TR_EDR		= 1,
-    TR_BLEC		= 2,
-    TR_EDRC		= 3,
-    TR_BLE_RF		= 4,				//BLE模拟2.4G
-    TR_BLE_RFC		= 5,
-    TR_RF		= 6,
-    TR_RFC		= 7,
-    TR_USBD		= 8,
-    TR_USBH		= 9,
-    TR_UART		= 10,
-    TR_MAX,
-}trp_t;
-```
-
-```c
-//获取设备通讯MTU
+//获取设备指定通讯MTU
 typedef struct{
     uint8_t head;
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
+    trp_t   trp;        //可省略,省略后获取的是当前通讯通道的MTU
     uint8_t sum;
 };
 //回复设备mode
@@ -189,7 +189,8 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint8_t mtu[TR_MAX];    //返回全部设备mtu值
+    trp_t   trp;
+    uint8_t mtu;
     uint8_t sum;
 };
 
@@ -273,6 +274,7 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
+    trp_t   trp;        //0:ble , 1:edr
     uint8_t sum;
 };
 //设置设备 mac 地址
@@ -281,6 +283,8 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
+    uint8_t id;             //默认为0
+    trp_t   trp;
     uint8_t mac[6];
     uint8_t sum;
 };
@@ -290,6 +294,8 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
+    uint8_t id;             //默认为0
+    trp_t   trp;
     uint8_t mac[6];
     uint8_t sum;
 };
@@ -407,7 +413,7 @@ typedef struct{
 指令
 
 ```c
-//获取设备 模式
+//获取设备模式下设备模式
 typedef struct{
     uint8_t head;
     uint8_t len;
@@ -415,15 +421,16 @@ typedef struct{
     uint8_t cmd;
     uint8_t sum;
 };
-//设置设备 模式
+//设置设备下设备模式
 typedef struct{
     uint8_t head;
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint16_t dev_trps;	//当前支持的传输类型
-    uint16_t dev_types;	//当前支持的设备类型
-    uint16_t hid_types;	//当前支持的hid类型
+    uint16_t dev_trps;	    //设备传输类型
+    uint16_t usb_hid_types;	//usb模式
+    uint16_t bt_hid_types;	//蓝牙模式
+    uint16_t rf_hid_types;	//2.4g模式
     uint8_t sum;
 };
 //回复设备 模式
@@ -432,14 +439,18 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint16_t dev_trps;
-    uint16_t dev_types;
-    uint16_t hid_types;
+    uint16_t dev_trps_support;	//设备支持的传输类型
+    uint16_t hid_types_support;	//设备支持的hid模式
+
+    uint16_t usb_hid_types;	//usb模式
+    uint16_t bt_hid_types;	//蓝牙模式
+    uint16_t rf_hid_types;	//2.4g模式
+    
     uint8_t sum;
 };
 ```
 
-### 设置/获取设备控制 (0x11)
+### 设备控制 (0x11)
 
 > 数据结构:
 
@@ -464,12 +475,13 @@ typedef struct{
     dev_ctrl_t ctrl;
     uint8_t sum;
 };
-//回复控制消息
+//回复控制消息, 注意设备复位关机可能接收不到消息
 typedef struct{
     uint8_t head;
     uint8_t len;
     uint8_t index;
     uint8_t cmd;			//0XFF
+    dev_ctrl_t ctrl;
     error_t err;
     uint8_t sum;
 };
@@ -492,7 +504,7 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint8_t test_trp;
+    uint8_t test_trp;       //可以省略, 如果省略模式是通过当前通讯的协议发送测试指令
     uint8_t sum;
 };
 //回复设备 测试模式状态
@@ -637,7 +649,6 @@ typedef struct {
     axis3i_t gyro;
 }app_gamepad_key_t;	//28
 ```
-
 指令:
 
 ```c
@@ -716,7 +727,43 @@ typedef struct{
 };
 ```
 
-### 设置RGB灯控制(0X24)
+### LED灯驱控制(0X24)
+
+
+```c
+
+//获取 LED 灯状态
+typedef struct{
+    uint8_t head;
+    uint8_t len;
+    uint8_t index;
+    uint8_t cmd;
+    uint8_t sum;
+};
+//设置设备 LED状态
+typedef struct{
+    uint8_t head;
+    uint8_t len;
+    uint8_t index;
+    uint8_t cmd;
+    uint8_t period[n];
+    uint8_t sum;
+};
+//回复设备LED 状态
+typedef struct{
+    uint8_t head;
+    uint8_t len;
+    uint8_t index;
+    uint8_t cmd;
+    uint8_t period[n];
+    uint8_t sum;
+};
+```
+period 配置说明: 
+0: 灭, 1: 亮, 其他:闪烁
+
+
+### 设置RGB灯控制(0X25)
 
 数据结构:
 
@@ -766,7 +813,7 @@ typedef struct{
 
 ```
 
-### RGB全局亮度控制(0X25)
+### RGB全局亮度控制(0X26)
 
 ```c
 
@@ -800,10 +847,10 @@ typedef struct{
 
 ---
 
-### //设置设备 保存配置到flash
+### SOCKET CMD(0XD0~D6)
+socket 通讯指令
 
-
-### 自定义协议封装(0XD0)
+### 自定义协议封装(0XDF)
 
 > 为了emf command 协议和sdk平台协议兼容,使用0XEF指令来封装SDK自定义协议
 

@@ -155,7 +155,7 @@ static uint32c_t x360_key_map[20][2] =
 };
 #endif
 
-#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_XBOX))
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | HID_XBOX_MASK)
 static uint32c_t gamepad_key_map[20][2] =
 {
 	{HW_KEY_A 			,GAMEPAD_A		},

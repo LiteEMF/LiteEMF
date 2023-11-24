@@ -35,10 +35,10 @@ typedef struct {
 	axis2i_t stick_l;
 	axis2i_t stick_r;
 	int16_t l2;
-	int16_t r2;
+	int16_t r2;			//16
 	axis3i_t acc;
-	axis3i_t gyro;	
-}app_gamepad_key_t;	//28
+	axis3i_t gyro;
+}app_gamepad_key_t;		//28
 
 extern uint8_t  m_app_stick_key;
 extern app_gamepad_key_t m_gamepad_key;

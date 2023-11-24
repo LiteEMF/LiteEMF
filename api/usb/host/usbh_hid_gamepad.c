@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (HIDH_SUPPORT & HID_GAMEPAD_MASK)
+#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
 #include "api/api_transport.h"
 #include "api/usb/host/usbh.h"
 
@@ -265,7 +265,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
     }
 
     if(HID_TYPE_NONE != hid_type){
-        #if HIDH_SUPPORT & HID_XBOX_MASK
+        #if USBH_HID_SUPPORT & HID_XBOX_MASK
         if(HID_TYPE_X360 == hid_type){      //x360 特殊处理
             if(X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls){
                 m_x360_identify_itf = pclass->itf.if_num;

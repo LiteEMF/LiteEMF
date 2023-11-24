@@ -170,6 +170,11 @@ extern "C" {
 #define HIDH_SUPPORT		(BTC_HID_SUPPORT | USBH_HID_SUPPORT)		
 #endif
 
+//dev 设备从机支持类型,必须使用 BIT_ENUM(enum)	
+#ifndef TYPED_SUPPORT
+#define  TYPED_SUPPORT	(BT_TYPE_SUPPORT  | USBD_TYPE_SUPPORT | (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA) | BIT_ENUM(DEV_TYPE_IAP2)))
+#endif
+
 //*********************************************************************************//
 //                                 蓝牙配置                                   	  //
 //*********************************************************************************//

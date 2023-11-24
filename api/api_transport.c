@@ -37,9 +37,12 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t m_trps = DEV_TRPS_DEFAULT;		//在工程中修改,用于判断当前支持的传输类型
+uint16_t m_trps = DEV_TRPS_DEFAULT;			//在工程中修改,用于判断当前支持的传输类型
 
-
+//TODO注意: 以下类型用于产品类型分类, 具体到不同传输类型上在工程中根据不同产品自定义修改
+//后期遇到不同传输类型需要不同模式的产品再修改适配
+uint16_t m_dev_mode = USBD_TYPE_SUPPORT | BT_TYPE_SUPPORT;
+uint16_t m_hid_mode = HIDD_SUPPORT;					
 
 /******************************************************************************************************
 **	static Parameters
@@ -94,6 +97,75 @@ bool api_trp_is_host(trp_t trp)
 	}
 	return false;
 }
+
+bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t hid_types)
+{
+	bool ret = false;
+
+	if(TR_USBD == trp){
+		#if API_USBD_BIT_ENABLE
+		dev_types &= USBD_TYPE_SUPPORT;
+		hid_types &= USBD_HID_SUPPORT;
+		m_usbd_types[id] = dev_types;
+		m_usbd_hid_types[id] = hid_types;
+		ret = true;
+		#endif
+	}else if(TR_USBH == trp){			//usb host 修改的是AOA/IAP2模式
+		#if API_USBH_BIT_ENABLE
+		dev_types &= USBH_TYPE_SUPPORT;
+		m_usbh_types = dev_types;
+		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPES_AOA)
+		if(dev_types & BIT_ENUM(DEV_TYPES_AOA)){
+			m_aoa_hid_typess = hid_types & AOA_HID_SUPPORT;
+		}
+		#endif
+		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPES_IAP2)
+		if(dev_types & BIT_ENUM(DEV_TYPES_IAP2)){
+			m_iap_hid_types = hid_types & IAP2_HID_SUPPORT;
+		}
+		#endif
+		hid_types &= IAP2_HID_SUPPORT | AOA_HID_SUPPORT;
+		#endif
+	}else{
+		api_bt_ctb_t* bt_ctbp;
+		bt_ctbp = api_bt_get_ctb(id);
+		if(NULL != bt_ctbp){
+			switch(trp){
+			case TR_BLE		:
+				dev_types &= BLE_TYPE_SUPPORT;
+				hid_types &= BLE_HID_SUPPORT;
+				bt_ctbp->types = dev_types;
+				bt_ctbp->hid_types = hid_types;
+				ret = true;
+				break;
+			case TR_EDR		:
+				dev_types &= EDR_TYPE_SUPPORT;
+				hid_types &= EDR_HID_SUPPORT;
+				bt_ctbp->types = dev_types;
+				bt_ctbp->hid_types = hid_types;
+				ret = true;
+				break;
+			case TR_BLEC	:
+			case TR_BLE_RF	:
+			case TR_BLE_RFC :
+			case TR_EDRC	:
+			case TR_RF		:
+			case TR_RFC		:
+				bt_ctbp->hid_types = hid_types;
+				ret = true;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	if(0 == (hid_types | dev_types)){
+		ret = false;
+	}
+	
+	return ret;
+}
+
 
 bool api_transport_ready(trp_handle_t* phandle)
 {
@@ -193,7 +265,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	if (NULL == buf)		return false;
 
 	if((TR_RF != phandle->trp) && (TR_RFC != phandle->trp)){
-		//logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick; //dumpd(buf,len);
+		// logd("trp=%d,id=%d,index=0x%x,dt=%ld,len=%d:",(uint16_t)phandle->trp, (uint16_t)phandle->id,(uint16_t)phandle->index,m_systick-tx_timer,len); tx_timer = m_systick; //dumpd(buf,len);
 	}
 	switch(phandle->trp){
 		#if API_BT_ENABLE

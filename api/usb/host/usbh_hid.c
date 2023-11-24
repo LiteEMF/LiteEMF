@@ -171,10 +171,13 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
 	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 
     switch(pclass->hid_type){
+        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             usbh_hid_km_in_process(id, pclass, buf, len);
             break;
+        #endif
+        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
@@ -182,10 +185,9 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_in_process(id, pclass, buf, len);
-            #endif
             break;
+        #endif
         default:
             break;
     }
@@ -225,10 +227,13 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
     switch(pclass->hid_type){
+        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             err = usbh_hid_km_open(id, pclass);
             break;
+        #endif
+        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
@@ -236,10 +241,9 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_open(id, pclass);
-            #endif
             break;
+        #endif
         default:
             break;
     }
@@ -282,20 +286,26 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
         emf_free(desc_buf);
 
         if(ERROR_SUCCESS == err){
+            err = ERROR_NOT_FOUND;
             hid_desc_dump(&hid_info);
+            #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
             err = usbh_hid_km_init(id, pclass, &hid_info);
+            #endif
+
+            #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
             if(err){
-                #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
                 err = usbh_hid_gamepad_init(id, pclass, &hid_info);
-                #endif
             }
+            #endif
             hid_desc_info_free(&hid_info);
         }
     }else if(XBOX_CLASS == pclass->itf.if_cls){          //xbox 特殊处理, x360 if_pro 必须是X360_PROTOCOL
         if((XBOX_SUBCLASS == pclass->itf.if_sub_cls) 
             || (X360_SUBCLASS == pclass->itf.if_sub_cls)
             || (X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls)){
+            #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_init(id, pclass, NULL);
+            #endif
         }
     }
     return err;
@@ -310,10 +320,13 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
 {
     error_t err = ERROR_UNKNOW;
     switch(pclass->hid_type){
+        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             err = usbh_hid_km_deinit(id, pclass);
             break;
+        #endif
+        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
@@ -321,10 +334,9 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             err = usbh_hid_gamepad_deinit(id, pclass);
-            #endif
             break;
+        #endif
         default:
             break;
     }
@@ -339,10 +351,13 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
 void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
 {
     switch(pclass->hid_type){
+        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
         case HID_TYPE_KB:
         case HID_TYPE_MOUSE:
             usbh_hid_km_task(id, pclass);
             break;
+        #endif
+        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
@@ -350,10 +365,9 @@ void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_PS3	:
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
-            #if (HIDH_SUPPORT & HID_GAMEPAD_MASK)
             usbh_hid_gamepad_task(id, pclass);
-            #endif
             break;
+        #endif
         default:
             break;
     }
