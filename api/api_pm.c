@@ -55,7 +55,7 @@ bool app_pm_key_sleep = 0;								//是否是按键进入休眠, 用于波动开
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-static timer_t s_pm_timer;	//修改模式同步时间,保证每reset 和关机都在100ms后处理,防止user_vender_deinit时间不够
+static time_t pm_force_shutdown;								//强制关机防止不关机问题
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -171,6 +171,7 @@ void api_boot(uint8_t index)
 void api_reset(void)
 {
 	logd("api rest\n");
+	pm_force_shutdown = m_systick;
 	m_pm_sta = PM_STA_RESET;
 }
 
@@ -184,7 +185,7 @@ void api_reset(void)
 void api_sleep(void)
 {
     //充电状态下休眠
-	s_pm_timer = m_systick;
+	pm_force_shutdown = m_systick;
 
 	#if APP_BATTERY_ENABLE
 	if((BAT_CHARGE_STA == m_battery_sta) || (BAT_CHARGE_DONE_STA == m_battery_sta)){
@@ -258,26 +259,28 @@ void api_pm_task(void*pa)
 		break;
 	case PM_STA_RESET:
 	case PM_STA_SLEEP:
-		if(api_pm_sleep_hook()) return;
+		if(m_systick - pm_force_shutdown >= 3000){
+			if(api_pm_sleep_hook()) return;
 
-		#if API_STORAGE_ENABLE
-		api_storage_sync();
-		if (!api_storage_sync_complete()) return;
-		#endif
+			#if API_STORAGE_ENABLE
+			api_storage_sync();
+			if (!api_storage_sync_complete()) return;
+			#endif
 
 
-		#if API_BT_ENABLE
-		if(1){		//蓝牙需要正常断开连接
-			uint8_t id;
-			api_bt_ctb_t* bt_ctbp;
+			#if API_BT_ENABLE
+			if(1){		//蓝牙需要正常断开连接
+				uint8_t bt;
+				api_bt_ctb_t* bt_ctbp;
 
-			for(id = 0; id < BT_MAX; id++){
-				if(api_bt_is_connected(id)){
-					return;				
+				for(bt = 0; bt < BT_MAX; bt++){
+					if(api_bt_is_connected(bt)){
+						return;				
+					}
 				}
 			}
+			#endif
 		}
-		#endif
 
 		if(PM_STA_RESET == m_pm_sta)
 		{
