@@ -176,7 +176,7 @@ error_t usbh_get_endp( usb_endp_t* endp,uint8_t *buf ,uint16_t len,usb_dir_t dir
             endp->addr = pdesc->bEndpointAddress & 0x0F;
 			endp->type = pdesc->bmAttributes.xfer;
             endp->dir = dir;
-			endp->mtu = SWAP16_L(pdesc->wMaxPacketSize);
+			endp->mtu = SWAP16_L(pdesc->wMaxPacketSize) & 0X3FF;
             endp->interval = pdesc->bInterval;
 			err = ERROR_SUCCESS;
             break;

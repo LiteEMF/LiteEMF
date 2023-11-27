@@ -199,7 +199,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			endp->sync = 0;
 			endp->dir = (pep->bEndpointAddress & TUSB_DIR_MASK)? TUSB_DIR_IN:TUSB_DIR_OUT;
 			endp->interval = pep->bInterval;
-			endp->mtu = SWAP16_L(pep->wMaxPacketSize);
+			endp->mtu = SWAP16_L(pep->wMaxPacketSize) & 0X3FF;
         	break;
 		case TUSB_DESC_CS_INTERFACE:
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
@@ -407,7 +407,18 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 	if(NULL == pclass) return ERROR_NOT_FOUND;
 
 	if(pclass->endpin.addr){
-		err = usbd_in(id, pclass->endpin.addr, buf, len);
+		//TODO 目前发送64字节有问题!!!
+		if(0 && (DEV_TYPE_HID == type) && (sub_type == HID_TYPE_VENDOR) && (len < pclass->endpin.mtu)){	//hid vendor 需要根据MTU长度发送数据
+			uint8_t *mtu_pbuf = emf_malloc(pclass->endpin.mtu);
+			if(NULL != mtu_pbuf){
+				memset(mtu_pbuf, 0, pclass->endpin.mtu);
+				memcpy(mtu_pbuf, buf, len);
+				err = usbd_in(id, pclass->endpin.addr, mtu_pbuf, pclass->endpin.mtu);		
+				emf_free(mtu_pbuf);
+			}
+		}else{
+			err = usbd_in(id, pclass->endpin.addr, buf, len);
+		}
 	}
 
 	return err;

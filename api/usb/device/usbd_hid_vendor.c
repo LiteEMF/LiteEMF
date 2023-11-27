@@ -16,6 +16,10 @@
 #if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)) && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
 #include "api/usb/device/usbd.h"
 
+#if APP_CMD_ENABLE
+#include "app/app_command.h"
+#endif
+
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -92,6 +96,10 @@ error_t usbd_hid_vendor_out_process(uint8_t id, usbd_class_t* pclass)
     err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
     if((ERROR_SUCCESS == err) && usb_rxlen){
         logd("vendor hid ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+        #if APP_CMD_ENABLE
+        trp_handle_t handle = {TR_USBD, id, U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
+		app_command_rx(&handle, usb_rxbuf, usb_rxlen);
+        #endif
     }
 
     return ERROR_SUCCESS;

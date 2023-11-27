@@ -70,12 +70,18 @@ command_rx_t rf_cmd_rx = {{rf_sbuf,0},{NULL,0}};
 uint8_t rfc_sbuf[RFC_CMD_MTU];
 command_rx_t rfc_cmd_rx = {{rfc_sbuf,0},{NULL,0}};
 #endif
+
+
+#if BT_SUPPORT & BIT_ENUM(TR_EDR)
+uint8_t edr_sbuf[EDR_CMD_MTU];
+command_rx_t edr_cmd_rx = {{edr_sbuf,0},{NULL,0}};
+#endif
 #endif
 
-#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
+#if API_USBD_BIT_ENABLE
 command_rx_t usbd_cmd_rx = {{NULL,0},{NULL,0}};
 #endif
-#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
+#if API_USBH_BIT_ENABLE
 command_rx_t usbh_cmd_rx = {{NULL,0},{NULL,0}};
 #endif
 /******************************************************************************************************
@@ -140,7 +146,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			replay[0] = phandle->trp;
 			replay[1] = api_transport_get_mtu(phandle->trp);
 		}
-		app_send_command(phandle,phead->cmd, replay, 2);
+		api_command_tx(phandle,phead->cmd, replay, 2);
 		ret = true;
 		break;
 	case CMD_DEV_PID_VID:
@@ -153,7 +159,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			replay[0] = buf[4];
 			replay[1] = buf[5];
 			if(api_bt_get_mac(buf[4], buf[5], replay+2)){
-				app_send_command(phandle,phead->cmd, replay, 8);
+				api_command_tx(phandle,phead->cmd, replay, 8);
 				ret = true;
 			}
 		}
@@ -164,7 +170,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	case CMD_DEV_NAME:
 		#ifdef DEFAULT_NAME
 		if(len == CMD_PACK_LEN){		//read
-			app_send_command(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
+			api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
 			ret = true;
 		}else{				//write
 
@@ -188,7 +194,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		replay[5] = m_dev_mode;
 		replay[6] = m_hid_mode>>8;
 		replay[7] = m_hid_mode;
-		app_send_command(phandle,phead->cmd, replay, 10);
+		api_command_tx(phandle,phead->cmd, replay, 10);
 		ret = true;
 		break;
 	case CMD_TEST_MODE:
@@ -208,7 +214,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 				ret = true;
 				break;
 			case CTRL_STOP:
-				api_stop();
+				api_sleep();
 				ret = true;
 				break;
 			case CTRL_BOOT:
@@ -223,21 +229,21 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			if(ret){
 				replay[0] = ctrl;
 				replay[1] = 0;
-				app_send_command(phandle,phead->cmd, replay, 2);
+				api_command_tx(phandle,phead->cmd, replay, 2);
 			}
 		}
 		break;
 	case CMD_STORAGE_SYNC:
 		#if API_STORAGE_ENABLE
 		ret = api_storage_sync();
-		app_send_command(phandle,phead->cmd, &ret, 1);
+		api_command_tx(phandle,phead->cmd, &ret, 1);
 		#endif
 		break;
 	case CMD_HEART_BEAT:
-		app_send_command(phandle,phead->cmd, &ret, 1);
+		api_command_tx(phandle,phead->cmd, &ret, 1);
 		break;
 	case CMD_RECOVER_FACTORY:
-		app_send_command(phandle,phead->cmd, &ret, 1);
+		api_command_tx(phandle,phead->cmd, &ret, 1);
 		break;
 	default:
 		break;
@@ -270,7 +276,11 @@ __WEAK bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_
 
 
 
-
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	注意为了接收空间没有将所以的通讯都定义出来, 如果有冲突需要修改!!	
+*******************************************************************/
 command_rx_t* app_get_command_rx(trp_handle_t* phandle)
 {
 	switch(phandle->trp){
@@ -293,13 +303,18 @@ command_rx_t* app_get_command_rx(trp_handle_t* phandle)
 	case TR_RFC		:
 		return &rfc_cmd_rx;
 	#endif
+	#if BT_SUPPORT & BIT_ENUM(TR_EDR)
+	case TR_EDR		:
+		return &edr_cmd_rx;
+	#endif
+	
 	#endif
 
-	#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
+	#if API_USBD_BIT_ENABLE
 	case TR_USBD	:
 		return &usbd_cmd_rx;
 	#endif
-	#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
+	#if API_USBH_BIT_ENABLE
 	case TR_USBH	:
 		return &usbh_cmd_rx;
 	#endif

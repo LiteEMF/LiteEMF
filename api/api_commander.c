@@ -262,10 +262,10 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 	if(CMD_SHEAD == buf[0]){								//start packet
 		memset(rxp, 0, sizeof(bytes_t));					//注意数据释放
 
+		if(phead->len < CMD_PACK_LEN)	return ret;			//长度错误
 		cmd_max_len = (phead->pack_index) * phead->len;		//phead->len为单包接收数据长度,可以做为mtu
 		rxp->buf = emf_malloc(cmd_max_len);			
 		if(NULL != rxp->buf){
-			rxp->buf[0] = phead->cmd;							//cmd
 			memcpy(rxp->buf, buf, CMD_HEAD_LEN);
 			rxp->len = CMD_HEAD_LEN;
 		}else{
@@ -276,13 +276,12 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 	if(NULL != rxp->buf){
 		if( (rxp->buf[3] == phead->cmd) 
 			&& (rxp->buf[2] == phead->pack_index)
-			&& (rxp->buf[1] >= phead->len) ){			//MTU保证buf不溢出
-
-			memcpy(rxp->buf+rxp->len, buf+4, phead->len-5);
-			rxp->len += phead->len-5;
-			rxp->buf[2]--;
-			
+			&& (rxp->buf[1] >= phead->len) ){			//MTU保证buf不溢出(rxp->buf[1] 可以作为MTU)
+			memcpy(rxp->buf+rxp->len, buf+4, phead->len-CMD_PACK_LEN);
+			rxp->len += phead->len-CMD_PACK_LEN;
+			rxp->buf[2]--;	
 			if(1 == phead->pack_index){
+
 				rxp->buf[rxp->len++] = 0;	//add sum len		
 				ret = true;
 			}

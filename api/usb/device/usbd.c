@@ -220,7 +220,7 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 		}else{
 			app_gamepad_get_vid_pid(TR_USBD, m_usbd_hid_types[id], &dev.idVendor, &dev.idProduct);
 			
-			#if USBD_HID_SUPPORT && HID_XBOX_MASK
+			#if USBD_HID_SUPPORT & HID_XBOX_MASK
 			if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
 				dev.bDeviceClass       = 0xFF;
 				dev.bDeviceSubClass    = 0x47;
