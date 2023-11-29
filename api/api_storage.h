@@ -51,7 +51,7 @@ typedef struct {
 	uint8_t res[6];			//16
 
 	#if APP_JOYSTICK_ENABLE
-	int16_t joystick_cal[18];
+	int16_t joystick_cal[19];
 	#endif
 
 	#if APP_IMU_ENABLE

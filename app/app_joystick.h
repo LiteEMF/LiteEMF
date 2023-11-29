@@ -32,6 +32,13 @@ extern "C" {
 #define STICK_DIR_VAL			10900
 #endif
 
+
+
+//stick 上电未校准默认值
+#ifndef STICK_CAL_DEFAULT_R
+#define STICK_CAL_DEFAULT_R			(ADC_RES_MAX/4)
+#endif
+
 //circle limit in square
 #ifndef STICK_CIRCLE_LIMIT
 #define STICK_CIRCLE_LIMIT  (1.03)
@@ -44,6 +51,11 @@ extern "C" {
 #endif
 #ifndef STICK_CAL_SIDE_DEADZONE
 #define STICK_CAL_SIDE_DEADZONE   3
+#endif
+
+//trigger 上电未校准默认值
+#ifndef TRIGGER_CAL_DEFAULT_R
+#define TRIGGER_CAL_DEFAULT_R   (ADC_RES_MAX/4)
 #endif
 
 #ifndef TRIGGER_LIMIT_MIN_R
@@ -78,10 +90,11 @@ typedef struct {
 
 
 typedef struct {    
+    uint16_t cal_mask;
     joystick_t min;
     joystick_t mid;
     joystick_t max;
-} joystick_cal_t;		//36
+} joystick_cal_t;		//38
 
 typedef enum{
     JOYSTICK_CAL_NONE = 0,

@@ -32,6 +32,8 @@ joystick:  stick  trigger
 #ifndef APP_TRIGGER_ACTIVE
 #define APP_TRIGGER_ACTIVE {true, true}
 #endif
+
+#define APP_JOYSTICK_CAL_MASK   0XAA55
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
@@ -47,11 +49,16 @@ const_t uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;
 #if API_STORAGE_ENABLE
 joystick_cal_t *const joystick_calp = (joystick_cal_t*)m_storage.joystick_cal;
 #else
-joystick_cal_t joystick_cal_default = {{{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX},ADC_RES_MAX}};
+joystick_cal_t joystick_cal_default = {0X00, {{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX},ADC_RES_MAX}};
 joystick_cal_t *const joystick_calp = &joystick_cal_default;
 #endif
 
-
+static joystick_cal_t s_cal;
+joystick_cal_t m_cal;                           //动态校准后的校准数据, 动态校准不保存
+int16_t dynamic_cal_max_r[APP_STICK_NUMS] = {  //动态校准最大半径值, 默认3/2*r, 不修改情况下为ADC_RES_MAX/2
+    STICK_CAL_DEFAULT_R*3/2, 
+    STICK_CAL_DEFAULT_R*3/2
+};
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -69,6 +76,11 @@ __WEAK bool app_joystick_get_adc(joystick_t* joystickp)
     joystickp->stick[APP_STICK_L_ID].y = api_adc_value(ADC_LY_ID);
 	joystickp->stick[APP_STICK_R_ID].x = api_adc_value(ADC_RX_ID);
     joystickp->stick[APP_STICK_R_ID].y = api_adc_value(ADC_RY_ID);
+    // logd("adc:%d %d, %d %d\n",joystickp->stick[APP_STICK_L_ID].x,
+    //                     joystickp->stick[APP_STICK_L_ID].y,
+    //                     joystickp->stick[APP_STICK_R_ID].x,
+    //                     joystickp->stick[APP_STICK_R_ID].y
+    //                     );
     #endif
     return true;
 }
@@ -77,6 +89,18 @@ __WEAK void app_joystick_event(joystick_cal_sta_t event)
 {
 }
 #endif
+
+
+void joystick_cal_dump(joystick_cal_t *calp)
+{
+    logd("joystick cal:\n");
+    logd("stick lx: %d %d %d\n", calp->min.stick[0].x,calp->mid.stick[0].x,calp->max.stick[0].x);
+    logd("stick ly: %d %d %d\n", calp->min.stick[0].y,calp->mid.stick[0].y,calp->max.stick[0].y);
+    logd("stick rx: %d %d %d\n", calp->min.stick[1].x,calp->mid.stick[1].x,calp->max.stick[1].x);
+    logd("stick ry: %d %d %d\n", calp->min.stick[1].y,calp->mid.stick[1].y,calp->max.stick[1].y);
+    logd("tarigger l: %d  %d\n", calp->min.tarigger[0],calp->max.tarigger[0]);
+    logd("tarigger r: %d  %d\n", calp->min.tarigger[1],calp->max.tarigger[1]);
+}
 
 uint8_t get_stick_dir(axis2i_t* stickp)
 {
@@ -202,8 +226,8 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
 
     adc = adcp->tarigger[id];
 
-    adc_min = joystick_calp->min.tarigger[id];
-    adc_max = joystick_calp->max.tarigger[id];
+    adc_min = m_cal.min.tarigger[id];
+    adc_max = m_cal.max.tarigger[id];
 
 	ret = remap(adc, adc_min, adc_max,0, 0xffff);
     if(!trigger_active[id]){ 
@@ -220,17 +244,17 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
     if(id >= APP_STICK_NUMS) return;
 
     //get joystick movement length
-    x = 32768 * (adcp->stick[id].x - joystick_calp->mid.stick[id].x);
-    y = 32768 * (adcp->stick[id].y - joystick_calp->mid.stick[id].y);
+    x = 32768 * (adcp->stick[id].x - m_cal.mid.stick[id].x);
+    y = 32768 * (adcp->stick[id].y - m_cal.mid.stick[id].y);
     if(x > 0){
-        calx_r = joystick_calp->max.stick[id].x - joystick_calp->mid.stick[id].x;
+        calx_r = m_cal.max.stick[id].x - m_cal.mid.stick[id].x;
     }else{
-        calx_r =  (joystick_calp->mid.stick[id].x - joystick_calp->min.stick[id].x);
+        calx_r =  (m_cal.mid.stick[id].x - m_cal.min.stick[id].x);
     }
     if(y > 0){
-        caly_r =  (joystick_calp->max.stick[id].y - joystick_calp->mid.stick[id].y);
+        caly_r =  (m_cal.max.stick[id].y - m_cal.mid.stick[id].y);
     }else{
-        caly_r =  (joystick_calp->mid.stick[id].y - joystick_calp->min.stick[id].y);
+        caly_r =  (m_cal.mid.stick[id].y - m_cal.min.stick[id].y);
     }
     
     if(0 == calx_r) calx_r = 1;         //avoid div 0
@@ -241,9 +265,10 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
 
     if (!stick_active[id].x)    x = -x;
     if (!stick_active[id].y)    y = -y;
-        
+
     stickp->x = constrain_int16(x);
     stickp->y = constrain_int16(y);
+    // if(id==0) logd("%d %d %d %d =%d",adcp->stick[0].y, 32768 * (adcp->stick[id].y - m_cal.mid.stick[id].y), caly_r,y,stickp->y );
 }
 
 
@@ -255,10 +280,11 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
 ** Returns:	    has avable r
 ** Description:		
 *******************************************************************/
-static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp,joystick_t* adcp)
+static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp, joystick_t* adcp)
 {
     bool ret = false;
     uint8_t i;
+    joystick_t r;
     for (i=0; i<APP_STICK_NUMS; i++){
         calp->min.stick[i].x = MIN(adcp->stick[i].x, calp->min.stick[i].x);
         calp->min.stick[i].y = MIN(adcp->stick[i].y, calp->min.stick[i].y);
@@ -268,19 +294,153 @@ static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp,joystick_t
         calp->min.tarigger[i] = MIN(adcp->tarigger[i], calp->min.tarigger[i]);
         calp->max.tarigger[i] = MAX(adcp->tarigger[i], calp->max.tarigger[i]);
 
-        rp->stick[i].x = calp->max.stick[i].x - calp->min.stick[i].x;
-        rp->stick[i].y = calp->max.stick[i].x - calp->min.stick[i].y;
-        rp->tarigger[i] = calp->max.tarigger[i] - calp->min.tarigger[i];
-        if((rp->stick[i].x > STICK_LIMIT_MIN_R) || (rp->stick[i].y > STICK_LIMIT_MIN_R)  || (rp->tarigger[i] > TRIGGER_LIMIT_MIN_R) ){
+        r.stick[i].x = calp->max.stick[i].x - calp->min.stick[i].x;
+        r.stick[i].y = calp->max.stick[i].x - calp->min.stick[i].y;
+        r.tarigger[i] = calp->max.tarigger[i] - calp->min.tarigger[i];
+        if((r.stick[i].x > STICK_LIMIT_MIN_R) || (r.stick[i].y > STICK_LIMIT_MIN_R)  || (r.tarigger[i] > TRIGGER_LIMIT_MIN_R) ){
             ret = true;
         }
     }
+    if(rp) *rp = r;
     return ret;
 }
 
-    
+void joystick_set_cal_deadzone(joystick_cal_t *calp)
+{
+    uint8_t id;
+    axis2i_t axis;
 
+    for (id = 0; id < APP_STICK_NUMS; id++){
+        axis = calp->mid.stick[id];
+        axis2i_sub(&axis, &calp->min.stick[id]);
+        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
+        axis2i_add(&calp->min.stick[id], &axis);
 
+        axis = calp->max.stick[id];
+        axis2i_sub(&axis, &calp->mid.stick[id]);
+        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
+        axis2i_sub(&calp->max.stick[id], &axis);
+    }
+    for (id = 0; id < APP_TRIGGER_NUMS; id++){
+        //适配扳机硬件死区
+        int16_t r;
+        r = calp->max.tarigger[id] - calp->min.tarigger[id];
+        calp->min.tarigger[id] += r * TRIGGER_CAL_DEADZONE / 100;
+        calp->max.tarigger[id] -= r * TRIGGER_CAL_SIDE_DEADZONE / 100;
+    }
+}
+
+static void joystick_dynamic_cal(joystick_t* adcp)
+{
+    uint8_t id;
+    static uint16_t dynamic_cal_num = 0;
+
+    if(JOYSTICK_CAL_NONE != joystick_cal_sta) {
+        return;
+    }
+
+    //上电默认校准
+    if(APP_JOYSTICK_CAL_MASK != joystick_calp->cal_mask){
+        logd_r("joystick load default val\n");
+
+        for(id = 0; id < APP_STICK_NUMS; id++){
+            if((adcp->stick[id].x + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
+                || (adcp->stick[id].x < STICK_CAL_DEFAULT_R)){
+                adcp->stick[id].x =  ADC_RES_MAX/2;
+            }
+            if((adcp->stick[id].y + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
+                || (adcp->stick[id].y < STICK_CAL_DEFAULT_R)){
+                adcp->stick[id].y =  ADC_RES_MAX/2;
+            }
+            if(adcp->tarigger[id] + TRIGGER_CAL_DEFAULT_R > ADC_RES_MAX){
+                adcp->tarigger[id] = ADC_RES_MAX/2;
+            }
+
+            joystick_calp->mid.stick[id] = adcp->stick[id];
+            joystick_calp->min.stick[id].x = adcp->stick[id].x - STICK_CAL_DEFAULT_R;
+            joystick_calp->min.stick[id].y = adcp->stick[id].y - STICK_CAL_DEFAULT_R;
+            joystick_calp->max.stick[id].x = adcp->stick[id].x + STICK_CAL_DEFAULT_R;
+            joystick_calp->max.stick[id].y = adcp->stick[id].y + STICK_CAL_DEFAULT_R;
+
+            joystick_calp->min.tarigger[id] = adcp->tarigger[id];
+            joystick_calp->max.tarigger[id] = adcp->tarigger[id] + TRIGGER_CAL_DEFAULT_R; 
+        }
+
+        #if API_STORAGE_ENABLE
+        joystick_calp->cal_mask = APP_JOYSTICK_CAL_MASK;
+        api_storage_auto_sync();
+        #endif
+
+        m_cal = *joystick_calp;
+        s_cal = *joystick_calp;
+        joystick_cal_dump(joystick_calp);
+    }else{
+        //使用实时动态校准
+        bool side_ret = false;
+        int16_t r;
+        if(joystick_get_cal_val(&s_cal, NULL, adcp)){
+            dynamic_cal_num++;
+            if(dynamic_cal_num > 1000){
+ 
+                dynamic_cal_num = 0;
+                joystick_set_cal_deadzone(&s_cal);
+                for(id = 0; id < APP_STICK_NUMS; id++){
+                    if(s_cal.min.stick[id].x < m_cal.min.stick[id].x){
+                        r = m_cal.mid.stick[id].x - s_cal.min.stick[id].x;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_cal.min.stick[id].x = m_cal.mid.stick[id].x - r;
+                    }
+                    if(s_cal.max.stick[id].x > m_cal.max.stick[id].x){
+                        r = s_cal.max.stick[id].x - m_cal.mid.stick[id].x;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_cal.max.stick[id].x = m_cal.mid.stick[id].x + r;
+                    }
+
+                    if(s_cal.min.stick[id].y < m_cal.min.stick[id].y){
+                        r = m_cal.mid.stick[id].y - s_cal.min.stick[id].y;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_cal.min.stick[id].y = m_cal.mid.stick[id].y - r;
+                    }
+                    if(s_cal.max.stick[id].y > m_cal.max.stick[id].y){
+                        r = s_cal.max.stick[id].y - m_cal.mid.stick[id].y;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_cal.max.stick[id].y = m_cal.mid.stick[id].y + r;
+                    }
+
+                    if(s_cal.min.tarigger[id] < m_cal.min.tarigger[id]){
+                        m_cal.min.tarigger[id] = s_cal.min.tarigger[id];
+                        side_ret = true;
+                    }
+                    if(s_cal.max.tarigger[id] > m_cal.max.tarigger[id]){
+                        m_cal.max.tarigger[id] = s_cal.max.tarigger[id];
+                        side_ret = true;
+                    }
+                }
+                if(side_ret){
+                    logd_b("joystick auto cal:");
+                    joystick_cal_dump(&m_cal);
+                }
+                s_cal = m_cal;
+            }
+        }
+    }
+ }
 
     
 
@@ -289,7 +449,6 @@ static void joystick_do_cal(joystick_t* adcp)
     uint8_t id;
     axis2i_t axis;
     joystick_t r;
-    static joystick_cal_t s_cal;
     static timer_t cal_timer;
     static joystick_cal_sta_t s_cal_sta = JOYSTICK_CAL_NONE;
 
@@ -313,7 +472,7 @@ static void joystick_do_cal(joystick_t* adcp)
             cal_timer = m_systick;
             joystick_cal_sta = JOYSTICK_CAL_FAILED;
         }else{
-            if(joystick_get_cal_val(&s_cal,&r,adcp)){
+            if(joystick_get_cal_val(&s_cal, &r, adcp)){
                 joystick_cal_sta = JOYSTICK_CAL_SID;
             }
         }
@@ -330,7 +489,7 @@ static void joystick_do_cal(joystick_t* adcp)
         for (id = 0; id < APP_STICK_NUMS; id++){    //check
             if((r.stick[id].x < STICK_LIMIT_MIN_R) || (r.stick[id].y < STICK_LIMIT_MIN_R)){
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
-                logi("stick[%d] cal fail, %d %d\n", id,r.stick[id].x, r.stick[id].y);
+                logi("stick[%d] cal fail, %d %d\n", id, r.stick[id].x, r.stick[id].y);
             }
             if(r.tarigger[id] < TRIGGER_LIMIT_MIN_R){
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
@@ -339,30 +498,17 @@ static void joystick_do_cal(joystick_t* adcp)
         }
 
         if(JOYSTICK_CAL_FAILED != joystick_cal_sta){    //cal fix
-            for (id = 0; id < APP_STICK_NUMS; id++){
-                axis = s_cal.mid.stick[id];
-                axis2i_sub(&axis, &s_cal.min.stick[id]);
-                AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
-                axis2i_add(&s_cal.min.stick[id], &axis);
 
-                axis = s_cal.max.stick[id];
-                axis2i_sub(&axis, &s_cal.mid.stick[id]);
-                AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
-                axis2i_sub(&s_cal.max.stick[id], &axis);
-            }
-            for (id = 0; id < APP_TRIGGER_NUMS; id++){
-                //适配扳机硬件死区
-                s_cal.min.tarigger[id] += r.tarigger[id] * TRIGGER_CAL_DEADZONE / 100;
-                s_cal.max.tarigger[id] -= r.tarigger[id] * TRIGGER_CAL_SIDE_DEADZONE / 100;
-            }
-            #if API_STORAGE_ENABLE
-            *joystick_calp = s_cal;
-            #endif
-
+            joystick_set_cal_deadzone(&s_cal);
             joystick_cal_sta = JOYSTICK_CAL_SUCCEED;
+
             #if API_STORAGE_ENABLE
+            joystick_calp->cal_mask = APP_JOYSTICK_CAL_MASK;
+            *joystick_calp = s_cal;
             api_storage_auto_sync();
             #endif
+
+            m_cal = *joystick_calp;
         }
 
         cal_timer = m_systick;
@@ -375,7 +521,10 @@ static void joystick_do_cal(joystick_t* adcp)
             }else{
                 logi("joystick cal failed!\n");
             }
+
+            s_cal = m_cal;
             joystick_cal_sta = JOYSTICK_CAL_NONE;
+            joystick_cal_dump(joystick_calp);
         }
         break;
     default:
@@ -410,15 +559,9 @@ bool app_joystick_init(void)
 {
     joystick_cal_sta = JOYSTICK_CAL_NONE;
     memset(&m_joystick,0,sizeof(m_joystick));
-
-    logd("joystick cal:\n");
-    logd("stick lx: %d %d %d\n", joystick_calp->min.stick[0].x,joystick_calp->mid.stick[0].x,joystick_calp->max.stick[0].x);
-    logd("stick ly: %d %d %d\n", joystick_calp->min.stick[0].y,joystick_calp->mid.stick[0].y,joystick_calp->max.stick[0].y);
-    logd("stick rx: %d %d %d\n", joystick_calp->min.stick[1].x,joystick_calp->mid.stick[1].x,joystick_calp->max.stick[1].x);
-    logd("stick ry: %d %d %d\n", joystick_calp->min.stick[1].y,joystick_calp->mid.stick[1].y,joystick_calp->max.stick[1].y);
-    logd("tarigger l: %d  %d\n", joystick_calp->min.tarigger[0],joystick_calp->max.tarigger[0]);
-    logd("tarigger r: %d  %d\n", joystick_calp->min.tarigger[1],joystick_calp->max.tarigger[1]);
-
+    m_cal = *joystick_calp;
+    s_cal = m_cal;
+    joystick_cal_dump(joystick_calp);
 	return true;
 }
 
@@ -441,12 +584,18 @@ void app_joystick_task(void *pa)
 {
     uint8_t id;
     joystick_t joystick_adc;
+    static s_ignore_num = 20;          //忽略ADC前面20个不可靠数据
 
     app_joystick_get_adc(&joystick_adc);
-    joystick_do_cal(&joystick_adc);
-    for(id = 0; id < APP_STICK_NUMS; id++){
-        m_joystick.tarigger[id] = app_trigger_normalization(id,&joystick_adc);
-        app_stick_normalization(id, &m_joystick.stick[id],&joystick_adc);
+    if(0 == s_ignore_num){
+        joystick_dynamic_cal(&joystick_adc);
+        joystick_do_cal(&joystick_adc);
+        for(id = 0; id < APP_STICK_NUMS; id++){
+            m_joystick.tarigger[id] = app_trigger_normalization(id, &joystick_adc);
+            app_stick_normalization(id, &m_joystick.stick[id], &joystick_adc);
+        }
+    }else{
+        s_ignore_num--;
     }
 	UNUSED_PARAMETER(pa);
 }

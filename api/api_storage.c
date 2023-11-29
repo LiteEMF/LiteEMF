@@ -122,7 +122,7 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 				stg_write_len = stg_len;
 				merge = storage_merge_buf(page_addr, tmp, stg_addr, stg_buf, &stg_write_len);
 				map_write_len = map_len;
-				merge = storage_merge_buf(page_addr, tmp, map_addr, map_buf, &map_write_len);
+				merge |= storage_merge_buf(page_addr, tmp, map_addr, map_buf, &map_write_len);
 				if(merge){
 					ret = api_flash_erase(page_addr);
 					ret &= api_flash_write(page_addr,tmp,sizeof(tmp));
