@@ -12,7 +12,7 @@
 0x06, 0x80, 0xff,              // USAGE_PAGE (Generic Desktop)
 0x09, 0x01,                    // USAGE (Vendor Usage 1)
 0xa1, 0x01,                    // COLLECTION (Application)
-	0X85, VENDOR_REPORT_ID,
+	// 0X85, VENDOR_REPORT_ID,	//NOT ADD REPORT ID
 	0x09, 0x02,                    //   USAGE (Vendor Usage 2)
 	0xa1, 0x00,                    //   COLLECTION (Physical)
 		0x09, 0x03,                    //     USAGE (Vendor Usage 1)

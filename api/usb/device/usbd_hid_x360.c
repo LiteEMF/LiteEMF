@@ -186,7 +186,7 @@ static uint8c_t x360_itf_desc_tab[] = {
 	0x00,			/* wMaxPacketSize: 2 Bytes max  */
 	0x08, 
 
-	// used for x360 identify
+	// used for x360 host mode identify, 添加这个会导致xinput模式下驱动识别不正常
 	0x09,        // bLength
 	0x04,        // bDescriptorType (Interface)
 	0x01,        // bInterfaceNumber 3

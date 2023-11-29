@@ -407,12 +407,11 @@ error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* bu
 	if(NULL == pclass) return ERROR_NOT_FOUND;
 
 	if(pclass->endpin.addr){
-		//TODO 目前发送64字节有问题!!!
-		if(0 && (DEV_TYPE_HID == type) && (sub_type == HID_TYPE_VENDOR) && (len < pclass->endpin.mtu)){	//hid vendor 需要根据MTU长度发送数据
+		if((DEV_TYPE_HID == type) && (sub_type == HID_TYPE_VENDOR) && (len < pclass->endpin.mtu)){	//hid vendor 需要根据MTU长度发送数据
 			uint8_t *mtu_pbuf = emf_malloc(pclass->endpin.mtu);
 			if(NULL != mtu_pbuf){
 				memset(mtu_pbuf, 0, pclass->endpin.mtu);
-				memcpy(mtu_pbuf, buf, len);
+				memcpy(mtu_pbuf, buf, MIN(len,pclass->endpin.mtu));
 				err = usbd_in(id, pclass->endpin.addr, mtu_pbuf, pclass->endpin.mtu);		
 				emf_free(mtu_pbuf);
 			}
