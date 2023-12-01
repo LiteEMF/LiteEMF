@@ -487,7 +487,9 @@ error_t usbh_init( uint8_t id )
 	#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
 	m_aoa_hid_types = 0;
 	#endif
-	usbh_iap_hid_types = 0;
+	#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
+	m_iap_hid_types = 0;
+	#endif
 
 	return usbh_core_init(id);
 }

@@ -234,6 +234,8 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
         ret = 0xffff - ret;
     }
 	ret = constrain_int16(ret);
+
+    // if(id==0) logd("%d %d",adcp->tarigger[0], ret );
     return ret;
 }
 
@@ -515,7 +517,7 @@ static void joystick_do_cal(joystick_t* adcp)
         break;
     case JOYSTICK_CAL_SUCCEED:
     case JOYSTICK_CAL_FAILED:
-        if (m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT){
+        if (m_systick - cal_timer > JOYSTICK_CAL_TIMEOUT/4){
             if(JOYSTICK_CAL_SUCCEED == joystick_cal_sta){
                 logi("joystick cal successed!\n");
             }else{

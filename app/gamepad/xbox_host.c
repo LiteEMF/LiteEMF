@@ -30,7 +30,7 @@
 uint8c_t xbox_start0[]={0x06,0x00,0x00,0x00,0x00,0x00,0x00,0x55,0x53};
 uint8c_t xbox_start1[]={0x00};
 uint8c_t xbox_set_led[]={0x00,0x01,0x14};
-uint8c_t xbox_set_motor[]={0x00,0x0F,0x00,0x00,0x00,0x00,0xFF,0x00,0x00};
+uint8c_t xbox_set_rumble[]={0x00,0x0F,0x00,0x00,0x00,0x00,0xFF,0x00,0x00};
 #endif
 
 
@@ -55,69 +55,69 @@ bool xbox_host_uac_en;				//是否开启音频
 
 static bool xboxs_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-    static uint8_t motor_index=0;
+    static uint8_t rumble_index=0;
 	uint8c_t MIN_DUTY = 3;
-	xbox_motor_t motor;
-    rumble_t motor_data;
-    uint8_t i, motor1, motor2, small_l, small_r;
-    memcpy(&motor_data, prumble, sizeof(rumble_t));
+	xbox_rumble_t rumble;
+    rumble_t rumble_data;
+    uint8_t i, rumble1, rumble2, small_l, small_r;
+    memcpy(&rumble_data, prumble, sizeof(rumble_t));
 
     for(i = 0;i<2;  i++){
         /* 解决SWITCH的马达数据remap时候丢失震动的问题, remap(3,0,255,0,100) = 1, remap(2,0,255,0,100) = 0*/
-        if((motor_data.duty[i] > 0) && (motor_data.duty[i] < MIN_DUTY)){
-            motor_data.duty[i] = MIN_DUTY;
+        if((rumble_data.duty[i] > 0) && (rumble_data.duty[i] < MIN_DUTY)){
+            rumble_data.duty[i] = MIN_DUTY;
         }
     }
 
-	motor1 = remap(motor_data.duty[RUMBLE_L],0,255,0,100);
-	motor2 = remap(motor_data.duty[RUMBLE_R],0,255,0,100);
-	small_l = remap(motor_data.duty[RUMBLE_SL],0,255,0,100);
-	small_r = remap(motor_data.duty[RUMBLE_SR],0,255,0,100);
-	motor.bt_cmd = 0;
-	motor.rumble_mask = 0x0f;
-	motor.motor1 = motor1;
-	motor.motor2 = motor2;
-	motor.smotor1 = small_l;
-	motor.smotor2 = small_r;
-	motor.duration = 0xff;
-	motor.res2[1] = 0xeb;
+	rumble1 = remap(rumble_data.duty[RUMBLE_L],0,255,0,100);
+	rumble2 = remap(rumble_data.duty[RUMBLE_R],0,255,0,100);
+	small_l = remap(rumble_data.duty[RUMBLE_SL],0,255,0,100);
+	small_r = remap(rumble_data.duty[RUMBLE_SR],0,255,0,100);
+	rumble.bt_cmd = 0;
+	rumble.rumble_mask = 0x0f;
+	rumble.rumble1 = rumble1;
+	rumble.rumble2 = rumble2;
+	rumble.srumble1 = small_l;
+	rumble.srumble2 = small_r;
+	rumble.duration = 0xff;
+	rumble.res2[1] = 0xeb;
 	
 	if(api_trp_is_usb(phandle->trp)){
-		xbox_usb_pack_t usb_motor;
-		memset(&usb_motor, 0, sizeof(usb_motor));
-		usb_motor.cmd = XBOX_RUMBLE_CMD;
-		usb_motor.len = 0x09;
-		usb_motor.index = motor_index++;
-		usb_motor.p.rumble = motor;
-		return api_transport_tx(phandle,(uint8_t*)&usb_motor,sizeof(usb_motor));
+		xbox_usb_pack_t usb_rumble;
+		memset(&usb_rumble, 0, sizeof(usb_rumble));
+		usb_rumble.cmd = XBOX_RUMBLE_CMD;
+		usb_rumble.len = 0x09;
+		usb_rumble.index = rumble_index++;
+		usb_rumble.p.rumble = rumble;
+		return api_transport_tx(phandle,(uint8_t*)&usb_rumble,sizeof(usb_rumble));
 	}else{
-		motor.bt_cmd = XBOX_BT_RUMBLE_CMD;
-		return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+		rumble.bt_cmd = XBOX_BT_RUMBLE_CMD;
+		return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 	}
 }
 
 
 static bool x360_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[RUMBLE_L];
-	uint8_t motor2 = prumble->duty[RUMBLE_R];
+	uint8_t rumble1 = prumble->duty[RUMBLE_L];
+	uint8_t rumble2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
-		x360_usb_motor_t motor;
-		memset(&motor,0,sizeof(motor));
-		motor.cmd = X360_RUMBLE_CMD;
-		motor.motor1 = motor1;
-		motor.motor2 = motor2;
-		return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+		x360_usb_rumble_t rumble;
+		memset(&rumble,0,sizeof(rumble));
+		rumble.cmd = X360_RUMBLE_CMD;
+		rumble.rumble1 = rumble1;
+		rumble.rumble2 = rumble2;
+		return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 	}else{
-		xbox_motor_t motor;
-		memset(&motor,0,sizeof(motor));
-		motor.bt_cmd = XBOX_BT_RUMBLE_CMD;
-		motor.rumble_mask = 0xff;
-		motor.motor1 = remap(motor1,0,255,0,100);
-		motor.motor2 = remap(motor2,0,255,0,100);
-		motor.duration = 0xff;
-		motor.res2[1] = 0xeb;
-		return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+		xbox_rumble_t rumble;
+		memset(&rumble,0,sizeof(rumble));
+		rumble.bt_cmd = XBOX_BT_RUMBLE_CMD;
+		rumble.rumble_mask = 0xff;
+		rumble.rumble1 = remap(rumble1,0,255,0,100);
+		rumble.rumble2 = remap(rumble2,0,255,0,100);
+		rumble.duration = 0xff;
+		rumble.res2[1] = 0xeb;
+		return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 	}
 }
 
@@ -382,7 +382,7 @@ void xbox_enum_process(trp_handle_t* phandle)		//xbox手柄枚举需要发送开
 				}
 				break;
 			case 4:
-				xbox_command_fill(phandle,&tx_cmd,&xbox_host_index,xbox_host_uac_en,XBOX_RUMBLE_CMD,(uint8_t*)xbox_set_motor,sizeof(xbox_set_motor));
+				xbox_command_fill(phandle,&tx_cmd,&xbox_host_index,xbox_host_uac_en,XBOX_RUMBLE_CMD,(uint8_t*)xbox_set_rumble,sizeof(xbox_set_rumble));
 				if(xbox_command_send(&tx_cmd)){
 					m_xbox_enum_step++;
 					logd_g("usbh gamepad ready...\n");

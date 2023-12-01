@@ -128,7 +128,7 @@ static void switch_dump_cmd_out(char* tag, uint8_t* buf, uint16_t len)
     uint32_t pa;
     switch_ctrl_t* switch_ctrlp=(switch_ctrl_t*)buf;
 
-    if(SWITCH_MOTOR_ID == switch_ctrlp->id) return;
+    if(SWITCH_RUMBLE_ID == switch_ctrlp->id) return;
     memcpy(&pa,switch_ctrlp->cmd_data,4);
     pa = SWAP32_L(pa);
 
@@ -191,9 +191,23 @@ void get_switch_mac_addr(uint8_t* macp)
 	api_bt_get_mac(BT_ID1, BT_EDR, macp);
 	#endif
 	
-
-
     swap_buf(macp,6);              //MAC address is Big Endian
+}
+
+bool switch_info_reply(trp_handle_t *phandle)
+{
+    uint8_t buf[64];
+    switch_usb_mac_replies_t switch_info;
+
+    switch_info.id = SWITCH_USB_REPLIES_ID;
+    switch_info.sub_cmd = SWITCH_USB_REQUEST_MAC;
+    switch_info.res = 0;
+    switch_info.type = SWITCH_TYPE_PROCONTROLLER;
+    get_switch_mac_addr(switch_info.mac);
+    memset(buf, 0, sizeof(buf));
+    memcpy(buf, &switch_info, sizeof(switch_info));
+
+    return api_transport_tx(phandle,buf,64);
 }
 
 
@@ -238,7 +252,7 @@ void get_switch_mac_addr(uint8_t* macp)
 ** {0xe4, 0x02, 0x4d, 0x46},
 ** {0x6d, 0x00, 0x3c, 0x80},
 *********************************************************************************/
-static uint8c_t siwtch_motor_non_vibration[][4] = {        //switch不震动的数据组
+static uint8c_t siwtch_rumble_non_vibration[][4] = {        //switch不震动的数据组
     {0x64, 0x00, 0x64, 0x80},\
     {0x62, 0x0C, 0x63, 0x40},\
     {0xCA, 0x99, 0x31, 0x40},\
@@ -258,11 +272,11 @@ uint8_t switch_rumble_decode(switch_rumble_bit_t* prumble_bit)
 {
     uint16_t lamp=0, hamp=0;
     uint8_t i;
-	// uint16_t h_freq,l_freq;
-	// h_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->hf/4+0x60)/32.0)*10);
-	// l_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->lf+0x40)/32.0)*10);
-    for(i=0;i<sizeof(siwtch_motor_non_vibration)/sizeof(switch_rumble_bit_t);i++){//TODO 协议解析不适用,暂处理
-        if(0 == memcmp((uint8_t *)prumble_bit, siwtch_motor_non_vibration[i],sizeof(switch_rumble_bit_t))){
+	uint16_t h_freq,l_freq;
+	h_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->hf/4+0x60)/32.0)*10);
+	l_freq = (uint16_t)(round)(pow(2.0,(prumble_bit->lf+0x40)/32.0)*10);
+    for(i=0;i<sizeof(siwtch_rumble_non_vibration)/sizeof(switch_rumble_bit_t);i++){//TODO 协议解析不适用,暂处理
+        if(0 == memcmp((uint8_t *)prumble_bit, siwtch_rumble_non_vibration[i],sizeof(switch_rumble_bit_t))){
             return 0;
         }
     }
@@ -270,6 +284,7 @@ uint8_t switch_rumble_decode(switch_rumble_bit_t* prumble_bit)
         lamp = prumble_bit->lf_amp-0x80;
         hamp = prumble_bit->hf_amp;
     }
+    //logd("l=%d %d h=%d %d",l_freq,lamp,h_freq,hamp);
     return remap(MAX(lamp, hamp), 0, 100, 0, 255);
 }
 
@@ -653,7 +668,7 @@ bool switch_usb_id_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
     {
     case SWITCH_USB_REQUEST_MAC:        //0x01
         replies[2] = 0x00;
-        replies[3] = 0x03;        //type
+        replies[3] = SWITCH_TYPE_PROCONTROLLER; //type
         get_switch_mac_addr(replies + 4);
 
         length = sizeof(replies);
@@ -706,7 +721,7 @@ in  从0快开始,第13,14bit是指令回复
 bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 {
     bool ret = false;
-    static rumble_t s_motor;
+    static rumble_t s_rumble;
     if ( 0 ==  len) return ret;
     switch_dump_cmd_out("dev:",buf,len);
 
@@ -720,28 +735,32 @@ bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
         switch_ctrl_id_process(phandle,buf,len);
         ret = true;
         break;
-    case SWITCH_MOTOR_ID:           //0X10
+    case SWITCH_RUMBLE_ID:           //0X10
 	{
+        return false;
+
         #if APP_RUMBLE_ENABLE
         switch_rumble_t *p = (switch_rumble_t*)buf;
-        uint8_t motor_l,motor_r;
-        motor_l = switch_rumble_decode(&p->rumble_l);
-        motor_r = switch_rumble_decode(&p->rumble_r);
-        if(motor_l != s_motor.duty[RUMBLE_L] || motor_l != 0){
-            s_motor.duty[RUMBLE_L] = motor_l;
-            motor_l = (uint8_t)(pow(motor_l/255.0, 0.5)*255.0);
-            if(motor_l){                                             //motor为0不做处理，防止马达震动数据下发太快导致不震动
-                app_rumble_set_duty(RUMBLE_L, motor_l, 150);               //最后震动数据延时150ms 体验感最好
+        uint8_t rumble_l,rumble_r;
+        logd("rubmle:");dumpd(p, sizeof(switch_rumble_t));
+        rumble_l = switch_rumble_decode(&p->rumble_l);
+        rumble_r = switch_rumble_decode(&p->rumble_r);
+        if(rumble_l != s_rumble.duty[RUMBLE_L] || rumble_l != 0){
+            s_rumble.duty[RUMBLE_L] = rumble_l;
+            rumble_l = (uint8_t)(pow(rumble_l/255.0, 0.5)*255.0);
+            if(rumble_l){                                             //rumble为0不做处理，防止马达震动数据下发太快导致不震动
+                app_rumble_set_duty(RUMBLE_L, rumble_l, 150);               //最后震动数据延时150ms 体验感最好
             }
         }
-        if(motor_r != s_motor.duty[RUMBLE_R] || motor_r != 0){
-            s_motor.duty[RUMBLE_R] = motor_r ;
-            motor_r = (uint8_t)(pow(motor_r/255.0, 0.5)*255.0);
-            if(motor_r){
-                app_rumble_set_duty(RUMBLE_R, motor_r, 150);
+        if(rumble_r != s_rumble.duty[RUMBLE_R] || rumble_r != 0){
+            s_rumble.duty[RUMBLE_R] = rumble_r ;
+            rumble_r = (uint8_t)(pow(rumble_r/255.0, 0.5)*255.0);
+            if(rumble_r){
+                app_rumble_set_duty(RUMBLE_R, rumble_r, 150);
             }
         }
         #endif
+        
         ret = true;
         break;
 	}

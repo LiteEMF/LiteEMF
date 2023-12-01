@@ -100,7 +100,11 @@ error_t usbd_hid_switch_out_process(uint8_t id, usbd_class_t* pclass)
 		trp_handle.trp = TR_USBD;
 		trp_handle.id = id;
 		trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
-		app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen);
+        if(!app_gamepad_dev_process(&trp_handle, usb_rxbuf,usb_rxlen)){
+			#if USBD_SOCKET_ENABLE
+			usbd_socket_cmd(&usbd_socket_trp, CMD_SOCKET_OUT, usb_rxbuf,usb_rxlen);
+			#endif
+		}
     }
 
     return ERROR_SUCCESS;
@@ -156,6 +160,15 @@ void usbd_hid_switch_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt,
         break;
     case USBD_EVENT_EP_IN:
         break;
+    case USBD_EVENT_EP_READY:{
+        trp_handle_t trp_handle;
+        trp_handle.trp = TR_USBD;
+        trp_handle.id = id;
+        trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+
+        switch_info_reply(&trp_handle);
+        break;
+    }
     default:
         break;
     }

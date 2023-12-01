@@ -53,16 +53,16 @@ app_gamepad_key_t m_gamepad_key;
 void app_gamepad_trigger_check(app_gamepad_key_t* keyp)
 {
 	if((keyp->key & HW_KEY_L2) && (0 == keyp->l2)){
-		keyp->l2 = 0xffff;
+		keyp->l2 = 0x7fff;
 	}
-	if((0 == keyp->key & HW_KEY_L2) && keyp->l2){
+	if((0 == (keyp->key & HW_KEY_L2)) && keyp->l2){
 		keyp->key |= HW_KEY_L2;
 	}
 
 	if((keyp->key & HW_KEY_R2) && (0 == keyp->r2)){
-		keyp->r2 = 0xffff;
+		keyp->r2 = 0x7fff;
 	}
-	if((0 == keyp->key & HW_KEY_R2) && keyp->r2){
+	if((0 == (keyp->key & HW_KEY_R2)) && keyp->r2){
 		keyp->key |= HW_KEY_R2;
 	}
 }

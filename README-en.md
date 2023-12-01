@@ -20,7 +20,7 @@ Embedded development is characterized by large differences in chips and many typ
 
 The goal of the LiteEMF project is to build a framework that can be easily used in your own hardware. Whether the chip is a 51 single-chip microcomputer, or arm, avr, risc-v, whether the SDK uses the main loop or Freertos, UcosII, Rtheard, Linux and other operating systems, you can quickly build a hardware basic input and output API interface through this framework, allowing users to focus on upper-level application development without hardware.
 
-In addition to building a standard API to help users dock hardware, the upper layer should also provide rich standard protocol interfaces like mainstream IOT systems, and commonly used embedded modules (power management, buttons, RGB, USB, motor, somatosensory sense, controller, Bluetooth, network, etc.), mainstream open source modules (such as nanopb), etc. 
+In addition to building a standard API to help users dock hardware, the upper layer should also provide rich standard protocol interfaces like mainstream IOT systems, and commonly used embedded modules (power management, buttons, RGB, USB, rumble, somatosensory sense, controller, Bluetooth, network, etc.), mainstream open source modules (such as nanopb), etc. 
 
 At present, LiteEMF has done this, and has also successfully verified mass production products on 51 single-chip microcomputer, Arm and other chip platforms, and freeRtos, Linux operating system. 
 

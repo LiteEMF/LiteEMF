@@ -41,7 +41,7 @@ typedef struct {
 		xbox_led_en_t led_en;
 		xbox_info_t dev_info;
 		serial_number_t serial_number;
-		xbox_motor_t  rumble;
+		xbox_rumble_t  rumble;
 		xbox_lpacket_t lpack;
 		uint8_t buf[60];	//最大58
 	}p;

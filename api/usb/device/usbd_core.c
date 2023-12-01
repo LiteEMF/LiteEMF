@@ -268,11 +268,18 @@ error_t usbd_set_ready(uint8_t id, uint8_t ready)
 
 	if(NULL == pdev) return ERROR_PARAM;
 
-	if(TUSB_STA_CONFIGURED == pdev->state){
-		pdev->ready = ready;       //枚举完
-		logd_g("usbd%d ready=%d...\n",(uint16_t)id,(uint16_t)ready);
-		err = ERROR_SUCCESS;
+	if(ready && (TUSB_STA_CONFIGURED != pdev->state)){
+		err = ERROR_STATE;
+		return err;
 	}
+
+	if(pdev->ready != ready){
+		pdev->ready = ready;       					//枚举完
+		usbd_class_notify_evt(id,USBD_EVENT_READY,pdev->ready);
+		logd_g("usbd%d ready=%d...\n",(uint16_t)id,(uint16_t)ready);
+	}
+	err = ERROR_SUCCESS;
+	
     return err;
 }
 

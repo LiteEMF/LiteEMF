@@ -127,6 +127,7 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
 				preq->setup_len = MIN(preq->req.wLength, desc_len);
 				memcpy((void*)preq->setup_buf,desc_buf,preq->setup_len);
 
+                usbd_class_notify_evt(id,USBD_EVENT_EP_READY,true);
                 if(HID_TYPE_SWITCH != pclass->hid_type){        //switch ready 在 switch_controller 中设置
                     usbd_set_ready(id, true);
                 }

@@ -139,11 +139,24 @@ typedef enum{								/*设备HID 指令 */
 	SWITCH_USB_ENABLE_TIMEOUT = 0x05,
 }switch_usb_cmd_t;
 
+typedef enum
+{
+    SWITCH_TYPE_UNKNOWN = 0,
+    SWITCH_TYPE_JOYCON_LEFT = 1,
+    SWITCH_TYPE_JOYCON_RIGHT = 2,
+    SWITCH_TYPE_PROCONTROLLER = 3,
+    SWITCH_TYPE_NES_LEFT = 9,
+    SWITCH_TYPE_NES_RIGHT = 10,
+    SWITCH_TYPE_SNES = 11,
+    SWITCH_TYPE_N64 = 12,
+    SWITCH_TYPE_SEGA_GENESIS = 13,
+} switch_devinfo_type_t;
 
 typedef struct{				/*USB 指令 */
 	uint8_t id;				/*SWITCH_USB_REPLIES_ID */
 	uint8_t sub_cmd;		/*SWITCH_USB_REQUEST_MAC */
-	uint8_t type;
+	uint8_t res;
+	uint8_t type;			/*switch_devinfo_type_t*/
 	uint8_t mac[6];
 }switch_usb_mac_replies_t;
 
@@ -154,7 +167,7 @@ typedef struct{				/*USB 指令 */
 typedef enum{								//设备HID 指令
 	SWITCH_CTRL_ID				=0x01,		//OUT
 	SWITCH_MCU_UPDATA_ID		=0X03,
-	SWITCH_MOTOR_ID				=0X10,		//马达控制 report id
+	SWITCH_RUMBLE_ID				=0X10,		//马达控制 report id
 	SWITCH_MCU_CTRL_ID			=0X11,		//Request specific data from the NFC/IR MCU. Can also send rumble.
 	SWITCH_REQ_UNKNOWN_ID		=0X12,
 	
@@ -178,8 +191,8 @@ typedef struct
 	uint8_t id;			//0x01/0x11	SWITCH_CTRL_ID/SWITCH_MCU_CTRL_ID
 	uint8_t index:4;	//index
 	uint8_t res:4;		//0x00;
-	switch_rumble_bit_t	motor1;
-	switch_rumble_bit_t	motor2;
+	switch_rumble_bit_t	rumble1;
+	switch_rumble_bit_t	rumble2;
 	uint8_t sub_cmd;			//11byte
 	uint8_t cmd_data[36];		//
 	uint8_t crc8;				//only SWITCH_MCU_CTRL_ID:cmd_data crc8
@@ -207,7 +220,7 @@ typedef struct
 
 
 //*********************************************************************************//
-//                              SWITCH_MOTOR_ID  0x10                              //
+//                              SWITCH_RUMBLE_ID  0x10                              //
 //*********************************************************************************//
 typedef struct	 //只定义有用数据  其他数据最后附加
 {
@@ -215,10 +228,10 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t  hf_amp;
 	uint16_t lf;
 	uint8_t  lf_amp;
-}switch_motor_decode_t;					//switch马达是低频和高频叠加效果
+}switch_rumble_decode_t;					//switch马达是低频和高频叠加效果
 typedef struct	 //只定义有用数据  其他数据最后附加
 {
-	uint8_t id;		//固定0x10	SWITCH_MOTOR_ID
+	uint8_t id;		//固定0x10	SWITCH_RUMBLE_ID
 	uint8_t index;		//+1 0~0f
 	switch_rumble_bit_t	rumble_l;
 	switch_rumble_bit_t	rumble_r;

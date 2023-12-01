@@ -232,10 +232,10 @@ typedef struct
 typedef struct {
 	uint16_t cmd;			//固定0x800 小端
 	uint8_t res;      		//0x00
-	uint8_t motor1; 		//大马达 left
-	uint8_t motor2; 		//大马达 right
+	uint8_t rumble1; 		//大马达 left
+	uint8_t rumble2; 		//大马达 right
 	uint8_t res2[3];     	//0x00
-}x360_usb_motor_t;		//8
+}x360_usb_rumble_t;		//8
 
 
 //*********************************************************************************//
@@ -309,13 +309,13 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 {
 	uint8_t bt_cmd;			//XBOX_BT_RUMBLE_CMD	0X03, USB: 0X00
 	uint8_t rumble_mask; 	//0x0f
-	uint8_t smotor1; 		//小马达 left
-	uint8_t smotor2; 		//小马达 right
-	uint8_t motor1; 		//大马达 left
-	uint8_t motor2; 		//大马达 right
+	uint8_t srumble1; 		//小马达 left
+	uint8_t srumble2; 		//小马达 right
+	uint8_t rumble1; 		//大马达 left
+	uint8_t rumble2; 		//大马达 right
 	uint8_t duration;   	//0xff
 	uint8_t res2[2];		//0x00 0xeb  period?
-}xbox_motor_t;				//9
+}xbox_rumble_t;				//9
 
 
 ////report struct

@@ -33,6 +33,7 @@ extern switch_ctb_t switch_dev_ctb;
 /*******************************************************************************************************************
 **	Functions
 ********************************************************************************************************************/
+bool switch_info_reply(trp_handle_t *phandle);
 uint16_t switch_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len);
 uint8_t switch_rumble_decode(switch_rumble_bit_t* prumble_bit);
 bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len);		//switch 手柄数据处理

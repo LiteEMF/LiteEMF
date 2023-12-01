@@ -73,7 +73,7 @@ static void switch_dump_cmd_out(char* tag, uint8_t* buf, uint16_t len)
     uint32_t pa;
     switch_ctrl_t* switch_ctrlp=(switch_ctrl_t*)buf;
 
-    if(SWITCH_MOTOR_ID == switch_ctrlp->id) return;
+    if(SWITCH_RUMBLE_ID == switch_ctrlp->id) return;
     memcpy(&pa,switch_ctrlp->cmd_data,4);
     pa = SWAP32_L(pa);
 
@@ -118,40 +118,40 @@ void switch_dump_cal(void)
 *********************************************************************************/
 switch_rumble_bit_t switch_rumble_encode(uint8_t duty)
 {
-	switch_rumble_bit_t motor_bit;
+	switch_rumble_bit_t rumble_bit;
 	uint16_t encoded_hex_amp;
 	//uint16_t freq = 160;
 	//uint16_t encoded_hex_freq;
 
 	// if(freq > 1252) freq = 1252;
 	// encoded_hex_freq = (uint8_t)round(log2(freq/10.0)*32.0);
-	// motor_bit.hf = (encoded_hex_freq-0x60)*4;
-	// motor_bit.lf = encoded_hex_freq-0x40;
+	// rumble_bit.hf = (encoded_hex_freq-0x60)*4;
+	// rumble_bit.lf = encoded_hex_freq-0x40;
 
-	motor_bit.lf = 0x40; //160hz
-	motor_bit.hf = 0x080; //160hz 暂时用不到频率,默认写死
+	rumble_bit.lf = 0x40; //160hz
+	rumble_bit.hf = 0x080; //160hz 暂时用不到频率,默认写死
 
 	encoded_hex_amp = remap(duty, 0, 255 ,0, 64);
-	motor_bit.hf_amp = encoded_hex_amp;
-	motor_bit.lf_amp = encoded_hex_amp + 0x80;
+	rumble_bit.hf_amp = encoded_hex_amp;
+	rumble_bit.lf_amp = encoded_hex_amp + 0x80;
 
-	// logd("freq=%d %d, amp=%d %d\n",pmotor->hf,pmotor->lf,pmotor->hf_amp,pmotor->lf_amp);
-	// logd("hf=%x lf=%x ,hf_amp=%x, lf_amp=%x\n",motor_bit.hf,motor_bit.lf,motor_bit.hf_amp,motor_bit.lf_amp);
-	return motor_bit;
+	// logd("freq=%d %d, amp=%d %d\n",prumble->hf,prumble->lf,prumble->hf_amp,prumble->lf_amp);
+	// logd("hf=%x lf=%x ,hf_amp=%x, lf_amp=%x\n",rumble_bit.hf,rumble_bit.lf,rumble_bit.hf_amp,rumble_bit.lf_amp);
+	return rumble_bit;
 }
 
 bool switch_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-    static uint8_t motor_index=0;
+    static uint8_t rumble_index=0;
     
     switch_rumble_t rumble;
-    uint8_t motor1 = prumble->duty[RUMBLE_L];
-	uint8_t motor2 = prumble->duty[RUMBLE_R];
+    uint8_t rumble1 = prumble->duty[RUMBLE_L];
+	uint8_t rumble2 = prumble->duty[RUMBLE_R];
     rumble.id = 0x10;
-    rumble.index=motor_index++;
+    rumble.index=rumble_index++;
 
-    rumble.rumble_l = switch_rumble_encode(motor1);
-    rumble.rumble_r = switch_rumble_encode(motor2);
+    rumble.rumble_l = switch_rumble_encode(rumble1);
+    rumble.rumble_r = switch_rumble_encode(rumble2);
     return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 }
 
@@ -250,8 +250,8 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
             switch_ctrlp->index = switch_ctrl_index++;
             switch_ctrlp->sub_cmd =  enump->sub_cmd;
 
-            switch_ctrlp->motor1 = switch_rumble_encode(0);
-            switch_ctrlp->motor2 = switch_ctrlp->motor1;
+            switch_ctrlp->rumble1 = switch_rumble_encode(0);
+            switch_ctrlp->rumble2 = switch_ctrlp->rumble1;
             switch_ctrlp->cmd_data[0] = enump->param & 0xff;
             switch_ctrlp->cmd_data[1] = (enump->param>>8) & 0xff;
             switch_ctrlp->cmd_data[2] = (enump->param>>16) & 0xff;
@@ -319,7 +319,12 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
     switch_enum_t* enump;
 
     if (len < 2) return ret;
-    switch_dump_cmd_in("enum:",buf,len);
+
+    if(SWITCH_NORMAL_REPORT_ID != buf[0]
+        && SWITCH_LARGE_REPORT_ID != buf[0]
+        && SWITCH_STANDARD_REPORT_ID != buf[0]){        //忽略按键数据
+        switch_dump_cmd_in("enum:",buf,len);
+    }
     
     if(api_trp_is_usb(phandle->trp)){
         enump = &usb_switch_enump;

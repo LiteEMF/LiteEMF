@@ -249,15 +249,15 @@ static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 
 static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[RUMBLE_L];
-	uint8_t motor2 = prumble->duty[RUMBLE_R];
+	uint8_t rumble1 = prumble->duty[RUMBLE_L];
+	uint8_t rumble2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
 		ps4_usb_effects_t effects;
 		memset(&effects,0,sizeof(effects));
 		effects.cmd = PS4_USB_EFFECTS_ID;
 		effects.magic = 0x03;				/* Magic value 0x07*/
-		effects.effects.rumble_l = motor1;
-		effects.effects.rumble_r = motor2;
+		effects.effects.rumble_l = rumble1;
+		effects.effects.rumble_r = rumble2;
 		effects.effects.led_r = 0x20;
 		effects.effects.led_g = 0x20;
 		effects.effects.led_b = 0x20;
@@ -272,8 +272,8 @@ static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 		effects.cmd = PS4_BT_EFFECTS_ID;
 		effects.magic = 0xC0 | 0x04;  /* Magic value HID + CRC, also sets interval to 4ms for samples */
 		effects.ctrl = 0x03;
-		effects.effects.rumble_l = motor1;
-		effects.effects.rumble_r = motor2;
+		effects.effects.rumble_l = rumble1;
+		effects.effects.rumble_r = rumble2;
 		effects.effects.led_r = 0x00;
 		effects.effects.led_g = 0x00;
 		effects.effects.led_b = 0x40;
@@ -297,25 +297,25 @@ static bool ps3_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 }
 bool ps5_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 {
-	uint8_t motor1 = prumble->duty[RUMBLE_L];
-	uint8_t motor2 = prumble->duty[RUMBLE_R];
+	uint8_t rumble1 = prumble->duty[RUMBLE_L];
+	uint8_t rumble2 = prumble->duty[RUMBLE_R];
 	if(api_trp_is_usb(phandle->trp)){
-		ps5_usb_effects_t motor;
-		memset(&motor,0,sizeof(motor));
-		motor.cmd = PS5_USB_EFFECTS_ID;
-		motor.effects.bit1_en = 0x01;
-		motor.effects.rumble_l = motor1;
-		motor.effects.rumble_r = motor2;
-		return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+		ps5_usb_effects_t rumble;
+		memset(&rumble,0,sizeof(rumble));
+		rumble.cmd = PS5_USB_EFFECTS_ID;
+		rumble.effects.bit1_en = 0x01;
+		rumble.effects.rumble_l = rumble1;
+		rumble.effects.rumble_r = rumble2;
+		return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 	}else{
-		ps5_bt_effects_t motor;
-		memset(&motor,0,sizeof(motor));
-		motor.cmd = PS5_BT_EFFECTS_ID;
-		motor.magic = 0x02;
-		motor.effects.bit1_en = 0x01;
-		motor.effects.rumble_l = motor1;
-		motor.effects.rumble_r = motor2;
-		return api_transport_tx(phandle,(uint8_t*)&motor,sizeof(motor));
+		ps5_bt_effects_t rumble;
+		memset(&rumble,0,sizeof(rumble));
+		rumble.cmd = PS5_BT_EFFECTS_ID;
+		rumble.magic = 0x02;
+		rumble.effects.bit1_en = 0x01;
+		rumble.effects.rumble_l = rumble1;
+		rumble.effects.rumble_r = rumble2;
+		return api_transport_tx(phandle,(uint8_t*)&rumble,sizeof(rumble));
 	}
 }
 
