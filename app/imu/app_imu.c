@@ -332,27 +332,28 @@ void app_imu_task(void* pa)
 
 	if(app_imu_get_raw(&acc, &gyro)){
 
-		#if IMU_FILTER_ENABLE
-		app_imu_filter(&acc, &gyro);
-		#else
-		m_gyro = gyro;
-		m_acc = acc;
-		#endif
+		// #if IMU_FILTER_ENABLE
+		// app_imu_filter(&acc, &gyro);
+		// #else
+		// m_gyro = gyro;
+		// m_acc = acc;
+		// #endif
 
 				
-		// logd("imu: %d, %d, %d, %d, %d, %d\n",acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z );
-		imu_static_check();
-		imu_do_cal();
+		// // logd("imu: %d, %d, %d, %d, %d, %d\n",acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z );
+		// imu_static_check();
+		// imu_do_cal();
 
-		//动态校准
-		if((IMU_CAL_NONE == imu_cal_sta) && IMU_MOVE_NONE == is_imu_move){
-			if(m_systick - atuo_cal_timer > 6000){
-				imu_cal_sta = IMU_CAL_START;
-				imu_auto_cal =  true;
-			}
-		}else{
-			atuo_cal_timer = m_systick;
-		}
+		// //动态校准
+		// if((IMU_CAL_NONE == imu_cal_sta) && IMU_MOVE_NONE == is_imu_move){
+		// 	if(m_systick - atuo_cal_timer > 6000){
+		// 		imu_cal_sta = IMU_CAL_START;
+		// 		imu_auto_cal =  true;
+		// 	}
+		// }else{
+		// 	atuo_cal_timer = m_systick;
+		// }
+		
 	}
 	UNUSED_PARAMETER(pa);
 }

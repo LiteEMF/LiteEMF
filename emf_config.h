@@ -258,6 +258,9 @@ extern "C" {
 #ifndef API_PM_ENABLE
 #define API_PM_ENABLE			0
 #endif
+#ifndef API_SOFT_SPI_ENABLE
+#define API_SOFT_SPI_ENABLE    1
+#endif
 
 //*********************************************************************************//
 //                       	APP modules                  						   //
@@ -272,7 +275,7 @@ extern "C" {
 #define APP_KM_ENABLE			0
 #endif
 #ifndef APP_IMU_ENABLE
-#define APP_IMU_ENABLE			0
+#define APP_IMU_ENABLE			1
 #endif
 #ifndef APP_JOYSTICK_ENABLE
 #define APP_JOYSTICK_ENABLE		0
