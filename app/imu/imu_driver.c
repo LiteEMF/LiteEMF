@@ -15,6 +15,9 @@
 #include "app/imu/imu_driver.h"
 #include "api/api_tick.h"
 
+#if	defined IMU_ICM42688_ID
+#include "app/imu/icm42688.h"
+#endif
 #if	defined IMU_SH3001_ID
 #include "app/imu/sh3001.h"
 #endif
@@ -63,6 +66,9 @@ bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop)
 		#if	defined IMU_SH3001_ID
 		ret = SH3001_GetImuCompData((int16_t *)accp, (int16_t *)gyrop,1);
 		#endif
+		#if	defined IMU_ICM42688_ID
+		ret = ICM42688_GetImuData((int16_t *)accp, (int16_t *)gyrop);
+		#endif
 		#if defined IMU_ICM20600_ID
 		ret = zw_get_imu_data((int16_t *)accp, (int16_t *)gyrop);
 		#endif
@@ -96,6 +102,9 @@ bool imu_driver_init(acc_range_t acc_range,gyro_range_t gyro_range)	//TODO 待�
 	imu_init_ctb.timer = m_systick;	//imu定时器
 	imu_init_ctb.retry = 3;
 
+	#if	defined IMU_ICM42688_ID
+	imu_init_ctb.timeout = 300;
+	#endif
 	#if	defined IMU_SH3001_ID
     imu_init_ctb.timeout = 300;
     #endif
@@ -137,6 +146,10 @@ void imu_driver_task(void* pa)
         #if	defined IMU_SH3001_ID
         m_imu_init = SH3001_init(ACC_RANGE_8G, GYRO_RANGE_2000);
         #endif
+
+		#if	defined IMU_ICM42688_ID
+		m_imu_init = ICM42688_init(ACC_RANGE_8G, GYRO_RANGE_2000);
+		#endif
 
         #if defined IMU_ICM20600_ID
         m_imu_init = InitICM20600(ACC_RANGE_8G, GYRO_RANGE_2000);

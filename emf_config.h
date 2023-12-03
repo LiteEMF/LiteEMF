@@ -259,7 +259,7 @@ extern "C" {
 #define API_PM_ENABLE			0
 #endif
 #ifndef API_SOFT_SPI_ENABLE
-#define API_SOFT_SPI_ENABLE    1
+#define API_SOFT_SPI_ENABLE    0
 #endif
 
 //*********************************************************************************//

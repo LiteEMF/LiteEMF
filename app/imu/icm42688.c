@@ -49,10 +49,10 @@ XYZ_GYRO_T GyroOffset={0,0,0};
 *********************************************************************************/
 uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range)
 {
-	uint8_t id;
+	uint8_t ret,id;
 
-	id = soft_spi_readReg(MPUREG_WHO_AM_I);
-	logd("\r\nid = 0x%x\r\n", id);
+	ret = api_spi_host_read(0,0x80|MPUREG_WHO_AM_I, &id, 1);
+	logd("id = 0x%x\n", id);
 	if(id == ICM42688_ID)
 	{
 		// soft_spi_writeReg(PWR_MGMT_1,0x01);			//解除休眠状态，时钟选择
@@ -63,8 +63,10 @@ uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range)
 		// soft_spi_writeReg(GYRO_CONFIG,0x18);		//陀螺仪自检及测量范围，典型值：0x18(不自检，+-2000deg/s)
 		// soft_spi_writeReg(ACCEL_CONFIG,0x08);		//加速计自检、测量范围(不自检，+-4G)
 		// soft_spi_writeReg(ACCEL_CONFIG2,0x02);
+
+	//	api_spi_host_write(0,PWR_MGMT_1, 0x01, 1);
 	}
-	return id;
+	return ret;
 }
 
 void ICM42688_Sleep(void)
@@ -91,20 +93,22 @@ void  SendUart_Wave(void)
 ****************************************************************/
 bool ICM42688_GetImuData(int16_t *accData, int16_t *gyroData)
 {
-	uint8_t temp[12];
+	uint8_t ret,temp[12];
 
-	soft_spi_readRegs(MPUREG_ACCEL_DATA_X0_UI,temp,12);
-	accData[0] = (int16_t)(((temp[0]&0X00FF)<< 8) | (temp[1]&0X00FF));	//拼接数据
-	accData[1] = (int16_t)(((temp[2]&0X00FF)<< 8) | (temp[3]&0X00FF));
-	accData[2] = (int16_t)(((temp[4]&0X00FF)<< 8) | (temp[5]&0X00FF));
-	gyroData[0] = (int16_t)(((temp[6]&0X00FF)<< 8) | (temp[7]&0X00FF));	//拼接数据
-	gyroData[1] = (int16_t)(((temp[8]&0X00FF)<< 8) | (temp[9]&0X00FF));
-	gyroData[2] = (int16_t)(((temp[10]&0X00FF)<< 8) | (temp[11]&0X00FF));
+	ret = api_spi_host_read(0,0x80|MPUREG_ACCEL_DATA_X0_UI,temp,12);
+	if(ret == true)
+	{
+		accData[0] = (int16_t)(((temp[0]&0X00FF)<< 8) | (temp[1]&0X00FF));	//拼接数据
+		accData[1] = (int16_t)(((temp[2]&0X00FF)<< 8) | (temp[3]&0X00FF));
+		accData[2] = (int16_t)(((temp[4]&0X00FF)<< 8) | (temp[5]&0X00FF));
+		gyroData[0] = (int16_t)(((temp[6]&0X00FF)<< 8) | (temp[7]&0X00FF));	//拼接数据
+		gyroData[1] = (int16_t)(((temp[8]&0X00FF)<< 8) | (temp[9]&0X00FF));
+		gyroData[2] = (int16_t)(((temp[10]&0X00FF)<< 8) | (temp[11]&0X00FF));
 
-//	logd("AX = %d  AY = %d  AZ = %d\r\n", AcceXYZ.AcceX,AcceXYZ.AcceY,AcceXYZ.AcceZ);
-//	logd("GX = %d  GY = %d  GZ = %d\r\n", GyroXYZ.GyroX,GyroXYZ.GyroY,GyroXYZ.GyroZ);
-
-	return TRUE;
+	//	logd("AX = %d  AY = %d  AZ = %d\r\n", AcceXYZ.AcceX,AcceXYZ.AcceY,AcceXYZ.AcceZ);
+	//	logd("GX = %d  GY = %d  GZ = %d\r\n", GyroXYZ.GyroX,GyroXYZ.GyroY,GyroXYZ.GyroZ);
+	}
+	return ret;
 }
 
 

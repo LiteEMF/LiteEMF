@@ -28,7 +28,11 @@ extern "C" {
 #ifndef SPI_SOFT_ENABLE
 #define SPI_SOFT_ENABLE    0
 #endif
-
+#if SPI_SOFT_ENABLE
+#ifndef FASTSPI_SOFT_ENABLE
+#define FASTSPI_SOFT_ENABLE    1
+#endif
+#endif
 
 #define SPI_BADU_POS		(0)
 #define SPI_BADU_MASK		0X0000FFFF		//KHZ
@@ -52,6 +56,22 @@ extern "C" {
 #endif
 
 
+#if FASTSPI_SOFT_ENABLE
+#define SPI_CLK_BIT           			BIT(0)// set clk
+#define SPI_CLK_PORT(x)       			JL_PORTA->x
+#define SPI_MOSI_BIT            		BIT(1)// set mosi
+#define SPI_MOSI_PORT(x)        		JL_PORTA->x
+#define SPI_MISO_BIT            		BIT(2)// set miso
+#define SPI_MISO_PORT(x)        		JL_PORTA->x
+
+#define SOFTSPI_CS_PORT       			IO_PORTC_07
+#define softspi_cs_h()                  api_gpio_out(SOFTSPI_CS_PORT, 1)
+#define softspi_cs_l()                  api_gpio_out(SOFTSPI_CS_PORT, 0)
+
+#define bit_delay_r()  asm("nop");asm("nop");asm("nop");asm("nop");
+#define bit_delay_w()  asm("nop");asm("nop");asm("nop");asm("nop");asm("nop");asm("nop");
+
+#else
 #ifndef SPI_SCLK
 #define SPI_SCLK(id,x)    api_gpio_out(m_spi_map[id].clk ,x) 	
 #endif
@@ -61,8 +81,7 @@ extern "C" {
 #ifndef SPI_MISO
 #define SPI_MISO(id)      api_gpio_in(m_spi_map[id].miso)
 #endif
-
-
+#endif
 
 /******************************************************************************************************
 **	Parameters

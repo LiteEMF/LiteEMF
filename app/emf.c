@@ -75,11 +75,11 @@ bool emf_api_init(void)
 	#endif
 
 	api_tick_init();
+	hw_user_vender_init();	
+	
 	#if API_STORAGE_ENABLE
 	api_storage_init();
 	#endif
-
-	hw_user_vender_init();
 
 	#if API_WDT_ENABLE
 	api_wdt_init(API_WDT_TIME);
