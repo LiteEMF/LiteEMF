@@ -19,6 +19,7 @@
 #include  "api/api_gpio.h"
 #include  "api/api_tick.h"
 
+#include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -84,10 +85,10 @@ bool app_set_led(uint8_t id, uint8_t period,uint8_t times)
 	if (id >= m_led_num) return false;
 
 	
-	if(times){			//设置第默认灭灯,保证完整的闪烁周期
+	if(times){			//设置默认灭灯,保证完整的闪烁周期
 		led_ctb[id].turn = 0;
 	}else if((led_ctb[id].period != period) && (period != LED_ON) && (period != LED_OFF)){		//sync
-		for(i=0; i< m_led_num; i++){
+		for(i=0; i < m_led_num; i++){
 			if(i == id) continue;
 			if (period == led_ctb[i].period){
 				led_ctb[id].turn = led_ctb[i].turn;

@@ -128,7 +128,7 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 		#endif
 	}else{
 		api_bt_ctb_t* bt_ctbp;
-		bt_ctbp = api_bt_get_ctb(id);
+		bt_ctbp = api_bt_get_ctb(trp);
 		if(NULL != bt_ctbp){
 			switch(trp){
 			case TR_BLE		:

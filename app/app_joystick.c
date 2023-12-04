@@ -72,10 +72,28 @@ __WEAK bool app_joystick_get_adc(joystick_t* joystickp)
     #ifdef HW_ADC_MAP
 	joystickp->tarigger[APP_TRIGGER_L_ID] = api_adc_value(ADC_L2_ID);
     joystickp->tarigger[APP_TRIGGER_R_ID] = api_adc_value(ADC_R2_ID);
-	joystickp->stick[APP_STICK_L_ID].x = api_adc_value(ADC_LX_ID);
-    joystickp->stick[APP_STICK_L_ID].y = api_adc_value(ADC_LY_ID);
-	joystickp->stick[APP_STICK_R_ID].x = api_adc_value(ADC_RX_ID);
-    joystickp->stick[APP_STICK_R_ID].y = api_adc_value(ADC_RY_ID);
+
+    #if ID_NULL != ADC_LX_ID 
+	    joystickp->stick[APP_STICK_L_ID].x = api_adc_value(ADC_LX_ID);
+    #else
+        joystickp->stick[APP_STICK_L_ID].x = m_cal.mid.stick[APP_STICK_L_ID].x;
+    #endif
+    #if ID_NULL != ADC_LY_ID 
+        joystickp->stick[APP_STICK_L_ID].y = api_adc_value(ADC_LY_ID);
+    #else
+        joystickp->stick[APP_STICK_L_ID].y = m_cal.mid.stick[APP_STICK_L_ID].y;
+    #endif
+    #if ID_NULL != ADC_RX_ID 
+	    joystickp->stick[APP_STICK_R_ID].x = api_adc_value(ADC_RX_ID);
+    #else
+        joystickp->stick[APP_STICK_R_ID].x = m_cal.mid.stick[APP_STICK_R_ID].x;
+    #endif
+    #if ID_NULL != ADC_RY_ID 
+        joystickp->stick[APP_STICK_R_ID].y = api_adc_value(ADC_RY_ID);
+    #else
+        joystickp->stick[APP_STICK_R_ID].y = m_cal.mid.stick[APP_STICK_R_ID].y;
+    #endif
+
     // logd("adc:%d %d, %d %d\n",joystickp->stick[APP_STICK_L_ID].x,
     //                     joystickp->stick[APP_STICK_L_ID].y,
     //                     joystickp->stick[APP_STICK_R_ID].x,
@@ -251,12 +269,12 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
     if(x > 0){
         calx_r = m_cal.max.stick[id].x - m_cal.mid.stick[id].x;
     }else{
-        calx_r =  (m_cal.mid.stick[id].x - m_cal.min.stick[id].x);
+        calx_r = (m_cal.mid.stick[id].x - m_cal.min.stick[id].x);
     }
     if(y > 0){
-        caly_r =  (m_cal.max.stick[id].y - m_cal.mid.stick[id].y);
+        caly_r = (m_cal.max.stick[id].y - m_cal.mid.stick[id].y);
     }else{
-        caly_r =  (m_cal.mid.stick[id].y - m_cal.min.stick[id].y);
+        caly_r = (m_cal.mid.stick[id].y - m_cal.min.stick[id].y);
     }
     
     if(0 == calx_r) calx_r = 1;         //avoid div 0
@@ -490,10 +508,29 @@ static void joystick_do_cal(joystick_t* adcp)
         joystick_get_cal_val(&s_cal,&r,adcp);
         for (id = 0; id < APP_STICK_NUMS; id++){    //check
             if((r.stick[id].x < STICK_LIMIT_MIN_R) || (r.stick[id].y < STICK_LIMIT_MIN_R)){
+                if(id == APP_STICK_L_ID){
+                    #if (ID_NULL == ADC_LX_ID) || (ID_NULL == ADC_LY_ID)
+                    continue;
+                    #endif
+                }else{
+                    #if (ID_NULL == ADC_RX_ID) || (ID_NULL == ADC_LY_ID) 
+                    continue;
+                    #endif
+                }
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
                 logi("stick[%d] cal fail, %d %d\n", id, r.stick[id].x, r.stick[id].y);
             }
             if(r.tarigger[id] < TRIGGER_LIMIT_MIN_R){
+                if(id == APP_TRIGGER_L_ID){
+                    #if (ID_NULL == ADC_L2_ID)
+                    continue;
+                    #endif
+                }else{
+                    #if (ID_NULL == ADC_R2_ID)
+                    continue;
+                    #endif
+                }
+                
                 joystick_cal_sta = JOYSTICK_CAL_FAILED;
                 logi("tarigger[%d] cal fail, %d %d %d\n", id, r.tarigger[id], s_cal.min.tarigger[id], s_cal.max.tarigger[id]);
             }
@@ -586,7 +623,7 @@ void app_joystick_task(void *pa)
 {
     uint8_t id;
     joystick_t joystick_adc;
-    static s_ignore_num = 20;          //忽略ADC前面20个不可靠数据
+    static uint8_t s_ignore_num = 20;          //忽略ADC前面20个不可靠数据
 
     app_joystick_get_adc(&joystick_adc);
     if(0 == s_ignore_num){

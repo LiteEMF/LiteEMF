@@ -46,6 +46,7 @@
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
 api_bt_ctb_t m_ble = {BLE_TYPE_SUPPORT, BLE_HID_SUPPORT, true};
+bool m_ble_adv_discoverable = true;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLEC)					//ble central
@@ -868,7 +869,8 @@ static bool api_bt_ctb_init(void)
 			bt_ctbp->inteval_10us = 1500;
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;
-
+			logd("bt%d type=%x %x", bt, bt_ctbp->types, bt_ctbp->hid_types);
+			
 			if(BT_EDR == bt){
 				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
 				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){		//switch sniff by remote

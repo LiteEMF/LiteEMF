@@ -290,6 +290,7 @@ typedef struct{
 
 #if BT_SUPPORT & BIT_ENUM(TR_BLE)					//ble peripheral
 extern api_bt_ctb_t m_ble;
+extern bool m_ble_adv_discoverable;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
