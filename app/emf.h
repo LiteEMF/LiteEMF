@@ -105,6 +105,9 @@
 #if APP_RUMBLE_ENABLE
 #include "app/app_rumble.h"
 #endif
+#if APP_INFR_ENABLE
+#include "app/app_infr.h"
+#endif
 #if APP_LED_ENABLE
 #include "app/app_led.h"
 #endif

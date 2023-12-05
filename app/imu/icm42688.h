@@ -145,8 +145,44 @@
 #define MPUREG_OFFSET_USER_7_B4   0x7E
 #define MPUREG_OFFSET_USER_8_B4   0x7F
 
-#define ACC_1G               512
+#define AFS_2G  0x03
+#define AFS_4G  0x02
+#define AFS_8G  0x01
+#define AFS_16G 0x00  // default
 
+#define GFS_2000DPS   0x00 // default
+#define GFS_1000DPS   0x01
+#define GFS_500DPS    0x02
+#define GFS_250DPS    0x03
+#define GFS_125DPS    0x04
+#define GFS_62_5DPS   0x05
+#define GFS_31_25DPS  0x06
+#define GFS_15_125DPS 0x07
+
+#define AODR_8000Hz   0x03
+#define AODR_4000Hz   0x04
+#define AODR_2000Hz   0x05
+#define AODR_1000Hz   0x06 // default
+#define AODR_200Hz    0x07
+#define AODR_100Hz    0x08
+#define AODR_50Hz     0x09
+#define AODR_25Hz     0x0A
+#define AODR_12_5Hz   0x0B
+#define AODR_6_25Hz   0x0C
+#define AODR_3_125Hz  0x0D
+#define AODR_1_5625Hz 0x0E
+#define AODR_500Hz    0x0F
+
+#define GODR_8000Hz  0x03
+#define GODR_4000Hz  0x04
+#define GODR_2000Hz  0x05
+#define GODR_1000Hz  0x06 // default
+#define GODR_200Hz   0x07
+#define GODR_100Hz   0x08
+#define GODR_50Hz    0x09
+#define GODR_25Hz    0x0A
+#define GODR_12_5Hz  0x0B
+#define GODR_500Hz   0x0F
 
 /******************************************************************************************************
 **	Parameters
@@ -174,7 +210,7 @@ typedef struct {
 uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range);
 void ICM42688_Sleep(void);
 bool ICM42688_GetImuData(int16_t *accData, int16_t *gyroData);
-uint8_t MotionState_Process();
+void ICM42688_IMUupdate(float gx, float gy, float gz, float ax, float ay, float az);
 
 
 #endif

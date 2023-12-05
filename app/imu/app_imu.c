@@ -332,6 +332,7 @@ void app_imu_task(void* pa)
 
 	if(app_imu_get_raw(&acc, &gyro)){
 
+		ICM42688_IMUupdate(gyro.x,gyro.y,gyro.z, acc.x,acc.y,acc.z);
 		// #if IMU_FILTER_ENABLE
 		// app_imu_filter(&acc, &gyro);
 		// #else

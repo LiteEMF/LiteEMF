@@ -61,38 +61,38 @@ static void spi_write(uint8_t id,uint8_t buf)
 	struct _dat_bit *_dat = (struct _dat_bit *)&buf;
 	_dat->bit7 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit6 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit5 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit4 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit3 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit2 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit1 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
     _dat->bit0 ? SPI_MOSI_PORT(OUT) |= SPI_MOSI_BIT : (SPI_MOSI_PORT(OUT) &= ~SPI_MOSI_BIT);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
-    bit_delay_w();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
 #else
-	uint8_t i;
+	uint32_t i;
 	for(i = 0; i < 8; i++ )
 	{
 		SPI_SCLK(id,0);		
@@ -118,46 +118,38 @@ static uint8_t spi_read(uint8_t id)
     struct _dat_bit *_dat = (struct _dat_bit *)&read_dat;
 	SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit7 = 1 : (_dat->bit7 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit6 = 1 : (_dat->bit6 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit5 = 1 : (_dat->bit5 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit4 = 1 : (_dat->bit4 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit3 = 1 : (_dat->bit3 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit2 = 1 : (_dat->bit2 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit1 = 1 : (_dat->bit1 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
-    bit_delay_r();
+    SPI_DELAY(id);
     SPI_CLK_PORT(OUT) |=  SPI_CLK_BIT;
     (SPI_MISO_PORT(IN)& SPI_MISO_BIT) ? _dat->bit0 = 1 : (_dat->bit0 = 0);
-    asm("nop");asm("nop");
     SPI_CLK_PORT(OUT) &= ~SPI_CLK_BIT;
 	return read_dat;
 #else
-	uint8_t i,buf = 0;
+	uint32_t i,buf = 0;
 	for( i = 0; i < 8; i++ ){
 		SPI_DELAY(id);
 		SPI_SCLK(id,1);		
@@ -179,7 +171,7 @@ static uint8_t spi_read(uint8_t id)
 static bool soft_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 {
     bool ret = false;
-	uint8_t i;
+	uint32_t i;
 
 	if(addr >> 8){
 		spi_write(id,addr >> 8);
@@ -198,7 +190,7 @@ static bool soft_spi_write(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 bool soft_spi_read(uint8_t id,uint16_t addr, uint8_t * buf, uint8_t len)
 {
     bool ret = false;
-	uint8_t i;
+	uint32_t i;
 
 	if(addr >> 8){
 		spi_write(id,addr >> 8);
