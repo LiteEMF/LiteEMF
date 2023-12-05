@@ -102,6 +102,7 @@ extern trp_t test_trp;
 ******************************************************************************************************/
 void app_command_init(void);
 bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);		//WEAK
+bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);
 bool app_command_rx(trp_handle_t *phandle,uint8_t *buf, uint8_t len);
 bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c);		
 bool app_command_rx_fifo(trp_handle_t *phandle, app_fifo_t* fifop);

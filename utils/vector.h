@@ -88,7 +88,33 @@ typedef struct{
 	float y;
 	float z;
 }axis3f_t;
+typedef struct{
+	int8_t x;
+	int8_t y;
+	int8_t z;
+	int8_t w;
+}axis4_t;
 
+typedef struct{
+	int16_t x;	
+	int16_t y;
+	int16_t z;
+	int16_t w;
+}axis4i_t;
+
+typedef struct{
+	int32_t x;	
+	int32_t y;
+	int32_t z;
+	int32_t wait_completion_del;
+}axis4l_t;
+
+typedef struct{
+	float x;
+	float y;
+	float z;
+	float w;
+}axis4f_t;
 
 typedef struct{			//vector
 	int8_t x;			//x sin_a

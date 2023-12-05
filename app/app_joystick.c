@@ -43,7 +43,7 @@ joystick_cal_sta_t joystick_cal_sta;
 **	static Parameters
 *******************************************************************************************************/
 const_t axis2_t stick_active[] = APP_STICK_ACTIVE;
-const_t uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;
+uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;          //支持动态调整trigger方向
 
 
 #if API_STORAGE_ENABLE
@@ -118,6 +118,23 @@ void joystick_cal_dump(joystick_cal_t *calp)
     logd("stick ry: %d %d %d\n", calp->min.stick[1].y,calp->mid.stick[1].y,calp->max.stick[1].y);
     logd("tarigger l: %d  %d\n", calp->min.tarigger[0],calp->max.tarigger[0]);
     logd("tarigger r: %d  %d\n", calp->min.tarigger[1],calp->max.tarigger[1]);
+}
+
+void update_trigger_active(void)
+{
+    uint8_t i;
+
+    if(APP_JOYSTICK_CAL_MASK == joystick_calp->cal_mask){
+        for(i=0; i<APP_TRIGGER_NUMS; i++){
+            if((joystick_calp->max.tarigger[i] - joystick_calp->mid.tarigger[i]) 
+                >= (joystick_calp->mid.tarigger[i] - joystick_calp->min.tarigger[i])){
+                trigger_active[i] = true;
+            }else{
+                trigger_active[i] = false;
+            }
+        }
+        logd("trigger active:", trigger_active[0], trigger_active[1]);
+    }
 }
 
 uint8_t get_stick_dir(axis2i_t* stickp)
@@ -384,6 +401,11 @@ static void joystick_dynamic_cal(joystick_t* adcp)
 
             joystick_calp->min.tarigger[id] = adcp->tarigger[id];
             joystick_calp->max.tarigger[id] = adcp->tarigger[id] + TRIGGER_CAL_DEFAULT_R; 
+            if(trigger_active[id]){
+                joystick_calp->mid.tarigger[id] = joystick_calp->min.tarigger[id];
+            }else{
+                joystick_calp->mid.tarigger[id] = joystick_calp->max.tarigger[id];
+            }
         }
 
         #if API_STORAGE_ENABLE
@@ -548,7 +570,9 @@ static void joystick_do_cal(joystick_t* adcp)
             #endif
 
             m_cal = *joystick_calp;
+            update_trigger_active();
         }
+        joystick_cal_dump(joystick_calp);
 
         cal_timer = m_systick;
         break;
@@ -560,10 +584,8 @@ static void joystick_do_cal(joystick_t* adcp)
             }else{
                 logi("joystick cal failed!\n");
             }
-
-            s_cal = m_cal;
+			s_cal = m_cal;
             joystick_cal_sta = JOYSTICK_CAL_NONE;
-            joystick_cal_dump(joystick_calp);
         }
         break;
     default:
@@ -599,7 +621,8 @@ bool app_joystick_init(void)
     joystick_cal_sta = JOYSTICK_CAL_NONE;
     memset(&m_joystick,0,sizeof(m_joystick));
     m_cal = *joystick_calp;
-    s_cal = m_cal;
+    s_cal = *joystick_calp;
+    update_trigger_active();
     joystick_cal_dump(joystick_calp);
 	return true;
 }
