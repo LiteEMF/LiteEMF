@@ -162,7 +162,7 @@ bool emf_init(void)
 	app_rumble_init();
 	#endif
 	#if APP_INFR_ENABLE
-	app_infr_init();
+	app_infr_init(INFR_PWM_ID1,INFR_PWM_ID2);
 	#endif
 	#if APP_LED_ENABLE
 	app_led_init();
