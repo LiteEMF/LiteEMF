@@ -34,7 +34,7 @@ extern "C" {
 #endif
 
 #ifndef FIR_FILTER_MAX_LENGTH
-#define FIR_FILTER_MAX_LENGTH 		8
+#define FIR_FILTER_MAX_LENGTH 		16
 #endif
 #ifndef SAMPLE_FIR_FILTER			//used fixed value
 #define SAMPLE_FIR_FILTER			1
@@ -86,7 +86,7 @@ typedef struct {
 	float 	out;
 	float 	sum;
 	float 	buf[FIR_FILTER_MAX_LENGTH];
-	float 	impulse_response[FIR_FILTER_MAX_LENGTH];
+	float 	impulse_response[FIR_FILTER_MAX_LENGTH];		//imp[0] is newest data
     #endif
 } firf_t;
 
@@ -124,6 +124,8 @@ extern void fir_fiter(firf_t *firp, int32_t measure);
 extern void fir_axis2f_fiter(firf_axis2f_t *firp, const axis2l_t* measurep);
 extern void fir_axis3f_fiter(firf_axis3f_t *firp, const axis3l_t* measurep);
 
+
+extern int32_t variance_calculate(int16_t value, int16_t* s_buf, uint8_t size);
 #ifdef __cplusplus
 }
 #endif

@@ -34,6 +34,17 @@ joystick:  stick  trigger
 #endif
 
 #define APP_JOYSTICK_CAL_MASK   0XAA55
+
+
+// @ref: https://github.dev/FreeJoy-Team/FreeJoy FILTER_LEVEL_1_COEF fir impulse_response
+// float FILTER_LEVEL_1_COEF[FIR_FILTER_MAX_LENGTH] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+// float FILTER_LEVEL_2_COEF[FIR_FILTER_MAX_LENGTH] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+// float FILTER_LEVEL_3_COEF[FIR_FILTER_MAX_LENGTH] = {25, 20, 10, 10, 8, 6, 6, 4, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0};
+// float FILTER_LEVEL_4_COEF[FIR_FILTER_MAX_LENGTH] = {20, 15, 10, 8, 8, 6, 6, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0};
+// float FILTER_LEVEL_5_COEF[FIR_FILTER_MAX_LENGTH] = {15, 13, 11, 10, 10, 9, 7, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
+// float FILTER_LEVEL_6_COEF[FIR_FILTER_MAX_LENGTH] = {12, 10, 8, 8, 8, 7, 7, 6, 6, 5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1};
+// float FILTER_LEVEL_7_COEF[FIR_FILTER_MAX_LENGTH] = {8, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 3, 2, 1, 1, 1};
+
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
@@ -54,7 +65,7 @@ joystick_cal_t *const joystick_calp = &joystick_cal_default;
 #endif
 
 static joystick_cal_t s_cal;
-joystick_cal_t m_cal;                           //动态校准后的校准数据, 动态校准不保存
+joystick_cal_t m_trim_cal;                     //动态校准后的校准数据, 动态校准不保存
 int16_t dynamic_cal_max_r[APP_STICK_NUMS] = {  //动态校准最大半径值, 默认3/2*r, 不修改情况下为ADC_RES_MAX/2
     STICK_CAL_DEFAULT_R*3/2, 
     STICK_CAL_DEFAULT_R*3/2
@@ -76,22 +87,22 @@ __WEAK bool app_joystick_get_adc(joystick_t* joystickp)
     #if ID_NULL != ADC_LX_ID 
 	    joystickp->stick[APP_STICK_L_ID].x = api_adc_value(ADC_LX_ID);
     #else
-        joystickp->stick[APP_STICK_L_ID].x = m_cal.mid.stick[APP_STICK_L_ID].x;
+        joystickp->stick[APP_STICK_L_ID].x = m_trim_cal.mid.stick[APP_STICK_L_ID].x;
     #endif
     #if ID_NULL != ADC_LY_ID 
         joystickp->stick[APP_STICK_L_ID].y = api_adc_value(ADC_LY_ID);
     #else
-        joystickp->stick[APP_STICK_L_ID].y = m_cal.mid.stick[APP_STICK_L_ID].y;
+        joystickp->stick[APP_STICK_L_ID].y = m_trim_cal.mid.stick[APP_STICK_L_ID].y;
     #endif
     #if ID_NULL != ADC_RX_ID 
 	    joystickp->stick[APP_STICK_R_ID].x = api_adc_value(ADC_RX_ID);
     #else
-        joystickp->stick[APP_STICK_R_ID].x = m_cal.mid.stick[APP_STICK_R_ID].x;
+        joystickp->stick[APP_STICK_R_ID].x = m_trim_cal.mid.stick[APP_STICK_R_ID].x;
     #endif
     #if ID_NULL != ADC_RY_ID 
         joystickp->stick[APP_STICK_R_ID].y = api_adc_value(ADC_RY_ID);
     #else
-        joystickp->stick[APP_STICK_R_ID].y = m_cal.mid.stick[APP_STICK_R_ID].y;
+        joystickp->stick[APP_STICK_R_ID].y = m_trim_cal.mid.stick[APP_STICK_R_ID].y;
     #endif
 
     // logd("adc:%d %d, %d %d\n",joystickp->stick[APP_STICK_L_ID].x,
@@ -193,10 +204,52 @@ void get_stick_val(uint8_t dir, axis2i_t* stickp)
 }
 
 
-void app_stick_deadzone(joystick_cfg_t* cfgp,axis2i_t* stickp)
+
+
+/*******************************************************************
+** Parameters: deadband: 死区范围 //TODO带测试
+** Returns:	
+** Description:	Dynamic deadband implementation 动态死区保持
+@ref: https://github.dev/FreeJoy-Team/FreeJoy IsDynamicDeadbandHolding	
+*******************************************************************/
+uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* pbuf, uint8_t size)
+{
+	uint8_t is_holding = 0;
+	int32_t	disp = 0;
+	int32_t treshold;
+
+    if (iabs(value - pbuf[0]) < 3*3*deadband){      // 3*3*deadband = 3 sigma
+        disp = variance_calculate(value, pbuf, size);
+
+        treshold = 3 * deadband;
+        if (disp < treshold*treshold){
+            is_holding = 1;
+        }
+    }
+
+	return is_holding;
+}
+
+/*******************************************************************
+** Parameters: pcurve_shape, shape_cnt: 曲线点
+** Returns:	
+** Description: 多点曲线转换
+@ref: https://github.dev/FreeJoy-Team/FreeJoy IsDynamicDeadbandHolding	
+*******************************************************************/
+
+void app_stick_curve_shape(axis2i_t* stickp, uint8_t* pcurve_shape, uint8_t shape_cnt)
+{
+    curve_shape_remap_axis2i(stickp, pcurve_shape, shape_cnt);
+}
+void app_trigger_curve_shape(int16_t *valp, uint8_t* pcurve_shape, uint8_t shape_cnt)
+{
+    *valp = curve_shape_remap(*valp, pcurve_shape, shape_cnt);
+}
+
+void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp)
 {
 	int32_t x,y;
-    uint8_t centre_percent=0,side_percent=100;        //deadzone percent
+    uint8_t centre_percent=0,side_percent=100;        //deadband percent
     vector2f_t vector;
     float scale;
 
@@ -208,8 +261,8 @@ void app_stick_deadzone(joystick_cfg_t* cfgp,axis2i_t* stickp)
     vector.r = vector.r * (100 / 32767.0);
 
     if(NULL != cfgp){
-        centre_percent = cfgp->centre_deadzone;
-        side_percent = 100-cfgp->side_deadzone;
+        centre_percent = cfgp->centre_deadband;
+        side_percent = 100-cfgp->side_deadband;
         if (cfgp->trunx) vector.x = -vector.x;
         if (cfgp->truny) vector.y = -vector.y;
     }
@@ -237,15 +290,15 @@ void app_stick_deadzone(joystick_cfg_t* cfgp,axis2i_t* stickp)
     stickp->y = constrain_int16(y);
 }
 
-void app_trigger_deadzone(joystick_cfg_t* cfgp,uint16_t *valp)
+void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp)
 {
 	uint16_t val = *valp;
     uint16_t min, max;
 
 	if(NULL != cfgp){
 		if (cfgp->trunx) val = 0xffff - val;
-		min = 0xffff * cfgp->centre_deadzone / 100;
-		max = 0xffff * (100 - cfgp->side_deadzone) / 100;
+		min = 0xffff * cfgp->centre_deadband / 100;
+		max = 0xffff * (100 - cfgp->side_deadband) / 100;
 		val = remap(val, min, max,0, 0xffff);
 	}
 
@@ -261,8 +314,8 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
 
     adc = adcp->tarigger[id];
 
-    adc_min = m_cal.min.tarigger[id];
-    adc_max = m_cal.max.tarigger[id];
+    adc_min = m_trim_cal.min.tarigger[id];
+    adc_max = m_trim_cal.max.tarigger[id];
 
 	ret = remap(adc, adc_min, adc_max,0, 0xffff);
     if(!trigger_active[id]){ 
@@ -281,17 +334,17 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
     if(id >= APP_STICK_NUMS) return;
 
     //get joystick movement length
-    x = 32768 * (adcp->stick[id].x - m_cal.mid.stick[id].x);
-    y = 32768 * (adcp->stick[id].y - m_cal.mid.stick[id].y);
+    x = 32768 * (adcp->stick[id].x - m_trim_cal.mid.stick[id].x);
+    y = 32768 * (adcp->stick[id].y - m_trim_cal.mid.stick[id].y);
     if(x > 0){
-        calx_r = m_cal.max.stick[id].x - m_cal.mid.stick[id].x;
+        calx_r = m_trim_cal.max.stick[id].x - m_trim_cal.mid.stick[id].x;
     }else{
-        calx_r = (m_cal.mid.stick[id].x - m_cal.min.stick[id].x);
+        calx_r = (m_trim_cal.mid.stick[id].x - m_trim_cal.min.stick[id].x);
     }
     if(y > 0){
-        caly_r = (m_cal.max.stick[id].y - m_cal.mid.stick[id].y);
+        caly_r = (m_trim_cal.max.stick[id].y - m_trim_cal.mid.stick[id].y);
     }else{
-        caly_r = (m_cal.mid.stick[id].y - m_cal.min.stick[id].y);
+        caly_r = (m_trim_cal.mid.stick[id].y - m_trim_cal.min.stick[id].y);
     }
     
     if(0 == calx_r) calx_r = 1;         //avoid div 0
@@ -305,7 +358,7 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
 
     stickp->x = constrain_int16(x);
     stickp->y = constrain_int16(y);
-    // if(id==0) logd("%d %d %d %d =%d",adcp->stick[0].y, 32768 * (adcp->stick[id].y - m_cal.mid.stick[id].y), caly_r,y,stickp->y );
+    // if(id==0) logd("%d %d %d %d =%d",adcp->stick[0].y, 32768 * (adcp->stick[id].y - m_trim_cal.mid.stick[id].y), caly_r,y,stickp->y );
 }
 
 
@@ -342,7 +395,7 @@ static bool joystick_get_cal_val(joystick_cal_t* calp, joystick_t* rp, joystick_
     return ret;
 }
 
-void joystick_set_cal_deadzone(joystick_cal_t *calp)
+void joystick_set_cal_deadband(joystick_cal_t *calp)
 {
     uint8_t id;
     axis2i_t axis;
@@ -350,20 +403,20 @@ void joystick_set_cal_deadzone(joystick_cal_t *calp)
     for (id = 0; id < APP_STICK_NUMS; id++){
         axis = calp->mid.stick[id];
         axis2i_sub(&axis, &calp->min.stick[id]);
-        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
+        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADBAND/100.0);
         axis2i_add(&calp->min.stick[id], &axis);
 
         axis = calp->max.stick[id];
         axis2i_sub(&axis, &calp->mid.stick[id]);
-        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADZONE/100.0);
+        AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADBAND/100.0);
         axis2i_sub(&calp->max.stick[id], &axis);
     }
     for (id = 0; id < APP_TRIGGER_NUMS; id++){
         //适配扳机硬件死区
         int16_t r;
         r = calp->max.tarigger[id] - calp->min.tarigger[id];
-        calp->min.tarigger[id] += r * TRIGGER_CAL_DEADZONE / 100;
-        calp->max.tarigger[id] -= r * TRIGGER_CAL_SIDE_DEADZONE / 100;
+        calp->min.tarigger[id] += r * TRIGGER_CAL_DEADBAND / 100;
+        calp->max.tarigger[id] -= r * TRIGGER_CAL_SIDE_DEADBAND / 100;
     }
 }
 
@@ -413,7 +466,7 @@ static void joystick_dynamic_cal(joystick_t* adcp)
         api_storage_auto_sync();
         #endif
 
-        m_cal = *joystick_calp;
+        m_trim_cal = *joystick_calp;
         s_cal = *joystick_calp;
         joystick_cal_dump(joystick_calp);
     }else{
@@ -425,60 +478,60 @@ static void joystick_dynamic_cal(joystick_t* adcp)
             if(dynamic_cal_num > 1000){
  
                 dynamic_cal_num = 0;
-                joystick_set_cal_deadzone(&s_cal);
+                joystick_set_cal_deadband(&s_cal);
                 for(id = 0; id < APP_STICK_NUMS; id++){
-                    if(s_cal.min.stick[id].x < m_cal.min.stick[id].x){
-                        r = m_cal.mid.stick[id].x - s_cal.min.stick[id].x;
+                    if(s_cal.min.stick[id].x < m_trim_cal.min.stick[id].x){
+                        r = m_trim_cal.mid.stick[id].x - s_cal.min.stick[id].x;
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
                             side_ret = true;
                         }
-                        m_cal.min.stick[id].x = m_cal.mid.stick[id].x - r;
+                        m_trim_cal.min.stick[id].x = m_trim_cal.mid.stick[id].x - r;
                     }
-                    if(s_cal.max.stick[id].x > m_cal.max.stick[id].x){
-                        r = s_cal.max.stick[id].x - m_cal.mid.stick[id].x;
+                    if(s_cal.max.stick[id].x > m_trim_cal.max.stick[id].x){
+                        r = s_cal.max.stick[id].x - m_trim_cal.mid.stick[id].x;
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
                             side_ret = true;
                         }
-                        m_cal.max.stick[id].x = m_cal.mid.stick[id].x + r;
-                    }
-
-                    if(s_cal.min.stick[id].y < m_cal.min.stick[id].y){
-                        r = m_cal.mid.stick[id].y - s_cal.min.stick[id].y;
-                        if(r > dynamic_cal_max_r[id]){
-                            r = dynamic_cal_max_r[id];
-                        }else{
-                            side_ret = true;
-                        }
-                        m_cal.min.stick[id].y = m_cal.mid.stick[id].y - r;
-                    }
-                    if(s_cal.max.stick[id].y > m_cal.max.stick[id].y){
-                        r = s_cal.max.stick[id].y - m_cal.mid.stick[id].y;
-                        if(r > dynamic_cal_max_r[id]){
-                            r = dynamic_cal_max_r[id];
-                        }else{
-                            side_ret = true;
-                        }
-                        m_cal.max.stick[id].y = m_cal.mid.stick[id].y + r;
+                        m_trim_cal.max.stick[id].x = m_trim_cal.mid.stick[id].x + r;
                     }
 
-                    if(s_cal.min.tarigger[id] < m_cal.min.tarigger[id]){
-                        m_cal.min.tarigger[id] = s_cal.min.tarigger[id];
+                    if(s_cal.min.stick[id].y < m_trim_cal.min.stick[id].y){
+                        r = m_trim_cal.mid.stick[id].y - s_cal.min.stick[id].y;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_trim_cal.min.stick[id].y = m_trim_cal.mid.stick[id].y - r;
+                    }
+                    if(s_cal.max.stick[id].y > m_trim_cal.max.stick[id].y){
+                        r = s_cal.max.stick[id].y - m_trim_cal.mid.stick[id].y;
+                        if(r > dynamic_cal_max_r[id]){
+                            r = dynamic_cal_max_r[id];
+                        }else{
+                            side_ret = true;
+                        }
+                        m_trim_cal.max.stick[id].y = m_trim_cal.mid.stick[id].y + r;
+                    }
+
+                    if(s_cal.min.tarigger[id] < m_trim_cal.min.tarigger[id]){
+                        m_trim_cal.min.tarigger[id] = s_cal.min.tarigger[id];
                         side_ret = true;
                     }
-                    if(s_cal.max.tarigger[id] > m_cal.max.tarigger[id]){
-                        m_cal.max.tarigger[id] = s_cal.max.tarigger[id];
+                    if(s_cal.max.tarigger[id] > m_trim_cal.max.tarigger[id]){
+                        m_trim_cal.max.tarigger[id] = s_cal.max.tarigger[id];
                         side_ret = true;
                     }
                 }
                 if(side_ret){
                     logd_b("joystick auto cal:");
-                    joystick_cal_dump(&m_cal);
+                    joystick_cal_dump(&m_trim_cal);
                 }
-                s_cal = m_cal;
+                s_cal = m_trim_cal;
             }
         }
     }
@@ -560,7 +613,7 @@ static void joystick_do_cal(joystick_t* adcp)
 
         if(JOYSTICK_CAL_FAILED != joystick_cal_sta){    //cal fix
 
-            joystick_set_cal_deadzone(&s_cal);
+            joystick_set_cal_deadband(&s_cal);
             joystick_cal_sta = JOYSTICK_CAL_SUCCEED;
 
             #if API_STORAGE_ENABLE
@@ -569,7 +622,7 @@ static void joystick_do_cal(joystick_t* adcp)
             api_storage_auto_sync();
             #endif
 
-            m_cal = *joystick_calp;
+            m_trim_cal = *joystick_calp;
             update_trigger_active();
         }
         joystick_cal_dump(joystick_calp);
@@ -584,7 +637,7 @@ static void joystick_do_cal(joystick_t* adcp)
             }else{
                 logi("joystick cal failed!\n");
             }
-			s_cal = m_cal;
+			s_cal = m_trim_cal;
             joystick_cal_sta = JOYSTICK_CAL_NONE;
         }
         break;
@@ -620,7 +673,7 @@ bool app_joystick_init(void)
 {
     joystick_cal_sta = JOYSTICK_CAL_NONE;
     memset(&m_joystick,0,sizeof(m_joystick));
-    m_cal = *joystick_calp;
+    m_trim_cal = *joystick_calp;
     s_cal = *joystick_calp;
     update_trigger_active();
     joystick_cal_dump(joystick_calp);

@@ -198,3 +198,39 @@ void fir_axis3f_fiter(firf_axis3f_t *firp, const axis3l_t* measurep)
 }
 
 
+
+
+/*******************************************************************
+** Parameters:	pbuf,size: 缓存数据	
+** Returns:	
+** Description:	计算方差
+@ref: https://github.dev/FreeJoy-Team/FreeJoy IsDynamicDeadbandHolding	
+*******************************************************************/
+int32_t variance_calculate(int16_t value, int16_t* pbuf, uint8_t size)
+{
+	int32_t	disp = 0;
+	int32_t mean = 0;
+    uint8_t i;
+	
+    // shift buffer data and add a new value
+	for (i=size-1; i>0; i--){
+		pbuf[i] = pbuf[i-1];
+	}
+	pbuf[0] = value;
+	
+	// calculating mean value
+	for (i=0; i<size; i++){
+		mean += pbuf[i];
+	}
+	mean = mean/size;
+	
+	// calculating dispercy
+	for (i=0; i<size; i++){
+		disp += (pbuf[i] - mean)*(pbuf[i] - mean);
+	}
+	disp = disp/size;
+	
+	return disp;
+}
+
+

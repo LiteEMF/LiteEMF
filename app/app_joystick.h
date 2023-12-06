@@ -46,11 +46,11 @@ extern "C" {
 #ifndef STICK_LIMIT_MIN_R
 #define STICK_LIMIT_MIN_R (ADC_RES_MAX/4)
 #endif
-#ifndef STICK_CAL_DEADZONE
-#define STICK_CAL_DEADZONE       0
+#ifndef STICK_CAL_DEADBAND
+#define STICK_CAL_DEADBAND       0
 #endif
-#ifndef STICK_CAL_SIDE_DEADZONE
-#define STICK_CAL_SIDE_DEADZONE   3
+#ifndef STICK_CAL_SIDE_DEADBAND
+#define STICK_CAL_SIDE_DEADBAND   3
 #endif
 
 //trigger 上电未校准默认值
@@ -61,11 +61,11 @@ extern "C" {
 #ifndef TRIGGER_LIMIT_MIN_R
 #define TRIGGER_LIMIT_MIN_R (ADC_RES_MAX/2)
 #endif
-#ifndef TRIGGER_CAL_DEADZONE
-#define TRIGGER_CAL_DEADZONE      2
+#ifndef TRIGGER_CAL_DEADBAND
+#define TRIGGER_CAL_DEADBAND      2
 #endif
-#ifndef TRIGGER_CAL_SIDE_DEADZONE
-#define TRIGGER_CAL_SIDE_DEADZONE 2
+#ifndef TRIGGER_CAL_SIDE_DEADBAND
+#define TRIGGER_CAL_SIDE_DEADBAND 2
 #endif
 
 
@@ -77,8 +77,10 @@ extern "C" {
 typedef struct{
     uint8_t trunx;
     uint8_t truny;
-    uint8_t centre_deadzone;
-    uint8_t side_deadzone;
+    uint8_t centre_deadband;
+    uint8_t side_deadband;
+
+    
 } joystick_cfg_t;
 
 
@@ -121,9 +123,9 @@ void app_joystack_cal_start(void);
 void app_joystack_cal_end(void);
 uint8_t get_stick_dir(axis2i_t* stickp);
 void get_stick_val(uint8_t dir, axis2i_t* stickp);
-void app_stick_deadzone(joystick_cfg_t* cfgp,axis2i_t* stickp);
-void app_trigger_deadzone(joystick_cfg_t* cfgp,uint16_t *valp);
-
+void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp);
+void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp);
+uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* pbuf, uint8_t size);
 bool app_joystick_init(void);
 bool app_joystick_deinit(void);
 void app_joystick_task(void *pa);
