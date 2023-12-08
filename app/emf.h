@@ -108,6 +108,9 @@
 #if APP_INFR_ENABLE
 #include "app/app_infr.h"
 #endif
+#if APP_LRA_ENABLE
+#include "app/app_LRAtactile.h"
+#endif
 #if APP_LED_ENABLE
 #include "app/app_led.h"
 #endif

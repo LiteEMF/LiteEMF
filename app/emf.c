@@ -164,6 +164,9 @@ bool emf_init(void)
 	#if APP_INFR_ENABLE
 	app_infr_init(INFR_PWM_ID1,INFR_PWM_ID2);
 	#endif
+	#if APP_LRA_ENABLE
+	app_lra_init();
+	#endif
 	#if APP_LED_ENABLE
 	app_led_init();
 	#endif
@@ -281,6 +284,9 @@ void emf_handler(uint32_t period_10us)
 	#endif
 	#if APP_INFR_ENABLE
 	app_infr_handler(1*100);
+	#endif
+	#if APP_LRA_ENABLE
+	app_lra_handler(100*100);
 	#endif
 	#if APP_LED_ENABLE
 	app_led_handler(APP_LED_SLICE);
