@@ -33,12 +33,6 @@ extern "C" {
 #define KALMAN_H				1	/* z(n)=H*x(n)+w(n),w(n)~N(0,r)   */
 #endif
 
-#ifndef FIR_FILTER_MAX_LENGTH
-#define FIR_FILTER_MAX_LENGTH 		16
-#endif
-#ifndef SAMPLE_FIR_FILTER			//used fixed value
-#define SAMPLE_FIR_FILTER			1
-#endif
 
 
 
@@ -78,29 +72,23 @@ typedef struct {
 typedef struct {
 	uint8_t index;
 	uint8_t imp_size;
-    #if SAMPLE_FIR_FILTER
-    int32_t out;
-	int32_t sum;
-	int32_t buf[FIR_FILTER_MAX_LENGTH];
-    #else
 	float 	out;
 	float 	sum;
-	float 	buf[FIR_FILTER_MAX_LENGTH];
-	float 	impulse_response[FIR_FILTER_MAX_LENGTH];		//imp[0] is newest data
-    #endif
+	float*  pbuf;
+	float* 	pimpulse_response;		//imp[0] is newest data
 } firf_t;
 
 
 typedef struct {
 	firf_t x;	
 	firf_t y;
-}firf_axis2f_t;		//for ram space recommend SAMPLE_FIR_FILTER  mode
+}firf_axis2_t;
 
 typedef struct {
 	firf_t x;	
 	firf_t y;
 	firf_t z;
-}firf_axis3f_t;		//for ram space recommend SAMPLE_FIR_FILTER  mode
+}firf_axis3_t;
 
 
 /*****************************************************************************************************
@@ -117,13 +105,14 @@ extern void kalman_filter(kalman_t* kalmanp, float measure);
 extern void kalman_axis2f_filter(kalman_axis2f_t* kalmanp, const axis2f_t* measurep);
 extern void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep);
 
-extern void fir_fiter_init(firf_t *firp,float* imp,uint8_t imp_size);
-extern void fir_axis2f_fiter_init(firf_axis2f_t *firp,float* imp,uint8_t imp_size);
-extern void fir_axis3f_fiter_init(firf_axis3f_t *firp,float* imp,uint8_t imp_size);
-extern void fir_fiter(firf_t *firp, int32_t measure);
-extern void fir_axis2f_fiter(firf_axis2f_t *firp, const axis2l_t* measurep);
-extern void fir_axis3f_fiter(firf_axis3f_t *firp, const axis3l_t* measurep);
-
+extern void fir_fiter_init(firf_t *firp,float* imp,float* fbuf, uint8_t imp_size);
+extern void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf,uint8_t imp_size);
+extern void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf,uint8_t imp_size);
+extern void fir_fiter(firf_t *firp, float measure);
+extern void fir_axis2l_fiter(firf_axis2_t *firp, const axis2l_t* measurep);
+extern void fir_axis3l_fiter(firf_axis3_t *firp, const axis3l_t* measurep);
+void fir_axis2f_fiter(firf_axis2_t *firp, const axis2f_t* measurep);
+void fir_axis3f_fiter(firf_axis3_t *firp, const axis3f_t* measurep);
 
 extern int32_t variance_calculate(int16_t value, int16_t* s_buf, uint8_t size);
 #ifdef __cplusplus

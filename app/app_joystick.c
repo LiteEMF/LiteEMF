@@ -36,14 +36,13 @@ joystick:  stick  trigger
 #define APP_JOYSTICK_CAL_MASK   0XAA55
 
 
+#if APP_JOYSTICK_FIR_FILTER_ENABLE
 // @ref: https://github.dev/FreeJoy-Team/FreeJoy FILTER_LEVEL_1_COEF fir impulse_response
-// float FILTER_LEVEL_1_COEF[FIR_FILTER_MAX_LENGTH] = {40, 30, 15, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-// float FILTER_LEVEL_2_COEF[FIR_FILTER_MAX_LENGTH] = {30, 20, 10, 10, 10, 6, 6, 4, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-// float FILTER_LEVEL_3_COEF[FIR_FILTER_MAX_LENGTH] = {25, 20, 10, 10, 8, 6, 6, 4, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0};
-// float FILTER_LEVEL_4_COEF[FIR_FILTER_MAX_LENGTH] = {20, 15, 10, 8, 8, 6, 6, 6, 4, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0};
-// float FILTER_LEVEL_5_COEF[FIR_FILTER_MAX_LENGTH] = {15, 13, 11, 10, 10, 9, 7, 4, 3, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1};
-// float FILTER_LEVEL_6_COEF[FIR_FILTER_MAX_LENGTH] = {12, 10, 8, 8, 8, 7, 7, 6, 6, 5, 4, 4, 3, 3, 2, 2, 2, 1, 1, 1};
-// float FILTER_LEVEL_7_COEF[FIR_FILTER_MAX_LENGTH] = {8, 8, 7, 7, 7, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 3, 2, 1, 1, 1};
+const float joystick_fir_imp[5] = {0.4, 0.3, 0.15, 0.1, 0.05};
+float joystick_fir_buf[5];
+firf_axis2_t m_tick_fir[APP_STICK_NUMS];
+#endif
+
 
 /******************************************************************************************************
 **	public Parameters
@@ -677,6 +676,12 @@ bool app_joystick_init(void)
     s_cal = *joystick_calp;
     update_trigger_active();
     joystick_cal_dump(joystick_calp);
+
+
+    #if APP_JOYSTICK_FIR_FILTER_ENABLE
+    fir_axis2_fiter_init(&m_tick_fir[0], joystick_fir_imp, joystick_fir_buf, countof(joystick_fir_buf));
+    fir_axis2_fiter_init(&m_tick_fir[1], joystick_fir_imp, joystick_fir_buf, countof(joystick_fir_buf));
+    #endif
 	return true;
 }
 
@@ -702,6 +707,20 @@ void app_joystick_task(void *pa)
     static uint8_t s_ignore_num = 20;          //忽略ADC前面20个不可靠数据
 
     app_joystick_get_adc(&joystick_adc);
+
+    #if APP_JOYSTICK_FIR_FILTER_ENABLE
+        #if (ID_NULL == ADC_LX_ID) || (ID_NULL == ADC_LY_ID)        //没有摇杆不计算,节约算力
+        fir_axis2l_fiter(&m_tick_fir[APP_STICK_L_ID], &joystick_adc.stick[APP_STICK_L_ID]);
+        joystick_adc.stick[APP_STICK_L_ID].x = m_tick_fir[APP_STICK_L_ID].x.out;
+        joystick_adc.stick[APP_STICK_L_ID].y = m_tick_fir[APP_STICK_L_ID].y.out;
+        #endif
+        #if (ID_NULL == ADC_RX_ID) || (ID_NULL == ADC_LY_ID) 
+        fir_axis2l_fiter(&m_tick_fir[APP_STICK_R_ID], &joystick_adc.stick[APP_STICK_R_ID]);
+        joystick_adc.stick[APP_STICK_R_ID].x = m_tick_fir[APP_STICK_R_ID].x.out;
+        joystick_adc.stick[APP_STICK_R_ID].y = m_tick_fir[APP_STICK_R_ID].y.out;
+        #endif
+    #endif        
+
     if(0 == s_ignore_num){
         joystick_dynamic_cal(&joystick_adc);
         joystick_do_cal(&joystick_adc);

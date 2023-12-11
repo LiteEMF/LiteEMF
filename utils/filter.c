@@ -117,60 +117,55 @@ void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep)
 ** Returns:	
 ** Description:		fir filter
 *******************************************************************/
-void fir_fiter_init(firf_t *firp,float* imp,uint8_t imp_size)
+void fir_fiter_init(firf_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 {
-	uint8_t i; 
-
 	memset(firp,0,sizeof(firf_t));
-	firp->imp_size = MIN(imp_size,FIR_FILTER_MAX_LENGTH);
-	if(0 == firp->imp_size) firp->imp_size = FIR_FILTER_MAX_LENGTH;	 //防止imp_size为0
+	EMF_ASSERT(imp_size);
+	EMF_ASSERT(NULL != buf);
 
-	#if !SAMPLE_FIR_FILTER
-	for(i=0; i<firp->imp_size; i++){			//for default value
-		fir->impulse_response[i] = 1/firp->imp_size;
-	}
-	if(NULL != imp){
-		memcpy(fir->impulse_response,imp,firp->imp_size);
-	}
-	#endif
-	
-	UNUSED_VARIABLE(i);
+	firp->pbuf = fbuf;
+	firp->pimpulse_response = imp;
 }
-void fir_axis2f_fiter_init(firf_axis2f_t *firp,float* imp,uint8_t imp_size)
+void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,imp,imp_size);
-	fir_fiter_init(&firp->y,imp,imp_size);
+	fir_fiter_init(&firp->x,fbuf,imp,imp_size);
+	fir_fiter_init(&firp->y,fbuf,imp,imp_size);
 }
-void fir_axis3f_fiter_init(firf_axis3f_t *firp,float* imp,uint8_t imp_size)
+void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,imp,imp_size);
-	fir_fiter_init(&firp->y,imp,imp_size);
-	fir_fiter_init(&firp->z,imp,imp_size);
+	fir_fiter_init(&firp->x,fbuf,imp,imp_size);
+	fir_fiter_init(&firp->y,fbuf,imp,imp_size);
+	fir_fiter_init(&firp->z,fbuf,imp,imp_size);
 }
-void fir_fiter(firf_t *firp, int32_t measure)
+void fir_fiter(firf_t *firp, float measure)
 {
 	uint8_t n;
 	uint8_t sum_index;
 	
 	UNUSED_VARIABLE(n);
 	UNUSED_VARIABLE(sum_index);
+
+	if(NULL == firp->pbuf){				//防止参数异常
+		firp->out = measure;
+		return;
+	}
 	
-	#if SAMPLE_FIR_FILTER
-		firp->sum += measure - firp->buf[firp->index];
+	if(NULL == firp->pimpulse_response){		
+		firp->sum += measure - firp->pbuf[firp->index];	//优化节省算力获取sum
 		firp->out = firp->sum / firp->imp_size;
-	#endif
+	}
 	
 	/* Store latest sample in buffer */
-	firp->buf[firp->index] = measure;
+	firp->pbuf[firp->index] = measure;
 	firp->index++;
 	if (firp->index == firp->imp_size) {
 		firp->index = 0;
 	}
 
-	#if !SAMPLE_FIR_FILTER
+	if(NULL != firp->pimpulse_response){
 		/* Compute new output sample (via convolution) */
-		fir->sum = 0;
-		sum_index = fir->index;
+		firp->sum = 0;
+		sum_index = firp->index;
 
 		for ( n = 0; n < firp->imp_size; n++) {
 			/* Decrement index and wrap if necessary */
@@ -180,23 +175,35 @@ void fir_fiter(firf_t *firp, int32_t measure)
 				sum_index = firp->imp_size - 1;
 			}
 			/* Multiply impulse response with shifted input sample and add to output */
-			fir->sum += fir->impulse_response[n] * fir->buf[sum_index];
+			firp->sum += firp->pimpulse_response[n] * firp->pbuf[sum_index];
 		}
-		fir->out = fir->sum;
-    #endif
+		firp->out = firp->sum;
+    }
 }
-void fir_axis2f_fiter(firf_axis2f_t *firp, const axis2l_t* measurep)
+
+void fir_axis2l_fiter(firf_axis2_t *firp, const axis2l_t* measurep)
+{
+	fir_fiter(&firp->x, (float)measurep->x);
+	fir_fiter(&firp->y, (float)measurep->y);
+}
+void fir_axis3l_fiter(firf_axis3_t *firp, const axis3l_t* measurep)
+{
+	fir_fiter(&firp->x, (float)measurep->x);
+	fir_fiter(&firp->y, (float)measurep->y);
+	fir_fiter(&firp->z, (float)measurep->z);
+}
+
+void fir_axis2f_fiter(firf_axis2_t *firp, const axis2f_t* measurep)
 {
 	fir_fiter(&firp->x, measurep->x);
 	fir_fiter(&firp->y, measurep->y);
 }
-void fir_axis3f_fiter(firf_axis3f_t *firp, const axis3l_t* measurep)
+void fir_axis3f_fiter(firf_axis3_t *firp, const axis3f_t* measurep)
 {
 	fir_fiter(&firp->x, measurep->x);
 	fir_fiter(&firp->y, measurep->y);
 	fir_fiter(&firp->z, measurep->z);
 }
-
 
 
 

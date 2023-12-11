@@ -179,11 +179,11 @@ typedef enum{								//设备HID 指令
 	SWITCH_UNKNOWN_REPORT_ID	=0X32,
 	SWITCH_UNKNOWN2_REPORT_ID	=0X33,
 }switch_hid_id_t;
-typedef struct	 //只定义有用数据  其他数据最后附加
+typedef struct	 //只定义有用数据  其他数据最后附加,//小端
 {
-	uint16_t hf:9; //high frequency
-	uint16_t hf_amp:7; //high frequency altitude
-	uint16_t lf:7; //low frequency
+	uint16_t hf:9; 		//high frequency
+	uint16_t hf_amp:7; 	//high frequency altitude
+	uint16_t lf:7; 		//low frequency
 	uint16_t lf_amp:9;
 }switch_rumble_bit_t;	//4
 typedef struct

@@ -31,9 +31,9 @@ extern "C" {
 #ifndef STICK_DIR_VAL
 #define STICK_DIR_VAL			10900
 #endif
-
-
-
+#ifndef JOYSTICK_CAL_TIMEOUT
+#define JOYSTICK_CAL_TIMEOUT          0
+#endif
 //stick 上电未校准默认值
 #ifndef STICK_CAL_DEFAULT_R
 #define STICK_CAL_DEFAULT_R			(ADC_RES_MAX/4)

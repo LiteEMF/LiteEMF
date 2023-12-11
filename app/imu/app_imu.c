@@ -63,7 +63,8 @@ bool imu_auto_cal;
 **	static Parameters
 *******************************************************************************************************/
 #if IMU_FILTER_ENABLE
-	static firf_axis3f_t gyro_filter;
+	static firf_axis3_t gyro_filter;
+	static float gyro_filter_buf[4];
 
 	#if ACC_FILTER_KALMAN
 	static kalman_axis3f_t acc_filter;
@@ -104,7 +105,7 @@ __WEAK void app_imu_event(imu_cal_sta_t event)
 #if IMU_FILTER_ENABLE
 static void app_imu_filter_init(void)
 {
-	fir_axis3f_fiter_init(&gyro_filter,NULL,4);
+	fir_axis3_fiter_init(&gyro_filter,NULL,gyro_filter_buf,countof(gyro_filter_buf));
 	#if ACC_FILTER_KALMAN
 	kalman_axis3f_filter_init(&acc_filter,ACC_KALMAN_Q,ACC_KALMAN_R);
 	#endif
@@ -128,7 +129,7 @@ static void app_imu_filter(axis3i_t* accp,axis3i_t* gyrop)
 	AXIS3_COPY(&m_acc,&acc_filter);
 	#endif
 
-	fir_axis3f_fiter(&gyro_filter, &gyro);
+	fir_axis3l_fiter(&gyro_filter, &gyro);
 	m_gyro.x = gyro_filter.x.out;
 	m_gyro.x = gyro_filter.x.out;
 	m_gyro.x = gyro_filter.x.out;

@@ -219,7 +219,7 @@ void emf_handler(uint32_t period_10us)
 	
 	UNUSED_PARAMETER(period_10us);
 	
-	if( m_systick - live_timer >= 10000){
+	if( m_systick - live_timer >= 30000){
 		live_timer = m_systick;
 		logd("t=%ld %ld\n", m_systick,m_task_tick10us);
 	}
