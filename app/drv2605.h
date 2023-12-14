@@ -19,7 +19,7 @@
 ** Defined
 *******************************************************************************************************/
 #define IIC_DRV2605_ID      0
-#define DRV2605_ADDRESS 	0x5A
+#define DRV2605_ADDRESS 	(0x5A<<1)
 
 #define STATUS_Reg          0x00
 #define MODE_Reg            0x01

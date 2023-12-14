@@ -29,6 +29,11 @@ extern "C" {
 #define SPI_SOFT_ENABLE    0
 #endif
 
+#if SPI_SOFT_ENABLE
+#ifndef FASTSPI_SOFT_ENABLE
+#define FASTSPI_SOFT_ENABLE    0
+#endif
+#endif
 
 #define SPI_BADU_POS		(0)
 #define SPI_BADU_MASK		0X0000FFFF		//KHZ

@@ -100,8 +100,18 @@ static bool write(uint8_t id,uint8_t buf)
 	uint8_t i;
     IIC_SDA_DIR(id,PIN_OUT);
     for(i=0;i<8;i++){
-        write_bit(id,BOOL_SET(buf&0x80));
-        buf<<=1;
+    //    write_bit(id,BOOL_SET(buf&0x80));
+    //    buf<<=1;
+		if ((buf << i) & 0x80) {
+            IIC_SDA_OUT(id,1);
+        } else {
+            IIC_SDA_OUT(id,0);
+        }
+        IIC_DELAY(id);
+        IIC_SCK_OUT(id,1);
+        IIC_DELAY(id);
+		IIC_DELAY(id);
+        IIC_SCK_OUT(id,0);
     }
     IIC_SDA_DIR(id,PIN_IN);
 	#ifdef IIC_ACK_TIMEOUT
@@ -361,7 +371,7 @@ bool api_iic_host_init(uint8_t id)
 	#if GPIO_OD_EN
 	api_gpio_dir(m_iic_map[id].sda, PIN_OUT, PIN_PULL_OD);
 	#else
-	api_gpio_dir(m_iic_map[id].sda, PIN_OUT, PIN_PULLNONE);
+	api_gpio_dir(m_iic_map[id].sda, PIN_OUT, PIN_PULLUP);
 	#endif
 
 	#if !IIC_SOFT_ENABLE

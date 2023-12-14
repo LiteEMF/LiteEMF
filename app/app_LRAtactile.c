@@ -46,7 +46,7 @@ __WEAK bool app_lra_show(void)
 {
 	bool ret = true;
 
-	drv2605_Play_Waveform(0x92);
+	drv2605_Play_Waveform(50);
 
 	return ret;
 }
