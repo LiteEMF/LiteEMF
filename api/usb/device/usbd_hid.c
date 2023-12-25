@@ -65,8 +65,9 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
                     len += usbd_hid_mt_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
-                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+                #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
 				case HID_TYPE_GAMEPADE:
+                case HID_TYPE_DINPUT:
                     len += usbd_hid_gamepade_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
@@ -173,8 +174,9 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
             err = usbd_hid_mt_control_request_process(id, pclass, preq);
             break;
         #endif
-        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
             err = usbd_hid_gamepade_control_request_process(id, pclass, preq);
             break;
         #endif
@@ -246,8 +248,9 @@ error_t usbd_hid_init(uint8_t id)
                 usbd_hid_mt_init(id);
                 break;
             #endif
-            #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+            #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
             case HID_TYPE_GAMEPADE:
+            case HID_TYPE_DINPUT:
                 usbd_hid_gamepade_init(id);
                 break;
             #endif
@@ -318,8 +321,9 @@ error_t usbd_hid_deinit(uint8_t id)
                 usbd_hid_mt_deinit(id);
                 break;
             #endif
-            #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+            #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
             case HID_TYPE_GAMEPADE:
+            case HID_TYPE_DINPUT:
                 usbd_hid_gamepade_deinit(id);
                 break;
             #endif
@@ -387,8 +391,9 @@ void usbd_hid_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32
             usbd_hid_mt_process(id, pclass, evt, val);
             break;
         #endif
-        #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
             usbd_hid_gamepade_process(id, pclass, evt, val);
             break;
         #endif

@@ -25,8 +25,7 @@
 #if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_MT))
 #include "api/usb/device/usbd_hid_mt.h"
 #endif
-
-#if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE))
+#if (USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT)))
 #include "api/usb/device/usbd_hid_gamepade.h"
 #endif
 #if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH))

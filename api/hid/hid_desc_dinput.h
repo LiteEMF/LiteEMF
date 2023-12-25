@@ -10,7 +10,7 @@
 */
 
 
-//(L2,R2描述符值会影响按键顺序,决定是android 还是DINPUT)
+//hid gamepad描述符(L2,R2描述符值会影响按键顺序,决定是android 还是DINPUT)
 0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 0x09, 0x05,        // Usage (Game Pad)
 0xA1, 0x01,        // Collection (Application)
@@ -28,6 +28,17 @@
 		0x95, 0x04,        //     Report Count (4)
 		0x81, 0x02,        //     Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 	0xC0,              //   End Collection
+	
+	0x05, 0x02,        //   Usage Page (Sim Ctrls)
+	0x15, 0x00,        //   Logical Minimum (0)
+	0x26, 0xFF, 0x00,  //   Logical Maximum (255)
+	0x09, 0x32,        //   Usage (0x32)
+	0x09, 0x35,        //   Usage (0x35)
+	0x95, 0x02,        //   Report Count (2)
+	0x75, 0x08,        //   Report Size (8)
+	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
+	
+	0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 	0x09, 0x39,        //   Usage (Hat switch)
 	0x15, 0x00,        //   Logical Minimum (0)
 	0x25, 0x07,        //   Logical Maximum (7)
@@ -48,15 +59,7 @@
 	0x75, 0x01,        //   Report Size (1)
 	0x95, 0x10,        //   Report Count (16)
 	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
-	0x05, 0x02,        //   Usage Page (Sim Ctrls)
-	0x15, 0x00,        //   Logical Minimum (0)
-	0x26, 0xFF, 0x00,  //   Logical Maximum (255)
-	0x09, 0x32,        //   Usage (0x32)
-	0x09, 0x35,        //   Usage (0x35)
-	0x95, 0x02,        //   Report Count (2)
-	0x75, 0x08,        //   Report Size (8)
-	0x81, 0x02,        //   Input (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position)
 0xC0,              // End Collection
 
-// 93 bytes
+// 95 bytes
 

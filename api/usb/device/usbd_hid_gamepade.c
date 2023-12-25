@@ -11,7 +11,7 @@
 
 
 #include "hw_config.h"
-#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)) && (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE))
+#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)) && (USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT)))
 
 #include "api/usb/device/usbd.h"
 
@@ -59,16 +59,16 @@ error_t usbd_hid_gamepade_suspend(uint8_t id)
     return ERROR_SUCCESS;
 }
 
-uint16_t usbd_hid_gamepade_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdesc, uint16_t desc_len, uint16_t* pdesc_index)
+uint16_t usbd_hid_gamepade_get_itf_desc(uint8_t id, uint8_t hid_type, itf_ep_index_t* pindex, uint8_t* pdesc, uint16_t desc_len, uint16_t* pdesc_index)
 {
     uint16_t len,rep_desc_len;
 
 	len = sizeof(hid_gamepade_itf_desc_tab);
 	if (desc_len >= *pdesc_index + len) {
 		memcpy(pdesc + *pdesc_index, hid_gamepade_itf_desc_tab, len);
-		usbd_assign_configuration_desc(id, DEV_TYPE_HID, HID_TYPE_GAMEPADE, pindex, pdesc + *pdesc_index, len);
+		usbd_assign_configuration_desc(id, DEV_TYPE_HID, hid_type, pindex, pdesc + *pdesc_index, len);
 
-		rep_desc_len = get_hid_desc_map(TR_USBD, HID_TYPE_GAMEPADE, NULL);
+		rep_desc_len = get_hid_desc_map(TR_USBD, hid_type, NULL);
 		pdesc[*pdesc_index + 16] = rep_desc_len&0xff;            //set hid report desc
 		pdesc[*pdesc_index + 17] = rep_desc_len>>8;
 	}

@@ -248,6 +248,9 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是publ
 			case BIT_ENUM(HID_TYPE_GAMEPADE):
 				base_mac[2] += HID_TYPE_GAMEPADE;
 				break;
+			case BIT_ENUM(HID_TYPE_DINPUT):
+				base_mac[2] += HID_TYPE_DINPUT;
+				break;
 			case BIT_ENUM(HID_TYPE_SWITCH):
 				base_mac[2] += HID_TYPE_SWITCH;
 				break;

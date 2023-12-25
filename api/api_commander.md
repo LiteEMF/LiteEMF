@@ -392,19 +392,20 @@ typedef struct{
 #define DEF_DEV_TYPE_NONE				16		/*type none 0 == ((uint16_t)BIT(DEV_TYPE_NONE)*/
 
 //hid type
-#define DEF_HID_TYPE_VENDOR		0
-#define DEF_HID_TYPE_KB 		1
-#define DEF_HID_TYPE_MOUSE    	2
-#define DEF_HID_TYPE_CONSUMER   3
-#define DEF_HID_TYPE_TOUCH		4
-#define DEF_HID_TYPE_MT			5
-#define DEF_HID_TYPE_GAMEPADE	6
-#define DEF_HID_TYPE_X360		7
-#define DEF_HID_TYPE_XBOX		8
-#define DEF_HID_TYPE_SWITCH		9
-#define DEF_HID_TYPE_PS3		10
-#define DEF_HID_TYPE_PS4		11
-#define DEF_HID_TYPE_PS5		12
+#define DEF_HID_TYPE_VENDOR			0
+#define DEF_HID_TYPE_KB 			1
+#define DEF_HID_TYPE_MOUSE    		2
+#define DEF_HID_TYPE_CONSUMER    	3
+#define DEF_HID_TYPE_TOUCH			4
+#define DEF_HID_TYPE_MT				5
+#define DEF_HID_TYPE_GAMEPADE		6
+#define DEF_HID_TYPE_DINPUT			7
+#define DEF_HID_TYPE_X360			8
+#define DEF_HID_TYPE_XBOX			9
+#define DEF_HID_TYPE_SWITCH			10
+#define DEF_HID_TYPE_PS3			11
+#define DEF_HID_TYPE_PS4			12
+#define DEF_HID_TYPE_PS5			13
 //res
 #define DEF_HID_TYPE_NONE 		16
 

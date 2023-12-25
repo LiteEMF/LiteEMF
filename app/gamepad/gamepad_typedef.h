@@ -20,9 +20,11 @@
 /*******************************************************************************************************************
 **	Hardware  Defined
 ********************************************************************************************************************/
-
-
-//android   通用  Gamepad
+//android   通用  Gamepad (0xC4,0xC5)
+/*	
+0	1	2	3	4	5	6	7	8	9	10		11		12		13	14	15
+A	B	C	X   Y	Z	L1	R1	L2	R2	SELECT	STAR	HOME	L3	R3	NO
+*/
 #define GAMEPAD_A_POS 			(0)
 #define GAMEPAD_B_POS 			(1)
 #define GAMEPAD_C_POS 			(2)
@@ -33,13 +35,13 @@
 #define GAMEPAD_R1_POS 			(7)
 #define GAMEPAD_L2_POS 			(8)
 #define GAMEPAD_R2_POS 			(9)
-#define GAMEPAD_SELECT_POS 		(10)		/*XBOX_BT_MENU_POS */
-#define GAMEPAD_START_POS 		(11)		/*XBOX_BT_MAP_POS */
+#define GAMEPAD_SELECT_POS 		(10)		/*XBOX BLE MENU */
+#define GAMEPAD_START_POS 		(11)		/*XBOX BLE MAP */
 #define GAMEPAD_HOME_POS 		(12)
 #define GAMEPAD_L3_POS 			(13)
 #define GAMEPAD_R3_POS 			(14)
 #define GAMEPAD_RES_POS 		(15)
-#define GAMEPAD_BACK_POS		(16) 		/*only xbox back or share */
+#define GAMEPAD_BACK_POS		(16) 		/*XBOX BLE SHARE */
 
 
 #define GAMEPAD_UP_POS 			(20)
@@ -79,8 +81,11 @@
 #define GAMEPAD_LEFT 		( 1UL<<GAMEPAD_LEFT_POS  )
 #define GAMEPAD_RIGHT 		( 1UL<<GAMEPAD_RIGHT_POS )
 
-
-//PC Dinput mode  Gamepad
+//PC Dinput mode  Gamepad	(0x32,0x35)
+/*	
+0	1	2	3	4	5	6	7	8		9		10	11		12		13	14	15
+Y	B	A	X   L1	R1	L2	R2	SELECT	STAR	L3	R3	
+*/
 #define DINPUT_Y_POS		    (0)
 #define DINPUT_B_POS			(1)
 #define DINPUT_A_POS			(2)
@@ -149,10 +154,10 @@ typedef struct {
 	uint8_t ly;
 	uint8_t rx;
 	uint8_t ry;
-	uint8_t hat_switch;
-	uint16_t button;
 	uint8_t r2;
 	uint8_t l2;
+	uint8_t hat_switch;
+	uint16_t button;
 }gamepad_retport_t;
 
 

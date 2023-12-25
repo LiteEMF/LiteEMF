@@ -155,6 +155,29 @@ static uint32c_t x360_key_map[20][2] =
 };
 #endif
 
+#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
+static uint32c_t xbox_edr_key_map[20][2] =
+{
+	{HW_KEY_A 			,XBOX_EDR_A 	},
+	{HW_KEY_B 			,XBOX_EDR_B 	},
+	{HW_KEY_X 			,XBOX_EDR_X 	},
+	{HW_KEY_Y 			,XBOX_EDR_Y 	},
+	{HW_KEY_L1			,XBOX_EDR_L1	},
+	{HW_KEY_R1			,XBOX_EDR_R1	},
+	{HW_KEY_L2			,XBOX_EDR_L2	},
+	{HW_KEY_R2			,XBOX_EDR_R2	},
+	{HW_KEY_L3			,XBOX_EDR_L3	},
+	{HW_KEY_R3			,XBOX_EDR_R3	},
+	{HW_KEY_SELECT		,XBOX_EDR_MAP	},
+	{HW_KEY_START 		,XBOX_EDR_MENU 	},
+	{HW_KEY_UP			,XBOX_EDR_UP	},
+	{HW_KEY_DOWN		,XBOX_EDR_DOWN	},
+	{HW_KEY_LEFT		,XBOX_EDR_LEFT	},
+	{HW_KEY_RIGHT 		,XBOX_EDR_RIGHT },
+	{HW_KEY_HOME		,XBOX_EDR_HOME	},
+	{HW_KEY_CAPTURE		,XBOX_EDR_SHARE	},
+};
+#endif
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | HID_XBOX_MASK)
 static uint32c_t gamepad_key_map[20][2] =
 {
@@ -178,6 +201,29 @@ static uint32c_t gamepad_key_map[20][2] =
 };
 #endif
 
+
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_DINPUT))
+static uint32c_t dinput_key_map[20][2] =
+{
+	{HW_KEY_A 			,DINPUT_A		},
+	{HW_KEY_B 			,DINPUT_B		},
+	{HW_KEY_X 			,DINPUT_X		},
+	{HW_KEY_Y 			,DINPUT_Y		},
+	{HW_KEY_L1			,DINPUT_L1		},
+	{HW_KEY_R1			,DINPUT_R1		},
+	{HW_KEY_L2			,DINPUT_L2		},
+	{HW_KEY_R2			,DINPUT_R2		},
+	{HW_KEY_L3			,DINPUT_L3		},
+	{HW_KEY_R3			,DINPUT_R3		},
+	{HW_KEY_SELECT		,DINPUT_SELECT	},
+	{HW_KEY_START 		,DINPUT_START	},
+	{HW_KEY_DOWN		,DINPUT_DOWN	},
+	{HW_KEY_UP			,DINPUT_UP		},
+	{HW_KEY_LEFT		,DINPUT_LEFT	},
+	{HW_KEY_RIGHT 		,DINPUT_RIGHT	},
+	{HW_KEY_HOME		,DINPUT_HOME	},
+};
+#endif
 /*****************************************************************************************************
 **	static Function
 ******************************************************************************************************/
@@ -200,6 +246,8 @@ hid_type_t app_gamepad_get_hidtype(uint16_t hid_types)
 	if(HID_GAMEPAD_MASK & hid_types){
 		if(BIT(HID_TYPE_GAMEPADE) & hid_types){
 			hid_type = HID_TYPE_GAMEPADE;
+		}else if(BIT(HID_TYPE_DINPUT) & hid_types){
+			hid_type = HID_TYPE_DINPUT;
 		}else if(BIT(HID_TYPE_X360) & hid_types){
 			hid_type = HID_TYPE_X360;
 		}else if(BIT(HID_TYPE_XBOX) & hid_types){
@@ -245,22 +293,17 @@ hid_type_t app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp
 		*vidp = PS_VID;
 		*pidp = PS5_PID;
 		#endif
-	}else if(hid_types & BIT_ENUM(HID_TYPE_X360)){
+	}else if(hid_types & HID_XBOX_MASK){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
 		*vidp = XBOX_VID;
-		if(api_trp_is_usb(trp)){
-			*pidp = X360_PID;
-		}else{
-			*pidp = XBOX_BT_PID;
-		}
-		#endif
-	}else if(hid_types & BIT_ENUM(HID_TYPE_XBOX)){
-		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
-		*vidp = XBOX_VID;
-		if(api_trp_is_usb(trp)){
+		if(TR_EDR == trp){
+			*pidp = XBOX_EDR_PID;
+		}else if(TR_BLE == trp){
+			*pidp = XBOX_BLE_PID;
+		}else if(hid_types & BIT(HID_TYPE_XBOX)){
 			*pidp = XBOX_PID;
 		}else{
-			*pidp = XBOX_BT_PID;
+			*pidp = X360_PID;
 		}
 		#endif
 	}
@@ -301,24 +344,35 @@ uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2])
 
 		#if((HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX))
 		case HID_TYPE_XBOX:
-			if(api_trp_is_usb(phandle->trp)){
+			if(TR_EDR == phandle->trp){
+				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
+				return countof(xbox_edr_key_map);
+			}else if(TR_BLE == phandle->trp){				//ble模式和标准hid gamepad按键相同
+				*mapp = (uint32_t(*)[2])gamepad_key_map;	
+				return countof(gamepad_key_map);
+			}else if(api_trp_is_usb(phandle->trp)){
 				*mapp = (uint32_t(*)[2])xbox_key_map;
 				return countof(xbox_key_map);
-			}else{												//蓝牙模式下使用gamepad 定义
-				*mapp = (uint32_t(*)[2])gamepad_key_map;
-				return countof(gamepad_key_map);
 			}
 		#endif
 
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_X360)
 		case HID_TYPE_X360:
-			if(api_trp_is_usb(phandle->trp)){
-				*mapp = (uint32_t(*)[2])x360_key_map;
-				return countof(x360_key_map);
-			}else{												//蓝牙模式下使用gamepad 定义
+			if(TR_EDR == phandle->trp){
+				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
+				return countof(xbox_edr_key_map);
+			}else if(TR_BLE == phandle->trp){		//ble模式和标准hid gamepad按键相同
 				*mapp = (uint32_t(*)[2])gamepad_key_map;
 				return countof(gamepad_key_map);
+			}else if(api_trp_is_usb(phandle->trp)){
+				*mapp = (uint32_t(*)[2])x360_key_map;
+				return countof(x360_key_map);
 			}
+		#endif
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_DINPUT)
+		case HID_TYPE_DINPUT:
+			*mapp = (uint32_t(*)[2])dinput_key_map;
+			return countof(dinput_key_map);
 		#endif
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
 		case HID_TYPE_GAMEPADE:
@@ -401,9 +455,11 @@ bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp)
 	key = *keyp;
 	key.key = app_gamepad_key_convert(phandle, key.key);			//标准按键转换对应主机按键
 
+
 	switch(phandle->index & 0xff){
-        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             len = gamepad_key_pack(phandle, &key, buf, sizeof(buf));
             break;
         #endif
@@ -442,8 +498,9 @@ bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 	bool ret = false;
 
 	switch(phandle->index & 0xff){
-        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             ret = gamepad_dev_process(phandle,buf,len);
             break;
         #endif
@@ -484,8 +541,9 @@ bool app_gamepad_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 	bool ret = false;
 
 	switch(phandle->index & 0xff){
-        #if HIDH_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             ret = gamepad_rumble_send(phandle,prumble);
             break;
         #endif
@@ -526,8 +584,9 @@ bool app_gamepad_host_process(trp_handle_t* phandle,app_gamepad_key_t *keyp, uin
 	app_gamepad_key_t key;
 
     switch(phandle->index & 0xff){
-        #if HIDH_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
 			key_decode = gamepad_key_decode(phandle,buf,len,&key);
             if(!key_decode){
                 ret = gamepad_in_process(phandle, buf, len);
@@ -579,8 +638,9 @@ bool app_gamepad_host_process(trp_handle_t* phandle,app_gamepad_key_t *keyp, uin
 bool app_gamepad_init( trp_handle_t *phandle ) 
 {
     switch(phandle->index & 0xff){
-        #if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             gamepad_controller_init(phandle);
             break;
         #endif
@@ -617,8 +677,9 @@ bool app_gamepad_init( trp_handle_t *phandle )
 bool app_gamepad_deinit( trp_handle_t *phandle ) 
 {
     switch(phandle->index & 0xff){
-        #if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             gamepad_controller_deinit(phandle);
             break;
         #endif
@@ -656,8 +717,9 @@ bool app_gamepad_deinit( trp_handle_t *phandle )
 void app_gamepad_task(trp_handle_t *phandle)
 {
     switch(phandle->index & 0xff){
-        #if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+		case HID_TYPE_DINPUT:
             gamepad_controller_task(phandle);
             break;
         #endif

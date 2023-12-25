@@ -149,7 +149,7 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 					pstr = "Wireless Controller";
 				}else if(m_usbd_hid_types[id] & HID_XBOX_MASK){
 					pstr = "Controller";
-				}else if(m_usbd_hid_types[id] & BIT(HID_TYPE_GAMEPADE)){
+				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_GAMEPADE) | BIT(HID_TYPE_DINPUT))){
 					pstr = "Hid Gamepade";
 				}else if(m_usbd_hid_types[id] & (BIT(HID_TYPE_MT) | BIT(HID_TYPE_TOUCH))){
 					pstr = "Touch Screen";

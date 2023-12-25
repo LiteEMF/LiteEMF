@@ -128,8 +128,9 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
     trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
     
     switch(pclass->hid_type){
-        #if USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_GAMEPADE)
+        #if USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
+        case DEF_HID_TYPE_DINPUT:
             gamepad_controller_init(&trp_handle);
             break;
         #endif

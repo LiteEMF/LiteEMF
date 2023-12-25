@@ -24,7 +24,8 @@
 #define   XBOX_PID         	0X02EA		/* 0X02D1(不带3.5手柄)	0X0B00 */
 #define   XBOX_UAC_PID      0X02F6		/* xbox/xboxx接音频后的PID */
 #define   XBOXX_PID         0X0B12		/* 0X02EA */
-#define   XBOX_BT_PID		0X0B13		/* 0X02E0(PC显示unknow device按键异常,手机正常) 0X0B13(pc显示x360但android按键异常) */
+#define   XBOX_EDR_PID		0X02E0		/* 0X02E0,0X02FD(xboxone)*/
+#define   XBOX_BLE_PID		0X0B13		/* 0X0B13(xboxxs) */
 #define   X360_PID         	0X028E
 
 
@@ -122,10 +123,10 @@
 #define  XBOX_L3_POS					(14)
 #define  XBOX_R3_POS					(15)
 
-#define  XBOX_L2_POS					(16)
-#define  XBOX_R2_POS					(17)
-#define  XBOX_HOME_POS					(18)
-#define  XBOX_SHARE_POS					(19) 		/*only xboxxs */
+#define  XBOX_SHARE_POS					(16) 		/*only xboxxs */
+#define  XBOX_HOME_POS					(17)
+#define  XBOX_L2_POS					(18)
+#define  XBOX_R2_POS					(19)
 
 #define  XBOX_L_UP_POS					(24)
 #define  XBOX_L_DOWN_POS				(25)
@@ -164,6 +165,75 @@
 #define  XBOX_R_LEFT				(0x01UL<<XBOX_R_LEFT_POS	)
 #define  XBOX_R_RIGHT				(0x01UL<<XBOX_R_RIGHT_POS	)
 
+
+//xbox bt edr mode
+/*
+	0	1	2	3	4	5	6		7		8	9	10	11	12	 13	14	15
+	A	B	X   Y	L1	R1	SELECT	STAR	L3	R3	NO	NO	HOME NO	NO	NO
+*/
+#define XBOX_EDR_A_POS			(0)
+#define XBOX_EDR_B_POS			(1)
+#define XBOX_EDR_X_POS			(2)
+#define XBOX_EDR_Y_POS		    (3)
+#define XBOX_EDR_L1_POS			(4)
+#define XBOX_EDR_R1_POS			(5)
+#define XBOX_EDR_MAP_POS			(6)
+#define XBOX_EDR_MENU_POS		(7)
+#define XBOX_EDR_L3_POS	    	(8)
+#define XBOX_EDR_R3_POS	    	(9)
+#define XBOX_EDR_C_POS			(10)
+#define XBOX_EDR_Z_POS			(11)	
+#define XBOX_EDR_HOME_POS		(12)	//EDR HOME
+// #define XBOX_EDR_Z_POS		(13)	
+// #define XBOX_EDR_Z_POS		(14)
+// #define XBOX_EDR_Z_POS		(15)
+
+#define XBOX_EDR_SHARE_POS		(16)
+#define XBOX_EDR_L2_POS			(18)
+#define XBOX_EDR_R2_POS			(19)
+#define XBOX_EDR_UP_POS			(20)
+#define XBOX_EDR_DOWN_POS		(21)
+#define XBOX_EDR_LEFT_POS		(22)
+#define XBOX_EDR_RIGHT_POS		(23)
+#define XBOX_EDR_L_UP_POS		(24)
+#define XBOX_EDR_L_DOWN_POS		(25)
+#define XBOX_EDR_L_LEFT_POS		(26)
+#define XBOX_EDR_L_RIGHT_POS		(27)
+#define XBOX_EDR_R_UP_POS		(28)
+#define XBOX_EDR_R_DOWN_POS		(29)
+#define XBOX_EDR_R_LEFT_POS		(30)
+#define XBOX_EDR_R_RIGHT_POS		(31)
+
+#define XBOX_EDR_A			(0x01UL<<XBOX_EDR_A_POS		)
+#define XBOX_EDR_B			(0x01UL<<XBOX_EDR_B_POS		)
+#define XBOX_EDR_X			(0x01UL<<XBOX_EDR_X_POS		)
+#define XBOX_EDR_Y		    (0x01UL<<XBOX_EDR_Y_POS		)
+#define XBOX_EDR_L1			(0x01UL<<XBOX_EDR_L1_POS		)
+#define XBOX_EDR_R1			(0x01UL<<XBOX_EDR_R1_POS		)
+#define XBOX_EDR_MAP			(0x01UL<<XBOX_EDR_MAP_POS	)
+#define XBOX_EDR_MENU		(0x01UL<<XBOX_EDR_MENU_POS	)
+#define XBOX_EDR_L3	    	(0x01UL<<XBOX_EDR_L3_POS		)
+#define XBOX_EDR_R3	    	(0x01UL<<XBOX_EDR_R3_POS		)
+#define XBOX_EDR_C			(0x01UL<<XBOX_EDR_C_POS	)
+#define XBOX_EDR_MODE		(0x01UL<<XBOX_EDR_MODE_POS	)
+#define XBOX_EDR_HOME		(0x01UL<<XBOX_EDR_HOME_POS	)
+#define XBOX_EDR_Z			(0x01UL<<XBOX_EDR_Z_POS	)
+
+#define XBOX_EDR_SHARE		(0x01UL<<XBOX_EDR_SHARE_POS	)
+#define XBOX_EDR_L2			(0x01UL<<XBOX_EDR_L2_POS	)
+#define XBOX_EDR_R2			(0x01UL<<XBOX_EDR_R2_POS	)
+#define XBOX_EDR_UP			(0x01UL<<XBOX_EDR_UP_POS		)
+#define XBOX_EDR_DOWN		(0x01UL<<XBOX_EDR_DOWN_POS	)
+#define XBOX_EDR_LEFT		(0x01UL<<XBOX_EDR_LEFT_POS	)
+#define XBOX_EDR_RIGHT		(0x01UL<<XBOX_EDR_RIGHT_POS	)
+#define XBOX_EDR_L_UP		(0x01UL<<XBOX_EDR_L_UP_POS	)
+#define XBOX_EDR_L_DOWN		(0x01UL<<XBOX_EDR_L_DOWN_POS	)
+#define XBOX_EDR_L_LEFT		(0x01UL<<XBOX_EDR_L_LEFT_POS	)
+#define XBOX_EDR_L_RIGHT		(0x01UL<<XBOX_EDR_L_RIGHT_POS)
+#define XBOX_EDR_R_UP		(0x01UL<<XBOX_EDR_R_UP_POS	)
+#define XBOX_EDR_R_DOWN		(0x01UL<<XBOX_EDR_R_DOWN_POS	)
+#define XBOX_EDR_R_LEFT		(0x01UL<<XBOX_EDR_R_LEFT_POS	)
+#define XBOX_EDR_R_RIGHT		(0x01UL<<XBOX_EDR_R_RIGHT_POS)
 
 /*-----------------------ID和指令-------------------------------------------------*/
 //xbox bt 

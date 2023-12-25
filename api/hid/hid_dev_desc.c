@@ -29,6 +29,13 @@ static uint8c_t hid_desc_gamepad_map[] =
     #include "api/hid/hid_desc_gamepad.h"
 };
 #endif
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_DINPUT)
+static uint8c_t hid_desc_dinput[] =
+{
+    #include "api/hid/hid_desc_dinput.h"
+};
+#endif
+
 
 #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
 static uint8c_t hid_desc_switch_bt_map[] =
@@ -43,10 +50,16 @@ static uint8c_t hid_desc_switch_usb_map[] =
 };
 #endif
 
-#if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)				//only bt 
-static uint8c_t hid_desc_xbox_bt_map[] =
+#if EDR_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)				//only edr
+static uint8c_t hid_desc_xbox_edr_map[] =
 {
-    #include "hid_desc_xboxone_bt.h"
+    #include "hid_desc_xbox_edr.h"
+};
+#endif
+#if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX)	//only ble
+static uint8c_t hid_desc_xbox_ble_map[] =
+{
+    #include "hid_desc_xbox_ble.h"
 };
 #endif
 
@@ -132,6 +145,12 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
             map_len = sizeof(hid_desc_gamepad_map);
             break;
         #endif
+        #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_DINPUT)
+        case HID_TYPE_DINPUT:
+            if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_dinput;
+            map_len = sizeof(hid_desc_dinput);
+            break;
+        #endif
         case HID_TYPE_SWITCH:
             if(api_trp_is_bt(trp)){
                 #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_SWITCH)
@@ -167,9 +186,16 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
             break;
         #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
         case HID_TYPE_XBOX	:
-            if(api_trp_is_bt(trp)){
-                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_bt_map;
-                map_len = sizeof(hid_desc_xbox_bt_map);
+            if(TR_EDR == trp){
+                #if EDR_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_edr_map;
+                map_len = sizeof(hid_desc_xbox_edr_map);
+                #endif
+            }else if((TR_BLE_RF == trp) || (TR_BLE == trp)){
+                #if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_ble_map;
+                map_len = sizeof(hid_desc_xbox_ble_map);
+                #endif
             }
             break;
         #endif

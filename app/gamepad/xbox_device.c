@@ -173,7 +173,9 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *k
 
 			bt_xboxp->id = XBOX_BT_KEY_REP_CMD;
 			bt_xboxp->button = SWAP16_L(keyp->key);
-			if(keyp->key & GAMEPAD_SELECT)	bt_xboxp->back_share_key = 1;
+
+			//GAMEPAD_BACK == XBOX_EDR_SHARE 这里edr share其实是无效的只作用在ble上
+			if(keyp->key & XBOX_EDR_SHARE)	bt_xboxp->back_share_key = 1;
 			bt_xboxp->hat_switch = (gamepad_key_to_hatswitch(keyp->key)+1) & 0x0f;//从1开始
 
 			bt_xboxp->l2 = (uint16_t)((keyp->l2)<<2) + 3;

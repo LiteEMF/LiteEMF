@@ -179,6 +179,7 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
         #endif
         #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
         case HID_TYPE_SWITCH:
@@ -235,6 +236,7 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
         #endif
         #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
         case HID_TYPE_SWITCH:
@@ -328,6 +330,7 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
         #endif
         #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
         case HID_TYPE_SWITCH:
@@ -359,6 +362,7 @@ void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
         #endif
         #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
         case HID_TYPE_GAMEPADE:
+        case HID_TYPE_DINPUT:
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
         case HID_TYPE_SWITCH:
