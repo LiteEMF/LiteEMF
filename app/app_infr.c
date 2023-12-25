@@ -93,7 +93,7 @@ void app_infr_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
     if(m_infr.duty[id] || infr_duty){
         m_infr_sync =  APP_INFR_SYNC_TIMES;
         m_infr.duty[id] = infr_duty;
-        logi("infr[%d]=%d\n",id,infr_duty);
+    //    logi("infr[%d]=%d\n",id,infr_duty);
     }
 }
 

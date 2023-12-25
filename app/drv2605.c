@@ -151,7 +151,7 @@ bool drv2605_init(void)
     while((regData != 0xE0) && (i++ < 3))
 	{
 		I2C_Read_NBytes(DRV2605_ADDRESS, STATUS_Reg, 1, &regData);	
-		logd("id = 0x%x\n", regData);
+		logd("drv2605_id = 0x%x\n", regData);
 		if((i == 3) && ((regData&0xE0) != 0xE0))
 		{
 			return false;

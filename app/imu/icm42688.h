@@ -192,16 +192,12 @@ typedef struct {
 	int16_t AcceY;				//acceleration y
 	int16_t AcceZ;				//acceleration z
 } XYZ_ACCE_T;
+
 typedef struct {
 	int16_t GyroX;				//gyro x
 	int16_t GyroY;				//gyro y
 	int16_t GyroZ;				//gyro z
 } XYZ_GYRO_T;
-typedef struct {
-	float X;				
-	float Y;				
-	float Z;				
-} XYZ_ANGLE_T;
 
 
 /*****************************************************************************************************
@@ -210,7 +206,6 @@ typedef struct {
 uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range);
 void ICM42688_Sleep(void);
 bool ICM42688_GetImuData(int16_t *accData, int16_t *gyroData);
-void ICM42688_IMUupdate(float gx, float gy, float gz, float ax, float ay, float az);
 
 
 #endif

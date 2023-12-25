@@ -24,7 +24,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef IMU_FILTER_ENABLE
-#define IMU_FILTER_ENABLE	    1
+#define IMU_FILTER_ENABLE	    0
 #endif
 #ifndef ACC_FILTER_KALMAN
 #define ACC_FILTER_KALMAN	    0
@@ -78,6 +78,9 @@ typedef struct{
     axis3i_t gyro;
 	axis3i_t acc;
 } imu_cal_t;	//12
+
+
+extern axis4f_t quaternion;		//四元数
 
 /*****************************************************************************************************
 **  Function

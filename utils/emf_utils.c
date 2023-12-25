@@ -241,3 +241,25 @@ uint8_t get_bit_pos(uint32_t val)
     return i;
 }
 
+//快速求平方根倒数
+float invSqrt(float x)
+{
+	// float halfx = 0.5f * x;
+	// float y = x;
+	// long i = *(long*)&y;
+
+	// i = 0x5f3759df - (i>>1);
+	// y = *(float*)&i;
+	// y = y * (1.5f - (halfx * y * y));
+
+	// return y;
+
+	union{  
+		int32_t i;  
+		float   f; 
+	} conv; 
+	
+	conv.f = x; 
+	conv.i = 0x5f3759df - (conv.i >> 1); 
+	return 0.5f * conv.f * (3.0f - x * conv.f * conv.f);
+}
