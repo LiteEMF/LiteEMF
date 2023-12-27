@@ -276,7 +276,7 @@ extern "C" {
 #define APP_KM_ENABLE			0
 #endif
 #ifndef APP_IMU_ENABLE
-#define APP_IMU_ENABLE			1
+#define APP_IMU_ENABLE			0
 #endif
 #ifndef APP_JOYSTICK_ENABLE
 #define APP_JOYSTICK_ENABLE		0

@@ -345,8 +345,10 @@ uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2])
 		#if((HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX))
 		case HID_TYPE_XBOX:
 			if(TR_EDR == phandle->trp){
+				#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
 				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
 				return countof(xbox_edr_key_map);
+				#endif
 			}else if(TR_BLE == phandle->trp){				//ble模式和标准hid gamepad按键相同
 				*mapp = (uint32_t(*)[2])gamepad_key_map;	
 				return countof(gamepad_key_map);
@@ -359,8 +361,10 @@ uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2])
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_X360)
 		case HID_TYPE_X360:
 			if(TR_EDR == phandle->trp){
+				#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
 				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
 				return countof(xbox_edr_key_map);
+				#endif
 			}else if(TR_BLE == phandle->trp){		//ble模式和标准hid gamepad按键相同
 				*mapp = (uint32_t(*)[2])gamepad_key_map;
 				return countof(gamepad_key_map);

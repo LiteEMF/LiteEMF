@@ -33,37 +33,6 @@
 **  hal bt Function
 ******************************************************************************************************/
 
-/*******************************************************************
-** Parameters:		
-** Returns:	
-** Description:	大部分平台不支持热切换,需要在初始化的时候选择模式
-*******************************************************************/
-bool hal_bt_select_mode(uint8_t id, uint16_t trps)
-{
-    #if BT0_SUPPORT & BIT_ENUM(TR_RF)
-    if(trps & BT0_SUPPORT & BIT(TR_RF)){
-    }else{
-        hal_bt_enable(BT_ID0, TR_RF, 0);
-    }
-    #endif
-
-    #if BT0_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))
-    if(trps & BT0_SUPPORT & BIT(TR_BLE_RF)){    
-    }else if(trps & BT0_SUPPORT & BIT(TR_BLE)) {
-    }else{
-        hal_bt_enable(BT_ID0, BT_BLE, 0);
-    }
-    #endif
-
-    #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
-    if(trps & BT0_SUPPORT & BIT(TR_EDR)) {
-    }else{
-        hal_bt_enable(BT_ID0, BT_EDR, 0);
-    }
-    #endif
-
-    return false;
-}
 
 bool hal_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
 {
@@ -78,7 +47,7 @@ bool hal_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
@@ -115,7 +84,7 @@ bool hal_bt_is_bonded(uint8_t id, bt_t bt)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
@@ -151,7 +120,7 @@ bool hal_bt_debond(uint8_t id, bt_t bt)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
@@ -187,7 +156,7 @@ bool hal_bt_disconnect(uint8_t id, bt_t bt)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
@@ -223,7 +192,7 @@ bool hal_bt_enable(uint8_t id, bt_t bt,bool en)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)
@@ -259,7 +228,7 @@ bool hal_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if (BT0_SUPPORT & BIT_ENUM(TR_EDR)) && (EDR_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_VENDOR))
@@ -295,7 +264,7 @@ bool hal_bt_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
     #endif
     #if BT0_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT0_SUPPORT & BIT_ENUM(TR_EDR)

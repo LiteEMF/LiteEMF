@@ -149,7 +149,7 @@ typedef enum {
 	BT_BLEC 	= DEF_TR_BLEC,		
 	BT_EDRC 	= DEF_TR_EDRC,		
 	BT_BLE_RF 	= DEF_TR_BLE_RF,					//BLE模拟2.4G
-	BT_BLEC_RF 	= DEF_TR_BLE_RFC,	
+	BT_BLE_RFC 	= DEF_TR_BLE_RFC,	
 	BT_RF 		= DEF_TR_RF,			
 	BT_RFC 		= DEF_TR_RFC,	
 	BT_MAX 		= 8,
@@ -365,7 +365,6 @@ bool bt_driver_init(uint8_t id);
 bool bt_driver_deinit(uint8_t id);
 void bt_driver_task(void* pa);
 
-bool hal_bt_select_mode(uint8_t id, uint16_t trps);
 bool hal_bt_get_mac(uint8_t id,bt_t bt, uint8_t *buf );		//这里高3byte buf[3]是public地址
 bool hal_bt_is_bonded(uint8_t id,bt_t bt);
 bool hal_bt_debond(uint8_t id,bt_t bt);

@@ -118,7 +118,7 @@ bt_evt_scan_t* api_bt_get_scan_result(bt_t bt)
 			break;
 		#endif
 		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)
-		case BT_RFC:
+		case BT_BLE_RFC:
 			resultp = &ble_rfc_scan_result;
 			break;
 		#endif
@@ -155,7 +155,7 @@ api_bt_ctb_t* api_bt_get_ctb(bt_t bt)
 			break;
 		#endif
 		#if BT_SUPPORT & BIT_ENUM(TR_BLE_RFC)
-		case BT_BLEC_RF:
+		case BT_BLE_RFC:
 			api_btp = &m_ble_rfc;
 			break;
 		#endif
@@ -623,7 +623,10 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 
 	switch(event){
 		case BT_EVT_INIT:			//蓝牙SDK自动广播
-			logd("bt(%d) init ok...\n",bt);
+			if((0 == m_trps) & BIT(bt)){
+				bt_ctbp->enable = 0;
+			}
+			logd("bt(%d) init ok en=%d...\n",bt, bt_ctbp->enable);
 			bt_ctbp->init_ok = true;
 			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 	
@@ -715,7 +718,10 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 
 	switch(event){
 		case BT_EVT_INIT:
-			logd("bt(%d) init ok...\n",bt);
+			if((0 == m_trps) & BIT(bt)){
+				bt_ctbp->enable = 0;
+			}
+			logd("bt(%d) init ok en=%d...\n",bt, bt_ctbp->enable);
 			bt_ctbp->init_ok = true;
 			bt_ctbp->sta = BT_STA_IDLE;
 			bt_ctbp->vendor_ready = false;
@@ -761,7 +767,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 					&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 					#endif
 				){
-					*bt_scan_resultp = *scanp;
+					if(NULL != bt_scan_resultp) *bt_scan_resultp = *scanp;
 					logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
 				}
 				#elif defined BTC_SEARCH_NAME
@@ -772,16 +778,17 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 						&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 						#endif
 					){
-						*bt_scan_resultp = *scanp;
+						if(NULL != bt_scan_resultp) *bt_scan_resultp = *scanp;
 						logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
 					}
 				}
             	#endif
-			}else{
+			}else if(NULL != bt_scan_resultp){
 				memset(bt_scan_resultp,0,sizeof(bt_evt_scan_t));
 			}
 			break;
 		case BT_EVT_SCAN_DIR:
+			logd("BT_EVT_SCAN_DIR");
 			bt_ctbp->sta = BT_STA_DIR_ADV;
 			break;
 		case BT_EVT_DISCONNECTED:

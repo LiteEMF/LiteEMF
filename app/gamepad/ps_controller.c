@@ -28,7 +28,7 @@
 #if API_USBH_BIT_ENABLE && (USBH_HID_SUPPORT & HID_PS_MASK)
 #include "api/usb/host/usbh.h"
 #endif
-#if BT_ENABLE
+#if API_BT_ENABLE
 #include  "api/bt/api_bt.h"
 #endif
 

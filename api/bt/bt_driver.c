@@ -53,7 +53,7 @@ bool bt_driver_get_mac(uint8_t id, bt_t bt, uint8_t *buf )
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -90,7 +90,7 @@ bool bt_driver_is_bonded(uint8_t id, bt_t bt)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -126,7 +126,7 @@ bool bt_driver_debond(uint8_t id, bt_t bt)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -162,7 +162,7 @@ bool bt_driver_disconnect(uint8_t id, bt_t bt)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -198,7 +198,7 @@ bool bt_driver_enable(uint8_t id, bt_t bt,bool en)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -234,7 +234,7 @@ bool bt_driver_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)
@@ -270,7 +270,7 @@ bool bt_driver_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
     #endif
     #if BT1_SUPPORT & (BIT_ENUM(TR_BLEC) | BIT_ENUM(TR_BLE_RFC))
     case BT_BLEC:
-    case BT_BLEC_RF:
+    case BT_BLE_RFC:
         break;
     #endif
     #if BT1_SUPPORT & BIT_ENUM(TR_EDR)

@@ -117,18 +117,21 @@ bool emf_api_init(void)
 	api_uarts_init();				
 	#endif
 
-	#ifndef API_NFC_ENABLE
+	#if API_NFC_ENABLE
 	api_nfc_init();
 	#endif
-	#ifndef API_GPS_ENABLE
+	#if API_GPS_ENABLE
 	api_gps_init();
 	#endif
-	#ifndef API_GSM_ENABLE
+	#if API_GSM_ENABLE
 	api_gsm_init();
 	#endif
-	#ifndef API_WIFI_ENABLE
+	#if API_WIFI_ENABLE
 	api_wifi_init();
 	#endif
+	#if API_BT_ENABLE
+    api_bt_init();
+    #endif
 
 	return true;
 }
