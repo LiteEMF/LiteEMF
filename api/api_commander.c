@@ -247,7 +247,7 @@ bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len
 				buf:输入指令包
 ** Returns:	
 ** Description:	获取长包指令
-		注意:rxp 数据处理完后必须调用 emf_free_and_clear 释放内存!!!
+		注意:rxp->buf 数据处理完后必须调用 emf_free_and_clear 释放内存!!!
 *******************************************************************/
 bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 {

@@ -376,7 +376,7 @@ bool api_bt_is_bonded(uint8_t id,bt_t bt)
 	}else{
 		ret = bt_driver_is_bonded(id, bt);
 	}
-
+	logd("bt(%d) isdebond=%d\n",bt,ret);
 	return ret;
 }
 bool api_bt_debond(uint8_t id,bt_t bt)
@@ -626,7 +626,6 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			if((0 == m_trps) & BIT(bt)){
 				bt_ctbp->enable = 0;
 			}
-			logd("bt(%d) init ok en=%d...\n",bt, bt_ctbp->enable);
 			bt_ctbp->init_ok = true;
 			if(NULL != bt_ctbp->fifo_txp) bt_ctbp->fifo_txp->tx_busy = false;
 	
@@ -639,6 +638,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
 			}
+			logd("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("bt(%d) connect...\n",bt);
@@ -666,7 +666,11 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			bt_ctbp->sta = BT_STA_IDLE;
 			break;			
 		case BT_EVT_ADV:
-			bt_ctbp->sta = BT_STA_ADV;
+			if(api_bt_is_bonded(id, bt)){
+				bt_ctbp->sta = BT_STA_DIR_ADV;
+			}else{
+				bt_ctbp->sta = BT_STA_ADV;
+			}
 			break;
 		case BT_EVT_ADV_DIR:
 			bt_ctbp->sta = BT_STA_DIR_ADV;
@@ -721,7 +725,6 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			if((0 == m_trps) & BIT(bt)){
 				bt_ctbp->enable = 0;
 			}
-			logd("bt(%d) init ok en=%d...\n",bt, bt_ctbp->enable);
 			bt_ctbp->init_ok = true;
 			bt_ctbp->sta = BT_STA_IDLE;
 			bt_ctbp->vendor_ready = false;
@@ -732,6 +735,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
 			}
+			logd("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("btc(%d) connect...\n",bt);
@@ -753,27 +757,19 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			bt_ctbp->sta = BT_STA_IDLE;
 			break;
 		case BT_EVT_SCAN:
-			bt_ctbp->sta = BT_STA_SCAN;
-			/*
-			1. 底层默认开启扫描地址,名字的广播,筛选由此处理
-			2. 当有绑定信息,使用的是扫描地址,否则扫面的是名字.
-			*/
-			if(pa != NULL){
-				bt_evt_scan_t *scanp = (bt_evt_scan_t*)pa;
-				
-				#if defined BTC_SEARCH_MAC
-				if(!memcmp(pa->scan.mac, BTC_SEARCH_MAC, 6)
-					#ifdef BTC_SEARCH_RSSI
-					&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
-					#endif
-				){
-					if(NULL != bt_scan_resultp) *bt_scan_resultp = *scanp;
-					logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
-				}
-				#elif defined BTC_SEARCH_NAME
-				if(strlen(scanp->name)){
-					logi("btc scan name: %s,mac:", scanp->name);dumpd(scanp->mac,6);
-					if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+			if(api_bt_is_bonded(id, bt)){
+				bt_ctbp->sta = BT_STA_DIR_SCAN;
+			}else{
+				bt_ctbp->sta = BT_STA_SCAN;
+				/*
+				1. 底层默认开启扫描地址,名字的广播,筛选由此处理
+				2. 当有绑定信息,底层会根据配对地址直接匹配,否则扫面的是名字.
+				*/
+				if(pa != NULL){
+					bt_evt_scan_t *scanp = (bt_evt_scan_t*)pa;
+					
+					#if defined BTC_SEARCH_MAC
+					if(!memcmp(pa->scan.mac, BTC_SEARCH_MAC, 6)
 						#ifdef BTC_SEARCH_RSSI
 						&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 						#endif
@@ -781,10 +777,22 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 						if(NULL != bt_scan_resultp) *bt_scan_resultp = *scanp;
 						logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
 					}
+					#elif defined BTC_SEARCH_NAME
+					if(strlen(scanp->name)){
+						logi("btc scan name: %s,mac:", scanp->name);dumpd(scanp->mac,6);
+						if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+							#ifdef BTC_SEARCH_RSSI
+							&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
+							#endif
+						){
+							if(NULL != bt_scan_resultp) *bt_scan_resultp = *scanp;
+							logd("btc(%d) match rissi=%d, name=%s",bt,pa->scan.rssi,pa->scan.name);
+						}
+					}
+					#endif
+				}else if(NULL != bt_scan_resultp){
+					memset(bt_scan_resultp,0,sizeof(bt_evt_scan_t));
 				}
-            	#endif
-			}else if(NULL != bt_scan_resultp){
-				memset(bt_scan_resultp,0,sizeof(bt_evt_scan_t));
 			}
 			break;
 		case BT_EVT_SCAN_DIR:

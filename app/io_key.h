@@ -157,7 +157,7 @@ extern "C" {
 **	Parameters
 *******************************************************************************************************/
 
-#ifdef KEY_POWER_GPIO
+#if (PIN_NULL != KEY_POWER_GPIO)
 	#if POWER_KEY_ACTIVE
 		#define KEY_POWER	(api_gpio_in(KEY_POWER_GPIO))
 	#else
@@ -167,12 +167,12 @@ extern "C" {
 	#define KEY_POWER	false
 #endif
 
-#ifdef KEY_USB_DET_GPIO
+#if PIN_NULL != KEY_USB_DET_GPIO
 	#define KEY_USB_DET  	(!!api_gpio_in(KEY_USB_DET_GPIO))
 #else
 	#define KEY_USB_DET  	false
 #endif
-#ifdef KEY_CHARGER_GPIO
+#if  PIN_NULL != KEY_CHARGER_GPIO
 	#define KEY_CHARGER  	(!api_gpio_in(KEY_CHARGER_GPIO))
 #else
 	#define KEY_CHARGER		false
