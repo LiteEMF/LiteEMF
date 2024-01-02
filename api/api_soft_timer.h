@@ -40,7 +40,7 @@ typedef void(*timer_cb_t)(void* pa);
 
 typedef struct {
 	timer_t timer;
-	uint32_t timeout;
+	uint32_t timeout;			//ms
 	void* pa;
 	timer_cb_t cb;
 	soft_timer_ctrl_t ctrl;

@@ -52,6 +52,7 @@ error_t soft_timer_register(soft_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t 
 
 	ptimer->ctrl = ctrl;
 	ptimer->timeout = timeout;
+	ptimer->timer = m_systick;
 	ptimer->pa = pa;
 	ptimer->cb = cb;
 	
@@ -73,6 +74,7 @@ soft_timer_t* soft_timer_create(timer_cb_t cb,void *pa,timer_t timeout,soft_time
 
 	ptimer->ctrl = ctrl | TIMER_IS_DYNAMIC;
 	ptimer->timeout = timeout;
+	ptimer->timer = m_systick;
 	ptimer->pa = pa;
 	ptimer->cb = cb;
 	
@@ -203,7 +205,7 @@ void soft_timer_task(void *pa)
 {
 	soft_timer_t *pos, *n;
 
-	list_for_each_entry_type_safe(pos, n, &timer_head, soft_timer_t, list){
+	list_for_each_entry_safe_type(pos, n, &timer_head, soft_timer_t, list){
 		if(pos->ctrl & TIMER_ACTIVE){
 			if(m_systick - pos->timer >= pos->timeout){
 				pos->timer = m_systick;
