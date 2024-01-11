@@ -25,11 +25,11 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef DISCONNECTED_SLEEP_TIME							//ms
-#define DISCONNECTED_SLEEP_TIME    	(3*1000*60UL)
+#ifndef DISCONNECTED_SLEEP_TIME						//ms, 0 表示不超时休眠
+#define DISCONNECTED_SLEEP_TIME    	(0*1000*60UL)
 #endif
 #ifndef CONNECTED_SLEEP_TIME
-#define CONNECTED_SLEEP_TIME    	(15*1000*60UL)
+#define CONNECTED_SLEEP_TIME    	(0*1000*60UL)
 #endif
 #ifndef KEY_POWERON_TIME
 #define KEY_POWERON_TIME    		(0)

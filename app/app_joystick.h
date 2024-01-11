@@ -24,15 +24,15 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
-#ifndef JOYSTICK_CAL_TIMEOUT
-#define JOYSTICK_CAL_TIMEOUT    12000
+#ifndef JOYSTCIK_DCAL_ENABLE         //DYNAMIC CAL 代码运行中自动校准是否打开
+#define JOYSTCIK_DCAL_ENABLE     1
 #endif
+
 #ifndef STICK_DIR_VAL
 #define STICK_DIR_VAL			10900
 #endif
 #ifndef JOYSTICK_CAL_TIMEOUT
-#define JOYSTICK_CAL_TIMEOUT          0
+#define JOYSTICK_CAL_TIMEOUT          12000
 #endif
 //stick 上电未校准默认值
 #ifndef STICK_CAL_DEFAULT_R
@@ -40,31 +40,35 @@ extern "C" {
 #endif
 
 //circle limit in square
-#ifndef STICK_CIRCLE_LIMIT
+#ifndef STICK_CIRCLE_LIMIT				//摇杆画圆切边
 #define STICK_CIRCLE_LIMIT  (1.03)
 #endif
-#ifndef STICK_LIMIT_MIN_R
+#ifndef STICK_LIMIT_MIN_R				//摇杆校准最小限制半径
 #define STICK_LIMIT_MIN_R (ADC_RES_MAX/4)
 #endif
-#ifndef STICK_CAL_DEADBAND
+#ifndef STICK_CAL_DEADBAND				//摇杆中心校准死区
 #define STICK_CAL_DEADBAND       0
 #endif
-#ifndef STICK_CAL_SIDE_DEADBAND
+#ifndef STICK_CAL_SIDE_DEADBAND			//摇杆边界校准死区
 #define STICK_CAL_SIDE_DEADBAND   3
 #endif
 
 //trigger 上电未校准默认值
-#ifndef TRIGGER_CAL_DEFAULT_R
+#ifndef TRIGGER_DYNAMIC_ACTIVE_ENABLE           //扳机是否支持动态修改active
+#define TRIGGER_DYNAMIC_ACTIVE_ENABLE   1
+#endif
+
+#ifndef TRIGGER_CAL_DEFAULT_R			//扳机未校准默认半径
 #define TRIGGER_CAL_DEFAULT_R   (ADC_RES_MAX/4)
 #endif
 
-#ifndef TRIGGER_LIMIT_MIN_R
+#ifndef TRIGGER_LIMIT_MIN_R             //校准判断
 #define TRIGGER_LIMIT_MIN_R (ADC_RES_MAX/2)
 #endif
-#ifndef TRIGGER_CAL_DEADBAND
+#ifndef TRIGGER_CAL_DEADBAND            //扳机中心校准死区(开始按下的死区)
 #define TRIGGER_CAL_DEADBAND      2
 #endif
-#ifndef TRIGGER_CAL_SIDE_DEADBAND
+#ifndef TRIGGER_CAL_SIDE_DEADBAND       //扳机边界校准死区(按到底的死区)
 #define TRIGGER_CAL_SIDE_DEADBAND 2
 #endif
 

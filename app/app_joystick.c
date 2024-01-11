@@ -59,7 +59,7 @@ uint8_t trigger_active[] = APP_TRIGGER_ACTIVE;          //支持动态调整trig
 #if API_STORAGE_ENABLE
 joystick_cal_t *const joystick_calp = (joystick_cal_t*)m_storage.joystick_cal;
 #else
-joystick_cal_t joystick_cal_default = {0X00, {{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX},ADC_RES_MAX}};
+joystick_cal_t joystick_cal_default = {0X00, {{0,0},0} , {{ADC_RES_MAX/2,ADC_RES_MAX/2},ADC_RES_MAX/2} , {{ADC_RES_MAX,ADC_RES_MAX}, ADC_RES_MAX}};
 joystick_cal_t *const joystick_calp = &joystick_cal_default;
 #endif
 
@@ -104,10 +104,12 @@ __WEAK bool app_joystick_get_adc(joystick_t* joystickp)
         joystickp->stick[APP_STICK_R_ID].y = m_trim_cal.mid.stick[APP_STICK_R_ID].y;
     #endif
 
-    // logd("adc:%d %d, %d %d\n",joystickp->stick[APP_STICK_L_ID].x,
+    // logd("adc:%d %d, %d %d, %d %d\n",joystickp->stick[APP_STICK_L_ID].x,
     //                     joystickp->stick[APP_STICK_L_ID].y,
     //                     joystickp->stick[APP_STICK_R_ID].x,
-    //                     joystickp->stick[APP_STICK_R_ID].y
+    //                     joystickp->stick[APP_STICK_R_ID].y,
+    //                     joystickp->tarigger[APP_TRIGGER_L_ID],
+    //                     joystickp->tarigger[APP_TRIGGER_R_ID]
     //                     );
     #endif
     return true;
@@ -121,29 +123,29 @@ __WEAK void app_joystick_event(joystick_cal_sta_t event)
 
 void joystick_cal_dump(joystick_cal_t *calp)
 {
-    logd("joystick cal:\n");
     logd("stick lx: %d %d %d\n", calp->min.stick[0].x,calp->mid.stick[0].x,calp->max.stick[0].x);
     logd("stick ly: %d %d %d\n", calp->min.stick[0].y,calp->mid.stick[0].y,calp->max.stick[0].y);
     logd("stick rx: %d %d %d\n", calp->min.stick[1].x,calp->mid.stick[1].x,calp->max.stick[1].x);
     logd("stick ry: %d %d %d\n", calp->min.stick[1].y,calp->mid.stick[1].y,calp->max.stick[1].y);
-    logd("tarigger l: %d  %d\n", calp->min.tarigger[0],calp->max.tarigger[0]);
-    logd("tarigger r: %d  %d\n", calp->min.tarigger[1],calp->max.tarigger[1]);
+    logd("trigger active:%d %d\n", trigger_active[0], trigger_active[1]);
+    logd("tarigger l: %d %d %d\n", calp->min.tarigger[0],calp->mid.tarigger[0],calp->max.tarigger[0]);
+    logd("tarigger r: %d %d %d\n", calp->min.tarigger[1],calp->mid.tarigger[1],calp->max.tarigger[1]);
 }
 
-void update_trigger_active(void)
+void update_trigger_active(joystick_cal_t *calp)
 {
     uint8_t i;
 
-    if(APP_JOYSTICK_CAL_MASK == joystick_calp->cal_mask){
+    if(APP_JOYSTICK_CAL_MASK == calp->cal_mask){
         for(i=0; i<APP_TRIGGER_NUMS; i++){
-            if((joystick_calp->max.tarigger[i] - joystick_calp->mid.tarigger[i]) 
-                >= (joystick_calp->mid.tarigger[i] - joystick_calp->min.tarigger[i])){
+            if((calp->max.tarigger[i] - calp->mid.tarigger[i]) 
+                >= (calp->mid.tarigger[i] - calp->min.tarigger[i])){
                 trigger_active[i] = true;
             }else{
                 trigger_active[i] = false;
             }
         }
-        logd("trigger active:", trigger_active[0], trigger_active[1]);
+        logd_r("set trigger active:%d %d\n", trigger_active[0], trigger_active[1]);
     }
 }
 
@@ -414,15 +416,40 @@ void joystick_set_cal_deadband(joystick_cal_t *calp)
         //适配扳机硬件死区
         int16_t r;
         r = calp->max.tarigger[id] - calp->min.tarigger[id];
-        calp->min.tarigger[id] += r * TRIGGER_CAL_DEADBAND / 100;
-        calp->max.tarigger[id] -= r * TRIGGER_CAL_SIDE_DEADBAND / 100;
+        if(trigger_active[id]){
+            calp->min.tarigger[id] += r * TRIGGER_CAL_DEADBAND / 100;
+            calp->max.tarigger[id] -= r * TRIGGER_CAL_SIDE_DEADBAND / 100;
+            calp->mid.tarigger[id] = calp->min.tarigger[id];
+        }else{
+            calp->min.tarigger[id] += r * TRIGGER_CAL_SIDE_DEADBAND / 100;
+            calp->max.tarigger[id] -= r * TRIGGER_CAL_DEADBAND / 100;
+            calp->mid.tarigger[id] = calp->max.tarigger[id];
+        }
     }
+}
+
+void joystick_save(joystick_cal_t *calp)
+{
+    *joystick_calp = *calp;
+    joystick_calp->cal_mask = APP_JOYSTICK_CAL_MASK;
+    logd_b("joystick cal:");
+    joystick_cal_dump(joystick_calp);
+
+    m_trim_cal = *calp;
+    joystick_set_cal_deadband(&m_trim_cal);
+    logd_b("trim cal:");
+    joystick_cal_dump(&m_trim_cal);
+    
+    #if API_STORAGE_ENABLE
+    api_storage_auto_sync();
+    #endif
 }
 
 static void joystick_dynamic_cal(joystick_t* adcp)
 {
     uint8_t id;
     static uint16_t dynamic_cal_num = 0;
+    joystick_t adc = *adcp;
 
     if(JOYSTICK_CAL_NONE != joystick_cal_sta) {
         return;
@@ -433,44 +460,43 @@ static void joystick_dynamic_cal(joystick_t* adcp)
         logd_r("joystick load default val\n");
 
         for(id = 0; id < APP_STICK_NUMS; id++){
-            if((adcp->stick[id].x + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
-                || (adcp->stick[id].x < STICK_CAL_DEFAULT_R)){
-                adcp->stick[id].x =  ADC_RES_MAX/2;
+            if((adc.stick[id].x + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
+                || (adc.stick[id].x < STICK_CAL_DEFAULT_R)){
+                adc.stick[id].x =  ADC_RES_MAX/2;
             }
-            if((adcp->stick[id].y + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
-                || (adcp->stick[id].y < STICK_CAL_DEFAULT_R)){
-                adcp->stick[id].y =  ADC_RES_MAX/2;
+            if((adc.stick[id].y + STICK_CAL_DEFAULT_R > ADC_RES_MAX)
+                || (adc.stick[id].y < STICK_CAL_DEFAULT_R)){
+                adc.stick[id].y =  ADC_RES_MAX/2;
             }
-            if(adcp->tarigger[id] + TRIGGER_CAL_DEFAULT_R > ADC_RES_MAX){
-                adcp->tarigger[id] = ADC_RES_MAX/2;
-            }
+            s_cal.mid.stick[id] = adc.stick[id];
+            s_cal.min.stick[id].x = adc.stick[id].x - STICK_CAL_DEFAULT_R;
+            s_cal.min.stick[id].y = adc.stick[id].y - STICK_CAL_DEFAULT_R;
+            s_cal.max.stick[id].x = adc.stick[id].x + STICK_CAL_DEFAULT_R;
+            s_cal.max.stick[id].y = adc.stick[id].y + STICK_CAL_DEFAULT_R;
 
-            joystick_calp->mid.stick[id] = adcp->stick[id];
-            joystick_calp->min.stick[id].x = adcp->stick[id].x - STICK_CAL_DEFAULT_R;
-            joystick_calp->min.stick[id].y = adcp->stick[id].y - STICK_CAL_DEFAULT_R;
-            joystick_calp->max.stick[id].x = adcp->stick[id].x + STICK_CAL_DEFAULT_R;
-            joystick_calp->max.stick[id].y = adcp->stick[id].y + STICK_CAL_DEFAULT_R;
-
-            joystick_calp->min.tarigger[id] = adcp->tarigger[id];
-            joystick_calp->max.tarigger[id] = adcp->tarigger[id] + TRIGGER_CAL_DEFAULT_R; 
             if(trigger_active[id]){
-                joystick_calp->mid.tarigger[id] = joystick_calp->min.tarigger[id];
+                if(adc.tarigger[id] + TRIGGER_CAL_DEFAULT_R > ADC_RES_MAX){
+                    adc.tarigger[id] = ADC_RES_MAX - TRIGGER_CAL_DEFAULT_R;
+                }
+                s_cal.min.tarigger[id] = adc.tarigger[id];
+                s_cal.mid.tarigger[id] = adc.tarigger[id];
+                s_cal.max.tarigger[id] = adc.tarigger[id] + TRIGGER_CAL_DEFAULT_R; 
             }else{
-                joystick_calp->mid.tarigger[id] = joystick_calp->max.tarigger[id];
+                if(adc.tarigger[id] < TRIGGER_CAL_DEFAULT_R){
+                    adc.tarigger[id] = TRIGGER_CAL_DEFAULT_R;
+                }
+                s_cal.min.tarigger[id] = adc.tarigger[id] - TRIGGER_CAL_DEFAULT_R; 
+                s_cal.mid.tarigger[id] = adc.tarigger[id];
+                s_cal.max.tarigger[id] = adc.tarigger[id]; 
             }
+            logd_g("tarigger%d %d, %d %d %d",id, trigger_active[id],s_cal.min.tarigger[id],s_cal.mid.tarigger[id],s_cal.max.tarigger[id]);
         }
-
-        #if API_STORAGE_ENABLE
-        joystick_calp->cal_mask = APP_JOYSTICK_CAL_MASK;
-        api_storage_auto_sync();
-        #endif
-
-        m_trim_cal = *joystick_calp;
-        s_cal = *joystick_calp;
-        joystick_cal_dump(joystick_calp);
+        joystick_save(&s_cal);
+        
+    #if JOYSTCIK_DCAL_ENABLE
     }else{
         //使用实时动态校准
-        bool side_ret = false;
+        bool is_trim = false;
         int16_t r;
         if(joystick_get_cal_val(&s_cal, NULL, adcp)){
             dynamic_cal_num++;
@@ -484,7 +510,7 @@ static void joystick_dynamic_cal(joystick_t* adcp)
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
-                            side_ret = true;
+                            is_trim = true;
                         }
                         m_trim_cal.min.stick[id].x = m_trim_cal.mid.stick[id].x - r;
                     }
@@ -493,7 +519,7 @@ static void joystick_dynamic_cal(joystick_t* adcp)
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
-                            side_ret = true;
+                            is_trim = true;
                         }
                         m_trim_cal.max.stick[id].x = m_trim_cal.mid.stick[id].x + r;
                     }
@@ -503,7 +529,7 @@ static void joystick_dynamic_cal(joystick_t* adcp)
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
-                            side_ret = true;
+                            is_trim = true;
                         }
                         m_trim_cal.min.stick[id].y = m_trim_cal.mid.stick[id].y - r;
                     }
@@ -512,27 +538,27 @@ static void joystick_dynamic_cal(joystick_t* adcp)
                         if(r > dynamic_cal_max_r[id]){
                             r = dynamic_cal_max_r[id];
                         }else{
-                            side_ret = true;
+                            is_trim = true;
                         }
                         m_trim_cal.max.stick[id].y = m_trim_cal.mid.stick[id].y + r;
                     }
 
                     if(s_cal.min.tarigger[id] < m_trim_cal.min.tarigger[id]){
                         m_trim_cal.min.tarigger[id] = s_cal.min.tarigger[id];
-                        side_ret = true;
+                        is_trim = true;
                     }
                     if(s_cal.max.tarigger[id] > m_trim_cal.max.tarigger[id]){
                         m_trim_cal.max.tarigger[id] = s_cal.max.tarigger[id];
-                        side_ret = true;
+                        is_trim = true;
                     }
                 }
-                if(side_ret){
-                    logd_b("joystick auto cal:");
+                if(is_trim){
+                    logd_b("trim cal:\n");
                     joystick_cal_dump(&m_trim_cal);
                 }
-                s_cal = m_trim_cal;
             }
         }
+    #endif
     }
  }
 
@@ -611,21 +637,13 @@ static void joystick_do_cal(joystick_t* adcp)
         }
 
         if(JOYSTICK_CAL_FAILED != joystick_cal_sta){    //cal fix
-
-            joystick_set_cal_deadband(&s_cal);
+            
             joystick_cal_sta = JOYSTICK_CAL_SUCCEED;
-
-            #if API_STORAGE_ENABLE
-            joystick_calp->cal_mask = APP_JOYSTICK_CAL_MASK;
-            *joystick_calp = s_cal;
-            api_storage_auto_sync();
+            #if TRIGGER_DYNAMIC_ACTIVE_ENABLE
+            update_trigger_active(&s_cal);              //这里先动态更新扳机active
             #endif
-
-            m_trim_cal = *joystick_calp;
-            update_trigger_active();
+            joystick_save(&s_cal);
         }
-        joystick_cal_dump(joystick_calp);
-
         cal_timer = m_systick;
         break;
     case JOYSTICK_CAL_SUCCEED:
@@ -636,7 +654,7 @@ static void joystick_do_cal(joystick_t* adcp)
             }else{
                 logi("joystick cal failed!\n");
             }
-			s_cal = m_trim_cal;
+            s_cal = *joystick_calp;
             joystick_cal_sta = JOYSTICK_CAL_NONE;
         }
         break;
@@ -672,10 +690,17 @@ bool app_joystick_init(void)
 {
     joystick_cal_sta = JOYSTICK_CAL_NONE;
     memset(&m_joystick,0,sizeof(m_joystick));
-    m_trim_cal = *joystick_calp;
     s_cal = *joystick_calp;
-    update_trigger_active();
+    #if TRIGGER_DYNAMIC_ACTIVE_ENABLE
+    update_trigger_active(joystick_calp);
+    #endif
+    logd_b("joystick cal:\n");
     joystick_cal_dump(joystick_calp);
+
+    m_trim_cal = *joystick_calp;
+    joystick_set_cal_deadband(&m_trim_cal);
+    logd_b("trim cal:\n");
+    joystick_cal_dump(&m_trim_cal);
 
 
     #if APP_JOYSTICK_FIR_FILTER_ENABLE
