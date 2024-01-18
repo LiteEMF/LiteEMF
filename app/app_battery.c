@@ -15,6 +15,7 @@
 #include  "hw_config.h"
 #if APP_BATTERY_ENABLE
 #include  "utils/emf_utils.h"
+#include  "app/io_key.h"
 #include  "app/app_battery.h"
 #include  "key_typedef.h"
 #include  "api/api_tick.h"

@@ -112,7 +112,7 @@ __WEAK void api_weakup_init(void)			//系统休眠前初始化唤醒IO
 	#endif
 
 	#if PIN_NULL != KEY_USB_DET_GPIO
-	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLNONE);
+	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLUP);
 	#endif
 
 	#if !POWER_SWITCH_KEY	//只在非拨动开关情况下做判断

@@ -289,7 +289,7 @@ void emf_handler(uint32_t period_10us)
 	app_infr_handler(1*100);
 	#endif
 	#if APP_LRA_ENABLE
-	app_lra_handler(1000*100);
+	app_lra_handler(3000*100);
 	#endif
 	#if APP_LED_ENABLE
 	app_led_handler(APP_LED_SLICE);

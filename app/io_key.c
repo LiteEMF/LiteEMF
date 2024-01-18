@@ -103,7 +103,7 @@ static void iokey_init(void)
 	api_gpio_dir(KEY_POWER_GPIO, PIN_IN,POWER_KEY_PULL);
 	#endif
 	#if PIN_NULL != KEY_USB_DET_GPIO
-	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLNONE);		// no pull
+	api_gpio_dir(KEY_USB_DET_GPIO, PIN_IN, PIN_PULLUP);		// no pull
 	#endif
 	#if PIN_NULL != KEY_CHARGER_GPIO
 	api_gpio_dir(KEY_CHARGER_GPIO, PIN_IN, PIN_PULLUP);
