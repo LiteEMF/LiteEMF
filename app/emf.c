@@ -74,6 +74,8 @@ bool emf_api_init(void)
 	hal_get_reset_reson();
 	#endif
 
+	io_key_init();		//按键上电立即初始化
+
 	api_tick_init();
 	hw_user_vender_init();	
 	

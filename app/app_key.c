@@ -110,7 +110,7 @@ bool app_key_init(void)
     m_key_power_on = false;
     m_key_scan = 0;
     memset(&m_app_key,0,sizeof(m_app_key));
-	return io_key_init();
+	return true;
 }
 
 /*******************************************************************

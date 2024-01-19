@@ -60,6 +60,9 @@ extern "C" {
 #ifndef KEY_CHARGER_GPIO
 #define KEY_CHARGER_GPIO	PIN_NULL
 #endif
+#ifndef KEY_CHARGER_DONE_GPIO
+#define KEY_CHARGER_DONE_GPIO	PIN_NULL
+#endif
 #ifndef KEY_A_GPIO
 #define KEY_A_GPIO 			PIN_NULL
 #endif
@@ -177,6 +180,13 @@ extern "C" {
 #else
 	#define KEY_CHARGER		false
 #endif
+
+#if  PIN_NULL != KEY_CHARGER_DONE_GPIO
+	#define KEY_CHARGER_DONE  	(!api_gpio_in(KEY_CHARGER_DONE_GPIO))
+#else
+	#define KEY_CHARGER_DONE	false
+#endif
+
 
 /*****************************************************************************************************
 **  Function

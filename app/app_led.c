@@ -111,6 +111,13 @@ uint8_t app_get_led(uint8_t id)
 	return LED_OFF;
 }
 
+uint8_t app_get_led_times(uint8_t id)
+{
+	if (id < m_led_num){
+		return led_ctb[id].times;
+	}
+	return LED_OFF;
+}
 bool app_led_turn(uint8_t id)
 {
 	if (id < m_led_num){

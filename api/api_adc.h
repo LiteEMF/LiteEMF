@@ -58,9 +58,9 @@ extern "C" {
 #endif
 
 #define ADC_CH_POS			(0)
-#define ADC_CH_MASK			0X0000FFFF
-#define ADC_PULL_POS		(16)
-#define ADC_PULL_MASK		0X00FF0000
+#define ADC_CH_MASK			0X00FFFFFF
+#define ADC_PULL_POS		(24)
+#define ADC_PULL_MASK		0XFF000000
 
 #ifndef ADC_CH_ATT			
 #define ADC_CH_ATT(id)  		(FLD2VAL(ADC_CH, m_adc_map[id].att))

@@ -22,6 +22,8 @@
 #if (ID_NULL != ADC_BATTERY_ID)
 #include  "api/api_adc.h"
 #endif
+
+#include  "api/api_log.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -54,8 +56,8 @@ __WEAK bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol)
 		protect_vol = BAT_PROTECT_VOL;
 	}
 
-	if (KEY_USB_DET || KEY_CHARGER){
-		if ((bat_vol >= 4200) || !KEY_CHARGER){
+	if (KEY_USB_DET || KEY_CHARGER || KEY_CHARGER_DONE){
+		if ((bat_vol >= 4200) || (!KEY_CHARGER || KEY_CHARGER_DONE)){
 			state = BAT_CHARGE_DONE_STA;
 		}else{
 			state = BAT_CHARGE_STA;
@@ -69,7 +71,7 @@ __WEAK bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol)
 			state = BAT_NORMAL_STA;
 		}
 	}
-
+	// logd("battery=%d %d %d %d %d",KEY_USB_DET,KEY_CHARGER,KEY_CHARGER_DONE,bat_vol,state);
 	return state;
 }
 
