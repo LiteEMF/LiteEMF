@@ -138,8 +138,8 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *k
 			xboxp->id = XBOX_KEY_REP_CMD;
 			xboxp->button = SWAP16_L(keyp->key);
 
-			xboxp->l2 = (uint16_t)((keyp->l2)<<2) + 3;
-			xboxp->r2 = (uint16_t)((keyp->r2)<<2) + 3;
+			xboxp->l2 = (uint16_t)((keyp->l2)>>5);
+			xboxp->r2 = (uint16_t)((keyp->r2)>>5);
 
 			xboxp->l2 = SWAP16_L(xboxp->l2);
 			xboxp->r2 = SWAP16_L(xboxp->r2);
@@ -178,8 +178,8 @@ static uint16_t xboxs_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *k
 			if(keyp->key & XBOX_EDR_SHARE)	bt_xboxp->back_share_key = 1;
 			bt_xboxp->hat_switch = (gamepad_key_to_hatswitch(keyp->key)+1) & 0x0f;//从1开始
 
-			bt_xboxp->l2 = (uint16_t)((keyp->l2)<<2) + 3;
-			bt_xboxp->r2 = (uint16_t)((keyp->r2)<<2) + 3;
+			bt_xboxp->l2 = (uint16_t)((keyp->l2) >> 5);
+			bt_xboxp->r2 = (uint16_t)((keyp->r2) >> 5);
 			bt_xboxp->l2 = SWAP16_L(bt_xboxp->l2);
 			bt_xboxp->r2 = SWAP16_L(bt_xboxp->r2);
 
@@ -210,8 +210,8 @@ static uint16_t x360_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *ke
 
 	x360p->cmd =  X360_KEY_REP_CMD;
 	x360p->button = SWAP16_L(keyp->key);
-	x360p->l2 = keyp->l2;
-    x360p->r2 = keyp->r2;
+	x360p->l2 = keyp->l2 >> 7;
+    x360p->r2 = keyp->r2 >> 7;
 
 	x360p->x = SWAP16_L(keyp->stick_l.x);
 	x360p->y = SWAP16_L(keyp->stick_l.y);

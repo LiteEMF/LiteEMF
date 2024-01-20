@@ -297,10 +297,10 @@ void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp)
     uint16_t min, max;
 
 	if(NULL != cfgp){
-		if (cfgp->trunx) val = 0xffff - val;
-		min = 0xffff * cfgp->centre_deadband / 100;
-		max = 0xffff * (100 - cfgp->side_deadband) / 100;
-		val = remap(val, min, max,0, 0xffff);
+		if (cfgp->trunx) val = 0x7fff - val;
+		min = 0x7fff * cfgp->centre_deadband / 100;
+		max = 0x7fff * (100 - cfgp->side_deadband) / 100;
+		val = remap(val, min, max,0, 0x7fff);
 	}
 
 	*valp = val;
@@ -318,9 +318,9 @@ uint16_t app_trigger_normalization(uint8_t id,joystick_t* adcp)
     adc_min = m_trim_cal.min.tarigger[id];
     adc_max = m_trim_cal.max.tarigger[id];
 
-	ret = remap(adc, adc_min, adc_max,0, 0xffff);
+	ret = remap(adc, adc_min, adc_max,0, 0x7fff);
     if(!trigger_active[id]){ 
-        ret = 0xffff - ret;
+        ret = 0x7fff - ret;
     }
 	ret = constrain_int16(ret);
 

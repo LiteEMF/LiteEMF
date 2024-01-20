@@ -135,8 +135,8 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	ps4p->buttonh = keyp->key>>16;
 	ps4p->buttonl = SWAP16_L( ps4p->buttonl );
 
-	ps4p->l2 = keyp->l2;
-	ps4p->r2 = keyp->r2;
+	ps4p->l2 = keyp->l2 >> 7;
+	ps4p->r2 = keyp->r2 >> 7;
 
 	ps4p->time_index = SWAP16_L((m_systick&0xffff)*200);
 	ps4p->mark = 0x13;
@@ -187,8 +187,8 @@ static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	ps3p->rx = (keyp->stick_r.x >> 8) + 0x80;
 	ps3p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
 	ps3p->button = SWAP32_L(keyp->key);
-	ps3p->l2 = keyp->l2;
-	ps3p->r2 = keyp->r2;
+	ps3p->l2 = keyp->l2 >> 7;
+	ps3p->r2 = keyp->r2 >> 7;
 
 	if(PS3_UP & keyp->key)	ps3p->up = 0xff;
 	if(PS3_DOWN & keyp->key)	ps3p->down = 0xff;
@@ -233,8 +233,8 @@ static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
 	ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
 	ps5p->button = (keyp->key&0xfffffff0) | ps4_key_to_hatswitch(keyp->key);
-	ps5p->l2 = keyp->l2;
-	ps5p->r2 = keyp->r2;
+	ps5p->l2 = keyp->l2 >> 7;
+	ps5p->r2 = keyp->r2 >> 7;
 
 	ps_report_index++;
 	ps5p->index = ps_report_index;
@@ -346,8 +346,8 @@ static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps4_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps4_inp->ry-0x80),-128,127,32767,-32768);
 
-		keyp->l2 = ps4_inp->l2;
-		keyp->r2 = ps4_inp->r2;
+		keyp->l2 = remap(ps4_inp->l2,0,0xFF,0,32767);
+		keyp->r2 = remap(ps4_inp->r2,0,0xFF,0,32767);
 
 		if(len > 10){
 			if(0 == (ps4_inp->touch_pad1_index & 0x80)){		//touch pad解析
@@ -413,8 +413,8 @@ static bool ps3_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps3_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps3_inp->ry-0x80),-128,127,32767,-32768);
 
-		keyp->l2 = ps3_inp->l2;
-		keyp->r2 = ps3_inp->r2;
+		keyp->l2 = remap(ps3_inp->l2,0,0xFF,0,32767);
+		keyp->r2 = remap(ps3_inp->r2,0,0xFF,0,32767);
 		ret = true;
 	}
 
@@ -439,8 +439,8 @@ static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 		keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
 		keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
 		
-		keyp->l2 = ps5_inp->l2;
-		keyp->r2 = ps5_inp->r2;
+		keyp->l2 = remap(ps5_inp->l2,0,0xFF,0,32767);
+		keyp->r2 = remap(ps5_inp->r2,0,0xFF,0,32767);
 		ret = true;
 	}
 	return ret;

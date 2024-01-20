@@ -147,8 +147,10 @@ static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, a
 			keyp->stick_l.y = SWAP16_L(xbox_inp->y);
 			keyp->stick_r.x = SWAP16_L(xbox_inp->rx);
 			keyp->stick_r.y = SWAP16_L(xbox_inp->ry);
-			keyp->l2 = SWAP16_L(xbox_inp->l2)>>2;
-			keyp->r2 = SWAP16_L(xbox_inp->r2)>>2;
+			keyp->l2 = SWAP16_L(xbox_inp->l2);
+			keyp->r2 = SWAP16_L(xbox_inp->r2);
+			keyp->l2 = remap(keyp->l2,0,0X3FF,0,32767);
+			keyp->r2 = remap(keyp->r2,0,0X3FF,0,32767);
 			
 			if(keyp->l2) keyp->key |= XBOX_L2;
 			if(keyp->r2) keyp->key |= XBOX_R2;
@@ -180,8 +182,11 @@ static bool xboxs_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, a
 			keyp->stick_l.y = negative_int16(keyp->stick_l.y);			//取反
 			keyp->stick_r.y = negative_int16(keyp->stick_r.y);
 
-			keyp->l2 = SWAP16_L(bt_xboxp->l2)>>2;
-			keyp->r2 = SWAP16_L(bt_xboxp->r2)>>2;
+			keyp->l2 = SWAP16_L(bt_xboxp->l2);
+			keyp->r2 = SWAP16_L(bt_xboxp->r2);
+			keyp->l2 = remap(keyp->l2,0,0X3FF,0,32767);
+			keyp->r2 = remap(keyp->r2,0,0X3FF,0,32767);
+			
 			if(keyp->l2) keyp->key |= GAMEPAD_L2;
 			if(keyp->r2) keyp->key |= GAMEPAD_R2;
 			ret = true;
@@ -204,8 +209,8 @@ static bool x360_key_decode(trp_handle_t* phandle,uint8_t* buf, uint16_t len, ap
 		keyp->stick_l.y = SWAP16_L(x360_inp->y);
 		keyp->stick_r.x = SWAP16_L(x360_inp->rx);
 		keyp->stick_r.y = SWAP16_L(x360_inp->ry);
-		keyp->l2 = x360_inp->l2;
-		keyp->r2 = x360_inp->r2;
+		keyp->l2 = remap(x360_inp->l2,0,0XFF,0,32767);
+		keyp->r2 = remap(x360_inp->r2,0,0XFF,0,32767);
 		if(keyp->l2) keyp->key |= X360_L2;
 		if(keyp->r2) keyp->key |= X360_R2;
 		ret = true;

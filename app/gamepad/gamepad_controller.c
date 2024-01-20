@@ -155,8 +155,8 @@ uint16_t gamepad_key_pack(trp_handle_t *phandle,app_gamepad_key_t *keyp, uint8_t
 	preport->rx = (keyp->stick_r.x >> 8) + 0x80;
 	preport->ry =(keyp->stick_r.y >> 8) + 0x80;
 
-	preport->l2 = keyp->l2;
-	preport->r2 = keyp->r2;
+	preport->l2 = keyp->l2 >> 7;
+	preport->r2 = keyp->r2 >> 7;
 
 	packet_len = sizeof(gamepad_retport_t);
 
@@ -196,8 +196,8 @@ bool gamepad_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_ga
 		keyp->stick_r.y = remap((int8_t)(dinput_inp->ry-0x80),-128,127,-32768,32767);
 
 		
-		keyp->l2 = dinput_inp->l2;
-		keyp->r2 = dinput_inp->r2;
+		keyp->l2 = remap(dinput_inp->l2,0,0XFF,0,32767);
+		keyp->r2 = remap(dinput_inp->r2,0,0XFF,0,32767);
 		ret = true;
 	}
 	return ret;
