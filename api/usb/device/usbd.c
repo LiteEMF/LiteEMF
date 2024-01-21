@@ -517,6 +517,7 @@ static error_t usbd_control_request_process(uint8_t id)
 				pdev->state = TUSB_STA_CONFIGURED;
 				usbd_set_ready(id, false);
 				pdev->cfg_num = preq->req.wValue;
+				usbd_class_notify_evt(id,USBD_EVENT_CONFIGURED,preq->req.wValue);
 				err = ERROR_SUCCESS;			//must success
 				break;
 			case TUSB_REQ_GET_DESCRIPTOR:

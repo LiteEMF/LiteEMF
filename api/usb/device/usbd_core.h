@@ -82,6 +82,8 @@ typedef enum
   USBD_EVENT_SOF,
   USBD_EVENT_SUSPEND,
   USBD_EVENT_RESUME,
+  USBD_EVENT_CONFIGURED,			//set cofigured event
+  
   USBD_EVENT_EP_READY,				//端点 ready, 可以收发数据
   USBD_EVENT_READY,
 

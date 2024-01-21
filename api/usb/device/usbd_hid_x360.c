@@ -420,6 +420,9 @@ void usbd_hid_x360_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, u
     case  USBD_EVENT_SUSPEND:
         usbd_hid_x360_suspend(id);
         break;
+	case USBD_EVENT_CONFIGURED:				//为了兼容linux系统这configred后ready
+		usbd_set_ready(id, true);
+		break;
     case  USBD_EVENT_EP_OUT:
         usbd_hid_x360_out_process(id, pclass);
         break;
