@@ -14,6 +14,10 @@
 #define _api_transporte_h
 #include "emf_typedef.h" 
 #include "hw_config.h"
+#if API_STORAGE_ENABLE
+#include  "api/api_storage.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

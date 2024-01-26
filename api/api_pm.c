@@ -175,6 +175,7 @@ void api_reset(void)
 	logd("api rest\n");
 	pm_force_shutdown = m_systick;
 	m_pm_sta = PM_STA_RESET;
+	api_pm_sleep_deinit();				//关闭蓝牙
 }
 
 /*******************************************************************
@@ -264,7 +265,7 @@ void api_pm_task(void*pa)
 		break;
 	case PM_STA_RESET:
 	case PM_STA_SLEEP:
-		if(m_systick - pm_force_shutdown >= 3000){
+		if(m_systick - pm_force_shutdown < 3000){
 			if(api_pm_sleep_hook()) return;
 
 			#if API_STORAGE_ENABLE
@@ -286,9 +287,8 @@ void api_pm_task(void*pa)
 			}
 			#endif
 		}
-
-		if(PM_STA_RESET == m_pm_sta)
-		{
+		
+		if(PM_STA_RESET == m_pm_sta){
 			logd_r("reset...\n\n");
 			#if API_STORAGE_ENABLE
 			m_storage.reset_reson = SOFT_RESET_MASK;

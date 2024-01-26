@@ -46,9 +46,11 @@ typedef struct {
 	uint8_t head;
 	uint8_t reset_reson;	
 	uint8_t flash_res[6];	//8
-	uint8_t mode;
-	uint8_t sub_mode;
-	uint8_t res[6];			//16
+	uint16_t trps;
+	uint16_t dev_mode;
+	uint16_t hid_mode;
+
+	uint8_t res[10];		//24
 
 	#if APP_JOYSTICK_ENABLE
 	int16_t joystick_cal[19];

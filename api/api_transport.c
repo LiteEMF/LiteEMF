@@ -37,10 +37,11 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-uint16_t m_trps = DEV_TRPS_DEFAULT;			//在工程中修改,用于判断当前支持的传输类型
 
+//产品模式
 //TODO注意: 以下类型用于产品类型分类, 具体到不同传输类型上在工程中根据不同产品自定义修改
 //后期遇到不同传输类型需要不同模式的产品再修改适配
+uint16_t m_trps = DEV_TRPS_DEFAULT;		
 uint16_t m_dev_mode = USBD_TYPE_SUPPORT | BT_TYPE_SUPPORT;
 uint16_t m_hid_mode = HIDD_SUPPORT;					
 
@@ -314,7 +315,24 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 *******************************************************************/
 bool api_trp_init(void)
 {
-	m_trps = DEV_TRPS_DEFAULT;
+	//判断和设置默认模式
+	#if API_STORAGE_ENABLE
+
+	if(m_storage.trps & ~(BIT(TR_MAX) - 1)){
+		m_storage.trps = DEV_TRPS_DEFAULT;
+	}
+	if(m_storage.dev_mode & ~(USBD_TYPE_SUPPORT | BT_TYPE_SUPPORT)){
+		m_storage.dev_mode = USBD_TYPE_SUPPORT | BT_TYPE_SUPPORT;
+	}
+	if(m_storage.hid_mode & ~HIDD_SUPPORT){
+		m_storage.hid_mode = HIDD_SUPPORT;
+	}
+	m_trps = m_storage.trps;
+	m_dev_mode = m_storage.dev_mode;
+	m_hid_mode = m_storage.hid_mode;
+	#endif
+
+	logd("dev trps=%x, modes=%x hids=%x\n",m_trps,m_dev_mode,m_hid_mode);
 	return true;
 }
 

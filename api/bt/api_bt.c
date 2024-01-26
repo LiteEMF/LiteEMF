@@ -204,7 +204,7 @@ bool api_bt_is_connected(bt_t bt)
 	
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL != bt_ctbp){
-		if(BT_STA_CONN <= bt_ctbp->sta){
+		if(BT_STA_CONN == bt_ctbp->sta){
 			ret = true;
 		}
 	}
@@ -429,7 +429,11 @@ bool api_bt_enable(uint8_t id,bt_t bt,bool en)
 	logi("bt%d enable=%d\n", bt, en);	
 
 	bt_ctbp->enable = en;
-	if(!en) api_bt_disconnect(id,bt);
+	if(!en) {
+		api_bt_disconnect(id,bt);
+		bt_ctbp->hid_ready = false;
+		bt_ctbp->vendor_ready = false;
+	}
 
 	if(bt_ctbp->init_ok){
 		if(id == BT_ID0){
@@ -623,7 +627,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 
 	switch(event){
 		case BT_EVT_INIT:			//蓝牙SDK自动广播
-			if((0 == m_trps) & BIT(bt)){
+			if(0 == (m_trps & BIT(bt))){
 				bt_ctbp->enable = 0;
 			}
 			bt_ctbp->init_ok = true;
@@ -722,7 +726,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 
 	switch(event){
 		case BT_EVT_INIT:
-			if((0 == m_trps) & BIT(bt)){
+			if(0 == (m_trps & BIT(bt))){
 				bt_ctbp->enable = 0;
 			}
 			bt_ctbp->init_ok = true;

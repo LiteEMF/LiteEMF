@@ -77,11 +77,14 @@ bool emf_api_init(void)
 	io_key_init();		//按键上电立即初始化
 
 	api_tick_init();
-	hw_user_vender_init();	
 	
 	#if API_STORAGE_ENABLE
 	api_storage_init();
 	#endif
+
+	api_trp_init();		//在storage init 之后初始化 设备模式
+	
+	hw_user_vender_init();	
 
 	#if API_WDT_ENABLE
 	api_wdt_init(API_WDT_TIME);
@@ -105,7 +108,7 @@ bool emf_api_init(void)
 	#ifdef HW_SPI_HOST_MAP
 	api_spis_init();
 	#endif
-	api_trp_init();
+	
 
 	#if APP_BATTERY_ENABLE		//special
 	app_battery_init();
