@@ -129,6 +129,8 @@ bool app_rumble_init(void)
 bool app_rumble_deinit(void)
 {
 	app_rumble_init();
+    app_rumble_show();
+    
 	return true;
 }
 
