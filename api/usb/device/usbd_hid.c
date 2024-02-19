@@ -68,7 +68,7 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
                 #if USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
 				case HID_TYPE_GAMEPADE:
                 case HID_TYPE_DINPUT:
-                    len += usbd_hid_gamepade_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
+                    len += usbd_hid_gamepade_get_itf_desc(id, hid_type, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_X360)

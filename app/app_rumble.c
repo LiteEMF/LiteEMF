@@ -29,7 +29,7 @@
 **	public Parameters
 *******************************************************************************************************/
 rumble_t	m_rumble;
-
+bool m_rumble_enable = true;            //rumble default enable true, controler in project
 
 /******************************************************************************************************
 **	static Parameters
@@ -76,6 +76,7 @@ void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
 	uint8_t rumble_duty;
 
 	if(id >= RUMBLE_MAX) return;
+    if(!m_rumble_enable) duty = 0;      //rumble disable duty设置为0
 
 	rumble_ctb[id].timeout = timeout_ms;
 
@@ -112,6 +113,7 @@ bool app_rumble_init(void)
 	uint8_t id;
 
     m_rumble_sync = 0;
+    m_rumble_enable = true;
     memset(&m_rumble,0,sizeof(m_rumble));
     memset(&rumble_ctb,0,sizeof(rumble_ctb));
     for (id = 0; id < RUMBLE_MAX; id++){
@@ -130,6 +132,7 @@ bool app_rumble_deinit(void)
 {
 	app_rumble_init();
     app_rumble_show();
+    m_rumble_enable = false;		//关闭马达设置,防止关机马达震动
     
 	return true;
 }
