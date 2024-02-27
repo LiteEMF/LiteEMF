@@ -144,7 +144,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			replay[1] = api_transport_get_mtu(buf[4]);
 		}else{			//获取指令当前传输协议mtu
 			replay[0] = phandle->trp;
-			replay[1] = api_transport_get_mtu(phandle->trp);
+			replay[1] = api_transport_get_mtu(phandle);
 		}
 		api_command_tx(phandle,phead->cmd, replay, 2);
 		ret = true;

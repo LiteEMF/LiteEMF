@@ -80,7 +80,7 @@ typedef struct{
 } imu_cal_t;	//12
 
 
-extern axis4f_t quaternion;		//四元数
+extern axis4f_t m_imu_quaternion;		//四元数
 
 /*****************************************************************************************************
 **  Function

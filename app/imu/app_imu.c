@@ -274,7 +274,7 @@ void app_imu_cal_start(void)
 float q0 = 1, q1 = 0, q2 = 0, q3 = 0;    	// 初始姿态四元数，由上篇博文提到的变换四元数公式得来
 float exInt = 0, eyInt = 0, ezInt = 0;    	//当前加计测得的重力加速度在三轴上的分量
                                 	//与用当前姿态计算得来的重力在三轴上的分量的误差的积分
-axis4f_t quaternion;		//四元数
+axis4f_t m_imu_quaternion;		//四元数
 void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az)		//g表陀螺仪，a表加计  
 {
 	float norm; //矢量的模或四元数的范数
@@ -325,10 +325,10 @@ void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az)	
 	q3 = q3_last + (q0_last*gz + q1_last*gy -q2_last*gx)*halfT;
 	//单位化四元数在空间旋转时不会拉伸，仅有旋转角度，这类似线性代数里的正交变换
 	norm = invSqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
-	quaternion.x = q0 * norm;
-	quaternion.y = q1 * norm;
-	quaternion.z = q2 * norm;
-	quaternion.w = q3 * norm;
+	m_imu_quaternion.x = q0 * norm;
+	m_imu_quaternion.y = q1 * norm;
+	m_imu_quaternion.z = q2 * norm;
+	m_imu_quaternion.w = q3 * norm;
 
 }
 

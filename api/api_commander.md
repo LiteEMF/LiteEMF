@@ -429,9 +429,8 @@ typedef struct{
     uint8_t index;
     uint8_t cmd;
     uint16_t dev_trps;	    //设备传输类型
-    uint16_t usb_hid_types;	//usb模式
-    uint16_t bt_hid_types;	//蓝牙模式
-    uint16_t rf_hid_types;	//2.4g模式
+    uint16_t dev_mode;
+    uint16_t hid_mode;
     uint8_t sum;
 };
 //回复设备 模式
@@ -441,12 +440,8 @@ typedef struct{
     uint8_t index;
     uint8_t cmd;
     uint16_t dev_trps_support;	//设备支持的传输类型
-    uint16_t hid_types_support;	//设备支持的hid模式
-
-    uint16_t usb_hid_types;	//usb模式
-    uint16_t bt_hid_types;	//蓝牙模式
-    uint16_t rf_hid_types;	//2.4g模式
-    
+    uint16_t dev_mode_support;	//设备支持的模式
+    uint16_t hid_mode_types;	//设备支持的HID模式
     uint8_t sum;
 };
 ```
