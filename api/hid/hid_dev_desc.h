@@ -15,7 +15,7 @@
 #include "emf_typedef.h" 
 #include "hw_config.h"
 #include "api/api_transport.h"
-
+#include "api/hid/hid_typedef.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

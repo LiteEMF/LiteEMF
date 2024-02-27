@@ -251,7 +251,7 @@ bool hal_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     
     return ret;
 }
-bool hal_bt_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
+bool hal_bt_hid_tx(uint8_t id, bt_t bt, hid_report_type_t report_type,uint8_t*buf, uint16_t len)
 {
     bool ret = false;
 

@@ -281,7 +281,13 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 			if(DEV_TYPE_VENDOR == (phandle->index >> 8)){
 				ret = api_bt_uart_tx(phandle->id,phandle->trp, pbuf, len);
 			}else if(DEV_TYPE_HID == (phandle->index >> 8)){
-				ret = api_bt_hid_tx(phandle->id,phandle->trp, pbuf, len);
+				if(TR_EDR == phandle->trp){
+					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_INPUT, pbuf, len);
+				}else if(TR_EDRC == phandle->trp){
+					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_OUTPUT, pbuf, len);
+				}else{
+					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_INVALID, pbuf, len);
+				}
 			}
 			break;
 		#endif

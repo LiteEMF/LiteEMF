@@ -257,7 +257,7 @@ bool bt_driver_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
     
     return ret;
 }
-bool bt_driver_hid_tx(uint8_t id, bt_t bt,uint8_t*buf, uint16_t len)
+bool bt_driver_hid_tx(uint8_t id, bt_t bt,hid_report_type_t report_type, uint8_t*buf, uint16_t len)
 {
     bool ret = false;
 

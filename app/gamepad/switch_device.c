@@ -721,8 +721,16 @@ in  从0快开始,第13,14bit是指令回复
 bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 {
     bool ret = false;
+    uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
     static rumble_t s_rumble;
-    if ( 0 ==  len) return ret;
+
+    if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
+		hid_type = buf[0] & 0X0F;
+        len -= 1;
+		buf += 1;
+		if ( 0 == len) return false;
+	}
+
     switch_dump_cmd_out("dev:",buf,len);
 
     switch (buf[0])

@@ -500,6 +500,8 @@ bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp)
 bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {
 	bool ret = false;
+	
+	if ( 0 ==  len) return ret;
 
 	switch(phandle->index & 0xff){
         #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
