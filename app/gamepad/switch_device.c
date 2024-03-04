@@ -299,10 +299,10 @@ uint16_t switch_normal_key_pack(trp_handle_t *phandle,const app_gamepad_key_t *k
 	switchp->id = SWITCH_NORMAL_REPORT_ID;
 	switchp->button = keyp->key & 0xffff;
 	switchp->hat_switch = gamepad_key_to_hatswitch(keyp->key);
-	switchp->lx = keyp->stick_l.x;
-	switchp->ly = keyp->stick_l.y;
-	switchp->rx = keyp->stick_r.x;
-	switchp->ry = keyp->stick_r.y;
+	switchp->lx = keyp->stick_l.x + 8000;
+	switchp->ly = keyp->stick_l.y + 8000;
+	switchp->rx = keyp->stick_r.x + 8000;
+	switchp->ry = keyp->stick_r.y + 8000;
 
 	packet_len = sizeof(switch_normal_report_t);
 	return packet_len;
@@ -721,11 +721,11 @@ in  从0快开始,第13,14bit是指令回复
 bool switch_dev_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
 {
     bool ret = false;
-    uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
+    uint8_t edr_hid_req = 0;
     static rumble_t s_rumble;
 
     if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
-		hid_type = buf[0] & 0X0F;
+		edr_hid_req = buf[0];
         len -= 1;
 		buf += 1;
 		if ( 0 == len) return false;

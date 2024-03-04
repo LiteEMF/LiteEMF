@@ -19,23 +19,42 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+//ref: https://crccalc.com/%EF%BC%89%EF%BC%9A%E8%BF%99%E6%98%AF%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E6%98%93%E7%94%A8%E7%9A%84%E5%9C%A8%E7%BA%BF
 
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef  CRC8_TABLE_EANBLE
-#define  CRC8_TABLE_EANBLE 		1
+//CRC8
+#define CRC8_POLY_DEFAULT 			0x07
+#ifndef  CRC8_POLY			
+#define  CRC8_POLY 			CRC8_POLY_DEFAULT
+#endif
+#ifndef  CRC8_EANBLE
+#define  CRC8_EANBLE 			1
+#endif
+
+//CRC16
+#define CRC16_POLY_XMODEM 			0x1021
+#define CRC16_POLY_MODBUS 			0x8005
+#ifndef  CRC16_POLY			
+#define  CRC16_POLY 				CRC16_POLY_MODBUS
 #endif
 #ifndef  CRC16_EANBLE
-#define  CRC16_EANBLE 			0
+#define  CRC16_EANBLE 			1
 #endif
-#ifndef  CRC16_TABLE16_EANBLE			//small flash size
-#define  CRC16_TABLE16_EANBLE 	0
+
+//CRC32
+#define CRC32_POLY_DEFAULT 		0x04C11DB7
+#define CRC32_POLY_LE 			0xedb88320
+#ifndef  CRC32_POLY			
+#define  CRC32_POLY 			CRC32_POLY_LE
 #endif
-#ifndef  CRC32_TABLE_EANBLE
-#define  CRC32_TABLE_EANBLE 	0
+#ifndef  CRC32_EANBLE
+#define  CRC32_EANBLE 			1
 #endif
+
+
+
 
 
 
@@ -46,9 +65,9 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-extern uint8_t  crc8(const void *buf, uint32_t len); 
-extern uint16_t crc16(const void *buf, uint32_t len); 
-extern uint32_t crc32(const void* buf, uint32_t len);
+extern uint8_t  crc8(uint8_t crc, const void *buf, uint32_t len); 
+extern uint16_t crc16(uint16_t crc,const void *buf, uint32_t len); 
+extern uint32_t crc32(uint32_t crc,const void* buf, uint32_t len);
 
 
 #ifdef __cplusplus

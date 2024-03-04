@@ -5,14 +5,18 @@
 ** Description: The source file of class crc32.
 **  CRC32 implementation according to IEEE standards.
 **  Polynomials are represented in LSB-first form
+*/
+#include "hw_config.h"
+#include "crc.h"
+
+#if  CRC32_EANBLE
+/*
 **  following parameters:
 **    Width                      : 32 bit
 **    Poly                       : 0x04C11DB7
 **    Output for "123456789"     : 0xCBF43926
 */
-#include "hw_config.h"
-#include "crc.h"
-#if  CRC32_TABLE_EANBLE
+#if CRC32_POLY == CRC32_POLY_DEFAULT
 static const_t uint32_t crc32_tab[] =
 {
     0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
@@ -69,7 +73,7 @@ static const_t uint32_t crc32_tab[] =
     0x2d02ef8dL
 };
 
-/* crc32 hash */
+// /* crc32 hash */
 uint32_t crc32(const void* buf, uint32_t len)
 {
     uint32_t i;
@@ -83,5 +87,39 @@ uint32_t crc32(const void* buf, uint32_t len)
 
     return crc32val ^ 0xFFFFFFFF;
 }
+
+#endif
+
+
+
+/*
+ * There are multiple 16-bit CRC polynomials in common use, but this is
+ * *the* standard CRC-32 polynomial, first popularized by Ethernet.
+**  following parameters:
+**    Width                      : 32 bit
+**    Poly                       : 0xedb88320 x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x^1+x^0
+**    Output for "123456789"     : 
+*/
+#if CRC32_POLY == CRC32_POLY_LE
+static uint32_t crc32_for_byte(uint32_t r)
+{
+    int i;
+    for(i = 0; i < 8; ++i) {
+        r = (r & 1? 0: (uint32_t)0xEDB88320L) ^ r >> 1;
+    }
+    return r ^ (uint32_t)0xFF000000L;
+}
+
+uint32_t crc32(uint32_t crc,const void* val, uint32_t len)
+{
+    /* As an optimization we can precalculate a 256 entry table for each byte */
+    uint16_t i;
+    for(i = 0; i < len; ++i) {
+        crc = crc32_for_byte((uint8_t)crc ^ ((const uint8_t*)val)[i]) ^ crc >> 8;
+    }
+    return crc;
+}
+#endif
+
 #endif
 

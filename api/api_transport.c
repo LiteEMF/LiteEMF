@@ -282,9 +282,9 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 				ret = api_bt_uart_tx(phandle->id,phandle->trp, pbuf, len);
 			}else if(DEV_TYPE_HID == (phandle->index >> 8)){
 				if(TR_EDR == phandle->trp){
-					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_INPUT, pbuf, len);
+					ret = api_bt_hid_tx(phandle->id,phandle->trp, EDR_HID_REQ_TYPE_DATA|HID_REPORT_TYPE_INPUT, pbuf, len);
 				}else if(TR_EDRC == phandle->trp){
-					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_OUTPUT, pbuf, len);
+					ret = api_bt_hid_tx(phandle->id,phandle->trp, EDR_HID_REQ_TYPE_DATA|HID_REPORT_TYPE_OUTPUT, pbuf, len);
 				}else{
 					ret = api_bt_hid_tx(phandle->id,phandle->trp, HID_REPORT_TYPE_INVALID, pbuf, len);
 				}

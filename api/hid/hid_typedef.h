@@ -69,13 +69,28 @@ typedef enum
 /// HID Request Report Type
 typedef enum
 {
-  HID_REPORT_TYPE_INVALID = 0,
-  HID_REPORT_TYPE_INPUT,      ///< Input
-  HID_REPORT_TYPE_OUTPUT,     ///< Output
-  HID_REPORT_TYPE_FEATURE     ///< Feature
+  HID_REPORT_TYPE_INVALID = 0,  //other
+  HID_REPORT_TYPE_INPUT,        //< Input
+  HID_REPORT_TYPE_OUTPUT,       //< Output
+  HID_REPORT_TYPE_FEATURE       //< Feature
 }hid_report_type_t;
 
-/// HID Class Specific Control Request
+//BT EDR HID CONTROL
+typedef enum
+{
+  EDR_HID_REQ_TYPE_HANDSHAKE       = 0x00,     //device 
+  EDR_HID_REQ_TYPE_CONTROL         = 0x10,     //device&host
+  EDR_HID_REQ_TYPE_GET_REPORT      = 0x40,     //host
+  EDR_HID_REQ_TYPE_SET_REPORT      = 0x50,     //host
+  EDR_HID_REQ_TYPE_GET_PROTOCOL    = 0x60,     //host
+  EDR_HID_REQ_TYPE_SET_PROTOCOL    = 0x70,     //host
+  EDR_HID_REQ_TYPE_GET_IDLE        = 0x80,     //host
+  EDR_HID_REQ_TYPE_SET_IDLE        = 0x90,     //host
+  EDR_HID_REQ_TYPE_DATA            = 0xA0,     //device&host
+  EDR_HID_REQ_TYPE_DATC            = 0xB0,     //device&host    
+}edr_hid_request_type_t;
+
+// HID Class Specific Control Request
 typedef enum
 {
   HID_REQ_CONTROL_GET_REPORT   = 0x01, ///< Get Report

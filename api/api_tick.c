@@ -59,6 +59,12 @@ void delay_ms(uint32_t ms)
 }
 #endif
 
+
+void api_os_delay_ms(uint32_t ms)
+{
+	hal_os_delay_ms(ms);
+}
+
 void api_tick_init(void)
 {
 	#ifndef m_task_tick10us

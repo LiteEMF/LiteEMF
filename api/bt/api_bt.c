@@ -533,7 +533,7 @@ bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len)
 ** Parameters: 
 ** Returns:
 *******************************************************************/
-bool api_bt_hid_tx(uint8_t id, bt_t bt, hid_report_type_t report_type, uint8_t*buf, uint16_t len)
+bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t hid_requset, uint8_t*buf, uint16_t len)
 {
 	bool ret = false;
 	api_bt_ctb_t* bt_ctbp;
@@ -544,9 +544,9 @@ bool api_bt_hid_tx(uint8_t id, bt_t bt, hid_report_type_t report_type, uint8_t*b
 	if(!bt_ctbp->init_ok || !bt_ctbp->hid_ready || (BT_STA_CONN != bt_ctbp->sta)) return ret;
 
 	if(id == BT_ID0){
-		ret = hal_bt_hid_tx(id, bt, report_type, buf, len);
+		ret = hal_bt_hid_tx(id, bt, hid_requset, buf, len);
 	}else{
-		ret = bt_driver_hid_tx(id, bt, report_type, buf, len);
+		ret = bt_driver_hid_tx(id, bt, hid_requset, buf, len);
 	}
 	
 	return ret;
@@ -592,6 +592,8 @@ static void bt_tx_event_process(uint8_t id, bt_tx_fifo_t* txp, bt_evt_tx_t* pa)
 *******************************************************************/
 __WEAK error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa)	
 {
+	// os post message 
+	// return ERROR_SUCCESS;
 	return ERROR_UNSUPPORT;
 }
 

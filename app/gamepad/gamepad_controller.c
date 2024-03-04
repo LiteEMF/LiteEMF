@@ -165,10 +165,10 @@ uint16_t gamepad_key_pack(trp_handle_t *phandle,app_gamepad_key_t *keyp, uint8_t
 
 bool gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {
-	uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
+	uint8_t edr_hid_req = 0;
 	
 	if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
-		hid_type = buf[0] & 0X0F;
+		edr_hid_req = buf[0];
 		len -= 1;
 		buf += 1;
 		if ( 0 == len) return false;

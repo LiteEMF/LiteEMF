@@ -49,7 +49,7 @@ uint8c_t ps_cmdF3[4] ={0xF3,0x00,0x38,0x38};		//b8 不支持F2,改成38
 **	public Parameters
 *******************************************************************************************************/
 ps_series_t m_ps_series;			//判断PS产品系列, 后面可以改成gamepad device series
-bool m_ps_enhanced_mode = false;	//large report mode, 从机蓝牙模式才有效, 收到马达数据后打开
+bool m_ps_enhanced_mode = true;	//large report mode, 从机蓝牙模式才有效, 收到马达数据/featrue 05/02 后打开
 
 
 /******************************************************************************************************
@@ -84,16 +84,15 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 {
 	uint16_t packet_len=0;
 	axis3i_t axis;
+	ps4_large_report_t* large_ps4p = (ps4_large_report_t*)buf;	//如果是large report
 	ps4_report_t* ps4p;
 
 	memset(buf,0,len);
 
 	if(api_trp_is_bt(phandle->trp)){           //蓝牙结构体长度(+id)
 		if(len < sizeof(ps4_large_report_t)) return 0;
-
 		if(m_ps_enhanced_mode){						//打开large report
-			ps4_large_report_t* large_ps4p = (ps4_large_report_t*)buf;	//这里特殊适配
-			large_ps4p->id = PS4_REPORT_ID;
+			large_ps4p->id = PS4_BT_LARGE_REPORT_ID;
 			large_ps4p->magic = 0xC0;
 			large_ps4p->touch_pad8_index = 0x80;
 
@@ -171,6 +170,22 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 
 
 	ps4_auto_ps_key(phandle, ps4p);
+
+	if(api_trp_is_bt(phandle->trp)){           //蓝牙结构体长度(+id)
+		if(m_ps_enhanced_mode){						//打开large report
+			/* Bluetooth reports need a CRC at the end of the packet (at least on Linux) */
+			#if  CRC32_EANBLE
+			uint8_t ubHdr = 0xA1; /* hidp header is part of the CRC calculation */
+			uint32_t unCRC;
+			unCRC = crc32(0,&ubHdr, 1);
+			unCRC = crc32(unCRC,large_ps4p, (sizeof(ps4_large_report_t) - sizeof(unCRC)));
+			large_ps4p->crc = SWAP32_L(unCRC);
+			#else
+			#error "ps controller need crc32!"
+			#endif
+		}
+	}
+	
 	return packet_len;
 }
 
@@ -279,9 +294,9 @@ static bool ps4_rumble_send(trp_handle_t *phandle, rumble_t const *prumble)
 		effects.effects.led_b = 0x40;
 
 		/* Bluetooth reports need a CRC at the end of the packet (at least on Linux) */
-		#if  CRC32_TABLE_EANBLE
-        unCRC = crc32(&ubHdr, 1);
-        unCRC += crc32(&effects, (sizeof(effects) - sizeof(unCRC)));
+		#if  CRC32_EANBLE
+        unCRC = crc32(0,&ubHdr, 1);
+        unCRC = crc32(unCRC,&effects, (sizeof(effects) - sizeof(unCRC)));
 		#else
 		#error "ps controller need crc32!"
 		#endif
@@ -681,6 +696,7 @@ uint16_t ps_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8
 	return packet_len;
 }
 
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:
@@ -689,17 +705,45 @@ uint16_t ps_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8
 bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 {
     bool ret = false;
-	uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
+	uint8_t edr_hid_req=0;
 
 	if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
-		hid_type = buf[0] & 0X0F;
+		edr_hid_req = buf[0];
 		len -= 1;
 		buf += 1;
-		if ( 0 == len) return false;
+		if(0 == len) return false;
 	}
-	if(hid_type == HID_REPORT_TYPE_FEATURE){	//freature 处理
-		//TODO
-		return ret;
+	
+	if(edr_hid_req == (EDR_HID_REQ_TYPE_GET_REPORT|HID_REPORT_TYPE_FEATURE)){	//freature 处理
+		bool ret;
+		switch(buf[0]){
+		case PS4_CALIBRATION_ID:
+		case PS4_BT_CALIBRATION_ID:{
+			uint8_t imu_calibration[]={
+			0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x22,0x00,0x22,0x00,0x22,0x00,0xDE,0x00,
+			0xDE,0x00,0xDE,0x1C,0x02,0x1C,0x02,0x00,0x20,0x00,0xE0,0x00,0x20,0x00,0xE0,0x00,
+			0x20,0x00,0xE0,0x0B,0x00,0xDB,0x5C,0x18,0x0A};
+			api_os_delay_ms(2);		//ps4模式下hid下发数据比较快，杰里蓝牙连接系统事件接收比较慢，这里简单delay特殊处理
+			
+			if(buf[0] == PS4_BT_CALIBRATION_ID){
+				ret = api_bt_hid_tx(BT_ID0,BT_EDR,HID_REPORT_TYPE_FEATURE,imu_calibration,sizeof(imu_calibration));
+			}else{
+				imu_calibration[0] = 0x02;
+				ret = api_bt_hid_tx(BT_ID0,BT_EDR,HID_REPORT_TYPE_FEATURE,imu_calibration,sizeof(imu_calibration)-4);
+			}
+			m_ps_enhanced_mode = true;
+			logd(" PS4_BT_CALIBRATION_ID ret=%d",ret);
+			break;
+		}
+		case PS4_BT_FIRMWARE_INFO_ID:{
+			uint8_t firmware_info[]={
+			0xA3,0x4A,0x75,0x6C,0x20,0x31,0x31,0x20,0x32,0x30,0x31,0x36,0x00,0x00,0x00,0x00,
+			0x00,0x31,0x32,0x3A,0x33,0x33,0x3A,0x33,0x38,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+			0x00,0x00,0x01,0x04,0x64,0x01,0x00,0x00,0x00,0x09,0x70,0x00,0x02,0x0C,0x45,0x62,0x2B};
+			api_bt_hid_tx(BT_ID0,BT_EDR,HID_REPORT_TYPE_FEATURE,firmware_info,sizeof(firmware_info));
+			break;
+		}
+		}
 	}else{
 		switch (buf[0]){
 		case PS4_BT_EFFECTS_ID:{           //0x11
@@ -771,7 +815,7 @@ void ps_controller_init(trp_handle_t *phandle)
 		#if (HIDD_SUPPORT & HID_PS_MASK)
 		pskey_auto_count = 0;
 		m_ps_series = PS_SERIES_NONE;
-		m_ps_enhanced_mode = false;
+		// m_ps_enhanced_mode = false;		//部分蓝牙先收到数据再收到连接成功消息，导致被清零。所以蓝牙默认11模式
 		memset(&mcontact_id, ID_NULL , sizeof(mcontact_id));
 		memset(&m_ps_touch, 0 , sizeof(m_ps_touch));
 		

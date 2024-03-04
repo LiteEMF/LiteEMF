@@ -338,7 +338,7 @@ bool api_bt_enable(uint8_t id,bt_t bt,bool en);
 void api_bt_enable_all(bool en);
 void api_bt_tx_fifo_fush(bt_t bt);
 bool api_bt_uart_tx(uint8_t id, bt_t bt,uint8_t *buf, uint16_t len);
-bool api_bt_hid_tx(uint8_t id, bt_t bt, hid_report_type_t report_type, uint8_t*buf, uint16_t len);
+bool api_bt_hid_tx(uint8_t id, bt_t bt, uint8_t hid_requset, uint8_t*buf, uint16_t len);
 error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
 void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
 bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);	//__WEAK
@@ -360,7 +360,7 @@ bool bt_driver_debond(uint8_t id,bt_t bt);
 bool bt_driver_disconnect(uint8_t id,bt_t bt);
 bool bt_driver_enable(uint8_t id,bt_t bt,bool en);
 bool bt_driver_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
-bool bt_driver_hid_tx(uint8_t id,bt_t bt, hid_report_type_t report_type,uint8_t*buf, uint16_t len);
+bool bt_driver_hid_tx(uint8_t id,bt_t bt, uint8_t hid_requset,uint8_t*buf, uint16_t len);
 bool bt_driver_init(uint8_t id);
 bool bt_driver_deinit(uint8_t id);
 void bt_driver_task(void* pa);
@@ -371,7 +371,7 @@ bool hal_bt_debond(uint8_t id,bt_t bt);
 bool hal_bt_disconnect(uint8_t id,bt_t bt);
 bool hal_bt_enable(uint8_t id,bt_t bt,bool en);
 bool hal_bt_uart_tx(uint8_t id,bt_t bt, uint8_t *buf, uint16_t len);
-bool hal_bt_hid_tx(uint8_t id,bt_t bt, hid_report_type_t report_type, uint8_t*buf, uint16_t len);
+bool hal_bt_hid_tx(uint8_t id,bt_t bt, uint8_t hid_requset, uint8_t*buf, uint16_t len);
 bool hal_bt_init(uint8_t id);
 bool hal_bt_deinit(uint8_t id);
 void hal_bt_task(void* pa);

@@ -1,7 +1,15 @@
 /* 
  * The crc32 is licensed under the Apache License, Version 2.0, and a copy of the license is included in this file.
  *  CRC16 implementation according to CCITT standards.
- *
+ */
+
+
+
+#include "crc.h"
+#if  CRC16_EANBLE
+
+
+ /*
  * The XMODEM CRC 16 algorithm, using the following parameters:
  *
  * Name                       : "XMODEM", also known as "ZMODEM", "CRC-16/ACORN" 
@@ -12,14 +20,8 @@
  * Reflect Output CRC         : False
  * Xor constant to output CRC : 0000
  * Output for "123456789"     : 31C3
- */
-
-
-
-#include "crc.h"
-#if  CRC16_EANBLE
-
-#if CRC16_TABLE16_EANBLE
+ * */
+#if CRC16_POLY == CRC16_POLY_XMODEM
 static const_t uint16_t crc16tab[256]= {
     0x0000,0x1021,0x2042,0x3063,0x4084,0x50a5,0x60c6,0x70e7,
     0x8108,0x9129,0xa14a,0xb16b,0xc18c,0xd1ad,0xe1ce,0xf1ef,
@@ -55,22 +57,27 @@ static const_t uint16_t crc16tab[256]= {
     0x6e17,0x7e36,0x4e55,0x5e74,0x2e93,0x3eb2,0x0ed1,0x1ef0
 };
 
-uint16_t crc16(const void *buf, uint32_t len) 
+uint16_t crc16(uint16_t crc,const void *buf, uint32_t len) 
 {
     uint32_t counter;
     uint8_t *p = (uint8_t *)buf;
-    uint16_t crc = 0;
+
     for (counter = 0; counter < len; counter++)
             crc = (crc<<8) ^ crc16tab[((crc>>8) ^ *p++)&0x00FF];
     return crc;
 }
-#else
+
+
+#endif
+
+
+#if CRC16_POLY == CRC16_POLY_MODBUS
 
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-
-** Description:	CRC-16/MODBUS:x16 + x15 + x2 + 1 polynomial 0x8005 
+** Description:	CRC-16/MODBUS:polynomial 0x8005  x16 + x15 + x2 + 1 
+* Initialization             : 0XFFFF
 * Output for "123456789"     : 4b37
 	run by direct: 		4598 cycle
 	run by 256 table: 	540 cycle
@@ -82,9 +89,8 @@ static const_t uint16_t crc16tab16[] =
 	0x6C00, 0x7800, 0xB401, 0x5000, 0x9C01, 0x8801, 0x4400
 };
 
-uint16_t crc16(const void* buf, uint32_t len)
+uint16_t crc16(uint16_t crc,const void* buf, uint32_t len)
 {
-    uint16_t wCRC = 0xFFFF;
     uint16_t i;
     uint8_t chChar;
 	uint8_t *p = (uint8_t *)buf;
@@ -92,10 +98,10 @@ uint16_t crc16(const void* buf, uint32_t len)
     for (i = 0; i < len; i++)
     {
         chChar = *p++;
-        wCRC = crc16tab16[(chChar ^ wCRC) & 15] ^ (wCRC >> 4);
-        wCRC = crc16tab16[((chChar >> 4) ^ wCRC) & 15] ^ (wCRC >> 4);
+        crc = crc16tab16[(chChar ^ crc) & 15] ^ (crc >> 4);
+        crc = crc16tab16[((chChar >> 4) ^ crc) & 15] ^ (crc >> 4);
     }
-    return wCRC;
+    return crc;
 }
 #endif
 

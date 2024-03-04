@@ -307,6 +307,13 @@ extern "C" {
 #define SIN8_ENABLE				1
 #endif
 
+
+#if ((HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK)
+#undef CRC32_EANBLE
+#define CRC32_EANBLE				1
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif

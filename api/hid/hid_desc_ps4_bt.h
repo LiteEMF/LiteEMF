@@ -10,6 +10,7 @@
 */
 
 //ps4一代 模式描述符 PS_VID=0X054c, PS4_S1_PID=0x05c4
+//二代 多了report id 0xA7到0xB4
 0x05, 0x01,        // Usage Page (Generic Desktop Ctrls)
 0x09, 0x05,        // Usage (Game Pad)
 0xA1, 0x01,        // Collection (Application)
@@ -185,6 +186,42 @@
 	0x85, 0xA4,        //   Report ID (-92)
 	0x09, 0x44,        //   Usage (0x44)
 	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+
+	0x85, 0xA7,        //   Report ID (-89)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xA8,        //   Report ID (-88)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xA9,        //   Report ID (-87)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xAA,        //   Report ID (-86)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xAB,        //   Report ID (-85)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xAC,        //   Report ID (-84)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xAD,        //   Report ID (-83)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xB1,        //   Report ID (-79)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xB2,        //   Report ID (-78)
+	0x09, 0x46,        //   Usage (0x46)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xB3,        //   Report ID (-77)
+	0x09, 0x45,        //   Usage (0x45)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+	0x85, 0xB4,        //   Report ID (-76)
+	0x09, 0x46,        //   Usage (0x46)
+	0xB1, 0x02,        //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
+
 0xC0,              // End Collection
 
-// 364 bytes
+// 364 bytes		一代
+// 430 bytes		二代

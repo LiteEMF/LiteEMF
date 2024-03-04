@@ -357,10 +357,10 @@ bool xbox_earphone_enable(trp_handle_t *phandle,xbox_command_t* cmdp,bool enable
 bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {
 	bool ret = false;
-	uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
+	uint8_t edr_hid_req = 0;
 	
 	if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
-		hid_type = buf[0] & 0X0F;
+		edr_hid_req = buf[0];
 		len -= 1;
 		buf += 1;
 		if ( 0 == len) return false;
@@ -468,12 +468,12 @@ bool xbox_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 bool x360_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {
     bool ret = false;
-	uint8_t hid_type = HID_REPORT_TYPE_OUTPUT;
+	uint8_t hid_req = 0;
 	rumble_t rumble;
 	x360_usb_rumble_t *rumblep;
 
 	if(TR_EDR == phandle->trp){		//edr 判断 hid_report_type_t
-		hid_type = buf[0] & 0X0F;
+		hid_req = buf[0];
 		len -= 1;
 		buf += 1;
 		if ( 0 == len) return false;

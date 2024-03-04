@@ -194,6 +194,10 @@ typedef enum {
 
 
 #define PS4_USB_EFFECTS_ID			 	0x05		/*USB 马达指令 */
+#define PS4_CALIBRATION_ID				0x02		/*获取校准信息，无crc校验 37*/
+#define PS4_BT_CALIBRATION_ID			0x05		/*蓝牙协议 获取校准信息 41 */
+#define PS4_BT_FIRMWARE_INFO_ID			0xA3		/*蓝牙协议 获取版本信息 49*/
+#define PS4_BT_PAIRING_INFO_ID			0x12		/*蓝牙协议 配对信息 16*/
 #define PS4_BT_EFFECTS_ID				0x11		/*蓝牙协议 马达指令 */
 
 
@@ -228,6 +232,45 @@ typedef enum {
 #ifndef pack
 #pragma pack(1)
 #endif
+
+
+typedef struct {
+	uint8_t id;					//02/05
+	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
+	axis3i_t gyro_plus;
+	axis3i_t gyro_minus;
+	int16_t gyro_speed_plus;
+	int16_t gyro_speed_minus;
+	int16_t acc_x_plus;
+	int16_t acc_x_minus;
+	int16_t acc_y_plus;
+	int16_t acc_y_minus;
+	int16_t acc_z_plus;
+	int16_t acc_z_minus;
+	int16_t res;
+	uint32_t crc;				//option
+}ps4_bt_calibration_t;			//41
+
+typedef struct {
+	uint8_t id;					//02
+	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
+	int16_t gyro_x_plus;
+	int16_t gyro_x_minus;
+	int16_t gyro_y_plus;
+	int16_t gyro_y_minus;
+	int16_t gyro_z_plus;
+	int16_t gyro_z_minus;
+	int16_t gyro_speed_plus;
+	int16_t gyro_speed_minus;
+	int16_t acc_x_plus;
+	int16_t acc_x_minus;
+	int16_t acc_y_plus;
+	int16_t acc_y_minus;
+	int16_t acc_z_plus;
+	int16_t acc_z_minus;
+	int16_t res;
+}ps4_calibration_t;			//37
+
 
 typedef struct {
 	uint8_t id:7;
