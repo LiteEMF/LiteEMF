@@ -53,7 +53,7 @@ extern "C" {
 
 
 #ifndef SPI_DELAY			//ns
-#define SPI_DELAY(id)  		delay_ns(1000000/2/SPI_BADU_ATT(id)) 	
+#define SPI_DELAY(id)  		api_delay_ns(1000000/2/SPI_BADU_ATT(id)) 	
 #endif
 
 

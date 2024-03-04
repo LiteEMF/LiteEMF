@@ -34,7 +34,7 @@ extern "C" {
 #define MATRIX_KEY_ACTIVE	0
 #endif
 #ifndef MATRIX_KEY_DELAY
-#define MATRIX_KEY_DELAY()		delay_ns(0);
+#define MATRIX_KEY_DELAY()		api_delay_ns(0);
 #endif
 
 

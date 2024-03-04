@@ -25,7 +25,7 @@
 * 5. void SH3001_INT_Flat_Config( unsigned char flatTimeTH, unsigned char flatTanHeta2)：	
 *    If using the function, need to config SH3001_INT_Orient_Config( ... ) function.
 *
-* 6. delay_ms(x): delay x millisecond.
+* 6. api_delay_ms(x): delay x millisecond.
 *
 * 7. New version SH3001: SH3001_CHIP_ID1(0xDF) = 0x61;
 *    SH3001_CompInit(... ): initialize compensation coefficients;
@@ -163,16 +163,16 @@ static void SH3001_SoftReset(void)
     
   	regData = 0x84;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
-	delay_ms(1);
+	api_delay_ms(1);
   	regData = 0x04;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);		
-	delay_ms(1);
+	api_delay_ms(1);
 	regData = 0x08;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0x2F, 1, &regData);
-	delay_ms(1);
+	api_delay_ms(1);
 	regData = 0x73;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0x00, 1, &regData);
-	delay_ms(50);
+	api_delay_ms(50);
 }	
 
 /******************************************************************
@@ -198,13 +198,13 @@ static void SH3001_ADCReset(void)
 	regData[1] = (regData[1] & 0xF9) | 0x02;
     I2C_Write_NBytes(SH3001_ADDRESS, 0xD5, 1, &regData[1]);	
     I2C_Write_NBytes(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
-	delay_ms(1);
+	api_delay_ms(1);
 	regData[0] = (regData[0] & 0xFC) | 0x02;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD3, 1, &regData[0]);
-	delay_ms(1);
+	api_delay_ms(1);
 	regData[1] = (regData[1] & 0xF9);
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD5, 1, &regData[1]);
-	delay_ms(50); 
+	api_delay_ms(50); 
 }	
 
 /******************************************************************
@@ -222,7 +222,7 @@ static void SH3001_CVAReset(void)
 	I2C_Read_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);	
 	regData |= 0x08;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
-	delay_ms(10);
+	api_delay_ms(10);
   	regData &= 0xF7;
 	I2C_Write_NBytes(SH3001_ADDRESS, 0xD4, 1, &regData);
 }	
@@ -256,14 +256,14 @@ static void SH3001_DriveStart(void)
 		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regDataBack[i]);	
 	}	
 	
-	delay_ms(100);
+	api_delay_ms(100);
 	
 	for(i=0; i<3; i++)
 	{
 		I2C_Write_NBytes(SH3001_ADDRESS, regAddr[i], 1, &regData[i]);;	
 	}
 	
-	delay_ms(50);
+	api_delay_ms(50);
 }
 		
 /******************************************************************

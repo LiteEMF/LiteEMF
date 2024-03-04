@@ -148,14 +148,14 @@ void nxp7105_init(void)
 	uint32_t buf[0x1f];
 	api_iic_host_write(NXP7105_IIC_ID,0x90,0X0F,NULL,0);
 
-	delay_ms(4);						//4ms
+	api_delay_ms(4);						//4ms
 	api_iic_host_read(NXP7105_IIC_ID,0x90,0x1f,buf,2);
 
-	delay_ms(4);						//4ms
+	api_delay_ms(4);						//4ms
 	api_iic_host_read(NXP7105_IIC_ID,0x90,0x2f,buf,0x1f);
 	logd("7105 init:");dumpd(buf,0x1f);
 
-	delay_ms(4);						//4ms
+	api_delay_ms(4);						//4ms
 	api_iic_host_read(NXP7105_IIC_ID,0x90,0xff,buf,2);
 	#endif
 	m_reg_addr = 0;

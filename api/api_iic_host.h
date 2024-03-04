@@ -40,7 +40,7 @@ extern "C" {
 
 
 #ifndef IIC_DELAY			//TODO check 是否优化代码
-#define  IIC_DELAY(id)  	delay_ns(1000000/2/IIC_BADU_ATT(id)) 	//ns, 约400KHZ, use offset for code run delay
+#define  IIC_DELAY(id)  	api_delay_ns(1000000/2/IIC_BADU_ATT(id)) 	//ns, 约400KHZ, use offset for code run delay
 #endif
 
 #ifndef IIC_RETRY

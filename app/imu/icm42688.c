@@ -166,7 +166,7 @@ uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range)
         reg_val |= ((3) << 2);		//设置GYRO_MODE  0:关闭 1:待机 2:预留 3:低噪声
         reg_val |= (3);				//设置ACCEL_MODE 0:关闭 1:关闭 2:低功耗 3:低噪声
         api_spi_host_write(0,MPUREG_PWR_MGMT_0, &reg_val, 1);	//page77
-        delay_us(500); 		//操作完PWR—MGMT0寄存器后 200us内不能有任何读写寄存器的操作
+        api_delay_us(500); 		//操作完PWR—MGMT0寄存器后 200us内不能有任何读写寄存器的操作
 
 	}
 	return ret;

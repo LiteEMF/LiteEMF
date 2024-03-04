@@ -131,7 +131,7 @@ bool app_battery_init(void)
 	uint8_t i;
 	for(i = 0; i < 6; i++){
 		app_battery_scan(false);
-		delay_ms(1);
+		api_delay_ms(1);
 	}
 	return true;
 }

@@ -52,14 +52,14 @@ extern  volatile timerd_t m_systick;			//1ms
 ** Returns:	
 ** Description:		
 *******************************************************************/
-#ifndef delay_ns
-void delay_ns(uint32_t ns);
+#ifndef api_delay_ns
+void api_delay_ns(uint32_t ns);
 #endif
-#ifndef delay_us
-void delay_us(uint32_t us);
+#ifndef api_delay_us
+void api_delay_us(uint32_t us);
 #endif
-#ifndef delay_ms
-void delay_ms(uint32_t ms);
+#ifndef api_delay_ms
+void api_delay_ms(uint32_t ms);
 #endif
 void api_os_delay_ms(uint32_t ms);
 

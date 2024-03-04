@@ -30,7 +30,7 @@ extern "C" {
 #define MATRIX_KB_ACTIVE	0
 #endif
 #ifndef MATRIX_KB_DELAY
-#define MATRIX_KB_DELAY()	delay_ns(0);
+#define MATRIX_KB_DELAY()	api_delay_ns(0);
 #endif
 
 

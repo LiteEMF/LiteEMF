@@ -139,7 +139,7 @@ void api_pm_weakup_check(void)
 		if(KEY_POWER){				//按键开机	
 			#if KEY_POWERON_TIME
 			for(i=0; i<KEY_POWERON_TIME; i++){
-				delay_ms(1);
+				api_delay_ms(1);
 
 				if(!KEY_POWER){
 					hal_sleep();

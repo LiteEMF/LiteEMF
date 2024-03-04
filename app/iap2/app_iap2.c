@@ -157,7 +157,7 @@ bool cp_read_data(uint8_t reg, uint8_t* buf, uint16_t len)
             // logd("cp_read %x\n",(uint16_t)(reg));//dumpd(buf,len);
             return true;
         }
-        delay_us(500);
+        api_delay_us(500);
     }
     #endif
     logd("cp_read %x err\n", (uint16_t)(reg));
@@ -173,7 +173,7 @@ bool cp_wite_data(uint8_t reg, uint8_t* buf, uint16_t len)
             logd("cp_write %x\n", (uint16_t)(reg)); // dumpd(buf,len);
             return true;
         }
-        delay_us(500);
+        api_delay_us(500);
     }
     #endif
     logd("cp_write %x err\n", (uint16_t)(reg));

@@ -119,7 +119,7 @@ static bool write(uint8_t id,uint8_t buf)
         if(!IIC_SDA_IN(id)){
             break;
         }
-		delay_us(1);
+		api_delay_us(1);
     }
 	#endif
     ack = !read_bit(id);
