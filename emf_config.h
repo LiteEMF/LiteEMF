@@ -24,7 +24,7 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define ID_NULL   				(0xff)
+#define ID_NULL   				(-1)
 
 #ifndef VID_DEFAULT
 #define VID_DEFAULT				0X4353
@@ -220,6 +220,10 @@ extern "C" {
 #define SOCKET_HID_TYPE_SUPPORT		(BIT_DEF(HID_TYPE_XBOX) | BIT_DEF(HID_TYPE_X360) | BIT_DEF(HID_TYPE_PS4))
 #endif
 
+#ifndef USBD_HID_DUAL_SUPPORT		
+#define USBD_HID_DUAL_SUPPORT		(0)
+#endif
+
 
 #ifndef USB_CPU				
 #define USB_CPU				0
@@ -293,6 +297,10 @@ extern "C" {
 #ifndef APP_RGB_ENABLE
 #define APP_RGB_ENABLE			0
 #endif
+#ifndef APP_MT_ENABLE
+#define APP_MT_ENABLE			1
+#endif
+
 #ifndef APP_WS2812FX_ENABLE				//TODO APP_WS2812FX_ENABLE属于led的一个驱动
 #define APP_WS2812FX_ENABLE		0
 #endif

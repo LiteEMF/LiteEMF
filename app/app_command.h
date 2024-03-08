@@ -58,6 +58,7 @@ typedef enum{
 	/*---- 0x20	设备数据和控制 ----*/
 	CMD_KM_KEY=0X20,		//kb + mouse
 	CMD_GAMEPAD_KEY,
+	CMD_MT_KEY,
 	CMD_JOYSTICK_CAL,
 	CMD_SET_RUMBLE,
 	CMD_LED_PERIOD,					//app_led period

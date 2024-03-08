@@ -15,7 +15,7 @@
 #include "hw_config.h"
 #if APP_MODE_ENABLE
 #include "template.h"
-
+#include "api/api_tick.h"
 
 #include "api/api_log.h"
 

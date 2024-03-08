@@ -16,16 +16,16 @@
 	0x85, TOUCH_REPORT_ID,        //   Report ID (1)
 	#include "hid_desc_touch.h"
 		
-	#if (MT_CONTACT_NUM > 1)		
+	#if (MT_CONTACT_MAX > 1)		
 	#include "hid_desc_touch.h"
 	#endif
-	#if (MT_CONTACT_NUM > 2)		
+	#if (MT_CONTACT_MAX > 2)		
 	#include "hid_desc_touch.h"
 	#endif
-	#if (MT_CONTACT_NUM > 3)
+	#if (MT_CONTACT_MAX > 3)
 	#include "hid_desc_touch.h"
 	#endif
-	#if (MT_CONTACT_NUM > 4)
+	#if (MT_CONTACT_MAX > 4)
 	#include "hid_desc_touch.h"
 	#endif
 

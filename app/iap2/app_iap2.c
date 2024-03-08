@@ -74,31 +74,31 @@ static uint8c_t ID_Information[] = {
 #endif
 
 #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_TOUCH)
-#if (MT_CONTACT_NUM > 0)
+#if (MT_CONTACT_MAX > 0)
     0x00, 24, 0x00, 18, // iAP2HID组件
     0x00, 6, 0x00, 0x00, 0x01, TOUCH_REPORT_ID, // id
     0x00, 9, 0x00, 0x01, 'H', 'I', 'D', '1', 0, // name
     0x00, 5, 0x00, 0x02, 0x02, // Touch Pointer
 #endif
-#if (MT_CONTACT_NUM > 1)
+#if (MT_CONTACT_MAX > 1)
     0x00, 24, 0x00, 18, // iAP2HID组件
     0x00, 6, 0x00, 0x00, 0x02, TOUCH_REPORT_ID, // id
     0x00, 9, 0x00, 0x01, 'H', 'I', 'D', '2', 0, // name
     0x00, 5, 0x00, 0x02, 0x02, // Touch Pointer
 #endif
-#if (MT_CONTACT_NUM > 2)
+#if (MT_CONTACT_MAX > 2)
     0x00, 24, 0x00, 18, // iAP2HID组件
     0x00, 6, 0x00, 0x00, 0x03, TOUCH_REPORT_ID, // id
     0x00, 9, 0x00, 0x01, 'H', 'I', 'D', '3', 0, // name
     0x00, 5, 0x00, 0x02, 0x02, // Touch Pointer
 #endif
-#if (MT_CONTACT_NUM > 3)
+#if (MT_CONTACT_MAX > 3)
     0x00, 24, 0x00, 18, // iAP2HID组件
     0x00, 6, 0x00, 0x00, 0x04, TOUCH_REPORT_ID, // id
     0x00, 9, 0x00, 0x01, 'H', 'I', 'D', '4', 0, // name
     0x00, 5, 0x00, 0x02, 0x02, // Touch Pointer
 #endif
-#if (MT_CONTACT_NUM > 4)
+#if (MT_CONTACT_MAX > 4)
     0x00, 24, 0x00, 18, // iAP2HID组件
     0x00, 6, 0x00, 0x00, 0x05, TOUCH_REPORT_ID, // id
     0x00, 9, 0x00, 0x01, 'H', 'I', 'D', '5', 0, // name
@@ -485,7 +485,7 @@ bool iap2_starthid_send(void)
     uint8_t *pdesc, desc_len;
     
     #if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_MT) | BIT_ENUM(HID_TYPE_TOUCH))
-    for (i = 1; i <= MT_CONTACT_NUM; i++) {
+    for (i = 1; i <= MT_CONTACT_MAX; i++) {
         memcpy(iap2_tx_buffer + IAP2_PAR_OFFSET, StartHIDPara, sizeof(StartHIDPara));
         iap2_tx_buffer[IAP2_PAR_OFFSET + 5] = (i << 8) | TOUCH_REPORT_ID; // 修改当前ID
         len = sizeof(StartHIDPara);

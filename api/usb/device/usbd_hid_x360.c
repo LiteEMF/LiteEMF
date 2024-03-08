@@ -166,8 +166,8 @@ static uint8c_t x360_itf_desc_tab[] = {
 	0x21,        // bDescriptorType (HID)
 	0x10, 0x01,  // bcdHID 1.10
 	0x01,        // bCountryCode
-	0x25, (TUSB_DIR_IN<<TUSB_DIR_POST),  0x14,0x00,0x00,0x00,0x00,
-	0x13, (TUSB_DIR_OUT<<TUSB_DIR_POST), 0x08,0x00,0x00, 
+	0x25, (TUSB_DIR_IN<<TUSB_DIR_POST),  0x14,0x00,0x00,0x00,0x00,	//len = (0x25 & 0X0F) + 2
+	0x13, (TUSB_DIR_OUT<<TUSB_DIR_POST), 0x08,0x00,0x00, 			//len = (0x13 & 0X0)F + 2
 
 	/******************** Descriptor of Custom HID endpoints ***********/
 	0x07,		  	/* bLength: Endpoint Descriptor size */
@@ -186,6 +186,42 @@ static uint8c_t x360_itf_desc_tab[] = {
 	0x00,			/* wMaxPacketSize: 2 Bytes max  */
 	0x08, 
 
+#if USBD_HID_DUAL_SUPPORT & BIT_ENUM(HID_TYPE_X360)
+	0x09,        // bLength
+	0x04,        // bDescriptorType (Interface)
+	0x00,        // bInterfaceNumber 0
+	0x00,        // bAlternateSetting
+	0x02,        // bNumEndpoints 2
+	0xFF,        // bInterfaceClass
+	0x5D,        // bInterfaceSubClass
+	0x01,        // bInterfaceProtocol
+	0x00,        // iInterface (String Index)
+
+	0x11,        // bLength
+	0x21,        // bDescriptorType (HID)
+	0x10, 0x01,  // bcdHID 1.10
+	0x01,        // bCountryCode
+	0x25, (TUSB_DIR_IN<<TUSB_DIR_POST),  0x14,0x00,0x00,0x00,0x00,	//len = (0x25 & 0X0F) + 2
+	0x13, (TUSB_DIR_OUT<<TUSB_DIR_POST), 0x08,0x00,0x00, 			//len = (0x13 & 0X0)F + 2
+
+	/******************** Descriptor of Custom HID endpoints ***********/
+	0x07,		  	/* bLength: Endpoint Descriptor size */
+	0x05, 		  	/* bDescriptorType: */
+	(TUSB_DIR_IN<<TUSB_DIR_POST),	/* bEndpointAddress: Endpoint Address (IN) */
+	0x03,		  	/* bmAttributes: Interrupt endpoint */
+	0x20,
+	0x00,		  	/* wMaxPacketSize: 2 Bytes max */
+	0x02,
+
+	0x07,			/* bLength: Endpoint Descriptor size */
+	0x05,			/* bDescriptorType: */
+	(TUSB_DIR_OUT<<TUSB_DIR_POST),	/* bEndpointAddress:  Endpoint Address (OUT) */
+	0x03, 			/* bmAttributes: Interrupt endpoint */
+	0x20,
+	0x00,			/* wMaxPacketSize: 2 Bytes max  */
+	0x08, 
+#endif
+
 	// used for x360 host mode identify, 添加这个会导致xinput模式下驱动识别不正常
 	0x09,        // bLength
 	0x04,        // bDescriptorType (Interface)
@@ -196,6 +232,7 @@ static uint8c_t x360_itf_desc_tab[] = {
 	0xFD,        // bInterfaceSubClass
 	0x13,        // bInterfaceProtocol
 	0x04,        // iInterface (String Index)
+	//x360 host end
 
 	0x06,        // bLength
 	0x41,        // bDescriptorType (Unknown)

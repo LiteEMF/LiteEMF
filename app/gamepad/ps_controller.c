@@ -574,9 +574,9 @@ uint8_t ps_touch_find_slot(uint32_t id,uint8_t active)
 		}
 	}
 
-	if((PS4_SLOT_MAX == find_slot) && active){		//auto slot
+	if((PS4_SLOT_MAX == find_slot) && active){		//malloc slot
 		for(i=0; i< PS4_SLOT_MAX; i++){
-			if(mcontact_id[i] == ID_NULL){
+			if(mcontact_id[i] == (uint8_t)ID_NULL){
 				find_slot = i;
 				mcontact_id[i] = id;
 				m_ps_touch[i].id = touch_index++;

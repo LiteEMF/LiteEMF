@@ -16,7 +16,7 @@
 #if API_USBH_BIT_ENABLE && USBH_SOCKET_ENABLE
 #include "api/usb/usbh_socket.h"
 #include "api/usb/host/usbh.h"
-#include "apP/app_command.h"
+#include "app/app_command.h"
 #if APP_GAMEAPD_ENABLE
 #include "app/gamepad/app_gamepad.h"
 #endif

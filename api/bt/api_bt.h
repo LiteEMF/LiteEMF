@@ -45,6 +45,10 @@ extern "C" {
 #ifndef EDR_ICON
 #define EDR_ICON		BD_CLASS_KEYBOARD
 #endif
+#ifndef BLE_MANUFACTURER_COMPANY
+#define BLE_MANUFACTURER_COMPANY			0xFFFE
+#endif
+
 
 #ifndef EDR_SNIFF_ENABLE
 #define EDR_SNIFF_ENABLE			1

@@ -1822,7 +1822,7 @@ bool SH3001_GetImuCompData(short accData[3], short gyroData[3],unsigned char isr
         gyroData[2] = (short)gyroTemp[2];
     }						 
 
-	// logd("%d,%d,%d,%d,%d,%d,%d\n", mSysTick, accData[0], accData[1], accData[2], gyroData[0], gyroData[1], gyroData[2]);
+	// logd("%d,%d,%d,%d,%d,%d,%d\n", m_systick, accData[0], accData[1], accData[2], gyroData[0], gyroData[1], gyroData[2]);
 
 	// logd("%d,%d,%d,%d,%d,%d\n", accData[0], accData[1], accData[2], gyroData[0], gyroData[1], gyroData[2]);
     return ret;

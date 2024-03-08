@@ -195,7 +195,7 @@ void api_uarts_init(void)
 {
 	uint8_t id;
 	for(id=0; id<m_uart_num; id++){
-		if(UART_DEBUG_ID != id){
+		if((uint8_t)UART_DEBUG_ID != id){
 			api_uart_init(id);
 		}
 	}   

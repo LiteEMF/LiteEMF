@@ -659,7 +659,40 @@ typedef struct{
 };
 ```
 
-### 摇杆校准模式设置(0X22)
+
+### 上报TOUCH数据格式(0X22)
+
+数据格式:
+
+```c
+typedef  struct{
+	uint8_t tip_switch:1;		//0x42
+	uint8_t in_range:1;			//0x32
+	uint8_t res:2;
+	uint8_t identifier:4;		//0x51
+	int16_t x;					//0x30
+	int16_t y;					//0x31
+}mt_contact_t;
+typedef  struct{
+	uint8_t id;					//report id
+	mt_contact_t contact[MT_CONTACT_MAX];
+}multitouch_t;
+```
+指令:
+
+```c
+//上报touch数据
+typedef struct{
+    uint8_t head;
+    uint8_t len;
+    uint8_t index;
+    uint8_t cmd;
+    multitouch_t touch;
+    uint8_t sum;
+};
+```
+
+### 摇杆校准模式设置(0X23)
 
 ```c
 //获取设备 校准状态
@@ -693,7 +726,7 @@ typedef struct{
 };
 ```
 
-### 设置马达震动(0X23)
+### 设置马达震动(0X24)
 
 数据格式:
 
@@ -723,7 +756,7 @@ typedef struct{
 };
 ```
 
-### LED灯驱控制(0X24)
+### LED灯驱控制(0X25)
 
 
 ```c
@@ -759,7 +792,7 @@ period 配置说明:
 0: 灭, 1: 亮, 其他:闪烁
 
 
-### 设置RGB灯控制(0X25)
+### 设置RGB灯控制(0X26)
 
 数据结构:
 
@@ -809,7 +842,7 @@ typedef struct{
 
 ```
 
-### RGB全局亮度控制(0X26)
+### RGB全局亮度控制(0X27)
 
 ```c
 

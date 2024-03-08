@@ -233,7 +233,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 					}else {
 						descp[j+1] = pindex->ep_out_num;
 					}
-					if(3 == assign_ep_num || 4 == assign_ep_num){		//超过2个端点,简单特殊处理
+					if(3 == assign_ep_num || 4 == assign_ep_num){		//一个接口超过2个同向端点,简单特殊处理不实际分配
 						descp[j+1]++;
 					}
 

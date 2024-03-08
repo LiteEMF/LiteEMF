@@ -27,10 +27,7 @@ extern "C" {
 *******************************************************************************************************/
 
 enum {					//为了节省蓝牙服务通过宏定义枚举类型
-	DEFAULT_REPORT_ID = 0,
-	#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)
 	VENDOR_REPORT_ID = 0,
-	#endif
 	#if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
 	GAMEPAD_REPORT_ID,
 	#endif
@@ -54,8 +51,8 @@ enum {					//为了节省蓝牙服务通过宏定义枚举类型
 #define KB_BIT_MAP_ENABLE			0
 #endif
 
-#ifndef MT_CONTACT_NUM		
-#define MT_CONTACT_NUM				5
+#ifndef MT_CONTACT_MAX		
+#define MT_CONTACT_MAX				3
 #endif
 #ifndef TOUCH_X_LOGICAL_MAX	
 #define TOUCH_X_LOGICAL_MAX			4096
