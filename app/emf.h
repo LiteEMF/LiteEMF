@@ -141,7 +141,7 @@ extern "C" {
 void user_vender_init(void);			//__WEAK
 void hw_user_vender_init(void);			//__WEAK			
 void user_vender_deinit(void);			//__WEAK
-void user_vender_handler(void);			//__WEAK
+void user_vender_handler(uint32_t period_10us);			//__WEAK
 
 bool emf_api_init(void);
 bool emf_init(void);

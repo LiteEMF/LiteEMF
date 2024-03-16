@@ -25,7 +25,7 @@ extern "C" {
 ** Defined
 *******************************************************************************************************/
 #ifndef JOYSTCIK_DCAL_ENABLE         //DYNAMIC CAL 代码运行中自动校准是否打开
-#define JOYSTCIK_DCAL_ENABLE     1
+#define JOYSTCIK_DCAL_ENABLE     0
 #endif
 
 #ifndef STICK_DIR_VAL

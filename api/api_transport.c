@@ -222,6 +222,7 @@ bool api_transport_ready(trp_handle_t* phandle)
 
 uint16_t api_transport_get_mtu(trp_handle_t* phandle)
 {
+	if(NULL == phandle) 	return 0;
 	switch(phandle->trp){
 	case TR_BLE		:
 	case TR_BLE_RF	:
@@ -261,7 +262,9 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	bool ret = true;
 	uint8_t* pbuf = buf;
 	static timer_t tx_timer;			//for test
+	static timer_t err_timer;			//for test
 
+	if(NULL == phandle) 	return false;
 	if (len <= 0)			return false;
 	if (NULL == buf)		return false;
 
@@ -309,7 +312,9 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 		default:
 			break;
 	}
-	if(!ret) logd("trp%d len=%d err\n",(uint16_t)phandle->trp,len);
+	if(!ret) {
+		logd("trp%d len=%d err dt=%d\n",(uint16_t)phandle->trp,len,m_systick-err_timer);err_timer = m_systick;
+	}
 	return ret;
 }
 

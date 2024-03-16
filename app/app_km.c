@@ -163,34 +163,6 @@ __WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	km report
-*******************************************************************/
-#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)
-bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
-{
-	mouse_t mouse;
-	mouse.id = MOUSE_REPORT_ID;
-	mouse.but = pmouse->but;
-	mouse.x = SWAP16_L(pmouse->x);
-	mouse.y = SWAP16_L(pmouse->y);
-	mouse.w = SWAP16_L(pmouse->w);
-	return api_transport_tx(phandle,&mouse, sizeof(mouse));	
-}
-#endif
-#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
-bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
-{
-	kb_bit_t kb;    
-
-	kb.id = KB_REPORT_ID;
-	kb.fn = pkey->fn;
-	memcpy(kb.key,pkey->key, sizoef(kb.key));
-	return api_transport_tx(phandle,&kb, sizeof(kb));
-}
-#endif
-/*******************************************************************
-** Parameters:		
-** Returns:	
 ** Description:		
 *******************************************************************/
 bool app_km_init(void)
@@ -265,7 +237,36 @@ void app_km_handler(uint32_t period_10us)
 
 #endif
 
+#include "km_typedef.h"
+#include  "api/api_transport.h"
+#include "api/hid/hid_dev_desc.h"
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	km report
+*******************************************************************/
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)	//TODO
+bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
+{
+	mouse_t mouse;
+	mouse.id = MOUSE_REPORT_ID;
+	mouse.but = pmouse->but;
+	mouse.x = SWAP16_L(pmouse->x);
+	mouse.y = SWAP16_L(pmouse->y);
+	mouse.w = SWAP16_L(pmouse->w);
+	return api_transport_tx(phandle,&mouse, sizeof(mouse));	
+}
+#endif
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
+bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
+{
+	kb_bit_t kb;    
 
-
+	kb.id = KB_REPORT_ID;
+	kb.fn = pkey->fn;
+	memcpy(kb.key,pkey->key, sizoef(kb.key));
+	return api_transport_tx(phandle,&kb, sizeof(kb));
+}
+#endif
 
 

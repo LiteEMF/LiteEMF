@@ -24,7 +24,7 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define ID_NULL   				(-1)
+#define ID_NULL   				(-1)	/*!!!千万注意使用ID_NULL的时候如果是无符号类型必须强制类型转换后做比较*/
 
 #ifndef VID_DEFAULT
 #define VID_DEFAULT				0X4353
@@ -298,7 +298,7 @@ extern "C" {
 #define APP_RGB_ENABLE			0
 #endif
 #ifndef APP_MT_ENABLE
-#define APP_MT_ENABLE			1
+#define APP_MT_ENABLE			0
 #endif
 
 #ifndef APP_WS2812FX_ENABLE				//TODO APP_WS2812FX_ENABLE属于led的一个驱动

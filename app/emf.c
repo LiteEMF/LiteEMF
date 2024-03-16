@@ -52,7 +52,7 @@ __WEAK void user_vender_deinit(void)			//关机前deinit
 {
 }
 
-__WEAK void user_vender_handler(void)
+__WEAK void user_vender_handler(uint32_t period_10us)
 {
 }
 #endif
@@ -320,7 +320,7 @@ void emf_handler(uint32_t period_10us)
 	usbd_auto_handler(0, 100);
 	#endif
 
-	user_vender_handler();
+	user_vender_handler(period_10us);
 }
 
 #if 0
