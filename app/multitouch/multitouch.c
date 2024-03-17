@@ -59,7 +59,13 @@ uint8_t m_slot_top;
 mt_slot_t mt_slot_buf[MT_SLOT_MAX];
 mt_slot_t s_mt_slot_buf[MT_SLOT_MAX];
 
-
+void multitouch_info_dump(multitouch_info_t* pinfo)
+{
+	logd("multitouch: turn_xy=%d,switch_xy=%d,hdmi=%d\n",pinfo->turn_xy,pinfo->switch_xy,pinfo->hdmi);
+	logd("ios: is_ios=%d,curvet_screen=%d,mouse_vertical=%d,version=V%d.%d\n",pinfo->is_ios,pinfo->ios_curvet_screen,
+		pinfo->iphone_mouse_vertical, pinfo-> ios_version>>8,pinfo-> ios_version&0xff);
+	logd("screen:%d %d, hdim screen:%d %d\n",pinfo->screen.x,pinfo->screen.y,pinfo->hdmi_screen.x,pinfo->hdmi_screen.y);
+}
 
 /*******************************************************************
 ** Parameters:
@@ -176,7 +182,7 @@ uint8_t  moutitouch_find_slot(uint16_t id,uint8_t active)
 			if((uint16_t)ID_NULL == mt_slot_buf[i].point_id){
 				find_slot  = i;
 				mt_slot_buf[i].point_id = id;
-				logd("malloc id%d slot=%d",id,i);
+				// logd("malloc id%d slot=%d",id,i);
 				break;
 			}
 		}
@@ -400,6 +406,8 @@ void  multitouch_init(uint8_t slot_num, uint8_t contact_num)
 
 	multitouch_deinit();
 	logd("slot=%d,contact=%d\n",(uint16_t)m_slot_num,(uint16_t)m_contact_num);
+	ios_touch_init();
+	multitouch_info_dump(&multitouch_info);
 }
 
 void  multitouch_deinit(void)

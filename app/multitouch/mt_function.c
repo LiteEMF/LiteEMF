@@ -102,14 +102,15 @@ bool mt_slide_run(uint16_t id, mt_map_t* mapp, uint16_t min_step, uint16_t max_s
 			mt_msg_t* pmsg = &mt_event_msg[id];
 			abs_d = abs((int8_t)(mpp->pa & 0xff)*32);
 			dx = abs_d * pmsg->slide8.dirx + mpp->x - x;
-			dy = abs_d * pmsg->slide8.diry + mpp->y - y;
+			dy = abs_d * pmsg->slide8.diry + mpp->y - y;				
 		}else{
 			dx = ((int8_t)(mpp->pa & 0xff)*32 + mpp->x - x);		//获取相对坐标位置
 			dy = ((int8_t)(mpp->pa >> 8)*32 + mpp->y - y);
-			abs_d = MAX(abs(dx) , abs(dy));
+			
 		}
-
+		abs_d = MAX(abs(dx) , abs(dy));
 		if(0 == max_step) max_step = 1;
+		// logd("slide:%d %d, %d %d %d",dx,dy,abs_d,min_step,max_step);
 		if(abs_d > max_step){				//限定最大步长, 均匀发送
 			dx = dx*(int32_t)max_step/(int32_t)abs_d;
 			dy = dy*(int32_t)max_step/(int32_t)abs_d;
@@ -221,16 +222,16 @@ void mt_event_scan(uint32_t key)
 				if((key_change & (up_key | down_key | left_key | right_key))){ //识别方向
 					pmsg->value = 0;
 					if(key & up_key){
-						pmsg->slide8.dirx -= 1;
-					}
-					if(key & down_key){
-						pmsg->slide8.dirx += 1;
-					}
-					if(key & left_key){
 						pmsg->slide8.diry -= 1;
 					}
-					if(key & right_key){
+					if(key & down_key){
 						pmsg->slide8.diry += 1;
+					}
+					if(key & left_key){
+						pmsg->slide8.dirx -= 1;
+					}
+					if(key & right_key){
+						pmsg->slide8.dirx += 1;
 					}
 					if(pmsg->slide8.dirx || pmsg->slide8.diry){
 						pmsg->slide8.event = 1;

@@ -440,8 +440,13 @@ bool ios_touch_init(void)
 		ios_dir.x = 1;
 		ios_dir.y = -1;
 	}
-	logd("ios curvet_screen=%d, vertical_screen=%d, version=V%d.%d\n",
-		multitouch_info.ios_curvet_screen,multitouch_info.iphone_mouse_vertical,multitouch_info.ios_version>>8,multitouch_info.ios_version&0xff);
+	logd("ios: is_ios=%d,curvet_screen=%d,mouse_vertical=%d,version=V%d.%d\n",
+		multitouch_info.is_ios,
+		multitouch_info.ios_curvet_screen,
+		multitouch_info.iphone_mouse_vertical, 
+		multitouch_info.ios_version>>8,
+		multitouch_info.ios_version&0xff);
+		
 	return true;
 }
 
