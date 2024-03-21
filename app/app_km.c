@@ -238,7 +238,7 @@ void app_km_handler(uint32_t period_10us)
 #endif
 
 #include "km_typedef.h"
-#include  "api/api_transport.h"
+#include "api/api_transport.h"
 #include "api/hid/hid_dev_desc.h"
 /*******************************************************************
 ** Parameters:		
@@ -254,7 +254,7 @@ bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
 	mouse.x = SWAP16_L(pmouse->x);
 	mouse.y = SWAP16_L(pmouse->y);
 	mouse.w = SWAP16_L(pmouse->w);
-	return api_transport_tx(phandle,&mouse, sizeof(mouse));	
+	return api_transport_tx(phandle, &mouse, sizeof(mouse));	
 }
 #endif
 #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)

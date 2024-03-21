@@ -32,12 +32,12 @@ mt_map_t mt_map[]={	//TODO for test
 	{MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_RIGHT_POS,HW_KEY_LEFT_POS,HW_KEY_DOWN_POS,HW_KEY_UP_POS),2000,2000},
 	//joystic dir
 	{MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_M4_POS,HW_KEY_M3_POS,HW_KEY_M2_POS,HW_KEY_M1_POS),2000,2000},
-	{MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_M8_POS,HW_KEY_M7_POS,HW_KEY_M6_POS,HW_KEY_M5_POS),2000,2000},
+	// {MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_M8_POS,HW_KEY_M7_POS,HW_KEY_M6_POS,HW_KEY_M5_POS),2000,2000},
 	
 	{MT_SLIDE,		0x01,	0,	5,	(int8_t)-50<<8,	HW_KEY_A,		2000,	2000},
 	{MT_KEY_AUTO,	0x01,	0,	10,	2,				HW_KEY_Y,		2000,	2000},
 	{MT_KEY_AUTO,	0x00,	0,	10,	0,				HW_KEY_B,		2000,	2000},	//按住
-	{MT_NONE,		0,		0,	0,	0,				HW_KEY_X,		1000,	1000},
+	{MT_NONE,		0,		0,	0,	0,				HW_KEY_X,		2000,	2000},
 };
 
 mt_msg_t mt_event_msg[countof(mt_map)];

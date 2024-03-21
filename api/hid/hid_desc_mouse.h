@@ -13,6 +13,7 @@
 0x09, 0x02,        // Usage (Mouse)
 0xA1, 0x01,        // Collection (Application)
 	0x85, MOUSE_REPORT_ID,        //   Report ID (1)
+	0x05, 0x01,        //   Usage Page (Generic Desktop Ctrls),!must add 05 01 switch back 01
 	0x09, 0x01,        //   Usage (Pointer)
 	0xA1, 0x00,        //   Collection (Physical)
 		0x05, 0x09,        //     Usage Page (Button)
@@ -42,6 +43,6 @@
 	0xC0,              //   End Collection
 0xC0,              // End Collection
 
-// 64 bytes
+// 66 bytes
 
 
