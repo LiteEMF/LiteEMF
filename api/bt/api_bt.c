@@ -425,6 +425,26 @@ bool api_bt_enable(uint8_t id,bt_t bt,bool en)
 	if(id >= BT_ID_MAX) return false;
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return ret;
+
+	//BT_BLE_RF是基于BLE传输的, 如果同时支持这里对BT_BLE和BT_BLE_RF只处理一次
+	#if (BIT(BT_BLE) | BIT(BT_BLE_RF)) == (BT0_SUPPORT & (BIT(BT_BLE) | BIT(BT_BLE_RF)))
+	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
+		if(m_trps & (BIT(BT_BLE) | BIT(BT_BLE_RF))){
+			if(0 == (m_trps & BIT(bt))){
+				return true;		//忽略重复防止蓝牙被关闭
+			}
+		}
+	}
+	#endif
+	#if (BIT(BT_BLEC) | BIT(BT_BLE_RFC)) == (BT0_SUPPORT & (BIT(BT_BLEC) | BIT(BT_BLE_RFC)))
+	if((BT_BLEC == bt) || (BT_BLE_RFC == bt)){
+		if(m_trps & (BIT(BT_BLEC) | BIT(BT_BLE_RFC))){
+			if(0 == (m_trps & BIT(bt))){
+				return true;		//忽略重复防止蓝牙被关闭
+			}
+		}
+	}
+	#endif
 	
 	logi("bt%d enable=%d\n", bt, en);	
 
