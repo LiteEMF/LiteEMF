@@ -11,6 +11,10 @@
 
 /************************************************************************************************************
 **	Description:	
+
+android: android手机竖屏模式下原点在左上角, 横屏模式下也是在左上角,坐标如下
+ios: ios手机同样竖屏模式下原点在左上角, 横屏模式下也是在左上角,坐标如下
+multitouch: multitouch坐标原点在不同系统和手机上表现形式不一样, 有的回跟随旋转有的不会
 screen x,y
 	0---------------->x
 	|				|
@@ -34,7 +38,7 @@ identifier: contant中触摸点的id, 使用 slot_id+1 作为identifier
 #if APP_MT_ENABLE
 #include "app/multitouch/multitouch.h"
 #include "app/app_command.h"
-#if APP_MT_ENABLE & (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
+#if APP_MT_ENABLE && (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
 #include "ios_simulate_touch.h"
 #endif
 
@@ -387,6 +391,23 @@ bool moutitouch_sync(trp_handle_t *phandle)
 }
 
 
+
+void  multitouch_reinit(void)
+{
+	uint8_t i;
+	memset(mt_slot_buf,0,sizeof(mt_slot_buf));
+	memset(s_mt_slot_buf,0,sizeof(s_mt_slot_buf));
+	for(i=0; i<countof(mt_slot_buf); i++){
+		mt_slot_buf->point_id = ID_NULL;
+	}
+
+	logd("slot=%d,contact=%d\n",(uint16_t)m_slot_num,(uint16_t)m_contact_num);
+	#if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
+	ios_touch_init();
+	#endif
+	multitouch_info_dump(&multitouch_info);
+}
+
 void  multitouch_init(uint8_t slot_num, uint8_t contact_num)
 {
 	m_slot_num = slot_num;
@@ -404,10 +425,7 @@ void  multitouch_init(uint8_t slot_num, uint8_t contact_num)
 	multitouch_info.hdmi_screen.x = HDMI_DEFAULT_SCREEN_X;
 	multitouch_info.hdmi_screen.y = HDMI_DEFAULT_SCREEN_Y;
 
-	multitouch_deinit();
-	logd("slot=%d,contact=%d\n",(uint16_t)m_slot_num,(uint16_t)m_contact_num);
-	ios_touch_init();
-	multitouch_info_dump(&multitouch_info);
+	multitouch_reinit();
 }
 
 void  multitouch_deinit(void)

@@ -240,10 +240,19 @@ void app_km_handler(uint32_t period_10us)
 #include "km_typedef.h"
 #include "api/api_transport.h"
 #include "api/hid/hid_dev_desc.h"
+#include "api/api_log.h"
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:	km report
+	mouse dir: 右移动x正,下移动y是正
+		0--------------->x
+		|
+		|
+		|
+		|
+	   \|/
+	   y
 *******************************************************************/
 #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE)	//TODO
 bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
@@ -254,6 +263,7 @@ bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
 	mouse.x = SWAP16_L(pmouse->x);
 	mouse.y = SWAP16_L(pmouse->y);
 	mouse.w = SWAP16_L(pmouse->w);
+	//logd("mouse:%x %d %d\n",pmouse->but,pmouse->x,pmouse->y);
 	return api_transport_tx(phandle, &mouse, sizeof(mouse));	
 }
 #endif

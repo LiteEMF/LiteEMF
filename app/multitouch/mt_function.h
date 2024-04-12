@@ -56,8 +56,8 @@ typedef  struct {
 	uint8_t	d;					//参数d
 	uint16_t pa;				//参数pa
 	uint32_t key;				//km key[4] or gamepad key
-	int16_t x;
-	int16_t y;
+	int16_t x;					//0~TOUCH_X_LOGICAL_MAX 
+	int16_t y;					//0~TOUCH_Y_LOGICAL_MAX 
 }mt_map_t;		//12
 
 

@@ -321,58 +321,65 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 	static timer_t t;
 	static uint8_t timer_del = 0;
 
-    if(1 == pmt->contact[0].identifier){   			//左上角固定点
-    	if(!api_transport_tx(phandle,pmt,len)){
-    		s = ERROR_UNKNOW;
-    	}
-        return s;
-    }
+	logd("ios tm id=%d",pmt->contact[0].identifier);
+    // if(1 == pmt->contact[0].identifier){   			//左上角固定点
+    // 	if(!api_transport_tx(phandle,pmt,len)){
+    // 		s = ERROR_UNKNOW;
+    // 	}
+    //     return s;
+    // }
 
 	if((m_systick-t) < timer_del)  return ERROR_BUSY;
+
+
 	t = m_systick;
 	timer_del = 0;
 
 	memset(&mouse,0,sizeof(mouse));
-    // logd("down: %d, %d, %d, %d", pt.down, spt.down, pt.id, spt.id);
+    logd("down: %d, %d, %d, %d", pt.down, spt.down, pt.id, spt.id);
 	switch(send_sta){
 		case IOS134_MOVE:			//移动必须一次完成
-			// logd("move ");
+			logd("move ");
 			pt.id = pmt->contact[0].identifier;
-			if(pmt->contact[0].tip_switch == 1){
-				pt.down = 16;
-			}else{
-				pt.down = 0;
-			}
-			//pt.down= pmt->contact[0].tip_switch;
-			// logi_y("down: %d, %d, %d, %d\n", pt.down, spt.down, pt.id, spt.id);
+			//使用鼠标侧键作为按下, ios模式下鼠标左右键,侧键都可以实现点击效果
+			// if(pmt->contact[0].tip_switch == 1){
+			// 	pt.down = 16;
+			// }else{
+			// 	pt.down = 0;
+			// }
+			pt.down= pmt->contact[0].tip_switch;
+			logi_y("down: %d, %d, %d, %d\n", pt.down, spt.down, pt.id, spt.id);
 			x = pmt->contact[0].x;
 			y = pmt->contact[0].y;
+
+			//这里调整触摸方向到鼠标方向一致
 			if(multitouch_info.iphone_mouse_vertical){			//phone  竖屏鼠标模式
-				if(multitouch_info.turn_xy){					//旋转屏幕
-					pt.x = x * screen.x/4095.0-screen.x;
-					pt.y = y * screen.y/4095.0-screen.y;
+				if(multitouch_info.turn_xy){					//旋转屏幕到横屏
+					pt.x = x * screen.x / TOUCH_X_LOGICAL_MAX - screen.x;
+					pt.y = y * screen.y / TOUCH_Y_LOGICAL_MAX - screen.y;
 				}else{						//不旋转屏幕
-					pt.x = x * screen.x/4095.0;
-					pt.y = y * screen.y/4095.0;
+					pt.x = x * screen.x / TOUCH_X_LOGICAL_MAX;
+					pt.y = y * screen.y / TOUCH_Y_LOGICAL_MAX;
 				}
 			}else{						//ipade  横屏幕鼠标模式
-				pt.x = y * screen.y/4095.0;
-				pt.y = 0-x * screen.x/4095.0;
+				pt.x = y * screen.y / TOUCH_Y_LOGICAL_MAX;
+				pt.y = 0 - x * screen.x / TOUCH_X_LOGICAL_MAX;
 			}
+
 			if((pt.id != spt.id) && (!pt.down && spt.down)) break;				//忽略不需要的抬起
 			if((pt.down == spt.down) && (5 == pt.id && 5 != spt.id)) break;		//按键按下后.  摇杆移动无效
 
-			// 使用起方式
+			// 抬起
 			if( (!pt.down) || ((pt.id != spt.id) && (0 != spt.id)) ){
 				int16_t max;
 				if(multitouch_info.ios_version >= 0xF00){
-					max = 1.1*MAX(fabs(spt.x),fabs(spt.y));
-					// max = MAX(max, 420);		//优化摇杆中点延时时间
+					max = 2*MAX(fabs(spt.x),fabs(spt.y));
+					max = MIN(max, 1600);
 				}else{
 					max = 1600;
 				}	
 				spt.x = max*ios_dir.x;
-				spt.y = max*ios_dir.y;				//将当前距离设置到最大位置
+				spt.y = max*ios_dir.y;			//将当前距离设置到最大位置
 				timer_del = 5;//20;				//防止不抬起,是否需要?
 				send_sta = IOS134_UP;
 				s = ERROR_BUSY;
@@ -388,6 +395,7 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 			}
 			break;
 		case IOS134_UP:
+			logd("up=\n");
 			if(app_mouse_key_send(phandle,&mouse)){
 				spt.down = 0;
 				timer_del = 5;
@@ -395,25 +403,25 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 			}
 			s = ERROR_BUSY;
 			break;
-		case IOS134_RESET:
+		case IOS134_RESET:					//TODO reset 可以moredata 方式发送
 			memset(&pt,0,sizeof(pt));		//reset 目标值的坐标(0,0)
 			s = ios_touch_send_move(phandle, &pt, &spt);
-			// logd("reset=%d\n",s);
+			logd("reset=%d\n",s);
 			if(ERROR_SUCCESS == s){
 				memset(&spt,0,sizeof(spt));
 				if(multitouch_info.ios_curvet_screen){
-					spt.x=13*ios_dir.x;			//如果是曲面屏做补偿
+					spt.x=13*ios_dir.x;				//如果是曲面屏做补偿
 					spt.y=15*ios_dir.y;
 				}
 
-				if(pmt->contact[0].tip_switch){		//数据没有发送完成有下一个按键按下
+				if(pmt->contact[0].tip_switch){		//有下一个按键按下
 					s = ERROR_BUSY;
 				}else{
 					s = ERROR_SUCCESS;
 				}
-				timer_del = 20;			//reset 后延时防止点跑不出来,必须添加
+				timer_del = 20;						//reset 后延时防止点跑不出来,必须添加
 				send_sta = IOS134_MOVE;
-			}else{
+			}else{									//延时重新发送
 				timer_del = 5;
 			}
 			break;
@@ -428,25 +436,21 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 *******************************************************************/
 bool ios_touch_init(void)
 {
-	if(multitouch_info.iphone_mouse_vertical){			//phone  竖屏鼠标模式
+	if(multitouch_info.iphone_mouse_vertical){		//phone  竖屏鼠标模式
 		if(multitouch_info.turn_xy){				//旋转屏幕
 			ios_dir.x = -1;
 			ios_dir.y = -1;
-		}else{						//不旋转屏幕
+		}else{										//不旋转屏幕
 			ios_dir.x = 1;
 			ios_dir.y = 1;
 		}
-	}else{						//ipade  横屏幕鼠标模式
+	}else{											//ipade  横屏幕鼠标模式
 		ios_dir.x = 1;
 		ios_dir.y = -1;
 	}
-	logd("ios: is_ios=%d,curvet_screen=%d,mouse_vertical=%d,version=V%d.%d\n",
-		multitouch_info.is_ios,
-		multitouch_info.ios_curvet_screen,
-		multitouch_info.iphone_mouse_vertical, 
-		multitouch_info.ios_version>>8,
-		multitouch_info.ios_version&0xff);
-		
+
+	logd("ios_dir:%d %d\n",ios_dir.x,ios_dir.y);
+
 	return true;
 }
 
