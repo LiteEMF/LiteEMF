@@ -12,6 +12,7 @@
 #ifndef _emf_config_h
 #define _emf_config_h
 
+#include "utils/emf_defined.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -343,7 +343,7 @@ bool api_iic_host_scan(uint8_t id)
 		ret = write(id,addr<<1);
 		stop(id);
 		#else
-		ret = hal_iic_scan(id,addr<<1);
+		ret = hal_iic_scan_addr(id,addr<<1);
 		#endif
 
 		if (ret) break;

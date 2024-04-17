@@ -17,7 +17,10 @@
 #if APP_RGB_ENABLE
 #include "app/rgb/rgb_driver.h"
 #include "app/rgb/app_rgb.h"
-
+#include "utils/emf_utils.h"
+#ifdef HW_SPI_HOST_MAP
+#include "api/api_spi_host.h"
+#endif
 #include "api/api_log.h"
 
 /******************************************************************************************************
@@ -74,8 +77,8 @@ __WEAK bool rgb_driver_show(uint8_t* frame, uint8_t len)
 	for(i=0; i<len; i++){
 		//show frame[i];
 		#ifdef HW_SPI_HOST_MAP
-		brightness = remap(frame[i], 0, 255, 0, 63);
-		ret = api_spi_host_write(0,led_channel[i], &brightness, 1);
+		uint8_t brightness = remap(frame[i], 0, 255, 0, 63);
+		ret = api_spi_host_write(0,i, &brightness, 1);
 		#endif
 		#ifdef HW_PWM_MAP
 		ret = api_pwm_set_duty(i, frame[i]);

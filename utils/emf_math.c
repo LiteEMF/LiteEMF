@@ -171,3 +171,4 @@ int16_t cos16( uint16_t theta)
     return sin16( theta + 16384);
 }
 #endif
+

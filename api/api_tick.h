@@ -61,7 +61,7 @@ void api_delay_us(uint32_t us);
 #ifndef api_delay_ms
 void api_delay_ms(uint32_t ms);
 #endif
-void api_os_delay_ms(uint32_t ms);
+void hal_os_delay_ms(uint32_t ms);
 
 
 void api_tick_init(void);

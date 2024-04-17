@@ -41,11 +41,15 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	需要使用硬件iic扫描外设时才需要适配该接口
 *******************************************************************/
 bool hal_iic_scan_addr(uint8_t id,uint8_t dev_addr)
 {
 	uint8_t ret = false;
+	
+	// start 
+	// tx byte 
+	// stop 
 
 	return ret;
 }

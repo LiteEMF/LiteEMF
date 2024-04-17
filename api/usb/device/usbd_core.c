@@ -275,6 +275,7 @@ error_t usbd_set_ready(uint8_t id, uint8_t ready)
 
 	if(pdev->ready != ready){
 		pdev->ready = ready;       					//枚举完
+		extern error_t usbd_class_notify_evt(uint8_t id, usbd_event_t event,uint32_t val);
 		usbd_class_notify_evt(id,USBD_EVENT_READY,pdev->ready);
 		logd_g("usbd%d ready=%d...\n",(uint16_t)id,(uint16_t)ready);
 	}

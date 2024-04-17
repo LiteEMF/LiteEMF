@@ -140,7 +140,7 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 	//默认分配string
 	if(NULL == pstr){
 		if(m_usbd_hid_types[id] & BIT_ENUM(HID_TYPE_XBOX)){
-			pstr = usbd_xbox_string_desc[index];
+			pstr = (char*)usbd_xbox_string_desc[index];
 		}else if(2 == index){		//product string
 			if(m_usbd_types[id] & BIT(DEV_TYPE_HID)){
 				if(m_usbd_hid_types[id] & HID_SWITCH_MASK){
@@ -171,13 +171,13 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 			}else if(m_usbd_types[id] & BIT(DEV_TYPE_AUDIO)){
 				pstr = "uac";
 			}else{
-				pstr = usbd_string_desc[index];
+				pstr = (char*)usbd_string_desc[index];
 			}
 		}
 	}
 
 	if(NULL == pstr){
-		pstr = usbd_string_desc[index];
+		pstr = (char*)usbd_string_desc[index];
 	}
 
 	if(NULL != pstr){

@@ -127,7 +127,8 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 		#endif
 		hid_types &= IAP2_HID_SUPPORT | AOA_HID_SUPPORT;
 		#endif
-	}else{
+	}else if(TR_RFC >= trp){	//bt and 2.4g
+		#if API_BT_ENABLE
 		api_bt_ctb_t* bt_ctbp;
 		bt_ctbp = api_bt_get_ctb(trp);
 		if(NULL != bt_ctbp){
@@ -159,7 +160,9 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 				break;
 			}
 		}
+		#endif
 	}
+
 	if(0 == (hid_types | dev_types)){
 		ret = false;
 	}

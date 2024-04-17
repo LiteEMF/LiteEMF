@@ -142,12 +142,13 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
         if(0 == l) break;
 		
 		switch(pdesc[i+1]){
-		case TUSB_DESC_INTERFACE_ASSOCIATION:
+		case TUSB_DESC_INTERFACE_ASSOCIATION:{
 			usb_desc_interface_assoc_t *pitf_assoc = (usb_desc_interface_assoc_t*)(pdesc+i);
 			pitf_assoc->bFirstInterface = pindex->itf_num;
 			logd("itf assoc first=%d count=%d\n",pitf_assoc->bFirstInterface,pitf_assoc->bInterfaceCount);
 			break;
-		case TUSB_DESC_INTERFACE:
+		}
+		case TUSB_DESC_INTERFACE:{
 			usb_desc_interface_t *pitf;
     
 			pitf = (usb_desc_interface_t*)(pdesc+i);
@@ -170,7 +171,8 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			pclass->itf.if_pro = pitf->bInterfaceProtocol;
 			pindex->itf_num++;
 			break;
-		case TUSB_DESC_ENDPOINT:
+		}
+		case TUSB_DESC_ENDPOINT:{
 			usb_endp_t *endp;
 			usb_desc_endpoint_t *pep = (usb_desc_endpoint_t*)(pdesc+i);
 
@@ -201,6 +203,7 @@ error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hi
 			endp->interval = pep->bInterval;
 			endp->mtu = SWAP16_L(pep->wMaxPacketSize) & 0X3FF;
         	break;
+		}
 		case TUSB_DESC_CS_INTERFACE:
 			#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 			if(AUDIO_CS_AC_INTERFACE_HEADER == pdesc[i+2]){
@@ -258,16 +261,17 @@ uint16_t usbd_class_get_itf_desc(uint8_t id, uint8_t *pdesc, uint16_t desc_len, 
 {
 	uint8_t type;
 	itf_ep_index_t index;
+	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUDIO)
 	bool xbox_audio = false;			//特殊处理xbox audio
+	if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX))){
+		xbox_audio = true;
+	}
+	#endif
 
 	//每次调用的时候从0开始, 不会因为多次调用导致数据不一致
 	memset(&index,0,sizeof(index));
 	index.ep_in_num = 1;					//endp from 1
 	index.ep_out_num = 1;
-
-	if((m_usbd_types[id] & BIT(DEV_TYPE_HID)) && (m_usbd_hid_types[id] & BIT(HID_TYPE_XBOX))){
-		xbox_audio = true;
-	}
 
 	for(type=0; type<DEV_TYPE_NONE; type++){
 		if(m_usbd_types[id] & (1UL<<type)){

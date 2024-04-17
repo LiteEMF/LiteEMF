@@ -274,7 +274,7 @@ bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
 
 	kb.id = KB_REPORT_ID;
 	kb.fn = pkey->fn;
-	memcpy(kb.key,pkey->key, sizoef(kb.key));
+	memcpy(kb.key,pkey->key, sizeof(kb.key));
 	return api_transport_tx(phandle,&kb, sizeof(kb));
 }
 #endif

@@ -219,7 +219,7 @@ uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* p
 	int32_t	disp = 0;
 	int32_t treshold;
 
-    if (iabs(value - pbuf[0]) < 3*3*deadband){      // 3*3*deadband = 3 sigma
+    if (abs(value - pbuf[0]) < 3*3*deadband){      // 3*3*deadband = 3 sigma
         disp = variance_calculate(value, pbuf, size);
 
         treshold = 3 * deadband;
@@ -448,7 +448,9 @@ void joystick_save(joystick_cal_t *calp)
 static void joystick_dynamic_cal(joystick_t* adcp)
 {
     uint8_t id;
+    #if JOYSTCIK_DCAL_ENABLE
     static uint16_t dynamic_cal_num = 0;
+    #endif
     joystick_t adc = *adcp;
 
     if(JOYSTICK_CAL_NONE != joystick_cal_sta) {
@@ -567,7 +569,6 @@ static void joystick_dynamic_cal(joystick_t* adcp)
 static void joystick_do_cal(joystick_t* adcp)
 {
     uint8_t id;
-    axis2i_t axis;
     joystick_t r;
     static timer_t cal_timer;
     static joystick_cal_sta_t s_cal_sta = JOYSTICK_CAL_NONE;
