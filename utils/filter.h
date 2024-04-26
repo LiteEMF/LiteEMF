@@ -114,6 +114,7 @@ extern void fir_axis3l_fiter(firf_axis3_t *firp, const axis3l_t* measurep);
 void fir_axis2f_fiter(firf_axis2_t *firp, const axis2f_t* measurep);
 void fir_axis3f_fiter(firf_axis3_t *firp, const axis3f_t* measurep);
 
+extern  int16_t average2i_filter(int16_t* pbuf, uint8_t size, uint8_t window_num);
 extern int32_t variance_calculate(int16_t value, int16_t* s_buf, uint8_t size);
 #ifdef __cplusplus
 }

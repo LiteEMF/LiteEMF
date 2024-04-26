@@ -9,7 +9,26 @@
 */
 
 /************************************************************************************************************
-**	Description:	
+**	Description:
+二、常见滤波算法介绍：
+1.限幅滤波
+2.滑动平均滤波（递推平均滤波）
+3.中值滤波
+4.加权平均滤波
+5.算术平均滤波
+6.惯性滤波法（一阶滞后滤波法）
+7.零相位滤波
+8.卡尔曼滤波
+9.粒子滤波
+10.复合算法
+a.中位值平均滤波法
+b.限幅均值滤波法
+复合滤波:
+1.限幅滤波：
+2.中值+滑动均值滤波：
+3.Kalman滤波
+
+ref: https://blog.csdn.net/qq_46280347/article/details/120743250
 ************************************************************************************************************/
 #include  "utils/filter.h"
 
@@ -240,4 +259,41 @@ int32_t variance_calculate(int16_t value, int16_t* pbuf, uint8_t size)
 	return disp;
 }
 
+
+
+
+/*******************************************************************
+** Parameters:	pbuf,size: 数据, 
+	window_num: 取中间窗口大小, 这里为了处理简单window_num = size-6 ~ size
+** Returns:	
+** Description:	去最大最小值取平均滤波值,中值+滑动均值滤波
+*******************************************************************/
+int16_t average2i_filter(int16_t* pbuf, uint8_t size, uint8_t window_num)
+{
+    int16_t max[3], min[3];
+	uint8_t i, k, exclude_num = size - window_num;
+    int32_t sum = 0;
+
+	if(exclude_num > 2*countof(max)) exclude_num = 2*countof(max); //这里简单处理, 排除最大最小数据支持最大6个数据排除
+
+	memcpy(max,pbuf[0],countof(max));
+	memcpy(min,pbuf[0],countof(min));
+	for(i=0; i<size; i++){
+		for(k=0; k<exclude_num/2; k++){
+			if (pbuf[i] > max[k]){
+				max[k] = pbuf[i];
+				break;
+			}else if(pbuf[i] < min[k]){
+				min[k] = pbuf[i];
+				break;
+			}
+		}
+		sum += pbuf[i];
+	}
+	for(k=0; k<exclude_num/2; k++){
+		sum -= max[k] + min[k];
+	}
+	sum = sum / window_num;
+	return sum;
+}
 
