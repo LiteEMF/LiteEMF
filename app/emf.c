@@ -223,7 +223,7 @@ bool emf_deinit(void)
 *******************************************************************/
 void emf_handler(uint32_t period_10us)
 {
-	static timer_t live_timer;
+	static timer_t live_timer = 0;
 	
 	UNUSED_PARAMETER(period_10us);
 	

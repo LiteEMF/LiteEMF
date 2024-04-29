@@ -478,7 +478,7 @@ error_t usbh_init( uint8_t id )
 	if((id>>4) >= USBH_NUM) return ERROR_FAILE;
 
 	usbh_class_buf_init(id);
-	#if USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))
+	#if (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
 	usbh_hid_km_pa_init(id);		//TODO 放一个合理的位置
 	#endif
 

@@ -31,7 +31,9 @@ extern "C" {
 #ifndef LOWEST_BRIGHT
 #define LOWEST_BRIGHT   	2
 #endif
-
+#ifndef DEFAULT_BRIGHT
+#define DEFAULT_BRIGHT   	255
+#endif
 
 #ifndef BLINK_FAST		//单位 ms
 #define BLINK_FAST (200) 

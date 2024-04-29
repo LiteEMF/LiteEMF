@@ -36,7 +36,7 @@ static uint32_t	rgb_tick=0;		// APP_RGB_SLICE
 **	static Parameters
 *******************************************************************************************************/
 uint8_t m_pixels[APP_RGB_NUMS*3];
-uint8_t m_brightness = 255;
+uint8_t m_brightness = DEFAULT_BRIGHT;
 rgb_cbt_t m_rgb_cbt[APP_RGB_NUMS];
 
 /*****************************************************************************************************
