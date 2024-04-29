@@ -64,8 +64,8 @@
 #if API_WIFI_ENABLE
 #include "api/wifi/api_wifi.h"
 #endif
-#if API_SOFT_TIMER_ENABLE
-#include "api/api_soft_timer.h"
+#if API_OS_TIMER_ENABLE
+#include "api/api_os_timer.h"
 #endif
 // #if API_PM_ENABLE
 #include "api/api_pm.h"

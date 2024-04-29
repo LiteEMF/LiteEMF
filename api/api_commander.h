@@ -42,6 +42,7 @@ typedef struct{
 	uint8_t len;
 	uint8_t pack_index;
 	uint8_t cmd;
+	uint8_t buf[1];			//占位
 }command_head_t;
 
 typedef struct{
