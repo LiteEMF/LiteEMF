@@ -5,7 +5,7 @@
 		"app_gamepad.h": "c",
 		"app_gamepad_key.h": "c",
 		"api_transport.h": "c",
-		"api_soft_timer.h": "c",
+		"api_os_timer.h": "c",
 		"limits": "c",
 		"type_traits": "c",
 		"api_storage.h": "c",

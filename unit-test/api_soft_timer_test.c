@@ -13,8 +13,8 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_SOFT_TIMER_ENABLE
-#include "api/api_soft_timer.h"
+#if API_OS_TIMER_ENABLE
+#include "api/api_os_timer.h"
 #include "utils/emf_utils.h"
 
 #include "api/api_log.h"
@@ -30,20 +30,20 @@ void timer2_cb(void* pa)
 	logd("time2 %d...\n",times);
 
 	if(times >= 5){
-		soft_timer_delete((soft_timer_t*)pa);
+		api_os_timer_delete((api_os_timer_t*)pa);
 	}
 	if(times >= 10){
-		soft_timer_delete_all();
+		api_os_timer_delete_all();
 	}
 }
 
-void api_soft_timer_test(void)
+void api_os_timer_test(void)
 {
-	soft_timer_t *timer1;
-	soft_timer_t *timer2;
+	api_os_timer_t *timer1;
+	api_os_timer_t *timer2;
 
-	timer1 = soft_timer_create(&timer1_cb,NULL,  200,TIMER_PERIODIC | TIMER_ACTIVE);
-	timer2 = soft_timer_create(&timer2_cb,timer1,400,TIMER_PERIODIC | TIMER_ACTIVE);
+	timer1 = api_os_timer_create(&timer1_cb,NULL,  200,TIMER_ACTIVE);
+	timer2 = api_os_timer_create(&timer2_cb,timer1,400,TIMER_ACTIVE);
 }
 
 

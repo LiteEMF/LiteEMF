@@ -31,7 +31,7 @@ void crc_test(void)
 	char str[]="123456789";
 	
 	logd("crc8=%x\n",crc8(0,str,strlen(str)));
-	logd("crc16=%x\n",crc16(0,str,strlen(str)));
+	logd("crc16=%x\n",crc16(0XFFFF,str,strlen(str)));
 	logd("crc32=%x\n",crc32(0,str,strlen(str)));
 }
 
