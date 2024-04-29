@@ -96,8 +96,8 @@ bool emf_api_init(void)
 	#if	defined HW_TIMER_MAP && API_TIMER_BIT_ENABLE
 	api_timers_init();
 	#endif
-	#ifndef API_SOFT_TIMER_ENABLE
-	soft_timer_init();
+	#ifndef API_OS_TIMER_ENABLE
+	api_os_timer_init();
 	#endif
 	#ifdef HW_PWM_MAP
 	api_pwms_init();
@@ -240,9 +240,6 @@ void emf_handler(uint32_t period_10us)
 	api_uart_tx_handler(200);
 	#endif
 
-	#ifndef API_SOFT_TIMER_ENABLE
-	soft_timer_task(NULL);
-	#endif
 	#if API_PM_ENABLE
 	api_pm_handler(100*100);
 	#endif
@@ -302,8 +299,8 @@ void emf_handler(uint32_t period_10us)
 	#if APP_RGB_ENABLE
 	app_rgb_handler(APP_RGB_SLICE*100);
 	#endif
-	#if API_SOFT_TIMER_ENABLE
-	soft_timer_handler(0);
+	#if API_OS_TIMER_ENABLE && API_OS_SOFT_TIMER_ENABLE
+	api_os_timer_handler(0);
 	#endif
 	#if API_STORAGE_ENABLE
 	api_storage_handler(API_STORAGE_TIME);

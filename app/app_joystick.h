@@ -27,6 +27,9 @@ extern "C" {
 #ifndef JOYSTCIK_DCAL_ENABLE         //DYNAMIC CAL 代码运行中自动校准是否打开
 #define JOYSTCIK_DCAL_ENABLE     0
 #endif
+#ifndef APP_JOYSTICK_FIR_FILTER_ENABLE
+#define APP_JOYSTICK_FIR_FILTER_ENABLE     0
+#endif
 
 #ifndef STICK_DIR_VAL
 #define STICK_DIR_VAL			10900

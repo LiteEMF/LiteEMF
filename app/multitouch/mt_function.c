@@ -27,20 +27,9 @@
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-mt_map_t mt_map[]={	//TODO for test
-	//mode			att		mac	d	pa			key			x		y
-	{MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_RIGHT_POS,HW_KEY_LEFT_POS,HW_KEY_DOWN_POS,HW_KEY_UP_POS),2000,2000},
-	//joystic dir
-	{MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_M4_POS,HW_KEY_M3_POS,HW_KEY_M2_POS,HW_KEY_M1_POS),2000,2000},
-	// {MT_SLIDE8,		0x01,	0,	5,	50,	U32(HW_KEY_M8_POS,HW_KEY_M7_POS,HW_KEY_M6_POS,HW_KEY_M5_POS),2000,2000},
-	
-	{MT_SLIDE,		0x01,	0,	5,	(int8_t)-50<<8,	HW_KEY_A,		2000,	2000},
-	{MT_KEY_AUTO,	0x01,	0,	10,	2,				HW_KEY_Y,		2000,	2000},
-	{MT_KEY_AUTO,	0x00,	0,	10,	0,				HW_KEY_B,		2000,	2000},	//按住
-	{MT_NONE,		0,		0,	0,	0,				HW_KEY_X,		2000,	2000},
-};
 
-mt_msg_t mt_event_msg[countof(mt_map)];
+
+
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -52,8 +41,25 @@ mt_msg_t mt_event_msg[countof(mt_map)];
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+static mt_map_t* mt_mapp = NULL;
+static mt_msg_t* mt_msgp = NULL;
+uint16_t mt_map_size = 0;
 
 
+
+void mt_map_swapl(mt_map_t* mapp, uint16_t map_len)
+{
+	#ifdef __BIG_ENDIAN
+	uint16_t i;
+
+	for(i=0; i<map_len; i++){
+		mapp->pa = SWAP16_L(mapp->pa);
+		mapp->x = SWAP16_L(mapp->x);
+		mapp->y = SWAP16_L(mapp->y);
+		mapp->key = SWAP32_L(mapp->key);
+	}
+	#endif
+}
 
 /*******************************************************************
 ** Parameters:	
@@ -99,7 +105,7 @@ bool mt_slide_run(uint16_t id, mt_map_t* mapp, uint16_t min_step, uint16_t max_s
 		moutitouch_fill_id(id,1,mpp->x,mpp->y);
 	}else{											//move
 		if(mpp->mode == MT_SLIDE8){				//slide8识别方向	
-			mt_msg_t* pmsg = &mt_event_msg[id];
+			mt_msg_t* pmsg = &mt_msgp[id];
 			abs_d = abs((int8_t)(mpp->pa & 0xff)*32);
 			dx = abs_d * pmsg->slide8.dirx + mpp->x - x;
 			dy = abs_d * pmsg->slide8.diry + mpp->y - y;				
@@ -140,84 +146,86 @@ void mt_event_scan(uint32_t key)
 	uint8_t id;
 	uint32_t key_change = 0, key_change_down = 0, key_change_up = 0;
 	static uint32_t s_key;
+
+	if(NULL == mt_mapp) return;
 	
 	key_change = s_key ^ key;
 	key_change_down = key_change & key;
 	key_change_up = key_change & s_key;
 
-	for(id=0; id<countof(mt_map); id++){
-		mt_msg_t* pmsg = &mt_event_msg[id];
+	for(id=0; id<mt_map_size; id++){
+		mt_msg_t* pmsg = &mt_msgp[id];
 
-		switch(mt_map[id].mode){
+		switch(mt_mapp[id].mode){
 			case MT_NONE:
-				if((key_change_down & mt_map[id].key) == mt_map[id].key){	
-					moutitouch_fill_id(id,1,mt_map[id].x, mt_map[id].y);
-					logd("id none down=%x ",mt_map[id].key);
+				if((key_change_down & mt_mapp[id].key) == mt_mapp[id].key){	
+					moutitouch_fill_id(id,1,mt_mapp[id].x, mt_mapp[id].y);
+					logd("id none down=%x ",mt_mapp[id].key);
 				}
-				if((key_change_up & mt_map[id].key) == mt_map[id].key){	
-					moutitouch_fill_id(id,0,mt_map[id].x, mt_map[id].y);
+				if((key_change_up & mt_mapp[id].key) == mt_mapp[id].key){	
+					moutitouch_fill_id(id,0,mt_mapp[id].x, mt_mapp[id].y);
 				}
 				break;
 			case MT_KEY_TRI:
-				if(0 == (mt_map[id].att & BIT(0))){			//0: 按下触发
-					if((key_change_down & mt_map[id].key) == mt_map[id].key){	
+				if(0 == (mt_mapp[id].att & BIT(0))){			//0: 按下触发
+					if((key_change_down & mt_mapp[id].key) == mt_mapp[id].key){	
 						pmsg->mode.event = 1;
-						pmsg->mode.pa = mt_map[id].d * MT_TRI_DT;
-						moutitouch_fill_id(id, 1,mt_map[id].x, mt_map[id].y);
-						logd("tri down=%x t=%d",mt_map[id].key, pmsg->mode.pa);
+						pmsg->mode.pa = mt_mapp[id].d * MT_TRI_DT;
+						moutitouch_fill_id(id, 1,mt_mapp[id].x, mt_mapp[id].y);
+						logd("tri down=%x t=%d",mt_mapp[id].key, pmsg->mode.pa);
 					}
 				}else{										//1: 抬起触发
-					if((key_change_up & mt_map[id].key) == mt_map[id].key){	
+					if((key_change_up & mt_mapp[id].key) == mt_mapp[id].key){	
 						pmsg->mode.event = 1;
-						pmsg->mode.pa = mt_map[id].d * MT_TRI_DT;
-						moutitouch_fill_id(id, 1,mt_map[id].x, mt_map[id].y);
+						pmsg->mode.pa = mt_mapp[id].d * MT_TRI_DT;
+						moutitouch_fill_id(id, 1,mt_mapp[id].x, mt_mapp[id].y);
 					}
 				}
 				break;
 			case MT_KEY_AUTO:
-				if((key_change_down & mt_map[id].key) == mt_map[id].key){	
-					if(mt_map[id].att & BIT(0)){			//1:按下连点, 再次按下停止
+				if((key_change_down & mt_mapp[id].key) == mt_mapp[id].key){	
+					if(mt_mapp[id].att & BIT(0)){			//1:按下连点, 再次按下停止
 						if(pmsg->mode.event){
 							pmsg->value = 0;
 							moutitouch_fill_id(id, 0, 0,0);
 						}else{
 							pmsg->mode.event = 1;
-							pmsg->mode.pa = mt_map[id].pa & 0XFF;//低8位连点次数
+							pmsg->mode.pa = mt_mapp[id].pa & 0XFF;//低8位连点次数
 							logd("auto down=%x ",pmsg->mode.pa);
 							
 						}
 					}else{
 						pmsg->mode.event = 1;
-						pmsg->mode.pa = mt_map[id].pa & 0XFF;//低8位连点次数
+						pmsg->mode.pa = mt_mapp[id].pa & 0XFF;//低8位连点次数
 						logd("auto down=%x ",pmsg->mode.pa);
 					}
 				}
-				if((key_change_up & mt_map[id].key) == mt_map[id].key){	
-					if(0 == (mt_map[id].att & BIT(0))){		//0:按住连点, 抬起释放
+				if((key_change_up & mt_mapp[id].key) == mt_mapp[id].key){	
+					if(0 == (mt_mapp[id].att & BIT(0))){		//0:按住连点, 抬起释放
 						pmsg->value = 0;
 						moutitouch_fill_id(id, 0, 0,0);
-						logd("auto up=%x ",mt_map[id].key);
+						logd("auto up=%x ",mt_mapp[id].key);
 					}
 				}
 				break;
 			case MT_SLIDE:
-				if((key_change_down & mt_map[id].key) == mt_map[id].key){	
+				if((key_change_down & mt_mapp[id].key) == mt_mapp[id].key){	
 					pmsg->mode.event = 1;
 					pmsg->mode.pa = 0;
-					logd("slide down=%x ",mt_map[id].key);
+					logd("slide down=%x ",mt_mapp[id].key);
 				}
-				if(0 == (mt_map[id].att & BIT(0))){		//0: 按住滑动, 抬起释放
-					if((key_change_up & mt_map[id].key) == mt_map[id].key){	
+				if(0 == (mt_mapp[id].att & BIT(0))){		//0: 按住滑动, 抬起释放
+					if((key_change_up & mt_mapp[id].key) == mt_mapp[id].key){	
 						pmsg->value = 0;
 						moutitouch_fill_id(id, 0, 0, 0);
 					}
 				}	// else 1:按下滑动,滑动完成后自动释放事件
 				break;	
 			case MT_SLIDE8:{		//注意按键格式不一样
-				uint32_t up_key = BIT(mt_map[id].key & 0Xff);
-				uint32_t down_key = BIT((mt_map[id].key >> 8) & 0Xff);
-				uint32_t left_key = BIT((mt_map[id].key >> 16) & 0Xff);
-				uint32_t right_key = BIT((mt_map[id].key >> 24) & 0Xff);
+				uint32_t up_key = BIT(mt_mapp[id].key & 0Xff);
+				uint32_t down_key = BIT((mt_mapp[id].key >> 8) & 0Xff);
+				uint32_t left_key = BIT((mt_mapp[id].key >> 16) & 0Xff);
+				uint32_t right_key = BIT((mt_mapp[id].key >> 24) & 0Xff);
 
 				if((key_change & (up_key | down_key | left_key | right_key))){ //识别方向
 					pmsg->value = 0;
@@ -254,8 +262,13 @@ void mt_event_scan(uint32_t key)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool mt_function_init(void)
+bool mt_function_init(const mt_map_t* mpp, mt_msg_t* msgp, uint16_t size)
 {
+	mt_mapp = mpp;
+	mt_msgp = msgp;
+	mt_map_size = size;
+
+	memset(mt_msgp, 0, size);
 	return true;
 }
 
@@ -275,15 +288,18 @@ bool mt_function_deinit(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void mt_event_task(void* pa)
+void mt_function_task(void* pa)
 {
 	uint8_t id;
-	uint16_t dt_ms = (uint32_t)pa / 100;
+	uint16_t dt_ms;
 
-	for(id=0; id<countof(mt_map); id++){
-		mt_msg_t* pmsg = &mt_event_msg[id];
+	if(NULL == mt_mapp) return;
 
-		switch(mt_map[id].mode){
+	dt_ms = (uint32_t)pa / 100;
+	for(id=0; id<mt_map_size; id++){
+		mt_msg_t* pmsg = &mt_msgp[id];
+
+		switch(mt_mapp[id].mode){
 			case MT_KEY_TRI:
 				if(pmsg->mode.event){
 					pmsg->mode.pa -= dt_ms;
@@ -295,7 +311,7 @@ void mt_event_task(void* pa)
 				break;
 			case MT_KEY_AUTO:
 				if(pmsg->mode.event){
-					if(mt_auto_run(id,mt_map)){
+					if(mt_auto_run(id,mt_mapp)){
 						if(pmsg->mode.pa){
 							if(0 == --pmsg->mode.pa){
 								pmsg->value = 0;
@@ -307,14 +323,14 @@ void mt_event_task(void* pa)
 			case MT_SLIDE:
 				if(pmsg->mode.event){		//slide
 					if(0 == pmsg->mode.pa){	//只计算一次
-						uint16_t t = MAX(1, mt_map[id].d * MT_SLIDE_DT);
-						uint16_t abs_d = 32 * MAX(abs((int8_t)(mt_map[id].pa & 0xff)) , abs((int8_t)(mt_map[id].pa >> 8)));
+						uint16_t t = MAX(1, mt_mapp[id].d * MT_SLIDE_DT);
+						uint16_t abs_d = 32 * MAX(abs((int8_t)(mt_mapp[id].pa & 0xff)) , abs((int8_t)(mt_mapp[id].pa >> 8)));
 						uint16_t step = MAX(1, abs_d * dt_ms / (t-dt_ms));	//滑动距离 / ((滑动时间/任务时间) - 1)
 						pmsg->mode.pa = step;
 						logd("slide d=%d t=%d step=%d", abs_d,t,step);
 					}
 
-					if(mt_slide_run(id,mt_map, pmsg->mode.pa, pmsg->mode.pa)){
+					if(mt_slide_run(id,mt_mapp, pmsg->mode.pa, pmsg->mode.pa)){
 						pmsg->value = 0;		//滑到终点抬起
 						moutitouch_fill_id(id, 0, 0,0);
 					}
@@ -323,14 +339,14 @@ void mt_event_task(void* pa)
 			case MT_SLIDE8:
 				if(pmsg->slide8.event){		//slide
 					if(0 == pmsg->slide8.step){	//只计算一次
-						uint16_t t = MAX(1, mt_map[id].d * MT_SLIDE_DT);
-						uint16_t abs_d = 32 * abs((int8_t)(mt_map[id].pa & 0xff));
+						uint16_t t = MAX(1, mt_mapp[id].d * MT_SLIDE_DT);
+						uint16_t abs_d = 32 * abs((int8_t)(mt_mapp[id].pa & 0xff));
 						uint16_t step = MAX(1, abs_d * dt_ms / (t-dt_ms));	//滑动距离 / ((滑动时间/任务时间) - 1)
 						pmsg->slide8.step = step;
 						logd("slide8 d=%d t=%d step=%d", abs_d,t,step);
 					}
 
-					if(mt_slide_run(id,mt_map, pmsg->slide8.step, pmsg->slide8.step)){
+					if(mt_slide_run(id,mt_mapp, pmsg->slide8.step, pmsg->slide8.step)){
 						pmsg->value = 0;		//滑到终点抬起
 						moutitouch_fill_id(id, 0, 0,0);
 					}
@@ -352,7 +368,7 @@ void mt_function_handler(uint32_t period_10us)
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){
 		s_timer = m_task_tick10us;
-		mt_event_task(period_10us);
+		mt_function_task(period_10us);
 	}
 }
 #endif

@@ -14,8 +14,8 @@
 ************************************************************************************************************/
 #include  "api/api_commander.h"
 #include  "utils/emf_utils.h"
-#if API_SOFT_TIMER_ENABLE
-#include "api/api_soft_timer.h"
+#if API_OS_TIMER_ENABLE
+#include "api/api_os_timer.h"
 #endif
 
 #include  "api/api_log.h"
@@ -168,7 +168,7 @@ static void api_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint8_t
 ** Returns:	
 ** Description:	用于类似蓝牙大数据发送, 需要定时拆分发送数据包
 *******************************************************************/
-#if API_SOFT_TIMER_ENABLE
+#if API_OS_TIMER_ENABLE
 static void api_command_timer_cb(command_tx_t *txp)
 {
 	if(NULL != txp->buf){
@@ -176,21 +176,21 @@ static void api_command_timer_cb(command_tx_t *txp)
 
 		if(NULL == txp->buf || txp->index == txp->len){
 			emf_free_and_clear(txp->buf);
-			soft_timer_stop((soft_timer_t*)txp->ptimer);
+			api_os_timer_stop((api_os_timer_t*)txp->ptimer);
 		}
 	}
 
 }
 
 /*******************************************************************
-** Parameters:
+** Parameters: buf:可以是临时变量, 内部会缓存
 ** Returns:	
-** Description:	注意: 使用到了软件定时器, 该接口不适用于51平台
+** Description:	长包定时拆分发送, 注意: 使用到了软件定时器, 该接口不适用于51平台
 *******************************************************************/
 bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms)
 {
 	bool ret = false;
-	soft_timer_t *tx_timer;
+	api_os_timer_t *tx_timer;
 	uint8_t *p;
 	uint8_t mtu = api_transport_get_mtu(phandle);
 
@@ -208,10 +208,10 @@ bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, 
 		memcpy(p, buf, len);
 		api_command_tx_fill(txp, phandle, cmd, p, len);
 
-		tx_timer = soft_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,TIMER_PERIODIC);
+		tx_timer = api_os_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,0);
 		if(NULL != tx_timer){
 			txp->ptimer = tx_timer;
-			ret = !soft_timer_start(tx_timer);
+			ret = !api_os_timer_start(tx_timer);
 		}else{
 			emf_free_and_clear(txp->buf);
 		}
@@ -224,7 +224,7 @@ bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, 
 /*******************************************************************
 ** Parameters:	
 ** Returns:	
-** Description:	发送指令,可以带一个arg 用于嵌入式方便调用
+** Description:	while(1)循环发送指令
 *******************************************************************/
 bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len)
 {

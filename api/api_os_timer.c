@@ -14,8 +14,8 @@
 注意: 使用到了函数指针, 该接口适用于51平台
 ************************************************************************************************************/
 #include "hw_config.h"
-#if API_SOFT_TIMER_ENABLE
-#include "api/api_soft_timer.h"
+#if API_OS_TIMER_ENABLE
+#include "api/api_os_timer.h"
 #include "utils/emf_utils.h"
 
 #include "api/api_log.h"
@@ -46,8 +46,9 @@
 ** Returns:	
 ** Description:	静态注册一个定时器,删除后资源不会释放
 *******************************************************************/
-error_t soft_timer_register(soft_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t timeout,soft_timer_ctrl_t ctrl)
+error_t api_os_timer_register(api_os_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t timeout,api_os_timer_ctrl_t ctrl)
 {
+	error_t err = ERROR_SUCCESS;
 	if(NULL == ptimer) return ERROR_NULL;
 
 	ptimer->ctrl = ctrl;
@@ -57,19 +58,23 @@ error_t soft_timer_register(soft_timer_t *ptimer,timer_cb_t cb,void *pa,timer_t 
 	ptimer->cb = cb;
 	
 	list_add(&ptimer->list,&timer_head);
-	return ERROR_SUCCESS;
+
+	#if !API_OS_SOFT_TIMER_ENABLE
+	err = hal_os_timer_register(ptimer);
+	#endif
+	return err;
 }
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
 ** Description:	动态注册一个定时器,删除后回自动释放内存
-	由于使用到 emf_malloc 动态内存分配, 常驻定时器不要使用 soft_timer_create 创建定时器
+	由于使用到 emf_malloc 动态内存分配, 常驻定时器不要使用 api_os_timer_create 创建定时器
 *******************************************************************/
-soft_timer_t* soft_timer_create(timer_cb_t cb,void *pa,timer_t timeout,soft_timer_ctrl_t ctrl)
+api_os_timer_t* api_os_timer_create(timer_cb_t cb,void *pa,timer_t timeout,api_os_timer_ctrl_t ctrl)
 {
-	soft_timer_t *ptimer;
+	api_os_timer_t *ptimer;
 	
-	ptimer = emf_malloc(sizeof(soft_timer_t));
+	ptimer = emf_malloc(sizeof(api_os_timer_t));
 	if(NULL == ptimer) return NULL;
 
 	ptimer->ctrl = ctrl | TIMER_IS_DYNAMIC;
@@ -79,20 +84,35 @@ soft_timer_t* soft_timer_create(timer_cb_t cb,void *pa,timer_t timeout,soft_time
 	ptimer->cb = cb;
 	
 	list_add(&ptimer->list,&timer_head);
+	#if !API_OS_SOFT_TIMER_ENABLE
+	err = hal_os_timer_create(pos);
+	if(err){
+		emf_free(ptimer);
+		ptimer = NULL;
+	}
+	#endif
+	
 	return ptimer;
 }
-error_t soft_timer_delete(soft_timer_t *ptimer)
+error_t api_os_timer_delete(api_os_timer_t *ptimer)
 {
 	error_t err = ERROR_NOT_FOUND;
-	soft_timer_t *pos;
+	api_os_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
 
-	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, api_os_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			pos->ctrl &= ~TIMER_ACTIVE;
 			pos->ctrl |= TIMER_DEACTIVATED;
 			err = ERROR_SUCCESS;
+
+			#if !API_OS_SOFT_TIMER_ENABLE
+			err = hal_os_timer_delete(pos);
+			if(pos->ctrl & TIMER_IS_DYNAMIC){
+				emf_free(pos);
+			}
+			#endif
 			break;
 		}
 	}
@@ -105,17 +125,21 @@ error_t soft_timer_delete(soft_timer_t *ptimer)
 ** Description:	调用soft_timer_start后等待timeout后才调用回调函数
 				如果定时器已经启动, 再次调用相当于soft_timer_modify 重置定时器
 *******************************************************************/
-error_t soft_timer_start(soft_timer_t *ptimer)
+error_t api_os_timer_start(api_os_timer_t *ptimer)
 {
 	error_t err = ERROR_NOT_FOUND;
-	soft_timer_t *pos;
+	api_os_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, api_os_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl |= TIMER_ACTIVE;
 			ptimer->timer = m_systick;
 			err = ERROR_SUCCESS;
+
+			#if !API_OS_SOFT_TIMER_ENABLE
+			err = hal_os_timer_start(pos);
+			#endif
 			break;
 		}
 	}
@@ -127,34 +151,44 @@ error_t soft_timer_start(soft_timer_t *ptimer)
 ** Returns:	
 ** Description:	更新定时器
 *******************************************************************/
-error_t soft_timer_modify(soft_timer_t *ptimer, uint32_t timeout)
+error_t soft_timer_modify(api_os_timer_t *ptimer, uint32_t timeout)
 {
 	error_t err = ERROR_NOT_FOUND;
-	soft_timer_t *pos;
+	api_os_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, api_os_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl |= TIMER_ACTIVE;
 			ptimer->timeout = timeout;
 			ptimer->timer = m_systick;
 			err = ERROR_SUCCESS;
+
+			#if !API_OS_SOFT_TIMER_ENABLE
+			err = hal_os_timer_modify(pos);
+			#endif
+
 			break;
 		}
 	}
 	return err;
 }
 
-error_t soft_timer_stop(soft_timer_t *ptimer)
+error_t api_os_timer_stop(api_os_timer_t *ptimer)
 {
 	error_t err = ERROR_NOT_FOUND;
-	soft_timer_t *pos;
+	api_os_timer_t *pos;
 
 	if(NULL == ptimer) return ERROR_NULL;
-	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){	//判断ptimer有效
+	list_for_each_entry_type(pos, &timer_head, api_os_timer_t, list){	//判断ptimer有效
 		if(pos == ptimer){
 			ptimer->ctrl &= ~TIMER_ACTIVE;
 			err = ERROR_SUCCESS;
+
+			#if !API_OS_SOFT_TIMER_ENABLE
+			err = hal_os_timer_stop(pos);
+			#endif
+
 			break;
 		}
 	}
@@ -167,13 +201,20 @@ error_t soft_timer_stop(soft_timer_t *ptimer)
 ** Returns:	
 ** Description:	
 *******************************************************************/
-void soft_timer_delete_all(void)
+void api_os_timer_delete_all(void)
 {
-	soft_timer_t *pos;
+	api_os_timer_t *pos;
 
-	list_for_each_entry_type(pos, &timer_head, soft_timer_t, list){
+	list_for_each_entry_type(pos, &timer_head, api_os_timer_t, list){
 		pos->ctrl &= ~TIMER_ACTIVE;
 		pos->ctrl |= TIMER_DEACTIVATED;
+
+		#if !API_OS_SOFT_TIMER_ENABLE
+		err = hal_os_timer_start(pos);
+		if(pos->ctrl & TIMER_IS_DYNAMIC){
+			emf_free(pos);
+		}
+		#endif
 	}
 }
 
@@ -183,7 +224,7 @@ void soft_timer_delete_all(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool soft_timer_init(void)
+bool api_os_timer_init(void)
 {
 	INIT_LIST_HEAD(&timer_head);
 	return true;
@@ -194,18 +235,18 @@ bool soft_timer_init(void)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool soft_timer_deinit(void)
+bool api_os_timer_deinit(void)
 {
-	soft_timer_delete_all();
+	api_os_timer_delete_all();
 	return true;
 }
 
-
-void soft_timer_task(void *pa)
+#if API_OS_SOFT_TIMER_ENABLE
+void api_os_timer_task(void *pa)
 {
-	soft_timer_t *pos, *n;
+	api_os_timer_t *pos, *n;
 
-	list_for_each_entry_safe_type(pos, n, &timer_head, soft_timer_t, list){
+	list_for_each_entry_safe_type(pos, n, &timer_head, api_os_timer_t, list){
 		if(pos->ctrl & TIMER_ACTIVE){
 			if(m_systick - pos->timer >= pos->timeout){
 				pos->timer = m_systick;
@@ -241,14 +282,16 @@ void soft_timer_task(void *pa)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void soft_timer_handler(uint32_t period_10us)
+void api_os_timer_handler(uint32_t period_10us)
 {
 	static timer_t s_timer;
 	if((m_task_tick10us - s_timer) >= period_10us){
 		s_timer = m_task_tick10us;
-		soft_timer_task(&timer_head);
+		api_os_timer_task(&timer_head);
 	}
 }
+#endif
+
 #endif
 
 #endif

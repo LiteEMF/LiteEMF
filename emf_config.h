@@ -237,8 +237,8 @@ extern "C" {
 #ifndef API_TIMER_BIT_ENABLE		// 打开哪些硬件定时器BIT(0) | BIT(2)
 #define API_TIMER_BIT_ENABLE		0
 #endif
-#ifndef API_SOFT_TIMER_ENABLE
-#define API_SOFT_TIMER_ENABLE		0
+#ifndef API_OS_TIMER_ENABLE
+#define API_OS_TIMER_ENABLE		0
 #endif
 #ifndef API_NFC_ENABLE
 #define API_NFC_ENABLE			0
