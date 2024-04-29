@@ -24,6 +24,7 @@
 #if API_STORAGE_ENABLE
 #include  "api/api_storage.h"
 #include  "api/api_tick.h"
+#include  "utils/emf_utils.h"
 #include  "api/api_log.h"
 
 /******************************************************************************************************
@@ -34,7 +35,6 @@
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-static uint8_t s_map_index;					//current m_storage_map index
 static bool is_stg_auto_sync;
 static timer_t storage_timer;
 
@@ -42,8 +42,7 @@ static timer_t storage_timer;
 **	public Parameters
 *******************************************************************************************************/
 api_storage_t m_storage;
-uint8_t m_storage_map[STORAGE_MAP_SIZE];
-
+api_storage_map_t m_storage_map;
 
 /*****************************************************************************************************
 **	static Function
@@ -59,6 +58,8 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 {
 	bool ret = false;
 	uint16_t page_end,map_offset,merge_len=0;
+
+	if(0 == *lenp) return false;
 
 	page_end = page_addr + API_FLASH_PAGE_SIZE;
 	if((map_addr >= page_addr) && (map_addr < page_end)){	//in page
@@ -80,10 +81,40 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
+** Description:	检测map中crc值
+*******************************************************************/
+bool api_storage_check_map(api_storage_map_t* mapp)
+{
+	bool ret = false;
+    uint16_t crc, map_len, map_crc;
+
+	map_len = (mapp->len);
+	map_crc = (mapp->crc);
+	if( (map_len < 4) || (map_len > STORAGE_MAP_SIZE-4 )) {
+        loge("map len err\n");
+        return ret;
+    }
+	#if  CRC16_EANBLE
+	crc = crc16(0XFFFF,mapp->map, map_len);
+	if(crc == map_crc){
+		ret = true;
+	}else{
+        loge("map crc err:%x,%x but %x\n",map_len, map_crc, crc);
+    }
+	#endif
+	return ret;
+}
+
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
 ** Description:	
 *******************************************************************/
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len)
 {
+	if(STORAGE_MAP_NUM <= index) return false;
+
 	return api_flash_read(STORAGE_MAP_ADDR(index),map, MIN(map_len,STORAGE_MAP_SIZE) );
 }
 
@@ -98,8 +129,9 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 	uint16_t stg_addr,stg_len,stg_write_len;							
 	uint16_t map_addr,map_write_len;									//storage map
 
-	uint8_t tmp[MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE)];				//Optimize memory
+	uint8_t* tmp = emf_malloc(MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
 
+	if(NULL == tmp) return false;
 	stg_addr = 0;
 	stg_buf = (uint8_t*)&m_storage;
 	stg_len = sizeof(m_storage);
@@ -147,20 +179,29 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 		}
 	}
 
+	emf_free(tmp);
 	return ret;
 }
 
-uint8_t api_storage_map_index(void)
+/*******************************************************************
+** Parameters:	sync:是否保存当前配置, 1:先保存当前配置再切换新配置
+							0:直接覆盖新配, 如果当前map有修改会丢失数据
+** Returns:	
+** Description:	切换map表配置
+*******************************************************************/
+bool api_storage_set_map(uint8_t index, bool sync)
 {
-	return s_map_index;
-}
-bool api_storage_set_map(uint8_t index)
-{
-	bool ret = false;
-	// ret = api_storage_sync();	//TODO
+	bool ret = !sync;
+
+	if(STORAGE_MAP_NUM <= index) return false;
+
+	if(sync){
+		ret = api_storage_sync();
+	}
+
 	if(ret){
-		ret = api_flash_read(STORAGE_MAP_ADDR(index),m_storage_map, sizeof(m_storage_map));
-		s_map_index = index;
+		ret = api_flash_read(STORAGE_MAP_ADDR(index),&m_storage_map, sizeof(m_storage_map));
+		m_storage.map_index = index;
 	}
 	
 	return ret;
@@ -175,8 +216,8 @@ bool api_storage_sync(void)
 {
 	bool ret = false;
 
-	logd("api_storage_sync\n");
-    ret = api_storage_write_map(s_map_index, m_storage_map, sizeof(m_storage_map));
+	logd("api_storage_sync,map=%d\n",m_storage.map_index);
+    ret = api_storage_write_map(m_storage.map_index, &m_storage_map, sizeof(m_storage_map));
 	is_stg_auto_sync = !ret;
 	storage_timer = m_systick;
 	return ret;
@@ -193,11 +234,13 @@ bool api_storage_init(void)
 {
 	bool ret;
 
-    s_map_index = 0;
 	is_stg_auto_sync = false;
-
 	ret = api_flash_read(0,(uint8_t*)&m_storage,sizeof(m_storage));
-	ret &= api_flash_read(STORAGE_MAP_ADDR(0),m_storage_map, sizeof(m_storage_map) );		//default map index 0
+
+	if(STORAGE_MAP_NUM <= m_storage.map_index){
+		m_storage.map_index = 0;
+	}
+	ret &= api_flash_read(STORAGE_MAP_ADDR(m_storage.map_index),&m_storage_map, sizeof(m_storage_map) );
 	if(!ret){
 		loge_r("storage init error!\n");
 	}
