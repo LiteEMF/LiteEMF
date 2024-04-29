@@ -32,7 +32,7 @@ extern "C" {
 #define STORAGE_MAP_NUM		1
 #endif	
 #ifndef STORAGE_MAP_SIZE
-#define STORAGE_MAP_SIZE	0X01
+#define STORAGE_MAP_SIZE	0X04
 #endif	
 #define STORAGE_SIZE		(sizeof(m_storage) + STORAGE_MAP_NUM*STORAGE_MAP_SIZE)
 #define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + i*STORAGE_MAP_SIZE)
@@ -45,7 +45,8 @@ extern "C" {
 typedef struct {
 	uint8_t head;
 	uint8_t reset_reson;	
-	uint8_t flash_res[6];	//8
+	uint8_t map_index;		//storage map index
+	uint8_t flash_res[5];	//8
 	uint16_t trps;
 	uint16_t dev_mode;
 	uint16_t hid_mode;
@@ -66,17 +67,27 @@ typedef struct {
 }api_storage_t;
 
 
+typedef  struct {	
+	uint16_t len;				//map len
+	uint16_t crc;				//map crc
+	uint8_t map[STORAGE_MAP_SIZE-4];
+}api_storage_map_t;
+
+
+
+
 extern api_storage_t m_storage;
-extern uint8_t m_storage_map[STORAGE_MAP_SIZE];
+extern api_storage_map_t m_storage_map;
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+bool api_storage_check_map(api_storage_map_t* mapp);
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len);
 bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len);
 uint8_t api_storage_map_index(void);
-bool api_storage_set_map(uint8_t index);
+bool api_storage_set_map(uint8_t index, bool sync);
 void api_storage_auto_sync(void);
 bool api_storage_sync(void);
 bool api_storage_sync_complete(void);
