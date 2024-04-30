@@ -43,16 +43,16 @@
 ******************************************************************************************************/
 static mt_map_t* mt_mapp = NULL;
 static mt_msg_t* mt_msgp = NULL;
-uint16_t mt_map_size = 0;
+uint16_t mt_map_count = 0;
 
 
 
-void mt_map_swapl(mt_map_t* mapp, uint16_t map_len)
+void mt_map_swapl(mt_map_t* mapp, uint16_t size)
 {
 	#ifdef __BIG_ENDIAN
 	uint16_t i;
 
-	for(i=0; i<map_len; i++){
+	for(i=0; i<size/sizeof(mt_map_t); i++){
 		mapp->pa = SWAP16_L(mapp->pa);
 		mapp->x = SWAP16_L(mapp->x);
 		mapp->y = SWAP16_L(mapp->y);
@@ -61,6 +61,21 @@ void mt_map_swapl(mt_map_t* mapp, uint16_t map_len)
 	#endif
 }
 
+void mt_map_dump(mt_map_t* mapp, uint16_t size)
+{
+	uint16_t i,count = size/sizeof(mt_map_t);
+
+	logd("mt map len=%d\n",count);
+	for(i=0; i<count; i++){
+		if(mapp->macro){
+			logd("mode=%x,att=%x,d=%x,pa=%x,key=%x,x=%x,y=%x\n",
+				mapp->mode,mapp->att,mapp->d,mapp->pa,mapp->key,mapp->x,mapp->y);
+		}else{
+			logd("macro:mode=%x,att=%x,d=%x,pa=%x,key=%x,x=%x,y=%x\n",
+					mapp->mode,mapp->att,mapp->d,mapp->pa,mapp->key,mapp->x,mapp->y);
+		}
+	}
+}
 /*******************************************************************
 ** Parameters:	
 ** Returns:	true:完成一次从按下到抬起的点击过程
@@ -153,7 +168,7 @@ void mt_event_scan(uint32_t key)
 	key_change_down = key_change & key;
 	key_change_up = key_change & s_key;
 
-	for(id=0; id<mt_map_size; id++){
+	for(id=0; id<mt_map_count; id++){
 		mt_msg_t* pmsg = &mt_msgp[id];
 
 		switch(mt_mapp[id].mode){
@@ -266,9 +281,9 @@ bool mt_function_init(const mt_map_t* mpp, mt_msg_t* msgp, uint16_t size)
 {
 	mt_mapp = mpp;
 	mt_msgp = msgp;
-	mt_map_size = size;
+	mt_map_count = size/sizeof(mt_map_t);
 
-	memset(mt_msgp, 0, size);
+	memset(mt_msgp, 0, mt_map_count);
 	return true;
 }
 
@@ -296,7 +311,7 @@ void mt_function_task(void* pa)
 	if(NULL == mt_mapp) return;
 
 	dt_ms = (uint32_t)pa / 100;
-	for(id=0; id<mt_map_size; id++){
+	for(id=0; id<mt_map_count; id++){
 		mt_msg_t* pmsg = &mt_msgp[id];
 
 		switch(mt_mapp[id].mode){

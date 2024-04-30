@@ -34,8 +34,8 @@ extern "C" {
 #ifndef STORAGE_MAP_SIZE
 #define STORAGE_MAP_SIZE	0X04
 #endif	
-#define STORAGE_SIZE		(sizeof(m_storage) + STORAGE_MAP_NUM*STORAGE_MAP_SIZE)
-#define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + i*STORAGE_MAP_SIZE)
+#define STORAGE_SIZE		(sizeof(m_storage) + (STORAGE_MAP_NUM)*(STORAGE_MAP_SIZE))
+#define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + (i)*(STORAGE_MAP_SIZE))
 
 
 

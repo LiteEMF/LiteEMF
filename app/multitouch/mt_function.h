@@ -81,7 +81,8 @@ typedef union{
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void mt_map_swapl(mt_map_t* mapp, uint16_t map_len);
+void mt_map_swapl(mt_map_t* mapp, uint16_t size);
+void mt_map_dump(mt_map_t* mapp, uint16_t size);
 bool mt_auto_run(uint16_t id, mt_map_t* mapp);
 bool mt_slide_run(uint16_t id, mt_map_t* mapp, uint16_t min_step, uint16_t max_step);
 bool mt_function_init(const mt_map_t* mpp, mt_msg_t* msgp, uint16_t size);
