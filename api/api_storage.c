@@ -91,7 +91,7 @@ bool api_storage_check_map(api_storage_map_t* mapp)
 	map_len = (mapp->len);
 	map_crc = (mapp->crc);
 	if( (map_len < 4) || (map_len > STORAGE_MAP_SIZE-4 )) {
-        loge("map len err\n");
+        loge("map len err=%x\n",map_len);
         return ret;
     }
 	#if  CRC16_EANBLE
@@ -149,7 +149,7 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 		if(((stg_addr >= page_addr) && (stg_addr < page_end))
 			|| ((map_addr >= page_addr) && (map_addr < page_end))){		//in page
 
-			ret = api_flash_read(page_addr,tmp,sizeof(tmp));
+			ret = api_flash_read(page_addr,tmp,MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
 			if(ret){
 				stg_write_len = stg_len;
 				merge = storage_merge_buf(page_addr, tmp, stg_addr, stg_buf, &stg_write_len);
@@ -157,7 +157,7 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 				merge |= storage_merge_buf(page_addr, tmp, map_addr, map_buf, &map_write_len);
 				if(merge){
 					ret = api_flash_erase(page_addr);
-					ret &= api_flash_write(page_addr,tmp,sizeof(tmp));
+					ret &= api_flash_write(page_addr,tmp,MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
 					if(ret){
 						stg_addr += stg_write_len;
 						stg_buf += stg_write_len;
