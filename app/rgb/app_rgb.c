@@ -248,7 +248,7 @@ bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t peri
 	period = (period / (APP_RGB_SLICE*2)) * (APP_RGB_SLICE*2);	//period/2 必须是APP_RGB_SLICE的倍数
 
 	pcbt->mode = mode;
-    pcbt->brightness = 0xff;
+    pcbt->brightness = m_brightness;
     pcbt->period = period; 				//period unit ms
 	if(times){
 		pcbt->times = times+1;
@@ -276,7 +276,7 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 	memset(pcbt, 0, sizeof(rgb_cbt_t));
 
 	pcbt->mode = mode;
-    pcbt->brightness = 0xff;
+    pcbt->brightness = m_brightness;
     pcbt->period = period; 				//period unit ms
 	if(times){
 		pcbt->times = times+1;
@@ -306,7 +306,7 @@ bool app_rgb_init(void)
 
 	memset(m_pixels, 0, sizeof(m_pixels[APP_RGB_NUMS*3]));
 	memset(m_rgb_cbt, 0, sizeof(m_rgb_cbt[APP_RGB_NUMS]));
-	m_brightness = 255;
+	m_brightness = DEFAULT_BRIGHT;
 
 	return true;
 }

@@ -51,6 +51,7 @@ typedef struct {
 	uint16_t dev_mode;
 	uint16_t hid_mode;
 	uint8_t res[10];		//24
+	uint8_t work_mode;
 
 	#if APP_JOYSTICK_ENABLE
 	__ALIGN(4)  int16_t joystick_cal[19];
@@ -74,6 +75,11 @@ typedef  struct {
 }api_storage_map_t;
 
 
+typedef enum{
+	WORK_MODE1 = DEF_WORK_MODE1 ,
+	WORK_MODE2 = DEF_WORK_MODE2 ,
+	WORK_MODE3 = DEF_WORK_MODE3 ,
+}work_mode_t;
 
 
 extern api_storage_t m_storage;

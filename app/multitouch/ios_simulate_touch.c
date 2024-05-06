@@ -373,7 +373,7 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 			if( (!pt.down) || ((pt.id != spt.id) && (0 != spt.id)) ){
 				int16_t max;
 				if(multitouch_info.ios_version >= 0xF00){
-					max = 2*MAX(fabs(spt.x),fabs(spt.y));
+					max = 8*MAX(fabs(spt.x),fabs(spt.y));
 					max = MIN(max, 1600);
 				}else{
 					max = 1600;

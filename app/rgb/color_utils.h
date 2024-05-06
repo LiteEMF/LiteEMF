@@ -41,10 +41,10 @@ extern "C" {
 
 
 #define RGB32(r,g,b) 		U32(0,r,g,b)
-#define R(c) 				((uint8_t)(c))
-#define G(c) 				((uint8_t)((c) >> 8))
-#define B(c) 				((uint8_t)((c) >> 16))
 #define W(c) 				((uint8_t)((c) >> 24))
+#define R(c) 				((uint8_t)((c) >> 16))
+#define G(c) 				((uint8_t)((c) >> 8))
+#define B(c) 				((uint8_t)(c))
 
 
 
