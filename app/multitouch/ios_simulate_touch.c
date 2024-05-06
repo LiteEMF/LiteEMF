@@ -336,7 +336,7 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 	timer_del = 0;
 
 	memset(&mouse,0,sizeof(mouse));
-    logd("down: %d, %d, %d, %d", pt.down, spt.down, pt.id, spt.id);
+    //logd("down: %d, %d, %d, %d", pt.down, spt.down, pt.id, spt.id);
 	switch(send_sta){
 		case IOS134_MOVE:			//移动必须一次完成
 			logd("move ");
@@ -395,7 +395,7 @@ uint8_t ios_simulate_touch_tx(trp_handle_t* phandle, multitouch_t* pmt, uint8_t 
 			}
 			break;
 		case IOS134_UP:
-			logd("up=\n");
+			logd("up\n");
 			if(app_mouse_key_send(phandle,&mouse)){
 				spt.down = 0;
 				timer_del = 5;
