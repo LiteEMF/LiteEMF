@@ -32,7 +32,7 @@ extern "C" {
 #define STORAGE_MAP_NUM		1
 #endif	
 #ifndef STORAGE_MAP_SIZE
-#define STORAGE_MAP_SIZE	0X04
+#define STORAGE_MAP_SIZE	0X08
 #endif	
 #define STORAGE_SIZE		(sizeof(m_storage) + (STORAGE_MAP_NUM)*(STORAGE_MAP_SIZE))
 #define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + (i)*(STORAGE_MAP_SIZE))
@@ -50,17 +50,17 @@ typedef struct {
 	uint16_t trps;
 	uint16_t dev_mode;
 	uint16_t hid_mode;
-
 	uint8_t res[10];		//24
 
 	#if APP_JOYSTICK_ENABLE
-	int16_t joystick_cal[19];
+	__ALIGN(4)  int16_t joystick_cal[19];
+	// uint16_t joystick_res;
 	#endif
 
 	#if APP_IMU_ENABLE
-	int16_t imu_cal[6];
+	__ALIGN(4) int16_t imu_cal[6];
 	#endif
-	
+
 	#ifdef HW_STORAGE
 	HW_STORAGE;
 	#endif
@@ -68,9 +68,9 @@ typedef struct {
 
 
 typedef  struct {	
-	uint16_t len;				//map len
-	uint16_t crc;				//map crc
-	uint8_t map[STORAGE_MAP_SIZE-4];
+	uint16_t len;					//map len
+	uint16_t crc;					//map crc
+	uint8_t map[STORAGE_MAP_SIZE-4];//注意这里只做为占位使用,具体大小根据len和实际空间分配为准	
 }api_storage_map_t;
 
 
@@ -83,10 +83,9 @@ extern api_storage_map_t m_storage_map;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bool api_storage_check_map(api_storage_map_t* mapp);
+bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len);
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len);
 bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len);
-uint8_t api_storage_map_index(void);
 bool api_storage_set_map(uint8_t index, bool sync);
 void api_storage_auto_sync(void);
 bool api_storage_sync(void);

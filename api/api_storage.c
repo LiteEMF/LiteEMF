@@ -83,14 +83,14 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 ** Returns:	
 ** Description:	检测map中crc值
 *******************************************************************/
-bool api_storage_check_map(api_storage_map_t* mapp)
+bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len)
 {
 	bool ret = false;
     uint16_t crc, map_len, map_crc;
 
 	map_len = (mapp->len);
 	map_crc = (mapp->crc);
-	if( (map_len < 4) || (map_len > STORAGE_MAP_SIZE-4 )) {
+	if( (map_len < 4) || (map_len > len-4 )) {
         loge("map len err=%x\n",map_len);
         return ret;
     }

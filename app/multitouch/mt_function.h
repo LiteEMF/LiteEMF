@@ -18,6 +18,8 @@
 #include "km_typedef.h"
 #include "utils/emf_utils.h"
 #include "app/multitouch/multitouch.h"
+#include "app/multitouch/app_map_setting.h"
+#include "app/multitouch/macro_map.h"
 #include "api/api_tick.h"
 
 #ifdef __cplusplus
@@ -28,64 +30,61 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#define MT_TRI_DT		8
-#define MT_AUTO_DT		8
-#define MT_SLIDE_DT		30
-
-//key attribute
-typedef  enum {	
-	MT_NONE = 0,
-	MT_KEY_TRI,				//trigger
-	MT_KEY_AUTO,			//连点
-	MT_SLIDE,				//滑动模式
-	MT_SLIDE8,				//wasd滑动模式, 8方向滑动
-
-	MT_TICK_WASD = 10,		//摇杆走位模式
-	MT_TICK_VISUAL,			//摇杆视角模式
-
-	MT_MACRO = 15,			//max 15
-}mt_mode_t;
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-typedef  struct {	
-	uint8_t mode:4;				//按键模式
-	uint8_t	att:3;				//属性
-	uint8_t macro:1;			//宏模式
-	uint8_t	d;					//参数d
-	uint16_t pa;				//参数pa
-	uint32_t key;				//km key[4] or gamepad key
-	int16_t x;					//0~TOUCH_X_LOGICAL_MAX 
-	int16_t y;					//0~TOUCH_Y_LOGICAL_MAX 
-}mt_map_t;		//12
-
-
 typedef union{
+
 	struct {
-		uint8_t step;
-		int8_t dirx:2;
-		int8_t diry:2;
-		int8_t res:3;
-		uint8_t event:1;			//事件
+		uint16_t time_out;			//超时ms
+		uint16_t res:14;
+		uint16_t run:1;				//是否运行
+		uint16_t event:1;			//事件
+	} tri;
+
+
+	struct {
+		uint16_t step;				//滑动步长
+		uint16_t res:14;
+		uint16_t run:1;				//是否运行
+		uint16_t event:1;			//事件
+	} slide;
+	struct {
+		uint16_t step;				//滑动步长
+		
+		int16_t dirx:2;
+		int16_t diry:2;
+		uint16_t res:10;
+		uint16_t run:1;				//是否运行
+		uint16_t event:1;			//事件
 	} slide8;
 
 	struct {
-		uint16_t pa:15;				//参数
+		uint16_t times;			 	//连点次数
+		uint16_t res:14;
+		uint16_t run:1;				//是否运行
 		uint16_t event:1;			//事件
-	} mode;
+	} autos;
 
-	uint16_t value;
+	struct {
+		uint16_t time_out;			//超时ms
+
+		uint16_t res:13;
+		uint16_t step_run:1;		//1:宏步骤当前正在执行,0:宏步骤运行完正在等待间隔时间
+		uint16_t run:1;				//是否运行
+		uint16_t event:1;			//事件
+	} macro;
+
+	uint32_t value;
 }mt_msg_t;
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void mt_map_swapl(mt_map_t* mapp, uint16_t size);
-void mt_map_dump(mt_map_t* mapp, uint16_t size);
-bool mt_auto_run(uint16_t id, mt_map_t* mapp);
-bool mt_slide_run(uint16_t id, mt_map_t* mapp, uint16_t min_step, uint16_t max_step);
-bool mt_function_init(const mt_map_t* mpp, mt_msg_t* msgp, uint16_t size);
+bool mt_auto_run(uint16_t id, mt_msg_t* pmsg, mt_map_t* mapp);
+bool mt_slide_run(uint16_t id, uint16_t min_step, uint16_t max_step, mt_msg_t* pmsg, mt_map_t* mapp);
+bool mt_function_init(const api_storage_map_t* mapp, const api_storage_map_t* macro_mapp,mt_msg_t* msgp);
 bool mt_function_deinit(void);
 void mt_function_task(void* pa);
 void mt_function_handler(uint32_t period_10us);
