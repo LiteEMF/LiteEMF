@@ -346,7 +346,7 @@ bool api_trp_init(void)
 	m_hid_mode = m_storage.hid_mode;
 	#endif
 
-	logd("trp init dev trps=%x, modes=%x hids=%x\n",m_trps,m_dev_mode,m_hid_mode);
+	logd_g("trp init dev trps=%x, modes=%x hids=%x\n",m_trps,m_dev_mode,m_hid_mode);
 	return true;
 }
 

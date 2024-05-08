@@ -82,6 +82,19 @@ static uint8c_t hid_desc_ps4_usb_map[] =
 };
 #endif
 
+#if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
+static uint8c_t hid_desc_ps5_bt_map[] =
+{
+    #include "hid_desc_ps5_edge_bt.h"
+};
+#endif
+#if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
+static uint8c_t hid_desc_ps5_usb_map[] =
+{
+    #include "hid_desc_ps5_edge_usb.h"
+};
+#endif
+
 #if	HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
 static uint8c_t hid_desc_kb_map[] =
 {
@@ -171,7 +184,6 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
             break;
         #endif
         case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
             if(api_trp_is_bt(trp)){
                 #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
                 if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps4_bt_map;
@@ -181,6 +193,19 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
                 if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps4_usb_map;
                 map_len = sizeof(hid_desc_ps4_usb_map);
+                #endif
+            }
+            break;
+        case HID_TYPE_PS5	:
+            if(api_trp_is_bt(trp)){
+                #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps5_bt_map;
+                map_len = sizeof(hid_desc_ps5_bt_map);
+                #endif
+            }else if(api_trp_is_usb(trp)){
+                #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
+                if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_ps5_usb_map;
+                map_len = sizeof(hid_desc_ps5_usb_map);
                 #endif
             }
             break;

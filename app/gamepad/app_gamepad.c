@@ -40,7 +40,7 @@
 *******************************************************************************************************/
 
 #if(HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_SWITCH)
-static uint32c_t switch_key_map[20][2] =
+static uint32c_t switch_key_map[][2] =
 {
 	{HW_KEY_A 			,SWITCH_A		  },
 	{HW_KEY_B 			,SWITCH_B		  },
@@ -64,8 +64,8 @@ static uint32c_t switch_key_map[20][2] =
 #endif
 
 
-#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5))
-static uint32c_t ps4_key_map[20][2] =
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS4))
+static uint32c_t ps4_key_map[][2] =
 {
 	{HW_KEY_A 			,PS4_O			},
 	{HW_KEY_B 			,PS4_X			},
@@ -87,8 +87,44 @@ static uint32c_t ps4_key_map[20][2] =
 	{HW_KEY_CAPTURE		,PS4_TOUCH_KEY	},
 };
 #endif
+
+#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS5))
+static uint32c_t ps5_key_map[][2] =
+{
+	{HW_KEY_A 			,PS4_O			},
+	{HW_KEY_B 			,PS4_X			},
+	{HW_KEY_X 			,PS4_TRIANGLE	},
+	{HW_KEY_Y 			,PS4_SQUARE		},
+	{HW_KEY_L1			,PS4_L1			},
+	{HW_KEY_R1			,PS4_R1			},
+	{HW_KEY_L2			,PS4_L2			},
+	{HW_KEY_R2			,PS4_R2			},
+	{HW_KEY_R3			,PS4_R3			},
+	{HW_KEY_L3			,PS4_L3			},
+	{HW_KEY_SELECT 		,PS4_SHARE		},
+	{HW_KEY_START		,PS4_OPTION		},
+	{HW_KEY_UP			,PS4_UP			},
+	{HW_KEY_DOWN		,PS4_DOWN		},
+	{HW_KEY_LEFT		,PS4_LEFT		},
+	{HW_KEY_RIGHT 		,PS4_RIGHT		},
+	{HW_KEY_HOME		,PS4_PS			},
+	{HW_KEY_CAPTURE		,PS4_TOUCH_KEY	},
+
+	//TODO for test
+	//{HW_KEY_A				,PS_L_FN		},
+	//{HW_KEY_B 			,PS_R_FN		},
+	//{HW_KEY_X			,PS_LB			},
+	//{HW_KEY_Y			,PS_LR			},
+
+	 {HW_KEY_M1			,PS_L_FN		},
+	 {HW_KEY_M2 		,PS_R_FN		},
+	 {HW_KEY_M3			,PS_LB			},
+	 {HW_KEY_M4			,PS_LR			},
+
+};
+#endif
 #if((HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_PS3))
-static uint32c_t ps3_key_map[20][2] =
+static uint32c_t ps3_key_map[][2] =
 {
 	{HW_KEY_A 		,PS3_O			},
 	{HW_KEY_B 		,PS3_X			},
@@ -110,7 +146,7 @@ static uint32c_t ps3_key_map[20][2] =
 };
 #endif
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX)
-static uint32c_t xbox_key_map[20][2] =
+static uint32c_t xbox_key_map[][2] =
 {
 	{HW_KEY_A 			,XBOX_A 	},
 	{HW_KEY_B 			,XBOX_B 	},
@@ -133,7 +169,7 @@ static uint32c_t xbox_key_map[20][2] =
 };
 #endif
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_X360)
-static uint32c_t x360_key_map[20][2] =
+static uint32c_t x360_key_map[][2] =
 {
 	{HW_KEY_A 			,X360_A		},
 	{HW_KEY_B 			,X360_B		},
@@ -156,7 +192,7 @@ static uint32c_t x360_key_map[20][2] =
 #endif
 
 #if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
-static uint32c_t xbox_edr_key_map[20][2] =
+static uint32c_t xbox_edr_key_map[][2] =
 {
 	{HW_KEY_A 			,XBOX_EDR_A 	},
 	{HW_KEY_B 			,XBOX_EDR_B 	},
@@ -179,7 +215,7 @@ static uint32c_t xbox_edr_key_map[20][2] =
 };
 #endif
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | HID_XBOX_MASK)
-static uint32c_t gamepad_key_map[20][2] =
+static uint32c_t gamepad_key_map[][2] =
 {
 	{HW_KEY_A 			,GAMEPAD_A		},
 	{HW_KEY_B 			,GAMEPAD_B		},
@@ -203,7 +239,7 @@ static uint32c_t gamepad_key_map[20][2] =
 
 
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_DINPUT))
-static uint32c_t dinput_key_map[20][2] =
+static uint32c_t dinput_key_map[][2] =
 {
 	{HW_KEY_A 			,DINPUT_A		},
 	{HW_KEY_B 			,DINPUT_B		},
@@ -291,7 +327,7 @@ hid_type_t app_gamepad_get_vid_pid(trp_t trp, uint16_t hid_types, uint16_t* vidp
 	}else if(hid_types & BIT_ENUM(HID_TYPE_PS5)){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_PS_MASK
 		*vidp = PS_VID;
-		*pidp = PS5_PID;
+		*pidp = PS5_EDGE_PID;
 		#endif
 	}else if(hid_types & HID_XBOX_MASK){
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & HID_XBOX_MASK
@@ -329,11 +365,16 @@ uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2])
 			return countof(switch_key_map);
 		#endif
 
-		#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5))
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS4))
 		case HID_TYPE_PS4:
-		case HID_TYPE_PS5:
 			*mapp = (uint32_t(*)[2])ps4_key_map;
 			return countof(ps4_key_map);
+		#endif
+
+		#if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_PS5))
+		case HID_TYPE_PS5:
+			*mapp = (uint32_t(*)[2])ps5_key_map;
+			return countof(ps5_key_map);
 		#endif
 		
 		#if((HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_PS3))

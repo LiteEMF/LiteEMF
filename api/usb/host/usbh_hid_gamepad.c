@@ -71,7 +71,7 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
         case PS_VID:
         	if(PS3_PID == pid){
 				dev = HID_TYPE_PS3;
-			}else if(PS5_PID == pid){
+			}else if((PS5_PID == pid) || (PS5_EDGE_PID == pid)){
 				dev = HID_TYPE_PS5;
             }else if(PS4_PID == pid){
 				dev = HID_TYPE_PS4;

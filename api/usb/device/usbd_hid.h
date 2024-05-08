@@ -37,8 +37,11 @@
 #if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX))
 #include "api/usb/device/usbd_hid_xbox.h"
 #endif
-#if (USBD_HID_SUPPORT & (BIT_ENUM(HID_TYPE_PS4) | BIT_ENUM(HID_TYPE_PS5)))
-#include "api/usb/device/usbd_hid_ps.h"
+#if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4))
+#include "api/usb/device/usbd_hid_ps4.h"
+#endif
+#if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5))
+#include "api/usb/device/usbd_hid_ps5.h"
 #endif
 #if (USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS3))
 #include "api/usb/device/usbd_hid_ps3.h"

@@ -25,7 +25,8 @@
 #define   PS4_PID	        0X09CC			//主机请求 01 02, 01 A3, 01 12
 #define   PS4_S1_PID	    0x05C4			//主机请求 01 02, 01 A3, 01 12
 #define   PS4_PART3_PID	    0x05C5			//主机请求 01 03
-#define   PS5_PID	        0X0CE6
+#define   PS5_PID	        0X0CE6			//DualSense
+#define   PS5_EDGE_PID	    0X0DF2			//DualSense Edge
 #define   PS3_PID	        0X0268
 
 
@@ -116,12 +117,12 @@ typedef enum {
 #define  PS3_PS						(0x01UL<<PS3_PS_POS		 )
 //#define  PS3_Z					(0x01UL<<  PS3_Z		 )
 #define  PS3_L_UP					(0x01UL<<PS3_L_UP_POS	 )
-#define  PS3_L_DOWN				(0x01UL<<PS3_L_DOWN_POS )
-#define  PS3_L_LEFT				(0x01UL<<PS3_L_LEFT_POS )
+#define  PS3_L_DOWN					(0x01UL<<PS3_L_DOWN_POS )
+#define  PS3_L_LEFT					(0x01UL<<PS3_L_LEFT_POS )
 #define  PS3_L_RIGHT				(0x01UL<<PS3_L_RIGHT_POS)
 #define  PS3_R_UP					(0x01UL<<PS3_R_UP_POS	 )
-#define  PS3_R_DOWN				(0x01UL<<PS3_R_DOWN_POS )
-#define  PS3_R_LEFT				(0x01UL<<PS3_R_LEFT_POS )
+#define  PS3_R_DOWN					(0x01UL<<PS3_R_DOWN_POS )
+#define  PS3_R_LEFT					(0x01UL<<PS3_R_LEFT_POS )
 #define  PS3_R_RIGHT				(0x01UL<<PS3_R_RIGHT_POS)
 
 
@@ -143,12 +144,17 @@ typedef enum {
 #define  PS4_R3_POS						(15)
 #define  PS4_PS_POS						(16)
 #define  PS4_TOUCH_KEY_POS				(17)
-										//(18)						
+
+#define  PS_L_FN_POS					(18)		/*ps5 edge*/
+#define  PS_R_FN_POS					(19)
+#define  PS_LB_POS						(20)
+#define  PS_LR_POS						(21)
 
 #define  PS4_TOUCH_U_POS				(20)	/*touch面板上约12-1点钟方向的区域(为了兼容rewasd平台) */
 #define  PS4_TOUCH_D_POS				(21)	/*touch面板上约6-1点钟方向的区域 */		
 #define  PS4_TOUCH_L_POS				(22)	/*touch面板上约9-1点钟方向的区域 */
 #define  PS4_TOUCH_R_POS	    		(23)	/*touch面板上约3-1点钟方向的区域 */
+
 #define  PS4_L_UP_POS					(24)
 #define  PS4_L_DOWN_POS					(25)
 #define  PS4_L_LEFT_POS					(26)
@@ -176,7 +182,13 @@ typedef enum {
 #define  PS4_R3						(0x01UL<<PS4_R3_POS			)
 #define  PS4_PS						(0x01UL<<PS4_PS_POS			)
 #define  PS4_TOUCH_KEY				(0x01UL<<PS4_TOUCH_KEY_POS	)
-#define  PS4_TOUCH_U				(0x01UL<<PS4_TOUCH_U_POS	)
+
+#define  PS_L_FN					(0x01UL<<PS_L_FN_POS	)			/*only ps5 edge*/
+#define  PS_R_FN					(0x01UL<<PS_R_FN_POS	)
+#define  PS_LB						(0x01UL<<PS_LB_POS	)
+#define  PS_LR						(0x01UL<<PS_LR_POS	)
+
+#define  PS4_TOUCH_U				(0x01UL<<PS4_TOUCH_U_POS	)		/*注意和ps5 PS_LB PS_LR按键是冲突的*/
 #define  PS4_TOUCH_D				(0x01UL<<PS4_TOUCH_D_POS	)
 #define  PS4_TOUCH_L				(0x01UL<<PS4_TOUCH_L_POS	)
 #define  PS4_TOUCH_R				(0x01UL<<PS4_TOUCH_R_POS	)
@@ -194,36 +206,40 @@ typedef enum {
 
 
 #define PS4_USB_EFFECTS_ID			 	0x05		/*USB 马达指令 */
-#define PS4_CALIBRATION_ID				0x02		/*获取校准信息，无crc校验 37*/
-#define PS4_BT_CALIBRATION_ID			0x05		/*蓝牙协议 获取校准信息 41 */
-#define PS4_BT_FIRMWARE_INFO_ID			0xA3		/*蓝牙协议 获取版本信息 49*/
-#define PS4_BT_PAIRING_INFO_ID			0x12		/*蓝牙协议 配对信息 16*/
 #define PS4_BT_EFFECTS_ID				0x11		/*蓝牙协议 马达指令 */
 
 
-#define PS4_REPORT_ID			 		0x01
-#define PS4_BT_LARGE_REPORT_ID			0x11		/*蓝牙协议发送完整数据, */
-#define PS4_BT_LARGE_REPORT1_ID			0x12		/*0x11~0X1A都是 */
-#define PS4_BT_LARGE_REPORT2_ID			0x13		
-#define PS4_BT_LARGE_REPORT3_ID			0x14		
-#define PS4_BT_LARGE_REPORT4_ID			0x15		
-#define PS4_BT_LARGE_REPORT5_ID			0x16		
-#define PS4_BT_LARGE_REPORT6_ID			0x18		
-#define PS4_BT_LARGE_REPORT7_ID			0x19
-#define PS4_BT_LARGE_REPORT8_ID			0x1A
+#define PS4_REPORT_ID			 	0x01
+#define PS4_BT_REPORT_ID			0x11		/*蓝牙协议发送完整数据, */
+#define PS4_BT_REPORT1_ID			0x12		/*0x11~0X1A都是 */
+#define PS4_BT_REPORT2_ID			0x13		
+#define PS4_BT_REPORT3_ID			0x14		
+#define PS4_BT_REPORT4_ID			0x15		
+#define PS4_BT_REPORT5_ID			0x16		
+#define PS4_BT_REPORT6_ID			0x18		
+#define PS4_BT_REPORT7_ID			0x19
+#define PS4_BT_REPORT8_ID			0x1A
 
+
+#define PS_CALIBRATION_ID				0x02		/*获取校准信息，无crc校验 37*/
+#define PS_BT_CALIBRATION_ID			0x05		/*蓝牙协议 获取校准信息 41 */
+#define PS_BT_FIRMWARE_INFO_ID			0xA3		/*蓝牙协议 获取版本信息 49*/
+#define PS_BT_PAIRING_INFO_ID			0x12		/*蓝牙协议 配对信息 16*/
 
 #define PS_CHALLENGE_CMD				0xF0			/*256	byte */
 #define PS_CALCULATE_CHECK_CMD			0xF2			/*doing: F2 index 00 , complete:F2 index 10 */
 #define PS_ANSWE_CMD					0xF1			/*1040 */
 
+//ps5
+#define PS5_REPORT_ID			 		0x01
+#define PS5_BT_REPORT_ID				0x31		//蓝牙协议发送完整数据,
 #define PS5_USB_EFFECTS_ID			 	0x02		/*USB 马达指令 */
 #define PS5_BT_EFFECTS_ID				0x31		/*蓝牙协议 马达指令 */
 
 
 //PS3
-#define PS3_CMD_ON  						0x420C
-#define PS3_CMD_OFF 						0x420B
+#define PS3_CMD_ON  					0x420C
+#define PS3_CMD_OFF 					0x420B
 
 /*******************************************************************************************************************
 **	Parameters
@@ -346,8 +362,8 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t  buttonh:2;
 	uint8_t index:6;	  		//"帧号 普通按键数据+4, PS按键按下+5, 按键抬起+3
 	uint8_t l2; 				//0-0XFF
-	uint8_t r2; 				//0-0XFF
-
+	uint8_t r2; 				//0-0XFF	,到这里是normal 模式
+	
 	uint16_t time_index; 		// 默认4ms对应704,//小端
 	int8_t mark;				//默认0x13		0x12 0x13 0x0d都有
 
@@ -356,7 +372,7 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 	uint8_t res[5];
 	uint8_t battery:5;			//bit4:USB接如, bit0~4:电量比例,比如5=50%, 超过10都=100%
 	uint8_t ear_stu:3;			//拔出耳机: 0:拔出耳机 1: 耳机接入过程? 3:接入耳机
-	uint8_t res2[4];				//35
+	uint8_t res2[4];			//	,35
 
 	uint8_t touch_pad1_index;		//bit7:0:press,1:up, bit0~6: index
     uint8_t touch_pad1[ 3 ];		//12bit x,y小端
@@ -381,7 +397,7 @@ typedef struct	 //只定义有用数据  其他数据最后附加
 
 typedef struct	 //mini ps4报告结构体舍去没有用到结构
 {
-	uint8_t id;			//PS4_BT_LARGE_REPORT_ID~PS4_BT_LARGE_REPORT8_ID
+	uint8_t id;			//PS4_BT_REPORT_ID~PS4_BT_REPORT8_ID
 	uint8_t magic;		//0xC0, bit7:HID, bit6:是否需要CRC
 	uint8_t res0;
 
@@ -397,15 +413,15 @@ typedef struct	 //mini ps4报告结构体舍去没有用到结构
 	int16_t time_index; 		// 默认4ms对应704
 	int8_t mark;				//默认0x13		0x12 0x13 0x0d都有
 	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
-	axis3i_t acc;				//系统:x向左,Y向下,Z向内范围0~8192		,25
+	axis3i_t acc;				//系统:x向左,Y向下,Z向内范围0~8192		,27
 	uint8_t res[5];
 	uint8_t battery:5;			//bit4:USB接如, bit0~4:电量比例,比如5=50%, 超过10都=100%
 	uint8_t ear_stu:3;			//拔出耳机: 0:拔出耳机 1: 耳机接入过程? 3:接入耳机
-	uint8_t res2[4];				//35
+	uint8_t res2[4];				//37
 	uint8_t touch_pad1_index;		//bit:0:press,1:up, bit0~6: index
     uint8_t touch_pad1[ 3 ];		//12bit x,y小端
     uint8_t touch_pad2_index;
-    uint8_t touch_pad2[ 3 ];		//43
+    uint8_t touch_pad2[ 3 ];		//45
 
 	uint8_t pad_res;
 	uint8_t touch_pad3_index;		//一下是猜测,27个保留数据 ,padn_index必须是80
@@ -425,7 +441,7 @@ typedef struct	 //mini ps4报告结构体舍去没有用到结构
 
 	uint8_t res4[2];
 	uint32_t crc;
-}ps4_large_report_t;			//78
+}ps4_bt_report_t;			//78
 
 
 
@@ -479,28 +495,73 @@ typedef struct		//小端
 	uint8_t l2; 				//0-0XFF
 	uint8_t r2; 				//0-0XFF
 	uint8_t index;	  			//"帧号
-	uint32_t button;			//底3位为方向键
-	uint16_t index2; 			//+1
-	uint16_t mark;				//每次开机随机, 以上数据加密	16
+	uint32_t button;			//底4位为方向键
+
+	uint32_t index2; 			//+1
 	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
 	axis3i_t acc;				//系统:x向左,Y向下,Z向内范围0~8192
-	uint16_t time_us; 			//3us为一个单位
-	uint16_t time_ms; 			//20ms 为一个单位		16
+	uint32_t time_us; 			//us为一个单位				,32
 
-	uint8_t battery_res;
+	uint8_t res_mark2;					// 11 12任意数据交替
 	uint8_t touch_pad1_index;			//bit:0:press,1:up, bit0~6: index
     uint8_t touch_pad1[ 3 ];			//12bit x,y小端
     uint8_t touch_pad2_index;
-    uint8_t touch_pad2[ 3 ];			//25
-	uint8_t res[8]; 					//保留数据
-	uint16_t time_us2; 					//3us为一个单位
-	uint16_t time_ms2; 					//20ms 为一个单位
-	uint8_t battery:5;					//bit4:USB接如, bit0~4:电量比例,比如5=50%, 超过10都=100%
-	uint8_t ear_stu:3;					//拔出耳机: 0:拔出耳机 1: 耳机接入过程? 3:接入耳机
-	uint16_t res2; 						// 0x1800 					24
+    uint8_t touch_pad2[ 3 ];
+	uint8_t sum;						//不确定	,42
 
-	uint8_t secucrt[8]; //保留数据  鼠标键盘用不上
-}ps5_report_t;
+	uint8_t res_mark3[10]; 				//保留数据固定 09 09 00 00 00 00 00 4C 00 08
+	uint32_t battery_ear;				//不充电:00 03 00 00	,56
+
+	uint8_t secucrt[8]; 				//加密数据
+}ps5_usb_report_t;						//64
+
+
+typedef struct	 		//ps5 bt报告结构体舍去没有用到结构
+{
+	uint8_t id;			//PS5_BT_REPORT_ID
+	uint8_t index;		//0x01 0x11 0x21... 0xf1
+	uint8_t lx;
+	uint8_t ly;
+	uint8_t rx;
+	uint8_t ry;
+	uint8_t l2; 				//0-0XFF
+	uint8_t r2; 				//0-0XFF
+	uint8_t res_mark;			//0x01固定
+	uint32_t button;			//支持ps5 edge背键
+		
+	uint32_t index2;			//+1
+	axis3i_t gyro;				//对应pich roll yaw ,参考acc坐标,左手定律旋转,范围-32768~32767
+	axis3i_t acc;				//系统:x向左,Y向下,Z向内范围0~8192
+	uint32_t time_us; 			//1us为一个单位	,33
+
+	uint8_t res_mark2;			// 11 12任意数据交替
+	uint8_t touch_pad1_index;	//bit:0:press,1:up, bit0~6: index
+    uint8_t touch_pad1[ 3 ];	//12bit x,y小端
+    uint8_t touch_pad2_index;
+    uint8_t touch_pad2[ 3 ];	//43
+	uint8_t sum;				//不确定		,43
+
+	uint8_t res_mark3[10]; 		//保留数据固定 09 09 00 00 00 00 00 4C 00 08
+	uint32_t battery_ear;		//不充电:00 03 00 00
+	uint8_t secucrt[8]; 		//加密数据		,65
+
+	uint8_t res2[9];			//全0 			,74
+	uint32_t crc;
+}ps5_bt_report_t;			//78
+
+typedef struct					//小端
+{
+	uint8_t id;					//固定01
+	int8_t lx;					//-128 ~ 127
+	int8_t ly;
+	int8_t rx;
+	int8_t ry;
+	uint16_t buttonl;
+	uint8_t  buttonh:2;
+	uint8_t index:6;	  		//"帧号 普通按键数据+4, PS按键按下+5, 按键抬起+3
+	uint8_t l2; 				//0-0XFF
+	uint8_t r2; 				//0-0XFF
+}ps5_bt_normal_report_t;				//11
 
 
 

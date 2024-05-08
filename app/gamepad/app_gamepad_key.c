@@ -135,6 +135,8 @@ void app_gamepad_key_scan_task(app_gamepad_key_t *pkey)
 
     #if APP_IMU_ENABLE
     app_imu_get_val(&app_key.acc,&app_key.gyro);
+    #else
+    app_key.acc.z = 0XFFFF/8;         //default 8G acc
     #endif
 
     #if APP_KEY_ENABLE

@@ -38,8 +38,8 @@
 /*******************************************************************************************************************
 **	Functions
 ********************************************************************************************************************/
-uint32_t ps4_hatswitch_to_key(uint8_t hat_switch);
-uint8_t ps4_key_to_hatswitch(uint32_t ps_key);
+uint32_t ps_hatswitch_to_key(uint8_t hat_switch);
+uint8_t ps_key_to_hatswitch(uint32_t ps_key);
 void ps_get_bt_mac(ps_bt_mac_t *pmac);
 void ps_set_bt_link(ps_bt_link_t *plink);
 void ps_touch_pack(app_gamepad_key_t *keyp);			//__WEAK

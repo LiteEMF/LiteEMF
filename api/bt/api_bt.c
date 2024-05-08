@@ -320,22 +320,26 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		switch(bt_ctbp->hid_types){
 			#if (BT_HID_SUPPORT & HID_SWITCH_MASK)
 			case BIT_ENUM(HID_TYPE_SWITCH):
-				memcpy(name,"Pro Controller",sizeof("Pro Controller"));
+				memcpy(name,"Pro Controller",strlen("Pro Controller"));
 				ret = true;
 				break;
 			#endif
 			#if (BT_HID_SUPPORT & HID_PS_MASK)
 			case BIT_ENUM(HID_TYPE_PS3)	:
 			case BIT_ENUM(HID_TYPE_PS4)	:
+				memcpy(name,"Wireless Controller",strlen("Wireless Controller"));
+				ret = true;
+				break;
 			case BIT_ENUM(HID_TYPE_PS5)	:
-				memcpy(name,"Wireless Controller",sizeof("Wireless Controller"));
+				// memcpy(name,"DualSense Edge Wireless Controlle",strlen("DualSense Edge Wireless Controlle"));
+				memcpy(name,"DualSense Wireless Controller",strlen("DualSense Wireless Controller"));
 				ret = true;
 				break;
 			#endif
 			#if (BT_HID_SUPPORT & HID_XBOX_MASK)
 			case BIT_ENUM(HID_TYPE_X360)	:
 			case BIT_ENUM(HID_TYPE_XBOX)	:
-				memcpy(name,"Xbox Wireless Controller",sizeof("Xbox Wireless Controller"));
+				memcpy(name,"Xbox Wireless Controller",strlen("Xbox Wireless Controller"));
 				ret = true;
 				break;
 			#endif
@@ -356,7 +360,7 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	}
 	
 	memset(buf,0,len);
-    len = MIN(len-1,(uint8_t)strlen(name));
+    len = MIN(len,(uint8_t)strlen(name));
     memcpy(buf, name, len);
 	return len;
 }
@@ -626,15 +630,25 @@ __WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 	bt_ctbp = api_bt_get_ctb(bt);
 	if(NULL == bt_ctbp) return;
 
-	if(BT_UART == pa->bts){					//uart
+	if(BT_HID & pa->bts){
+		#if EDR_HID_SUPPORT & HID_GAMEPAD_MASK
+		hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
+		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
+		app_gamepad_dev_process(&handle, pa->buf, pa->len);
+		#else
+		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
+		app_command_rx(&handle,pa->buf+1, pa->len-1);	//丢弃hid_report_type_t
+		#endif
+	}else if(BT_UART == pa->bts){					//uart
 		uint8_t i;
 		trp_handle_t handle = {bt,id,U16(DEV_TYPE_VENDOR, 0)};
-
 		for(i=0; i<pa->len; i++){
 			app_command_rx_byte(&handle, pa->buf[i]);
 		}
 	}
 }
+
+
 
 
 
@@ -664,7 +678,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
 			}
-			logd("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
+			logd_g("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("bt(%d) connect...\n",bt);
@@ -761,7 +775,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
 			}
-			logd("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
+			logd_g("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("btc(%d) connect...\n",bt);

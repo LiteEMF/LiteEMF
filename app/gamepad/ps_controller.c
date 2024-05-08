@@ -49,13 +49,13 @@ uint8c_t ps_cmdF3[4] ={0xF3,0x00,0x38,0x38};		//b8 不支持F2,改成38
 **	public Parameters
 *******************************************************************************************************/
 ps_series_t m_ps_series;			//判断PS产品系列, 后面可以改成gamepad device series
-bool m_ps_enhanced_mode = true;	//large report mode, 从机蓝牙模式才有效, 收到马达数据/featrue 05/02 后打开
+bool m_ps_enhanced_mode = true;		//large report mode, 从机蓝牙模式才有效, 收到马达数据/featrue 05/02 后打开
 
 
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
-static uint8_t ps_report_index=0;
+static uint32_t ps_report_index=0;
 static ps_touch_t m_ps_touch[PS4_SLOT_MAX];
 static uint8_t mcontact_id[PS4_SLOT_MAX];			//for find contact id不能为0
 
@@ -84,20 +84,20 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 {
 	uint16_t packet_len=0;
 	axis3i_t axis;
-	ps4_large_report_t* large_ps4p = (ps4_large_report_t*)buf;	//如果是large report
+	ps4_bt_report_t* bt_ps4p = (ps4_bt_report_t*)buf;	//如果是large report
 	ps4_report_t* ps4p;
 
 	memset(buf,0,len);
 
 	if(api_trp_is_bt(phandle->trp)){           //蓝牙结构体长度(+id)
-		if(len < sizeof(ps4_large_report_t)) return 0;
+		if(len < sizeof(ps4_bt_report_t)) return 0;
 		if(m_ps_enhanced_mode){						//打开large report
-			large_ps4p->id = PS4_BT_LARGE_REPORT_ID;
-			large_ps4p->magic = 0xC0;
-			large_ps4p->touch_pad8_index = 0x80;
+			bt_ps4p->id = PS4_BT_REPORT_ID;
+			bt_ps4p->magic = 0xC0;
+			bt_ps4p->touch_pad8_index = 0x80;
 
 			ps4p = (ps4_report_t*)(buf+2);			
-			packet_len = sizeof(ps4_large_report_t);		
+			packet_len = sizeof(ps4_bt_report_t);		
 		}else{
 			ps4p = (ps4_report_t*)buf;
 			ps4p->id = PS4_REPORT_ID;
@@ -130,7 +130,7 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 	ps4p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
 	ps4p->rx = (keyp->stick_r.x >> 8) + 0x80;
 	ps4p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
-	ps4p->buttonl = (keyp->key&0xfff0) | ps4_key_to_hatswitch(keyp->key);
+	ps4p->buttonl = (keyp->key&0xfff0) | ps_key_to_hatswitch(keyp->key);
 	ps4p->buttonh = keyp->key>>16;
 	ps4p->buttonl = SWAP16_L( ps4p->buttonl );
 
@@ -178,8 +178,8 @@ static uint16_t ps4_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 			uint8_t ubHdr = 0xA1; /* hidp header is part of the CRC calculation */
 			uint32_t unCRC;
 			unCRC = crc32(0,&ubHdr, 1);
-			unCRC = crc32(unCRC,large_ps4p, (sizeof(ps4_large_report_t) - sizeof(unCRC)));
-			large_ps4p->crc = SWAP32_L(unCRC);
+			unCRC = crc32(unCRC,bt_ps4p, (sizeof(ps4_bt_report_t) - sizeof(unCRC)));
+			bt_ps4p->crc = SWAP32_L(unCRC);
 			#else
 			#error "ps controller need crc32!"
 			#endif
@@ -238,24 +238,129 @@ static uint16_t ps3_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uint8_t* buf,uint16_t len)
 {
 	uint16_t packet_len=0;
-	ps5_report_t* ps5p = (ps5_report_t*)buf;
+	axis3i_t axis;
 
-	if(len < sizeof(ps5_report_t)) return 0;
+	if(api_trp_is_usb(phandle->trp)){
+		ps5_usb_report_t* ps5p = (ps5_usb_report_t*)buf;
 
-	memset(ps5p,0,sizeof(ps5_report_t));
-	ps5p->lx = (keyp->stick_l.x >> 8) + 0x80;
-	ps5p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
-	ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
-	ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
-	ps5p->button = (keyp->key&0xfffffff0) | ps4_key_to_hatswitch(keyp->key);
-	ps5p->l2 = keyp->l2 >> 7;
-	ps5p->r2 = keyp->r2 >> 7;
+		if(len < sizeof(ps5_usb_report_t)) return 0;
 
-	ps_report_index++;
-	ps5p->index = ps_report_index;
-	ps5p->index2 = ps_report_index;
+		memset(ps5p,0,sizeof(ps5_usb_report_t));
+		ps5p->id = PS5_REPORT_ID;
+		ps5p->lx = (keyp->stick_l.x >> 8) + 0x80;
+		ps5p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+		ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
+		ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+		ps5p->button = (keyp->key&0xfffffff0) | ps_key_to_hatswitch(keyp->key);
+		ps5p->l2 = keyp->l2 >> 7;
+		ps5p->r2 = keyp->r2 >> 7;
 
-	packet_len = sizeof(ps5_report_t);
+		axis.x = keyp->acc.y;
+		axis.y = 0-keyp->acc.z;
+		axis.z = 0-keyp->acc.x;
+		axis3i_swapl(&axis);
+		ps5p->acc = axis;
+
+		axis.x = keyp->gyro.y;
+		axis.y = 0-keyp->gyro.z;
+		axis.z = 0-keyp->gyro.x;
+		axis3i_swapl(&axis);
+		ps5p->gyro = axis;
+
+		ps5p->touch_pad1_index = 0x80;
+		ps5p->touch_pad2_index = 0x80;
+	
+		ps_report_index++;
+		ps5p->index = ps_report_index;
+		ps5p->index2 = ps_report_index;
+
+		ps5p->res_mark2 = 0x11;
+		memcpy(ps5p->res_mark3, "\x09\x09\x00\x00\x00\x00\x00\x4C\x00\x08", 10);
+		memcpy(&ps5p->battery_ear, "\x00\x03\x00\x00", 4);
+		ps5p->battery_ear = SWAP16_L(ps5p->battery_ear);
+		ps5p->time_us = m_systick * 1000;
+		
+
+		packet_len = sizeof(ps5_usb_report_t);
+	}else{					//bt
+		if(m_ps_enhanced_mode){						//打开large report
+			ps5_bt_report_t* ps5p = (ps5_bt_report_t*)buf;
+
+			if(len < sizeof(ps5_bt_report_t)) return 0;
+
+			memset(ps5p,0,sizeof(ps5_bt_report_t));
+			ps5p->id = PS5_BT_REPORT_ID;
+			ps5p->lx = (keyp->stick_l.x >> 8) + 0x80;
+			ps5p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+			ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
+			ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+			ps5p->button = (keyp->key&0xfffffff0) | ps_key_to_hatswitch(keyp->key);
+			ps5p->l2 = keyp->l2 >> 7;
+			ps5p->r2 = keyp->r2 >> 7;
+
+			axis.x = keyp->acc.y;
+			axis.y = 0-keyp->acc.z;
+			axis.z = 0-keyp->acc.x;
+			axis3i_swapl(&axis);
+			ps5p->acc = axis;
+
+			axis.x = keyp->gyro.y;
+			axis.y = 0-keyp->gyro.z;
+			axis.z = 0-keyp->gyro.x;
+			axis3i_swapl(&axis);
+			ps5p->gyro = axis;
+
+			ps5p->touch_pad1_index = 0x80;
+			ps5p->touch_pad2_index = 0x80;
+
+			ps_report_index++;
+			ps5p->index = (ps_report_index<<8) + 1;
+			ps5p->index2 = ps_report_index;
+
+			ps5p->res_mark = 0x01;
+			ps5p->res_mark2 = 0x11;
+			memcpy(ps5p->res_mark3, "\x09\x09\x00\x00\x00\x00\x00\x4C\x00\x08", 10);
+			memcpy(&ps5p->battery_ear, "\x00\x03\x00\x00", 4);
+			ps5p->battery_ear = SWAP16_L(ps5p->battery_ear);
+			
+			ps5p->time_us = m_systick * 1000;
+
+
+			/* Bluetooth reports need a CRC at the end of the packet (at least on Linux) */
+			#if  CRC32_EANBLE
+			uint8_t ubHdr = 0xA1; /* hidp header is part of the CRC calculation */
+			uint32_t unCRC;
+			unCRC = crc32(0,&ubHdr, 1);
+			unCRC = crc32(unCRC,ps5p, (sizeof(ps5_bt_report_t) - sizeof(unCRC)));
+			ps5p->crc = SWAP32_L(unCRC);
+			#else
+			#error "ps5 controller need crc32!"
+			#endif
+
+			packet_len = sizeof(ps5_bt_report_t);
+		}else{
+			ps5_bt_normal_report_t* ps5p = (ps5_bt_normal_report_t*)buf;
+
+			if(len < sizeof(ps5_bt_normal_report_t)) return 0;
+
+			memset(ps5p,0,sizeof(ps5_bt_normal_report_t));
+			ps5p->id = PS5_REPORT_ID;
+			ps5p->lx = (keyp->stick_l.x >> 8) + 0x80;
+			ps5p->ly = 0xFF - ((keyp->stick_l.y >> 8) + 0x80);
+			ps5p->rx = (keyp->stick_r.x >> 8) + 0x80;
+			ps5p->ry = 0xFF - ((keyp->stick_r.y >> 8) + 0x80);
+			ps5p->buttonl = (keyp->key&0xfff0) | ps_key_to_hatswitch(keyp->key);
+			ps5p->buttonh = keyp->key>>16;
+			ps5p->buttonl = SWAP16_L( ps5p->buttonl );
+			ps5p->l2 = keyp->l2 >> 7;
+			ps5p->r2 = keyp->r2 >> 7;
+
+			ps_report_index++;
+			ps5p->index = ps_report_index;
+
+			packet_len = sizeof(ps5_bt_normal_report_t);
+		}
+	}
 
 	return packet_len;
 }
@@ -346,15 +451,15 @@ static bool ps4_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 
 	if((PS4_REPORT_ID == buf[0]) && (len >= 10)){
 		ps4_inp = (ps4_report_t*)buf;
-	}else if((PS4_BT_LARGE_REPORT_ID <= buf[0]) && (PS4_BT_LARGE_REPORT8_ID >= buf[0]) && (len >= 12)){
-		ps4_inp = (ps4_report_t*)(buf+2);		//id不解析这里为了简单处理,实际是 ps4_large_report_t
+	}else if((PS4_BT_REPORT_ID <= buf[0]) && (PS4_BT_REPORT8_ID >= buf[0]) && (len >= 12)){
+		ps4_inp = (ps4_report_t*)(buf+2);		//id不解析这里为了简单处理,实际是 ps4_bt_report_t
 	}
 
 	if(NULL != ps4_inp){
 		buttonl = SWAP16_L(ps4_inp->buttonl);
 		key = buttonl | ((uint32_t)ps4_inp->buttonh << 16);
 		key &= 0Xfffff0;
-		key |= ps4_hatswitch_to_key(buttonl & 0X0F);
+		key |= ps_hatswitch_to_key(buttonl & 0X0F);
 		keyp->key = key;
 		keyp->stick_l.x = remap((int8_t)(ps4_inp->lx-0x80),-128,127,-32768,32767);
 		keyp->stick_l.y = remap((int8_t)(ps4_inp->ly-0x80),-128,127,32767,-32768);
@@ -441,22 +546,57 @@ static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 {
 	bool ret = false;
 	uint32_t key;
-	ps5_report_t* ps5_inp = (ps5_report_t*)buf;
-	if((0x01 == ps5_inp->id)){
-		key = ps5_inp->button ;
-		key &= 0Xfffff0;
-		key |= ps4_hatswitch_to_key(ps5_inp->button & 0X0F);
+	if(api_trp_is_usb(phandle->trp)){
+		ps5_usb_report_t* ps5_inp = (ps5_usb_report_t*)buf;
+		if((PS5_REPORT_ID == ps5_inp->id)){
+			key = ps5_inp->button ;
+			key &= 0Xfffff0;
+			key |= ps_hatswitch_to_key(ps5_inp->button & 0X0F);
 
-		keyp->key = key;
+			keyp->key = key;
 
-		keyp->stick_l.x = remap((int8_t)(ps5_inp->lx-0x80),-128,127,-32768,32767);
-		keyp->stick_l.y = remap((int8_t)(ps5_inp->ly-0x80),-128,127,32767,-32768);
-		keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
-		keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
-		
-		keyp->l2 = remap(ps5_inp->l2,0,0xFF,0,32767);
-		keyp->r2 = remap(ps5_inp->r2,0,0xFF,0,32767);
-		ret = true;
+			keyp->stick_l.x = remap((int8_t)(ps5_inp->lx-0x80),-128,127,-32768,32767);
+			keyp->stick_l.y = remap((int8_t)(ps5_inp->ly-0x80),-128,127,32767,-32768);
+			keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
+			keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
+			
+			keyp->l2 = remap(ps5_inp->l2,0,0xFF,0,32767);
+			keyp->r2 = remap(ps5_inp->r2,0,0xFF,0,32767);
+			ret = true;
+		}
+	}else{
+		uint16_t buttonl;
+		if((PS5_BT_REPORT_ID == buf[0])){
+			ps5_bt_report_t* ps5_inp = (ps5_bt_report_t*)buf;
+			key = ps5_inp->button ;
+			key &= 0Xfffff0;
+			key |= ps_hatswitch_to_key(ps5_inp->button & 0X0F);
+
+			keyp->stick_l.x = remap((int8_t)(ps5_inp->lx-0x80),-128,127,-32768,32767);
+			keyp->stick_l.y = remap((int8_t)(ps5_inp->ly-0x80),-128,127,32767,-32768);
+			keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
+			keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
+			
+			keyp->l2 = remap(ps5_inp->l2,0,0xFF,0,32767);
+			keyp->r2 = remap(ps5_inp->r2,0,0xFF,0,32767);
+			ret = true;
+		}else if(PS5_REPORT_ID == buf[0]){			//normal
+			ps5_bt_normal_report_t* ps5_inp = (ps5_bt_normal_report_t*)buf;
+			buttonl = SWAP16_L(ps5_inp->buttonl);
+			key = buttonl | ((uint32_t)ps5_inp->buttonh << 16);
+			key &= 0Xfffff0;
+			key |= ps_hatswitch_to_key(buttonl & 0X0F);
+			keyp->key = key;
+
+			keyp->stick_l.x = remap((int8_t)(ps5_inp->lx-0x80),-128,127,-32768,32767);
+			keyp->stick_l.y = remap((int8_t)(ps5_inp->ly-0x80),-128,127,32767,-32768);
+			keyp->stick_r.x = remap((int8_t)(ps5_inp->rx-0x80),-128,127,-32768,32767);
+			keyp->stick_r.y = remap((int8_t)(ps5_inp->ry-0x80),-128,127,32767,-32768);
+			
+			keyp->l2 = remap(ps5_inp->l2,0,0xFF,0,32767);
+			keyp->r2 = remap(ps5_inp->r2,0,0xFF,0,32767);
+			ret = true;
+		}
 	}
 	return ret;
 }
@@ -473,7 +613,7 @@ static bool ps5_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app
 ** Returns:	从0~7有效数据
 ** Description:		
 *******************************************************************/
-uint8_t ps4_key_to_hatswitch(uint32_t ps_key)
+uint8_t ps_key_to_hatswitch(uint32_t ps_key)
 {
 	uint32_t tmp;
 	uint8_t ret = 0x08;
@@ -515,7 +655,7 @@ uint8_t ps4_key_to_hatswitch(uint32_t ps_key)
 ** Returns:	从0~7有效数据
 ** Description:		
 *******************************************************************/
-uint32_t ps4_hatswitch_to_key(uint8_t hat_switch)
+uint32_t ps_hatswitch_to_key(uint8_t hat_switch)
 {
 	uint32_t tmp;
 	tmp=0;
@@ -717,25 +857,26 @@ bool ps_dev_process(trp_handle_t* phandle, uint8_t* buf,uint8_t len)
 	if(edr_hid_req == (EDR_HID_REQ_TYPE_GET_REPORT|HID_REPORT_TYPE_FEATURE)){	//freature 处理
 		bool ret;
 		switch(buf[0]){
-		case PS4_CALIBRATION_ID:
-		case PS4_BT_CALIBRATION_ID:{
+		case PS_CALIBRATION_ID:
+		case PS_BT_CALIBRATION_ID:{
 			uint8_t imu_calibration[]={
 			0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x22,0x00,0x22,0x00,0x22,0x00,0xDE,0x00,
 			0xDE,0x00,0xDE,0x1C,0x02,0x1C,0x02,0x00,0x20,0x00,0xE0,0x00,0x20,0x00,0xE0,0x00,
 			0x20,0x00,0xE0,0x0B,0x00,0xDB,0x5C,0x18,0x0A};
+
 			api_os_delay_ms(2);		//ps4模式下hid下发数据比较快，杰里蓝牙连接系统事件接收比较慢，这里简单delay特殊处理
 			
-			if(buf[0] == PS4_BT_CALIBRATION_ID){
+			if(buf[0] == PS_BT_CALIBRATION_ID){
 				ret = api_bt_hid_tx(BT_ID0,BT_EDR,HID_REPORT_TYPE_FEATURE,imu_calibration,sizeof(imu_calibration));
 			}else{
 				imu_calibration[0] = 0x02;
 				ret = api_bt_hid_tx(BT_ID0,BT_EDR,HID_REPORT_TYPE_FEATURE,imu_calibration,sizeof(imu_calibration)-4);
 			}
 			m_ps_enhanced_mode = true;
-			logd(" PS4_BT_CALIBRATION_ID ret=%d",ret);
+			logd(" PS_BT_CALIBRATION_ID ret=%d",ret);
 			break;
 		}
-		case PS4_BT_FIRMWARE_INFO_ID:{
+		case PS_BT_FIRMWARE_INFO_ID:{
 			uint8_t firmware_info[]={
 			0xA3,0x4A,0x75,0x6C,0x20,0x31,0x31,0x20,0x32,0x30,0x31,0x36,0x00,0x00,0x00,0x00,
 			0x00,0x31,0x32,0x3A,0x33,0x33,0x3A,0x33,0x38,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

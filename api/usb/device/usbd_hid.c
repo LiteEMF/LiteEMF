@@ -93,12 +93,12 @@ uint16_t usbd_hid_get_itf_desc(uint8_t id, itf_ep_index_t* pindex, uint8_t* pdes
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
 				case HID_TYPE_PS4	:
-                    len += usbd_hid_ps_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
+                    len += usbd_hid_ps4_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
                 #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
 				case HID_TYPE_PS5	:
-                    len += usbd_hid_ps_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
+                    len += usbd_hid_ps5_get_itf_desc(id, pindex, pdesc, desc_len, pdesc_index);
 					break;
                 #endif
 				default:
@@ -202,12 +202,12 @@ error_t usbd_hid_control_request_process(uint8_t id, usbd_class_t *pclass, usbd_
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
         case HID_TYPE_PS4	:
-            err = usbd_hid_ps_control_request_process(id, pclass, preq);
+            err = usbd_hid_ps4_control_request_process(id, pclass, preq);
             break;
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
         case HID_TYPE_PS5	:
-            err = usbd_hid_ps_control_request_process(id, pclass, preq);
+            err = usbd_hid_ps5_control_request_process(id, pclass, preq);
             break;
         #endif
         default:
@@ -276,12 +276,12 @@ error_t usbd_hid_init(uint8_t id)
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
             case HID_TYPE_PS4	:
-                usbd_hid_ps_init(id);
+                usbd_hid_ps4_init(id);
                 break;
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
             case HID_TYPE_PS5	:
-                usbd_hid_ps_init(id);
+                usbd_hid_ps5_init(id);
                 break;
             #endif
             default:
@@ -349,12 +349,12 @@ error_t usbd_hid_deinit(uint8_t id)
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
             case HID_TYPE_PS4	:
-                usbd_hid_ps_deinit(id);
+                usbd_hid_ps4_deinit(id);
                 break;
             #endif
             #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
             case HID_TYPE_PS5	:
-                usbd_hid_ps_deinit(id);
+                usbd_hid_ps5_deinit(id);
                 break;
             #endif
             default:
@@ -419,12 +419,12 @@ void usbd_hid_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS4)
         case HID_TYPE_PS4	:
-            usbd_hid_ps_process(id, pclass, evt, val);
+            usbd_hid_ps4_process(id, pclass, evt, val);
             break;
         #endif
         #if USBD_HID_SUPPORT & BIT_ENUM(HID_TYPE_PS5)
         case HID_TYPE_PS5	:
-            usbd_hid_ps_process(id, pclass, evt, val);
+            usbd_hid_ps5_process(id, pclass, evt, val);
             break;
         #endif
         default:
