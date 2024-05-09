@@ -14,6 +14,7 @@
 **  following parameters:
 **    Width                      : 32 bit
 **    Poly                       : 0x04C11DB7
+**    Init                       : 0xFFFFFFFF
 **    Output for "123456789"     : 0xCBF43926
 */
 #if CRC32_POLY == CRC32_POLY_DEFAULT
@@ -74,7 +75,7 @@ static const_t uint32_t crc32_tab[] =
 };
 
 // /* crc32 hash */
-uint32_t crc32(const void* buf, uint32_t len)
+uint32_t crc32(uint32_t crc,const void* buf, uint32_t len)
 {
     uint32_t i;
     uint8_t *p = (uint8_t *)buf;
@@ -98,7 +99,8 @@ uint32_t crc32(const void* buf, uint32_t len)
 **  following parameters:
 **    Width                      : 32 bit
 **    Poly                       : 0xedb88320 x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x^1+x^0
-**    Output for "123456789"     : 
+**    Init                       : 0x00
+**    Output for "123456789"     : 0xcbf43926
 */
 #if CRC32_POLY == CRC32_POLY_LE
 static uint32_t crc32_for_byte(uint32_t r)
@@ -110,12 +112,12 @@ static uint32_t crc32_for_byte(uint32_t r)
     return r ^ (uint32_t)0xFF000000L;
 }
 
-uint32_t crc32(uint32_t crc,const void* val, uint32_t len)
+uint32_t crc32(uint32_t crc,const void* buf, uint32_t len)
 {
     /* As an optimization we can precalculate a 256 entry table for each byte */
     uint16_t i;
     for(i = 0; i < len; ++i) {
-        crc = crc32_for_byte((uint8_t)crc ^ ((const uint8_t*)val)[i]) ^ crc >> 8;
+        crc = crc32_for_byte((uint8_t)crc ^ ((const uint8_t*)buf)[i]) ^ crc >> 8;
     }
     return crc;
 }

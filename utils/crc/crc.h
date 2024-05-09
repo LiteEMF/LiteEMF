@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 //CRC32
-#define CRC32_POLY_DEFAULT 		0x04C11DB7
+#define CRC32_POLY_DEFAULT 		0x04C11DB7		/*和CRC32_POLY_LE结果一样只是初始值不一样*/
 #define CRC32_POLY_LE 			0xedb88320
 #ifndef  CRC32_POLY			
 #define  CRC32_POLY 			CRC32_POLY_LE

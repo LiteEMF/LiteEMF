@@ -314,7 +314,7 @@ static uint16_t ps5_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *key
 			ps5p->touch_pad2_index = 0x80;
 
 			ps_report_index++;
-			ps5p->index = (ps_report_index<<8) + 1;
+			ps5p->index = (ps_report_index<<4) + 1;
 			ps5p->index2 = ps_report_index;
 
 			ps5p->res_mark = 0x01;
