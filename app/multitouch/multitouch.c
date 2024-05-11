@@ -60,9 +60,9 @@ mt_slot_t s_mt_slot_buf[MT_SLOT_MAX];
 
 void multitouch_info_dump(multitouch_info_t* pinfo)
 {
-	logd("multitouch: turn_xy=%d,switch_xy=%d,hdmi=%d\n",pinfo->turn_xy,pinfo->switch_xy,pinfo->hdmi);
-	logd("ios: is_ios=%d,curvet_screen=%d,mouse_vertical=%d,version=V%d.%d\n",pinfo->is_ios,pinfo->ios_curvet_screen,
-		pinfo->iphone_mouse_vertical, pinfo-> ios_version>>8,pinfo-> ios_version&0xff);
+	logd("multitouch: turn_xy=%d, switch_xy=%d, hdmi=%d, simulate_touch=%d\n",pinfo->turn_xy,pinfo->switch_xy,pinfo->hdmi,pinfo->simulate_touch);
+	logd("ios: is_ios=%d, curvet_screen=%d, screen_dir=%d, version=V%d.%d\n", pinfo->is_ios, pinfo->curvet_screen,
+		pinfo->screen_dir, pinfo-> ios_version>>8, pinfo-> ios_version&0xff);
 	logd("screen:%d %d, hdim screen:%d %d\n",pinfo->screen.x,pinfo->screen.y,pinfo->hdmi_screen.x,pinfo->hdmi_screen.y);
 }
 
@@ -379,20 +379,18 @@ bool multitouch_sync(trp_handle_t *phandle)
 
 
 
-void  multitouch_reinit(void)
+void  multitouch_reinit(multitouch_info_t* pinfo)
 {
-	uint8_t i;
-	memset(mt_slot_buf,0,sizeof(mt_slot_buf));
-	memset(s_mt_slot_buf,0,sizeof(s_mt_slot_buf));
-	for(i=0; i<countof(mt_slot_buf); i++){
-		mt_slot_buf->point_id = ID_NULL;
-	}
+	multitouch_deinit();
 
+	if(pinfo != NULL){
+		multitouch_info = *pinfo;
+	}
 	logd("slot=%d,contact=%d\n",(uint16_t)m_slot_num,(uint16_t)m_contact_num);
 	multitouch_info_dump(&multitouch_info);
 }
 
-void  multitouch_init(uint8_t slot_num, uint8_t contact_num)
+void  multitouch_init(uint8_t slot_num, uint8_t contact_num, multitouch_info_t* pinfo)
 {
 	m_slot_num = slot_num;
 	m_contact_num = contact_num;
@@ -401,15 +399,17 @@ void  multitouch_init(uint8_t slot_num, uint8_t contact_num)
 	m_slot_top = m_slot_num;
 	m_slot_bottom = 0;
 
-	memset(&multitouch_info, 0, sizeof(multitouch_info));
-	multitouch_info.ios_version = 0XF00;
-	multitouch_info.iphone_mouse_vertical = 1;
-	multitouch_info.screen.x = MT_DEFAULT_SCREEN_X;
-	multitouch_info.screen.y = MT_DEFAULT_SCREEN_Y;
-	multitouch_info.hdmi_screen.x = HDMI_DEFAULT_SCREEN_X;
-	multitouch_info.hdmi_screen.y = HDMI_DEFAULT_SCREEN_Y;
+	if(pinfo == NULL){
+		memset(&multitouch_info, 0, sizeof(multitouch_info));
+		multitouch_info.screen.x = MT_DEFAULT_SCREEN_X;
+		multitouch_info.screen.y = MT_DEFAULT_SCREEN_Y;
+		multitouch_info.hdmi_screen.x = HDMI_DEFAULT_SCREEN_X;
+		multitouch_info.hdmi_screen.y = HDMI_DEFAULT_SCREEN_Y;
+	}else if(pinfo != &multitouch_info){
+		multitouch_info = *pinfo;
+	}
 
-	multitouch_reinit();
+	multitouch_reinit(NULL);
 }
 
 void  multitouch_deinit(void)
@@ -418,7 +418,7 @@ void  multitouch_deinit(void)
 	memset(mt_slot_buf,0,sizeof(mt_slot_buf));
 	memset(s_mt_slot_buf,0,sizeof(s_mt_slot_buf));
 	for(i=0; i<countof(mt_slot_buf); i++){
-		mt_slot_buf->point_id = ID_NULL;
+		mt_slot_buf[i].point_id = ID_NULL;
 	}
 }
 

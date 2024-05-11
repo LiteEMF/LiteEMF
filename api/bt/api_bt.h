@@ -196,6 +196,7 @@ typedef enum {
 	BT_EVT_CONNECT_FAIL,						//(回连)连接失败	(pa)
 	BT_EVT_READY,								//蓝牙notyif打开,可以接收数据
 
+	BT_EVT_REMOTE_TYPE,							//蓝牙识别remote type event
 	BT_EVT_RX,									//rx消息, (pa)
 	BT_EVT_TX,									//READ 事件
 } bt_evt_t;
@@ -281,10 +282,12 @@ typedef struct{
 	uint16_t types;				//for default type, please fix in project
 	uint16_t hid_types;			//for default type, please fix in project
 	uint8_t enable:1;
+
 	uint8_t init_ok:1;
 	uint8_t hid_ready:1;		//ble edr hid ready
 	uint8_t vendor_ready:1;		//ble vendor uuid, edr SPP ready
-	uint8_t res:4;
+	uint8_t remote_ios:1;		//is ios remote type is ios
+	uint8_t res:3;
 	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
 

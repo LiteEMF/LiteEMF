@@ -69,7 +69,7 @@ mt_map_t* get_macro_map(uint16_t macro_id, uint16_t index, api_storage_map_t* ma
 		if(MT_MACRO_INOF == mapp->mode ){								//查找宏定义信息头
 			id = mapp->t;
 			map_cnt = mapp->x/sizeof(mt_map_t);
-		logd("macro_id=%d id=%d cnt=%d map=%x %x",macro_id,id, map_cnt, mapp + map_cnt, mapp_end);
+			// logd("macro_id=%d id=%d cnt=%d map=%x %x",macro_id,id, map_cnt, mapp + map_cnt, mapp_end);
 			if((id == macro_id) && (mapp + map_cnt <= mapp_end)){		//匹配id,保证len不溢出
 				if(index < map_cnt){						//index 有效
 					return mapp + index;

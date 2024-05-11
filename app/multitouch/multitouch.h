@@ -47,15 +47,16 @@ extern "C" {
 	ios 不锁屏鼠标根据屏幕方向会选择调整
 *******************************************************************/
 typedef  struct{
-	uint8_t turn_xy:1;				//xy选择, 横竖屏旋转
-	uint8_t switch_xy:1;			//xy交互, 镜像
+	uint8_t turn_xy:1;					//xy选择, 横竖屏旋转
+	uint8_t switch_xy:1;				//xy交互, 镜像
 	uint8_t hdmi:1;
 	uint8_t is_ios:1;
-	uint8_t ios_curvet_screen:1;
-	uint8_t iphone_mouse_vertical:1;	//iphone 横屏后鼠标和touch坐标方向有区别
-	uint8_t ret:2;
+	uint8_t curvet_screen:1;			//曲面屏坐标位置有一些偏差
+	uint8_t screen_dir:1;				//0:竖屏, 1:横屏
+	uint8_t simulate_touch:1;			//鼠标模拟touch
+	uint8_t ret:1;
 
-	uint16_t ios_version;
+	uint16_t ios_version;				//unused
 	axis2i_t screen;
 	axis2i_t hdmi_screen;
 }multitouch_info_t;
@@ -117,8 +118,8 @@ extern bool  	moutitouch_fill_id(uint16_t id,uint8_t active,int16_t x, int16_t y
 extern bool  	moutitouch_clear_all(void);
 extern void 	moutitouch_cut_screen(bool switch_xy, axis2i_t screen,axis2i_t display_screen, axis2i_t* pcut);
 extern bool  	multitouch_sync(trp_handle_t *phandle);
-extern void  	multitouch_reinit(void);
-extern void     multitouch_init(uint8_t slot_num, uint8_t contact_num);
+extern void  	multitouch_reinit(multitouch_info_t* pinfo);
+extern void     multitouch_init(uint8_t slot_num, uint8_t contact_num, multitouch_info_t* pinfo);
 extern void     multitouch_deinit(void);
 
 
