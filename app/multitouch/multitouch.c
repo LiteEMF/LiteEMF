@@ -37,11 +37,6 @@ identifier: contant中触摸点的id, 使用 slot_id+1 作为identifier
 #include "hw_config.h"
 #if APP_MT_ENABLE
 #include "app/multitouch/multitouch.h"
-#include "app/app_command.h"
-#if APP_MT_ENABLE && (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
-#include "ios_simulate_touch.h"
-#endif
-
 #include "api/api_tick.h"
 #include "api/api_log.h"
 #ifdef __cplusplus
@@ -309,31 +304,22 @@ void moutitouch_cut_screen(bool switch_xy,axis2i_t screen,axis2i_t display_scree
 	logd("switchxy=%d,dev=%d %d,hdim=%d %d\n",(uint16_t)switch_xy, driver_screen.x,driver_screen.y,display_screen.x,display_screen.y);
 }
 
-
-bool multitouch_send(trp_handle_t *phandle,uint8_t* buf, uint8_t len)
+#if WEAK_ENABLE
+__WEAK bool multitouch_transport_send(trp_handle_t *phandle,uint8_t* buf, uint8_t len)
 {
-	uint8_t ret = false;
 	if(NULL == phandle) 	return false;
-	
-	if(multitouch_info.is_ios){
-		#if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
-		ret = ERROR_SUCCESS == ios_simulate_touch_tx(phandle, (multitouch_t*)buf, len);
-		#endif
-	}else{
-		if((phandle->index & 0XFF) == HID_TYPE_VENDOR){
-			ret = api_command_tx(phandle,CMD_MT_KEY, buf,len);
-		}else{
-			ret = api_transport_tx(phandle,buf,len);
-		}
-	}
-
-	return ret;
+	logd("multitouch:");dumpd(buf,len);
+	return true;
 }
-
-
-bool moutitouch_sync(trp_handle_t *phandle)
+#endif
+/*******************************************************************
+** Parameters:		
+** Returns:	true: 数据同步成功	
+** Description:		
+*******************************************************************/
+bool multitouch_sync(trp_handle_t *phandle)
 {
-	bool ret = false;
+	bool ret = true;
 	uint8_t i,j;
 	int16d_t x,y;
 	multitouch_t touch;
@@ -370,8 +356,7 @@ bool moutitouch_sync(trp_handle_t *phandle)
 	}
 
 	if(j){
-		if(multitouch_send(phandle, &touch, 1 + m_contact_num*sizeof(mt_contact_t))){
-			ret = true;
+		if(multitouch_transport_send(phandle, &touch, 1 + m_contact_num*sizeof(mt_contact_t))){
 			while(i--){
 				if(!mt_slot_buf[i].tip_switch){
 					uint16_t point_id = mt_slot_buf[i].point_id;
@@ -385,6 +370,8 @@ bool moutitouch_sync(trp_handle_t *phandle)
 				}
 				s_mt_slot_buf[i] = mt_slot_buf[i];		//sync
 			}
+		}else{
+			ret = false;
 		}	
 	}
 	return ret;
@@ -402,9 +389,6 @@ void  multitouch_reinit(void)
 	}
 
 	logd("slot=%d,contact=%d\n",(uint16_t)m_slot_num,(uint16_t)m_contact_num);
-	#if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_MOUSE))
-	ios_touch_init();
-	#endif
 	multitouch_info_dump(&multitouch_info);
 }
 

@@ -104,9 +104,7 @@ extern multitouch_info_t multitouch_info;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-
-extern bool 	ex_multitouch_send(trp_handle_t *phandle,uint8_t* buf, uint8_t len);
-
+extern bool		multitouch_transport_send(trp_handle_t *phandle,uint8_t* buf, uint8_t len);	//__WEAK 
 bool 			multitouch_is_beyond(int16_t x, int16_t y,int16_t boundx, int16_t boundy);
 bool 			moutitouch_limit_bound(int16_t* px, int16_t* py,int16_t boundx, int16_t boundy);
 extern bool  	moutitouch_get_point_by_slot(uint8_t slot,int16_t* px, int16_t* py);
@@ -118,7 +116,7 @@ extern bool 	moutitouch_fill_slot(uint8_t slot,uint8_t active,int16_t x, int16_t
 extern bool  	moutitouch_fill_id(uint16_t id,uint8_t active,int16_t x, int16_t y);
 extern bool  	moutitouch_clear_all(void);
 extern void 	moutitouch_cut_screen(bool switch_xy, axis2i_t screen,axis2i_t display_screen, axis2i_t* pcut);
-extern bool  	moutitouch_sync(trp_handle_t *phandle);
+extern bool  	multitouch_sync(trp_handle_t *phandle);
 extern void  	multitouch_reinit(void);
 extern void     multitouch_init(uint8_t slot_num, uint8_t contact_num);
 extern void     multitouch_deinit(void);
