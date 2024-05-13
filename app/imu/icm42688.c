@@ -20,7 +20,7 @@ ________________________________________________________________________________
 #include "hw_config.h"
 #ifdef  IMU_ICM42688_ID
 #include "hw_board.h"
-#include "api/api_soft_spi.h"
+#include "api/api_spi_host.h"
 #include "api/api_tick.h"
 #include "icm42688.h"
 

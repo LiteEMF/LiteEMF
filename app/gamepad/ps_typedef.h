@@ -144,11 +144,12 @@ typedef enum {
 #define  PS4_R3_POS						(15)
 #define  PS4_PS_POS						(16)
 #define  PS4_TOUCH_KEY_POS				(17)
-
-#define  PS_L_FN_POS					(18)		/*ps5 edge*/
-#define  PS_R_FN_POS					(19)
-#define  PS_LB_POS						(20)
-#define  PS_LR_POS						(21)
+//(18)
+//(19)
+#define  PS_L_FN_POS					(20)		/*ps5 edge*/
+#define  PS_R_FN_POS					(21)
+#define  PS_LB_POS						(22)
+#define  PS_LR_POS						(23)
 
 #define  PS4_TOUCH_U_POS				(20)	/*touch面板上约12-1点钟方向的区域(为了兼容rewasd平台) */
 #define  PS4_TOUCH_D_POS				(21)	/*touch面板上约6-1点钟方向的区域 */		
