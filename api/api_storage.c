@@ -10,7 +10,7 @@
 */
 
 /************************************************************************************************************
-**	Description:	
+**	Description: storage page 	
 	|storage flash map:						|
 	|------------------page1----------------|
 	|m_storage		| storage_map[0]		|
@@ -19,6 +19,15 @@
 	|storage_map[1] | storage_map[2]		|
 	|------------------page3----------------|
 	|storage_map[2] | storage_map[3]		|
+
+|storage map:	map包含	m_storage 全局map和 storage_map	子配置map,子配置map有多个但是不会同时加载
+	|-------------------------------|
+	|m_storage		m_storage map	|
+	|storage_map[0]					|
+	|-------------------------------|
+	|storage_map[1] 				|
+	|-------------------------------|
+	|storage_map[2]					|
 ************************************************************************************************************/
 #include "hw_config.h"
 #if API_STORAGE_ENABLE
@@ -38,11 +47,16 @@
 static bool is_stg_auto_sync;
 static timer_t storage_timer;
 
+__ALIGN(4) static uint8_t s_list_map_buf[STORAGE_LIST_MAP_SIZE];
+
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
 api_storage_t m_storage;
-api_storage_map_t m_storage_map;
+/*m_storage_map map保存在m_storage中,全局配置*/
+api_storage_map_t* const m_storage_map = (api_storage_map_t*)m_storage.map;
+/*m_storage_list_map map保存在独立的page中有多套, 只会加载一套*/
+api_storage_map_t* const m_storage_list_map = (api_storage_map_t*)s_list_map_buf;
 
 /*****************************************************************************************************
 **	static Function
@@ -78,6 +92,12 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+
+uint16_t api_storage_calculate_crc(api_storage_map_t* mapp)
+{
+	return crc16(0XFFFF, (uint8_t*)mapp + 2, mapp->map_len + (STORAGE_MAP_HEAD_LEN - 2));
+}
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -86,20 +106,22 @@ static bool storage_merge_buf(uint16_t page_addr,uint8_t* page_buf,uint16_t map_
 bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len)
 {
 	bool ret = false;
-    uint16_t crc, map_len, map_crc;
+    uint16_t crc;
 
-	map_len = (mapp->len);
-	map_crc = (mapp->crc);
-	if( (map_len < 4) || (map_len > len-4 )) {
-        loge("map len err=%x\n",map_len);
+	if((mapp->max_len < mapp->map_len) ||  (mapp->max_len != len)){
+		loge("map max_len err=%d except=%d\n",mapp->max_len, len);
+        return ret;
+	}
+	if( (mapp->map_len < STORAGE_MAP_HEAD_LEN) || (mapp->map_len > len-STORAGE_MAP_HEAD_LEN )) {
+        loge("map len err=%d\n",mapp->map_len);
         return ret;
     }
 	#if  CRC16_EANBLE
-	crc = crc16(0XFFFF,mapp->map, map_len);
-	if(crc == map_crc){
+	crc = api_storage_calculate_crc(mapp);
+	if(crc == mapp->crc){
 		ret = true;
 	}else{
-        loge("map crc err:%x,%x but %x\n",map_len, map_crc, crc);
+        loge("map len=%d,crc=%x except=%x\n",mapp->map_len, mapp->crc, crc);
     }
 	#endif
 	return ret;
@@ -113,14 +135,14 @@ bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len)
 *******************************************************************/
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len)
 {
-	if(STORAGE_MAP_NUM <= index) return false;
+	if(STORAGE_LIST_MAP_NUM <= index) return false;
 
-	return api_flash_read(STORAGE_MAP_ADDR(index),map, MIN(map_len,STORAGE_MAP_SIZE) );
+	return api_flash_read(STORAGE_LIST_MAP_ADDR(index),map, MIN(map_len,STORAGE_LIST_MAP_SIZE) );
 }
 
 bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 {
-	bool ret = false,merge;
+	bool ret = false,merge, stg_in_range, map_in_range;
 	
     uint8_t i;
 	uint16_t page_addr,page_end;										//page address
@@ -129,43 +151,48 @@ bool api_storage_write_map(uint8_t index, uint8_t* map_buf, uint16_t map_len)
 	uint16_t stg_addr,stg_len,stg_write_len;							
 	uint16_t map_addr,map_write_len;									//storage map
 
-	uint8_t* tmp = emf_malloc(MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
+	uint8_t* tmp = emf_malloc(MIN(STORAGE_TOTAL_SIZE, API_FLASH_PAGE_SIZE));
 
 	if(NULL == tmp) return false;
 	stg_addr = 0;
 	stg_buf = (uint8_t*)&m_storage;
 	stg_len = sizeof(m_storage);
 
-	map_addr = STORAGE_MAP_ADDR(index);
-	map_len = MIN(map_len,STORAGE_MAP_SIZE);							//limit map_len
+	map_addr = STORAGE_LIST_MAP_ADDR(index);
+	map_len = MIN(map_len,STORAGE_LIST_MAP_SIZE);							//limit map_len
 
 	for(i=0; i < API_FLASH_PAGE_NUM; i++){
 		page_addr = i*API_FLASH_PAGE_SIZE;
 		page_end = page_addr + API_FLASH_PAGE_SIZE;
-		if(STORAGE_SIZE <= page_addr){
+		if(STORAGE_TOTAL_SIZE <= page_addr){
 			break;								//flash page not used
 		}
+		stg_in_range = ((stg_addr >= page_addr) && (stg_addr < page_end));
+		map_in_range = ((map_addr >= page_addr) && (map_addr < page_end));
 
-		if(((stg_addr >= page_addr) && (stg_addr < page_end))
-			|| ((map_addr >= page_addr) && (map_addr < page_end))){		//in page
-
-			ret = api_flash_read(page_addr,tmp,MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
+		if(stg_in_range || map_in_range){		//in page
+			ret = api_flash_read(page_addr,tmp,MIN(STORAGE_TOTAL_SIZE, API_FLASH_PAGE_SIZE));
 			if(ret){
-				stg_write_len = stg_len;
-				merge = storage_merge_buf(page_addr, tmp, stg_addr, stg_buf, &stg_write_len);
-				map_write_len = map_len;
-				merge |= storage_merge_buf(page_addr, tmp, map_addr, map_buf, &map_write_len);
+				if(stg_in_range){
+					stg_write_len = stg_len;
+					merge = storage_merge_buf(page_addr, tmp, stg_addr, stg_buf, &stg_write_len);
+					
+					stg_addr += stg_write_len;
+					stg_buf += stg_write_len;
+					stg_len -= stg_write_len;
+				}
+				if(map_in_range){
+					map_write_len = map_len;
+					merge |= storage_merge_buf(page_addr, tmp, map_addr, map_buf, &map_write_len);
+					
+					map_addr += map_write_len;
+					map_buf += map_write_len;
+					map_len -= map_write_len;
+				}
 				if(merge){
 					ret = api_flash_erase(page_addr);
-					ret &= api_flash_write(page_addr,tmp,MIN(STORAGE_SIZE, API_FLASH_PAGE_SIZE));
+					ret &= api_flash_write(page_addr,tmp,MIN(STORAGE_TOTAL_SIZE, API_FLASH_PAGE_SIZE));
 					if(ret){
-						stg_addr += stg_write_len;
-						stg_buf += stg_write_len;
-						stg_len -= stg_write_len;
-
-						map_addr += map_write_len;
-						map_buf += map_write_len;
-						map_len -= map_write_len;
 						logd("sync%d...\n",i);
 					}
 				}else{
@@ -193,15 +220,15 @@ bool api_storage_set_map(uint8_t index, bool sync)
 {
 	bool ret = !sync;
 
-	if(STORAGE_MAP_NUM <= index) return false;
+	if(STORAGE_LIST_MAP_NUM <= index) return false;
 
 	if(sync){
 		ret = api_storage_sync();
 	}
 
 	if(ret){
-		ret = api_flash_read(STORAGE_MAP_ADDR(index),&m_storage_map, sizeof(m_storage_map));
-		m_storage.map_index = index;
+		ret = api_flash_read(STORAGE_LIST_MAP_ADDR(index),m_storage_list_map, STORAGE_LIST_MAP_SIZE);
+		m_storage.list_map_index = index;
 	}
 	
 	return ret;
@@ -216,8 +243,8 @@ bool api_storage_sync(void)
 {
 	bool ret = false;
 
-	logd("api_storage_sync,map=%d\n",m_storage.map_index);
-    ret = api_storage_write_map(m_storage.map_index, &m_storage_map, sizeof(m_storage_map));
+	logd("api_storage_sync,map=%d\n",m_storage.list_map_index);
+    ret = api_storage_write_map(m_storage.list_map_index, m_storage_list_map, STORAGE_LIST_MAP_SIZE);
 	is_stg_auto_sync = !ret;
 	storage_timer = m_systick;
 	return ret;
@@ -237,10 +264,10 @@ bool api_storage_init(void)
 	is_stg_auto_sync = false;
 	ret = api_flash_read(0,(uint8_t*)&m_storage,sizeof(m_storage));
 
-	if(STORAGE_MAP_NUM <= m_storage.map_index){
-		m_storage.map_index = 0;
+	if(STORAGE_LIST_MAP_NUM <= m_storage.list_map_index){
+		m_storage.list_map_index = 0;
 	}
-	ret &= api_flash_read(STORAGE_MAP_ADDR(m_storage.map_index),&m_storage_map, sizeof(m_storage_map) );
+	ret &= api_flash_read(STORAGE_LIST_MAP_ADDR(m_storage.list_map_index),m_storage_list_map, STORAGE_LIST_MAP_SIZE );
 	if(!ret){
 		loge_r("storage init error!\n");
 	}

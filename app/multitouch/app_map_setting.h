@@ -61,6 +61,12 @@ typedef  struct {
 void app_map_swap_l(mt_map_t* mapp, uint16_t size);
 void app_map_dump(mt_map_t* mapp, uint16_t size);
 
+mt_map_t* find_map_by_id(uint16_t id, api_storage_map_t* app_map);
+uint16_t find_map_by_key(uint32_t key, uint8_t att, api_storage_map_t* app_map);
+bool app_map_add(mt_map_t* mapp, api_storage_map_t* app_map);
+bool app_map_remove(mt_map_t* mapp, api_storage_map_t* app_map);
+bool app_map_remove_by_id(uint16_t id, api_storage_map_t* app_map);
+bool app_map_replace_by_id(uint16_t id, mt_map_t* mapp, api_storage_map_t* app_map);
 
 #ifdef __cplusplus
 }

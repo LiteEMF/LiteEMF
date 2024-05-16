@@ -59,11 +59,11 @@ api_storage_map_t:
 ** Returns:	
 ** Description:	获取宏定义当前动作map
 *******************************************************************/
-mt_map_t* get_macro_map(uint16_t macro_id, uint16_t index, api_storage_map_t* macro_map)
+mt_map_t* find_macro_map_by_id(uint16_t macro_id, uint16_t index, api_storage_map_t* macro_map)
 {
 	uint16_t id;	
 	mt_map_t* mapp = (mt_map_t*)macro_map->map;
-	uint16_t map_cnt = macro_map->len / sizeof(mt_map_t);
+	uint16_t map_cnt = macro_map->map_len / sizeof(mt_map_t);
 	mt_map_t* mapp_end = mapp + map_cnt;
 	do{
 		if(MT_MACRO_INOF == mapp->mode ){								//查找宏定义信息头
@@ -91,7 +91,7 @@ mt_map_t* get_next_macro(mt_map_t* mapp, api_storage_map_t* macro_map)
 {
 	uint16_t len = mapp->x;	
 
-	if((uint8_t*)mapp + len < (uint8_t*)macro_map->map + macro_map->len){
+	if((uint8_t*)mapp + len < (uint8_t*)macro_map->map + macro_map->map_len){
 		return (uint8_t*)mapp + len;
 	}else{
 		return NULL;
@@ -104,18 +104,18 @@ mt_map_t* get_next_macro(mt_map_t* mapp, api_storage_map_t* macro_map)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool add_macro_map(mt_map_t* macrop, api_storage_map_t* macro_map, uint16_t map_size)
+bool macro_map_add(mt_map_t* macrop, api_storage_map_t* macro_map)
 {
 	uint8_t i; 
 	uint16_t id,len;	
 	len = macrop->x;
 
-	if(map_size - 4 < (uint8_t*)macro_map->len + len){
+	if(macro_map->max_len - STORAGE_MAP_HEAD_LEN < (uint8_t*)macro_map->map_len + len){
 		return false;
 	}
-	memcpy((uint8_t*)macro_map->map + macro_map->len, macrop, len);
-	macro_map->len += len;
-	macro_map->crc = crc16(0XFFFF, macro_map->map, macro_map->len);
+	memcpy((uint8_t*)macro_map->map + macro_map->map_len, macrop, len);
+	macro_map->map_len += len;
+	macro_map->crc = api_storage_calculate_crc(macro_map);
 
 	return true;
 }
@@ -124,7 +124,7 @@ bool add_macro_map(mt_map_t* macrop, api_storage_map_t* macro_map, uint16_t map_
 ** Returns:	
 ** Description:		
 *******************************************************************/
-bool remove_macro_map(uint16_t macro_id, api_storage_map_t* macro_map)
+bool macro_map_remove(uint16_t macro_id, api_storage_map_t* macro_map)
 {
 	uint16_t len,map_offset;
 	mt_map_t* mapp = get_macro(macro_id, 0, macro_map);
@@ -135,9 +135,9 @@ bool remove_macro_map(uint16_t macro_id, api_storage_map_t* macro_map)
 	len = mapp->x;
 	map_offset = (uint8_t*)mapp - ((uint8_t*)macro_map->map + len);
 	//当前宏定义删除,后面的数据覆盖拷贝到前面
-	memmvoe(mapp, (uint8_t*)mapp + len, macro_map->len - map_offset);
-	macro_map->len -= len;
-	macro_map->crc = crc16(0XFFFF, macro_map->map, macro_map->len);
+	memmvoe(mapp, (uint8_t*)mapp + len, macro_map->map_len - map_offset);
+	macro_map->map_len -= len;
+	macro_map->crc = api_storage_calculate_crc(macro_map);
 
 	return true;
 }

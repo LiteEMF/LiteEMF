@@ -28,24 +28,36 @@ extern "C" {
 #define API_STORAGE_TIME   (100*100)
 #endif
 
-#ifndef STORAGE_MAP_NUM
-#define STORAGE_MAP_NUM		1
-#endif	
 #ifndef STORAGE_MAP_SIZE
-#define STORAGE_MAP_SIZE	0X08
+#define STORAGE_MAP_SIZE			8
 #endif	
-#define STORAGE_SIZE		(sizeof(m_storage) + (STORAGE_MAP_NUM)*(STORAGE_MAP_SIZE))
-#define STORAGE_MAP_ADDR(i)	(sizeof(m_storage) + (i)*(STORAGE_MAP_SIZE))
+#ifndef STORAGE_LIST_MAP_NUM
+#define STORAGE_LIST_MAP_NUM		1
+#endif	
+#ifndef STORAGE_LIST_MAP_SIZE
+#define STORAGE_LIST_MAP_SIZE		8
+#endif	
+#define STORAGE_LIST_MAP_ADDR(i)	(sizeof(m_storage) + (i)*(STORAGE_LIST_MAP_SIZE))
+#define STORAGE_TOTAL_SIZE			(sizeof(m_storage) + (STORAGE_LIST_MAP_NUM)*(STORAGE_LIST_MAP_SIZE))
 
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+#define STORAGE_MAP_HEAD_LEN		8
+typedef  struct {	
+	uint16_t crc;					//crc 包括len 和 map
+	uint16_t res;					//res 0
+	uint16_t max_len;				//map_max len
+	uint16_t map_len;				//map[] len, 
+	uint8_t map[4];					//注意这里只做为占位使用,具体大小根据len和实际空间分配为准	
+}api_storage_map_t;
+
 typedef struct {
 	uint8_t head;
 	uint8_t reset_reson;	
-	uint8_t map_index;		//storage map index
+	uint8_t list_map_index;		//storage map index
 	uint8_t flash_res[5];	//8
 	uint16_t trps;
 	uint16_t dev_mode;
@@ -55,24 +67,19 @@ typedef struct {
 
 	#if APP_JOYSTICK_ENABLE
 	__ALIGN(4)  int16_t joystick_cal[19];
-	// uint16_t joystick_res;
 	#endif
 
 	#if APP_IMU_ENABLE
 	__ALIGN(4) int16_t imu_cal[6];
 	#endif
 
+	__ALIGN(4) uint8_t map[STORAGE_MAP_SIZE];
+
 	#ifdef HW_STORAGE
 	HW_STORAGE;
 	#endif
 }api_storage_t;
 
-
-typedef  struct {	
-	uint16_t len;					//map len
-	uint16_t crc;					//map crc
-	uint8_t map[STORAGE_MAP_SIZE-4];//注意这里只做为占位使用,具体大小根据len和实际空间分配为准	
-}api_storage_map_t;
 
 
 typedef enum{
@@ -83,13 +90,15 @@ typedef enum{
 
 
 extern api_storage_t m_storage;
-extern api_storage_map_t m_storage_map;
+extern api_storage_map_t* const m_storage_list_map;
+extern api_storage_map_t* const m_storage_map;
 
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
 bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len);
+uint16_t api_storage_calculate_crc(api_storage_map_t* mapp);
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len);
 bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len);
 bool api_storage_set_map(uint8_t index, bool sync);
