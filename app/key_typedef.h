@@ -93,6 +93,12 @@ extern "C" {
 #define HW_KEY_M8 		    BIT(30)
 #define HW_KEY_POWER 		BIT(31)
 
+
+#define  KEY_DIR_UP			( 1UL<<0)
+#define  KEY_DIR_DOWN		( 1UL<<1)
+#define  KEY_DIR_LEFT		( 1UL<<2)
+#define  KEY_DIR_RIGHT		( 1UL<<3)
+
 // 摇杆 固定写死
 #define APP_STICK_L_ID	  	0
 #define APP_STICK_R_ID	  	1
@@ -101,18 +107,14 @@ extern "C" {
 #define APP_TRIGGER_R_ID	1
 #define APP_TRIGGER_NUMS	2
 
-#define  STICK_UP			( 1UL<<0)
-#define  STICK_DOWN			( 1UL<<1)
-#define  STICK_LEFT			( 1UL<<2)
-#define  STICK_RIGHT		( 1UL<<3)
-#define  STICK_L_UP			STICK_UP
-#define  STICK_L_DOWN		STICK_DOWN
-#define  STICK_L_LEFT		STICK_LEFT
-#define  STICK_L_RIGHT		STICK_RIGHT
-#define  STICK_R_UP			(STICK_UP<<4)
-#define  STICK_R_DOWN		(STICK_DOWN<<4)
-#define  STICK_R_LEFT		(STICK_LEFT<<4)
-#define  STICK_R_RIGHT		(STICK_RIGHT<<4)
+#define  STICK_L_UP			KEY_DIR_UP
+#define  STICK_L_DOWN		KEY_DIR_DOWN
+#define  STICK_L_LEFT		KEY_DIR_LEFT
+#define  STICK_L_RIGHT		KEY_DIR_RIGHT
+#define  STICK_R_UP			(KEY_DIR_UP<<4)
+#define  STICK_R_DOWN		(KEY_DIR_DOWN<<4)
+#define  STICK_R_LEFT		(KEY_DIR_LEFT<<4)
+#define  STICK_R_RIGHT		(KEY_DIR_RIGHT<<4)
 
 
 

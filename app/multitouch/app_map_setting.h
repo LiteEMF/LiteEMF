@@ -25,6 +25,7 @@ extern "C" {
 *******************************************************************************************************/
 #define MT_SLIDE_DT		30		/*滑屏最小单位时间*/
 #define MT_AUTO_DT		8		/*连点间隔时间最小单位*/
+#define MT_SLIDE_DR		32		/*滑动模式半径最小单位*/
 //key attribute
 typedef  enum {	
 	MT_NONE = 0,

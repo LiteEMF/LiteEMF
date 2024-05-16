@@ -83,7 +83,11 @@ mt_map_t* find_map_by_id(uint16_t id, api_storage_map_t* app_map)
 	}
 	return (mt_map_t*)app_map->map + id;
 }
-
+/*******************************************************************
+** Parameters:	att:0xff 匹配任意属性	
+** Returns:	
+** Description:		
+*******************************************************************/
 uint16_t find_map_by_key(uint32_t key, uint8_t att, api_storage_map_t* app_map)
 {
 	uint16_t id = ID_NULL;
@@ -92,7 +96,7 @@ uint16_t find_map_by_key(uint32_t key, uint8_t att, api_storage_map_t* app_map)
 	for(id=0; id<app_map->map_len/sizeof(mt_map_t); id++){
 		mapp = (mt_map_t*)app_map->map + id;
 
-		if((mapp->k == key) && (mapp->att == att)){
+		if((mapp->k == key) &&( (0xff == att) || (mapp->att == att))){
 			return id;
 		}
 	}

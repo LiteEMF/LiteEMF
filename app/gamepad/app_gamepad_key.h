@@ -25,7 +25,9 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-
+#ifndef STICK_DIR_THRESHOLD
+#define STICK_DIR_THRESHOLD             10900
+#endif
 
 /******************************************************************************************************
 **	Parameters
@@ -47,6 +49,8 @@ extern app_gamepad_key_t m_gamepad_key;
 **  Function
 ******************************************************************************************************/
 void app_gamepad_key_vendor_scan(app_gamepad_key_t *keyp);		//__WEAK 
+uint8_t get_stick_dir(axis2i_t* stickp, int16_t threshold);
+void get_stick_val(uint8_t dir, axis2i_t* stickp);
 void app_gamepad_trigger_check(app_gamepad_key_t* keyp);
 void app_gamepad_key_swapl(app_gamepad_key_t* keyp);
 

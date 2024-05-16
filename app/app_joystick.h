@@ -31,11 +31,9 @@ extern "C" {
 #define APP_JOYSTICK_FIR_FILTER_ENABLE     0
 #endif
 
-#ifndef STICK_DIR_VAL
-#define STICK_DIR_VAL			10900
-#endif
+
 #ifndef JOYSTICK_CAL_TIMEOUT
-#define JOYSTICK_CAL_TIMEOUT          12000
+#define JOYSTICK_CAL_TIMEOUT            12000
 #endif
 //stick 上电未校准默认值
 #ifndef STICK_CAL_DEFAULT_R
@@ -128,8 +126,6 @@ void app_joystick_event(joystick_cal_sta_t event);   //__WEAK
 
 void app_joystack_cal_start(void);
 void app_joystack_cal_end(void);
-uint8_t get_stick_dir(axis2i_t* stickp);
-void get_stick_val(uint8_t dir, axis2i_t* stickp);
 void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp);
 void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp);
 uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* pbuf, uint8_t size);

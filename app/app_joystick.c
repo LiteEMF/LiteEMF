@@ -149,63 +149,6 @@ void update_trigger_active(joystick_cal_t *calp)
     }
 }
 
-uint8_t get_stick_dir(axis2i_t* stickp)
-{
-    uint8_t dir=0;
- 
-    if(stickp->x > STICK_DIR_VAL){
-        dir |= STICK_RIGHT;
-    }else if(stickp->x < -STICK_DIR_VAL){
-        dir |= STICK_LEFT;
-    }
-    if(stickp->y > STICK_DIR_VAL){
-        dir |= STICK_UP;
-    }else if(stickp->y < -STICK_DIR_VAL){
-        dir |= STICK_DOWN;
-    }
-    return dir;
-}
-
-void get_stick_val(uint8_t dir, axis2i_t* stickp)
-{   
-    switch (dir & 0x0f){
-        case STICK_UP:
-            stickp->y = INT16_MAX;
-            break;
-        case STICK_DOWN:
-            stickp->y = INT16_MIN;
-            break;
-        case STICK_RIGHT:
-            stickp->x = INT16_MAX;
-            break;
-        case STICK_LEFT:
-            stickp->x = INT16_MIN;
-            break;
-        case (STICK_UP | STICK_RIGHT):
-            stickp->y = 23170;
-            stickp->x = 23170;
-            break;
-        case (STICK_UP | STICK_LEFT):
-            stickp->y = 23170;
-            stickp->x = -23170;
-            break;
-        case (STICK_DOWN | STICK_RIGHT):
-            stickp->y = -23170;
-            stickp->x = 23170;
-            break;
-        case (STICK_DOWN | STICK_LEFT):
-            stickp->y = -23170;
-            stickp->x = -23170;
-            break;
-        default:
-            stickp->y = 0;
-            stickp->x = 0;
-            break;
-    }
-}
-
-
-
 
 /*******************************************************************
 ** Parameters: deadband: 死区范围 //TODO带测试

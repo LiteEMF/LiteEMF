@@ -127,7 +127,7 @@ bool macro_map_add(mt_map_t* macrop, api_storage_map_t* macro_map)
 bool macro_map_remove(uint16_t macro_id, api_storage_map_t* macro_map)
 {
 	uint16_t len,map_offset;
-	mt_map_t* mapp = get_macro(macro_id, 0, macro_map);
+	mt_map_t* mapp = find_macro_map_by_id(macro_id, 0, macro_map);
 	if(NULL == mapp){
 		return false;
 	}
@@ -135,7 +135,7 @@ bool macro_map_remove(uint16_t macro_id, api_storage_map_t* macro_map)
 	len = mapp->x;
 	map_offset = (uint8_t*)mapp - ((uint8_t*)macro_map->map + len);
 	//当前宏定义删除,后面的数据覆盖拷贝到前面
-	memmvoe(mapp, (uint8_t*)mapp + len, macro_map->map_len - map_offset);
+	memmove(mapp, (uint8_t*)mapp + len, macro_map->map_len - map_offset);
 	macro_map->map_len -= len;
 	macro_map->crc = api_storage_calculate_crc(macro_map);
 

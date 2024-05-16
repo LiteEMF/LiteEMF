@@ -50,6 +50,72 @@ app_gamepad_key_t m_gamepad_key;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
+uint8_t get_stick_dir(axis2i_t* stickp, int16_t threshold)
+{
+    uint8_t dir=0;
+ 
+    if(stickp->x > threshold){
+        dir |= KEY_DIR_RIGHT;
+    }else if(stickp->x < -threshold){
+        dir |= KEY_DIR_LEFT;
+    }
+    if(stickp->y > threshold){
+        dir |= KEY_DIR_UP;
+    }else if(stickp->y < -threshold){
+        dir |= KEY_DIR_DOWN;
+    }
+    return dir;
+}
+
+void get_stick_val(uint8_t dir, axis2i_t* stickp)
+{   
+    switch (dir & 0x0f){
+        case KEY_DIR_UP:
+            stickp->y = INT16_MAX;
+            break;
+        case KEY_DIR_DOWN:
+            stickp->y = INT16_MIN;
+            break;
+        case KEY_DIR_RIGHT:
+            stickp->x = INT16_MAX;
+            break;
+        case KEY_DIR_LEFT:
+            stickp->x = INT16_MIN;
+            break;
+        case (KEY_DIR_UP | KEY_DIR_RIGHT):
+            stickp->y = 23170;
+            stickp->x = 23170;
+            break;
+        case (KEY_DIR_UP | KEY_DIR_LEFT):
+            stickp->y = 23170;
+            stickp->x = -23170;
+            break;
+        case (KEY_DIR_DOWN | KEY_DIR_RIGHT):
+            stickp->y = -23170;
+            stickp->x = 23170;
+            break;
+        case (KEY_DIR_DOWN | KEY_DIR_LEFT):
+            stickp->y = -23170;
+            stickp->x = -23170;
+            break;
+        default:
+            stickp->y = 0;
+            stickp->x = 0;
+            break;
+    }
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 void app_gamepad_trigger_check(app_gamepad_key_t* keyp)
 {
 	if((keyp->key & HW_KEY_L2) && (0 == keyp->l2)){
@@ -129,8 +195,8 @@ void app_gamepad_key_scan_task(app_gamepad_key_t *pkey)
     app_gamepad_trigger_check(&app_key);
 
     #if APP_JOYSTICK_ENABLE
-    m_app_stick_key = get_stick_dir(&app_key.stick_l);
-    m_app_stick_key |= get_stick_dir(&app_key.stick_r)<<4;
+    m_app_stick_key = get_stick_dir(&app_key.stick_l, STICK_DIR_THRESHOLD);
+    m_app_stick_key |= get_stick_dir(&app_key.stick_r, STICK_DIR_THRESHOLD)<<4;
     #endif
 
     #if APP_IMU_ENABLE
