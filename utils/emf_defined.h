@@ -76,7 +76,7 @@ extern "C" {
 */
 #ifndef container_of
 #define container_of(ptr, type, memb) \
-		((type *)((void *)(ptr) - offsetof(type, memb)))
+		((type *)((char *)(ptr) - offsetof(type, memb)))
 #endif
 
 /*

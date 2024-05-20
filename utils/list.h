@@ -10,8 +10,8 @@
 */
 
 
-#ifndef LIST_H
-#define LIST_H
+#ifndef _LIST_H
+#define _LIST_H
 #include "emf_typedef.h" 
 
 #ifdef __cplusplus

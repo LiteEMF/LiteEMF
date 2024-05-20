@@ -51,6 +51,7 @@ error_t api_os_timer_register(api_os_timer_t *ptimer,timer_cb_t cb,void *pa,time
 	error_t err = ERROR_SUCCESS;
 	if(NULL == ptimer) return ERROR_NULL;
 
+	ctrl &= TIMER_ACTIVE | TIMER_ONE_SHOT;	//识别有效配置
 	ptimer->ctrl = ctrl;
 	ptimer->timeout = timeout;
 	ptimer->timer = m_systick;
@@ -77,7 +78,8 @@ api_os_timer_t* api_os_timer_create(timer_cb_t cb,void *pa,timer_t timeout,api_o
 	ptimer = emf_malloc(sizeof(api_os_timer_t));
 	if(NULL == ptimer) return NULL;
 
-	ptimer->ctrl = ctrl | TIMER_IS_DYNAMIC;
+	ctrl &= TIMER_ACTIVE | TIMER_ONE_SHOT;	//识别有效配置
+	ptimer->ctrl = (api_os_timer_ctrl_t)(ctrl | TIMER_IS_DYNAMIC);
 	ptimer->timeout = timeout;
 	ptimer->timer = m_systick;
 	ptimer->pa = pa;

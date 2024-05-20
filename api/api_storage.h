@@ -66,14 +66,15 @@ typedef struct {
 	uint8_t work_mode;
 
 	#if APP_JOYSTICK_ENABLE
-	__ALIGN(4)  int16_t joystick_cal[19];
+	int16_t joystick_cal[19];	
+	int16_t res[1];			//arm 不支持__ALIGN(4)修饰符?
 	#endif
 
 	#if APP_IMU_ENABLE
-	__ALIGN(4) int16_t imu_cal[6];
+	int16_t imu_cal[6];
 	#endif
 
-	__ALIGN(4) uint8_t map[STORAGE_MAP_SIZE];
+	uint8_t map[STORAGE_MAP_SIZE];
 
 	#ifdef HW_STORAGE
 	HW_STORAGE;
