@@ -91,7 +91,7 @@ usbd_class_t *usbd_class_find_by_itf(uint8_t id, uint8_t itf)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_type)
+usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub)
 {
 	uint8_t i;
 	usbd_dev_t *pdev = usbd_get_dev(id);
@@ -105,13 +105,15 @@ usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_t
 
 		if((pclass->dev_type) == type){
 			if(DEV_TYPE_HID == type){
-				if(sub_type != pclass->hid_type) continue;
-				if(HID_TYPE_XBOX == sub_type){		//xbox特殊处理,xbox音频不在这里处理
+				if(sub != pclass->hid_type) continue;
+				if(HID_TYPE_XBOX == sub){		//xbox特殊处理,xbox音频不在这里处理
 					if(pclass->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
 					if(pclass->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
 				}
 			}else if(DEV_TYPE_AUDIO == type){
-				if(sub_type != pclass->itf.if_sub_cls) continue;
+				if(sub != pclass->itf.if_sub_cls) continue;
+			}else if(DEV_TYPE_CDC == type){
+				if(sub != pclass->itf.if_cls) continue;
 			}
 
 			if(pdev->itf_alt[pclass->itf.if_num] == pclass->itf.if_alt){
@@ -458,6 +460,18 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 
 /*******************************************************************
 ** Parameters:		
+** Returns:		true: 用户自定义处理, false: 会走通用处理	
+** Description: usb事件用户处理
+*******************************************************************/
+#if WEAK_ENABLE
+__WEAK bool usbd_class_vendor_process_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
+{
+	return false;
+}
+#endif
+
+/*******************************************************************
+** Parameters:		
 ** Returns:	
 ** Description: usb事件触发任务,有3种usb事件处理方式
 	1. 轮询方式 USBD_LOOP_ENABLE 置1
@@ -466,6 +480,10 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 *******************************************************************/
 void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
+	if(usbd_class_vendor_process_weak(id, pclass, evt, val)){	//用户自定义事件处理
+		return;
+	}
+
 	switch(pclass->dev_type){
 	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 	case DEV_TYPE_HID	:

@@ -278,8 +278,8 @@ int16_t average2i_filter(int16_t* pbuf, uint8_t size, uint8_t window_num)
 
 	if(exclude_num > 2*countof(max)) exclude_num = 2*countof(max); //这里简单处理, 排除最大最小数据支持最大6个数据排除
 
-	memcpy(max,pbuf[0],countof(max));
-	memcpy(min,pbuf[0],countof(min));
+	memcpy(max,pbuf,countof(max));
+	memcpy(min,pbuf,countof(min));
 	for(i=0; i<size; i++){
 		for(k=0; k<exclude_num/2; k++){
 			if (pbuf[i] > max[k]){

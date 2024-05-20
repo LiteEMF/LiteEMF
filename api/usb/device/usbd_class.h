@@ -62,12 +62,13 @@ extern usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];
 ******************************************************************************************************/
 usbd_class_t *usbd_class_find_by_ep(uint8_t id, uint8_t ep);
 usbd_class_t *usbd_class_find_by_itf(uint8_t id, uint8_t itf);
-usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub_type);
+usbd_class_t *usbd_class_find_by_type(uint8_t id, dev_type_t type, uint8_t sub);
 error_t usbd_assign_configuration_desc(uint8_t id, dev_type_t type,hid_type_t hid_type, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len);
 uint16_t usbd_class_get_itf_desc(uint8_t id, uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);
 error_t usbd_class_control_request_process(uint8_t id, usbd_req_t* const preq);
 error_t usbd_class_in(uint8_t id, dev_type_t type, uint8_t sub_type, uint8_t* buf,uint16_t len);
 error_t usbd_class_notify_evt(uint8_t id, usbd_event_t event,uint32_t val);
+bool usbd_class_vendor_process_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);	//weak
 void 	usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val);
 error_t usbd_class_init(uint8_t id);
 error_t usbd_class_deinit(uint8_t id);

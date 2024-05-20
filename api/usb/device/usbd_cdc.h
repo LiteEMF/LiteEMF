@@ -14,6 +14,7 @@
 #define _usbd_cdc_h
 #include "emf_typedef.h" 
 #include "api/usb/device/usbd_core.h"
+#include "api/usb/usb_cdc_typedef.h"
 
 #ifdef __cplusplus
 extern "C" {
