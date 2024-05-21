@@ -290,9 +290,9 @@ bool switch_emu_ctrl_send(trp_handle_t* phandle, switch_enum_t* enump)
 
             len = sizeof(switch_ctrl_t);
             if(SWITCH_MCU_CTRL_ID == switch_ctrlp->id){
-                switch_ctrlp->crc8 = crc8(switch_ctrlp->cmd_data,sizeof(switch_ctrlp->cmd_data));
+                switch_ctrlp->crc8 = crc8(0,switch_ctrlp->cmd_data,sizeof(switch_ctrlp->cmd_data));
             }else if (SWITCH_CTRL_ID == switch_ctrlp->id && SUB_SET_NFC_IR_MCU_CONFIGURATION == switch_ctrlp->sub_cmd){
-                switch_ctrlp->sub_crc8 = crc8(switch_ctrlp->cmd_data+1,sizeof(switch_ctrlp->cmd_data));
+                switch_ctrlp->sub_crc8 = crc8(0,switch_ctrlp->cmd_data+1,sizeof(switch_ctrlp->cmd_data));
             }
             ret = api_transport_tx(phandle,(uint8_t*)switch_ctrlp,len);
         }

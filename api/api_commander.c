@@ -183,7 +183,7 @@ static void api_command_timer_cb(command_tx_t *txp)
 }
 
 /*******************************************************************
-** Parameters: buf:可以是临时变量, 内部会缓存
+** Parameters: txp: 传入静态变量 buf:可以是临时变量, 内部会缓存
 ** Returns:	
 ** Description:	长包定时拆分发送, 注意: 使用到了软件定时器, 该接口不适用于51平台
 *******************************************************************/
@@ -208,7 +208,7 @@ bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, 
 		memcpy(p, buf, len);
 		api_command_tx_fill(txp, phandle, cmd, p, len);
 
-		tx_timer = api_os_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,TIMER_PERIODIC);
+		tx_timer = api_os_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,0);
 		if(NULL != tx_timer){
 			txp->ptimer = tx_timer;
 			ret = !api_os_timer_start(tx_timer);
