@@ -380,7 +380,7 @@ bool api_bt_is_bonded(uint8_t id,bt_t bt)
 	}else{
 		ret = bt_driver_is_bonded(id, bt);
 	}
-	logd("bt(%d) isdebond=%d\n",bt,ret);
+	// logd("bt(%d) isdebond=%d\n",bt,ret);
 	return ret;
 }
 bool api_bt_debond(uint8_t id,bt_t bt)
@@ -635,16 +635,18 @@ __WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 		hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
 		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
 		app_gamepad_dev_process(&handle, pa->buf, pa->len);
-		#else
+		#elif APP_CMD_ENABLE
 		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
 		app_command_rx(&handle,pa->buf+1, pa->len-1);	//丢弃hid_report_type_t
 		#endif
 	}else if(BT_UART == pa->bts){					//uart
+		#if APP_CMD_ENABLE
 		uint8_t i;
 		trp_handle_t handle = {bt,id,U16(DEV_TYPE_VENDOR, 0)};
 		for(i=0; i<pa->len; i++){
 			app_command_rx_byte(&handle, pa->buf[i]);
 		}
+		#endif
 	}
 }
 
@@ -819,8 +821,8 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 					}
 					#elif defined BTC_SEARCH_NAME
 					if(strlen(scanp->name)){
-						logi("btc scan name: %s,mac:", scanp->name);dumpd(scanp->mac,6);
-						if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+						logi("btc scan name: %s,%s mac:", scanp->name, pa->scan.name);dumpd(scanp->mac,6);
+						if(!memcmp(scanp->name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
 							#ifdef BTC_SEARCH_RSSI
 							&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 							#endif

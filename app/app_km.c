@@ -270,12 +270,23 @@ bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse)
 #if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_KB)
 bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
 {
+	#if APP_BIT_KB_ENABLE
 	kb_bit_t kb;    
 
 	kb.id = KB_REPORT_ID;
 	kb.fn = pkey->fn;
 	memcpy(kb.key,pkey->key, sizeof(kb.key));
 	return api_transport_tx(phandle,&kb, sizeof(kb));
+
+	#else
+
+	kb_t kb;
+	kb.id = KB_REPORT_ID;
+	kb.fn = pkey->fn;
+	memcpy(kb.key,pkey->key,sizeof(kb.key));
+	return api_transport_tx(phandle,&kb, sizeof(kb));
+	
+	#endif
 }
 #endif
 
