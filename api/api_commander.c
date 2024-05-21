@@ -208,7 +208,7 @@ bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, 
 		memcpy(p, buf, len);
 		api_command_tx_fill(txp, phandle, cmd, p, len);
 
-		tx_timer = api_os_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,0);
+		tx_timer = api_os_timer_create((timer_cb_t)&api_command_timer_cb,(void*)txp,ms,TIMER_PERIODIC);
 		if(NULL != tx_timer){
 			txp->ptimer = tx_timer;
 			ret = !api_os_timer_start(tx_timer);

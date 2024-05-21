@@ -176,7 +176,7 @@ static uint8c_t x360_itf_desc_tab[] = {
 	0x03,		  	/* bmAttributes: Interrupt endpoint */
 	0x20,
 	0x00,		  	/* wMaxPacketSize: 2 Bytes max */
-	0x02,
+	0x01,
 
 	0x07,			/* bLength: Endpoint Descriptor size */
 	0x05,			/* bDescriptorType: */
