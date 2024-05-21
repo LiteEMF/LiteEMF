@@ -63,11 +63,10 @@ typedef struct {
 	uint16_t dev_mode;
 	uint16_t hid_mode;
 	uint8_t res[10];		//24
-	uint8_t work_mode;
 
 	#if APP_JOYSTICK_ENABLE
 	int16_t joystick_cal[19];	
-	int16_t res[1];			//arm 不支持__ALIGN(4)修饰符?
+	int16_t res1[1];			//arm 不支持__ALIGN(4)修饰符?
 	#endif
 
 	#if APP_IMU_ENABLE
@@ -81,13 +80,6 @@ typedef struct {
 	#endif
 }api_storage_t;
 
-
-
-typedef enum{
-	WORK_MODE1 = DEF_WORK_MODE1 ,
-	WORK_MODE2 = DEF_WORK_MODE2 ,
-	WORK_MODE3 = DEF_WORK_MODE3 ,
-}work_mode_t;
 
 
 extern api_storage_t m_storage;
