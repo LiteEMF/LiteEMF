@@ -11,8 +11,6 @@
 #ifndef	_EMF_DEFINED_H
 #define	_EMF_DEFINED_H
 
-#include <limits.h>
-#include "stddef.h"
 
 #ifdef __cplusplus
 extern "C" {

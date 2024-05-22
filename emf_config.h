@@ -12,7 +12,13 @@
 #ifndef _emf_config_h
 #define _emf_config_h
 
-#include "utils/emf_defined.h"
+#ifndef DEF_ENUM
+#define DEF_ENUM(e)	(DEF_##e)
+#endif
+#ifndef BIT_ENUM			//枚举无法在预编译展开,定义DEF_xxx, 使用BIT_ENUM(xxx)展开枚举用于枚举的预编译处理
+#define BIT_ENUM(e)			((1UL << (DEF_##e)))
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

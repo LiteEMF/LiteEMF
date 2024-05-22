@@ -321,7 +321,7 @@ error_t usbh_port_reset(uint8_t id,uint8_t reset_ms)
     error_t err;
     if((id>>4) >= USBH_NUM) return ERROR_FAILE;
     err = hal_usbh_port_reset(id,reset_ms);
-    logd("usbh%x reset=%d\n",id,err);
+    logd("usbh%x reset=%d\n",(uint16_t)id,(uint16_t)err);
     return err;
 }
 error_t usbh_set_speed(uint8_t id,usb_speed_t speed)
@@ -345,7 +345,7 @@ error_t usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed)
 
     err = hal_usbh_port_en(id, en, pspeed);
     pdev->speed = *pspeed;
-    logd("usbh%x en=%d,speed=%d,ret=%d\n",id,en,*pspeed,err);
+    logd("usbh%x en=%d,speed=%d,ret=%d\n",(uint16_t)id,(uint16_t)en,(uint16_t)*pspeed,(uint16_t)err);
     return err;
 }
 error_t usbh_endp_unregister(uint8_t id,usb_endp_t *endpp)

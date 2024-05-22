@@ -13,6 +13,9 @@
 #include "utils/compiler_abstraction.h"
 #include "hal_typedef.h"
 //std include
+#include <limits.h>
+#include "stddef.h"
+
 #include "stdint.h"
 #include "stdbool.h"
 #include <string.h>
@@ -20,7 +23,7 @@
 #include <stdio.h>
 
 
-#include "utils/emf_defined.h"
+#include "utils/emf_defined.h"		//注意这个文件不能随意跟换位置, 依赖了 compiler_abstraction
 #include "utils/emf_error.h"
 
 
