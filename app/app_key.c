@@ -85,6 +85,7 @@ void app_key_dump(uint32_t key)
     #endif
     logd("\n");
     #endif
+	UNUSED_PARAMETER(key);
 }
 
 #if WEAK_ENABLE

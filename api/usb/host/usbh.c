@@ -436,6 +436,7 @@ static void usbh_enum_all_device( uint32_t period_10us )
 *******************************************************************/
 __WEAK void usbh_reset_event(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 }
 __WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
 {
@@ -458,11 +459,15 @@ __WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
 		logd("usbh%x ep%x null class!\n",(uint16_t)id, (uint16_t)ep);
 	}
 	#endif
+	
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 }
 
 __WEAK void usbh_endp_out_event(uint8_t id, uint8_t ep)
 {
-
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 }
 
 

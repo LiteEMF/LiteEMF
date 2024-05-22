@@ -41,7 +41,7 @@
 *******************************************************************/
 void hal_delay_ns(uint32_t ns)
 {
-
+	UNUSED_PARAMETER(ns);
 }
 void hal_delay_us(uint32_t us)
 {
@@ -54,7 +54,7 @@ void hal_delay_ms(uint32_t ms)
 
 void hal_os_delay_ms(uint32_t ms)
 {
-	
+	UNUSED_PARAMETER(ms);
 }
 void hal_tick_init(void)
 {	

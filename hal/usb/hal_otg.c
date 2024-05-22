@@ -49,10 +49,12 @@
 *******************************************************************/
 error_t hal_otg_init(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 error_t hal_otg_deinit(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 

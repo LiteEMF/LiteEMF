@@ -47,34 +47,50 @@
 *******************************************************************/
 uint8_t *hal_usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 	return NULL;
 }
 error_t hal_usbd_endp_dma_init(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_open(uint8_t id, usb_endp_t *pendp)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pendp);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_close(uint8_t id, uint8_t ep)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_ack(uint8_t id, uint8_t ep, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
+	UNUSED_PARAMETER(len);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_nak(uint8_t id, uint8_t ep)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_clear_endp_stall(uint8_t id, uint8_t ep)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
 	return ERROR_SUCCESS;
 }
 
@@ -86,27 +102,40 @@ error_t hal_usbd_endp_stall(uint8_t id, uint8_t ep)
 *******************************************************************/
 error_t hal_usbd_in(uint8_t id, uint8_t ep, uint8_t* buf,uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_out(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t* plen)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(ep);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_reset(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_set_address(uint8_t id,uint8_t address)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(address);
 	return ERROR_SUCCESS;
 }
 
 error_t hal_usbd_init(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 error_t hal_usbd_deinit(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 

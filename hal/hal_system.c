@@ -30,6 +30,8 @@
 *******************************************************************/
 bool hal_set_sysclk(emf_clk_t clk, uint32_t freq)
 {
+	UNUSED_PARAMETER(clk);
+	UNUSED_PARAMETER(freq);
 	return true;
 }
 /*******************************************************************
@@ -39,11 +41,14 @@ bool hal_set_sysclk(emf_clk_t clk, uint32_t freq)
 *******************************************************************/
 uint32_t hal_get_sysclk(emf_clk_t clk)
 {
+	UNUSED_PARAMETER(clk);
 	return HAL_SYS_FREQ;
 }
 
 bool hal_get_uuid(uint8_t *uuid, uint8_t len)
 {
+	UNUSED_PARAMETER(uuid);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 

@@ -115,12 +115,12 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 		#if API_USBH_BIT_ENABLE
 		dev_types &= USBH_TYPE_SUPPORT;
 		m_usbh_types = dev_types;
-		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPES_AOA)
+		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AOA)
 		if(dev_types & BIT_ENUM(DEV_TYPES_AOA)){
 			m_aoa_hid_typess = hid_types & AOA_HID_SUPPORT;
 		}
 		#endif
-		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPES_IAP2)
+		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_IAP2)
 		if(dev_types & BIT_ENUM(DEV_TYPES_IAP2)){
 			m_iap_hid_types = hid_types & IAP2_HID_SUPPORT;
 		}
@@ -166,7 +166,7 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 	if(0 == (hid_types | dev_types)){
 		ret = false;
 	}
-	
+	UNUSED_PARAMETER(id);
 	return ret;
 }
 
@@ -318,6 +318,8 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	if(!ret) {
 		logd("trp%d len=%d err dt=%d\n",(uint16_t)phandle->trp,len,m_systick-err_timer);err_timer = m_systick;
 	}
+
+	UNUSED_VARIABLE(tx_timer);
 	return ret;
 }
 

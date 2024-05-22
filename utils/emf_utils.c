@@ -65,7 +65,7 @@ int16_t curve_shape_remap(int16_t value, uint8_t* pcurve_shape, uint8_t shape_cn
     }
     if(i == shape_cnt) return value;            // is line
 
-    step = (-INT16_MIN) / (shape_cnt-1);
+    step = (0 - INT16_MIN) / (shape_cnt-1);
     min_index = value / step;
     
     if (min_index == shape_cnt-1) min_index = shape_cnt-2;
@@ -73,8 +73,8 @@ int16_t curve_shape_remap(int16_t value, uint8_t* pcurve_shape, uint8_t shape_cn
     in_min = min_index*step;
     in_max = (min_index+1)*step;
     
-    out_min = ((int32_t)pcurve_shape[min_index] * (int32_t)(-INT16_MIN)/100);
-    out_max = ((int32_t)pcurve_shape[min_index+1] * (int32_t)(-INT16_MIN)/100);
+    out_min = ((int32_t)pcurve_shape[min_index] * (int32_t)(0 - INT16_MIN)/100);
+    out_max = ((int32_t)pcurve_shape[min_index+1] * (int32_t)(0 - INT16_MIN)/100);
     
     ret = remap(value, in_min, in_max, out_min, out_max);
 

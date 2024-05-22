@@ -35,6 +35,7 @@ pm_reson_t hal_get_reset_reson(void)
 }
 void hal_boot(uint8_t index)
 {
+	UNUSED_PARAMETER(index);
 }
 void hal_reset(void)
 {

@@ -50,7 +50,8 @@ bool hal_iic_scan_addr(uint8_t id,uint8_t dev_addr)
 	// start 
 	// tx byte 
 	// stop 
-
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(dev_addr);
 	return ret;
 }
 /*******************************************************************
@@ -60,26 +61,48 @@ bool hal_iic_scan_addr(uint8_t id,uint8_t dev_addr)
 *******************************************************************/
 bool hal_iic_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(dev_addr);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_iic_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(dev_addr);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_iic_isr_write(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t const *buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(dev_addr);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_iic_isr_read(uint8_t id,uint8_t dev_addr,uint16_t addr, uint8_t* buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(dev_addr);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_iic_init(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 bool hal_iic_deinit(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 

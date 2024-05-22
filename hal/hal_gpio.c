@@ -41,16 +41,24 @@
 *******************************************************************/
 void hal_gpio_mode(pin_t pin, uint8_t mode)
 {
+	UNUSED_PARAMETER(pin);
+	UNUSED_PARAMETER(mode);
 }
 void hal_gpio_dir(pin_t pin, pin_dir_t dir, pin_pull_t pull)
 {
+	UNUSED_PARAMETER(pin);
+	UNUSED_PARAMETER(dir);
+	UNUSED_PARAMETER(pull);
 }
 uint32_t hal_gpio_in(pin_t pin)
 {
+	UNUSED_PARAMETER(pin);
 	return 0;
 }
 void hal_gpio_out(pin_t pin, uint8_t value)
 {
+	UNUSED_PARAMETER(pin);
+	UNUSED_PARAMETER(value);
 }
 
 

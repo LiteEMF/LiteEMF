@@ -30,14 +30,21 @@
 //hal
 bool hal_flash_write(uint16_t offset,uint8_t *buf,uint16_t len)
 {
+	UNUSED_PARAMETER(offset);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_flash_read(uint16_t offset,uint8_t *buf,uint16_t len)
 {
+	UNUSED_PARAMETER(offset);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_flash_erase(uint16_t offset)
 {
+	UNUSED_PARAMETER(offset);
 	return false;
 }
 bool hal_flash_init(void)

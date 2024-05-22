@@ -215,6 +215,7 @@ error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass)
             err = ERROR_SUCCESS;
         }
     }
+	UNUSED_PARAMETER(id);
 	return err;
 }
 /*******************************************************************

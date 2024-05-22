@@ -146,6 +146,8 @@ void fir_fiter_init(firf_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 
 	firp->pbuf = fbuf;
 	firp->pimpulse_response = imp;
+	
+	UNUSED_PARAMETER(imp_size);
 }
 void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 {

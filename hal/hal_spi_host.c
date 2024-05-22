@@ -46,26 +46,44 @@
 *******************************************************************/
 bool hal_spi_host_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_spi_host_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_spi_host_isr_write(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_spi_host_isr_read(uint8_t id,uint16_t addr, uint8_t * buf, uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 bool hal_spi_host_init(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 bool hal_spi_host_deinit(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 

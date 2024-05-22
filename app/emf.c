@@ -299,8 +299,10 @@ void emf_handler(uint32_t period_10us)
 	#if APP_RGB_ENABLE
 	app_rgb_handler(APP_RGB_SLICE*100);
 	#endif
-	#if API_OS_TIMER_ENABLE && API_OS_SOFT_TIMER_ENABLE
-	api_os_timer_handler(0);
+	#if API_OS_TIMER_ENABLE
+		#if API_OS_SOFT_TIMER_ENABLE
+		api_os_timer_handler(0);
+		#endif
 	#endif
 	#if API_STORAGE_ENABLE
 	api_storage_handler(API_STORAGE_TIME);

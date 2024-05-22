@@ -49,24 +49,37 @@
 *******************************************************************/
 void hal_audio_spk_set_vol(uint8_t id,uint16_t l_vol, uint16_t r_vol)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(l_vol);
+	UNUSED_PARAMETER(r_vol);
 }
 void hal_audio_mic_set_vol(uint8_t id,uint16_t mic_vol)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(mic_vol);
 }
 void hal_audio_open_spk(uint8_t id,api_audio_t *paudio)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(paudio);
 }
 void hal_audio_close_spk(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 }
 void hal_audio_open_mic(uint8_t id,api_audio_t *paudio)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(paudio);
 }
 void hal_audio_close_mic(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 }
 bool hal_audio_init(uint8_t id,api_audio_t *paudio)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(paudio);
 	return true;
 }
 

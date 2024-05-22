@@ -46,14 +46,19 @@
 *******************************************************************/
 bool hal_pwm_set_duty(uint16_t id, uint8_t duty)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(duty);
 	return false;
 }
 bool hal_pwm_init(uint16_t id, uint8_t duty)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(duty);
 	return false;
 }
 bool hal_pwm_deinit(uint16_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 

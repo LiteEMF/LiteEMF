@@ -49,6 +49,8 @@
 *******************************************************************/
 bool hal_dump(void const *buf, uint16_t len)
 {
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return false;
 }
 

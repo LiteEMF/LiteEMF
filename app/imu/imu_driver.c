@@ -86,7 +86,8 @@ bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop)
 		ret = Qmi8658_read_xyz_raw((int16_t *)accp, (int16_t *)gyrop, NULL);
 		#endif
 	#endif
-
+	UNUSED_PARAMETER(accp);
+	UNUSED_PARAMETER(gyrop);
 	return ret;
 }
 
@@ -112,6 +113,8 @@ bool imu_driver_init(acc_range_t acc_range,gyro_range_t gyro_range)	//TODO å¾…ä¼
     imu_init_ctb.timeout = 2000;
     #endif
 
+	UNUSED_PARAMETER(gyro_range);
+	UNUSED_PARAMETER(acc_range);
 	return true;
 }
 

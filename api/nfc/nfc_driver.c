@@ -50,7 +50,8 @@ bool nfc_driver_auth(uint8_t *ptPwdData,uint8_t* ptPack)
 	#ifdef MS52X_NFC
 	ret = !HXW_Ntag21x_PwdAuth(ptPwdData,ptPack);
 	#endif
-
+	UNUSED_PARAMETER(ptPwdData);
+	UNUSED_PARAMETER(ptPack);
 	return ret;
 }
 
@@ -61,7 +62,10 @@ bool nfc_driver_polling(uint8_t *psn, uint8_t*psn_len, uint8_t *pversion, uint8_
 	#ifdef MS52X_NFC
 	ret = !HXW_APP_Ntag21xGetVersion(psn,psn_len,pversion,pversion_len);
 	#endif
-
+	UNUSED_PARAMETER(psn);
+	UNUSED_PARAMETER(psn_len);
+	UNUSED_PARAMETER(pversion);
+	UNUSED_PARAMETER(pversion_len);
 	return ret;
 }
 
@@ -88,7 +92,10 @@ bool nfc_driver_read(uint16_t addr, uint8_t *buf, uint16_t len)
 		memcpy(&buf[i*TAG_PAGE_SIZE],read_buf, read_len);
     }
 	#endif
-
+	
+	UNUSED_PARAMETER(addr);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return ret;	
 }
 
@@ -112,7 +119,7 @@ bool nfc_driver_write(uint16_t addr, uint8_t *buf, uint16_t len)
 			break;
 		}
     }
-
+	UNUSED_PARAMETER(addr);
 	return ret;
 		
 }

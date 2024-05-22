@@ -62,6 +62,7 @@ static void hid_desc_parse_collection(hid_desc_info_t *pinfo,hid_item_info_t* it
 //  Save the Parent Collection Information on the stack
     pinfo->item_list.collectionStack[pinfo->collectionNesting++] = pinfo->parent;
     pinfo->parent = i+1;       //emf fix  = i to i+1 ,区分顶级集合和子集合
+    UNUSED_PARAMETER(item);
 }
 
 static void hid_desc_parse_endcollection(hid_desc_info_t *pinfo,hid_item_info_t* item)
@@ -79,6 +80,7 @@ static void hid_desc_parse_endcollection(hid_desc_info_t *pinfo,hid_item_info_t*
     i = pinfo->item_list.collectionStack[--pinfo->collectionNesting];
     /*pinfo->sibling = pinfo->parent;*/
     pinfo->parent = i;
+	UNUSED_PARAMETER(item);
 }
 
 /****************************************************************************

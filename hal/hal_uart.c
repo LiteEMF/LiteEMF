@@ -46,18 +46,26 @@
 *******************************************************************/
 bool hal_uart_set_baud(uint8_t id, uint32_t baud)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(baud);
 	return true;
 }
 bool hal_uart_tx(uint8_t id,void * buf,uint16_t len)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(buf);
+	UNUSED_PARAMETER(len);
 	return true;
 }
 bool hal_uart_init(uint8_t id,uint32_t baudrate)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(baudrate);
 	return false;
 }
 bool hal_uart_deinit(uint8_t id)
 {
+	UNUSED_PARAMETER(id);
 	return false;
 }
 

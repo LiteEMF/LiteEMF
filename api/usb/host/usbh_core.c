@@ -396,7 +396,6 @@ error_t usbh_core_pa_init( uint8_t id )
 *******************************************************************/
 error_t usbh_core_init( uint8_t id )
 {
-	uint8_t i;
     error_t err = ERROR_UNSUPPORT;
     
 	usbh_core_pa_init(id);

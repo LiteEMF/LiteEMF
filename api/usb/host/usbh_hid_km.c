@@ -130,7 +130,7 @@ uint8_t kb_get_normal_key(hid_items_t *pitem, uint8_t* pkb, uint8_t kb_len, uint
     }else if(8 == pitem->bit_size){
         memcpy(pkb, &buf[pitem->bit_offset / 8], MIN(pitem->bit_count, kb_len));
     }
-    
+    UNUSED_PARAMETER(len);
     return k;
 }
 
@@ -215,11 +215,14 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
             logd("usbh mouse in:");dumpd(&km.mouse,sizeof(km.mouse));
         }
     }
+	UNUSED_PARAMETER(id);
 }
 
 
 error_t usbh_hid_km_open( uint8_t id, usbh_class_t *pclass) 
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
     return ERROR_SUCCESS;
 }
 /*******************************************************************
@@ -233,6 +236,7 @@ error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
     error_t err = ERROR_NOT_FOUND;
     hid_collection_t* pcollection;
     kb_items_t item;
+	
 
     memset(&item, 0, sizeof(item));
 
@@ -275,6 +279,9 @@ error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
         *pitems = item;
         logd("usbh find kb...\n");
     }
+	
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
     return err;
 }
 
@@ -331,6 +338,9 @@ error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *p
         *pitem = item;
         logd("usbh find mouse...\n");
     }
+	
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(pclass);
     return err;
 }
 
@@ -385,6 +395,7 @@ error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass)
             memset(pclass->pdat, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
         }
     }
+	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 

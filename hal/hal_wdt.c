@@ -38,6 +38,7 @@ void hal_wdt_feed(void)
 
 bool hal_wdt_init(uint32_t ms)
 {
+	UNUSED_PARAMETER(ms);
 	return false;
 }
 bool hal_wdt_deinit(void)

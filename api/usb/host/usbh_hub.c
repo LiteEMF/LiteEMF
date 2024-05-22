@@ -234,6 +234,8 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             }
         }
     }
+	
+	UNUSED_PARAMETER(len);
 }
     
 /*******************************************************************
@@ -305,7 +307,9 @@ error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
     if(pclass->endpin.interval > 10) pclass->endpin.interval = 10;     //most hub interval is 0xff
     pclass->pdat = (void*)((uintptr_t)desc.bNbrPorts);
     logd("hub port=%d\n",(uint16_t)desc.bNbrPorts);
-
+	
+	UNUSED_PARAMETER(len);
+	UNUSED_PARAMETER(pdesc);
     return err;
 }
 /*******************************************************************

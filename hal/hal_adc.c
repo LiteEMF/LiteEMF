@@ -43,10 +43,13 @@
 *******************************************************************/
 uint16_t hal_adc_to_voltage(uint16_t adc)
 {
+	UNUSED_PARAMETER(adc);
 	return 0;
 }
 bool hal_adc_value(uint8_t id, uint16_t* valp)
 {
+	UNUSED_PARAMETER(id);
+	UNUSED_PARAMETER(valp);
 	return false;
 }
 bool hal_adc_start_scan(void)

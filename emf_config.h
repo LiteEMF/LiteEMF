@@ -293,6 +293,12 @@ extern "C" {
 #ifndef APP_RUMBLE_ENABLE
 #define APP_RUMBLE_ENABLE		0
 #endif
+#ifndef APP_INFR_ENABLE
+#define APP_INFR_ENABLE			0
+#endif
+#ifndef APP_LRA_ENABLE
+#define APP_LRA_ENABLE			0
+#endif
 #ifndef APP_LED_ENABLE
 #define APP_LED_ENABLE			0
 #endif

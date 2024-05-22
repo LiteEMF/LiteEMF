@@ -52,7 +52,7 @@ error_t hal_os_timer_register(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
-
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 /*******************************************************************
@@ -68,7 +68,7 @@ error_t hal_os_timer_create(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
-
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 error_t hal_os_timer_delete(api_os_timer_t *ptimer)
@@ -78,7 +78,7 @@ error_t hal_os_timer_delete(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
-
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 
@@ -95,7 +95,7 @@ error_t hal_os_timer_start(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
-
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 
@@ -111,7 +111,7 @@ error_t hal_os_timer_modify(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
-
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 
@@ -121,6 +121,7 @@ error_t hal_os_timer_stop(api_os_timer_t *ptimer)
 	// if(TIMER_ONE_SHOT & ptimer->ctrl){
 	// }else{
 	// }
+	UNUSED_PARAMETER(ptimer);
 	return err;
 }
 
