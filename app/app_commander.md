@@ -621,11 +621,20 @@ typedef struct{
 };
 ```
 
-### 上报手柄数据格式(0X21)
+### 读取/上报手柄数据格式(0X21)
 
 数据格式:
 
 ```c
+//获取当前手柄数据
+typedef struct{
+    uint8_t head;
+    uint8_t len;
+    uint8_t index;
+    uint8_t cmd;
+    uint8_t sum;
+};
+
 typedef struct{ 
     int16_t x;
     int16_t y;

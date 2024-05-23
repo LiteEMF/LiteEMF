@@ -35,6 +35,7 @@
 
 
 #include  "api/api_log.h"
+#include "le_common.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -224,7 +225,7 @@ bool api_bt_is_connected(bt_t bt)
 *******************************************************************/
 bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
 {
-	bool ret = false;
+	bool ret = true;
 	uint8_t base_mac[6];
 	api_bt_ctb_t* bt_ctbp;
 
@@ -359,6 +360,13 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		#endif
 	}
 	
+	#if API_STORAGE_ENABLE && API_MODIFY_NAME_ENABLE
+	if((m_storage.device_name_len > 0) && (m_storage.device_name_len <= BT_NAME_LEN_MAX)){
+		memset(name,0,sizeof(name));
+		memcpy(name,m_storage.device_name,m_storage.device_name_len);
+	}
+	#endif
+
 	memset(buf,0,len);
     len = MIN(len,(uint8_t)strlen(name));
     memcpy(buf, name, len);

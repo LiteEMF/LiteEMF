@@ -40,6 +40,8 @@
 #include  "api/api_tick.h"
 
 #include  "api/api_log.h"
+
+#include "le_common.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -138,14 +140,9 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		#endif
 		break;
 	case CMD_GET_MTU:
-
-		if(len > CMD_PACK_LEN){
-			replay[0] = buf[4];
-			replay[1] = api_transport_get_mtu(buf[4]);
-		}else{			//获取指令当前传输协议mtu
-			replay[0] = phandle->trp;
-			replay[1] = api_transport_get_mtu(phandle);
-		}
+		//获取指令当前传输协议mtu
+		replay[0] = phandle->trp;
+		replay[1] = api_transport_get_mtu(phandle);	
 		api_command_tx(phandle,phead->cmd, replay, 2);
 		ret = true;
 		break;
@@ -155,10 +152,10 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_DEV_MAC:
 		#if API_BT_ENABLE
-		if(len > CMD_PACK_LEN+1){
-			replay[0] = buf[4];
-			replay[1] = buf[5];
-			if(api_bt_get_mac(buf[4], buf[5], replay+2)){
+		if(len == (CMD_PACK_LEN+1)){
+			replay[0] = phandle->id;
+			replay[1] = buf[4];
+			if(api_bt_get_mac(replay[0], replay[1], replay+2)){
 				api_command_tx(phandle,phead->cmd, replay, 8);
 				ret = true;
 			}
@@ -169,11 +166,29 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_DEV_NAME:
 		#ifdef DEFAULT_NAME
-		if(len == CMD_PACK_LEN){		//read
-			api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
+		char device_name[BT_NAME_LEN_MAX];
+		u8 device_name_len = 0;
+		if(len == CMD_PACK_LEN){		//read	
+			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
+			api_command_tx(phandle,phead->cmd, device_name, device_name_len);
+		//	api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
 			ret = true;
-		}else{				//write
-
+		}else if(len > CMD_PACK_LEN){				//write
+			#if API_STORAGE_ENABLE && API_MODIFY_NAME_ENABLE
+			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
+			if(memcmp(device_name, buf+4, device_name_len)){
+				device_name_len = buf[1]-5;
+				if (device_name_len > BT_NAME_LEN_MAX) {
+					device_name_len = BT_NAME_LEN_MAX;
+				}
+				memcpy(device_name,buf+4,device_name_len);
+				ble_comm_set_config_name(device_name, 0);	
+				m_storage.device_name_len = device_name_len;	
+				memcpy(m_storage.device_name,device_name,device_name_len);
+				api_storage_auto_sync();
+				api_reset();
+			}
+			#endif
 		}
 		#endif
 		break;
