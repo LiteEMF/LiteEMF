@@ -175,8 +175,9 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			ret = true;
 		}else if(len > CMD_PACK_LEN){				//write
 			#if API_STORAGE_ENABLE && API_MODIFY_NAME_ENABLE
+			memset(device_name,0,sizeof(device_name));
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
-			if(memcmp(device_name, buf+4, device_name_len)){
+			if(memcmp(device_name, buf+4, buf[1]-5)){
 				device_name_len = buf[1]-5;
 				if (device_name_len > BT_NAME_LEN_MAX) {
 					device_name_len = BT_NAME_LEN_MAX;
