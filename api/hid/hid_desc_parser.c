@@ -179,8 +179,9 @@ static void hid_desc_convert_to_signed(hid_item_info_t* item)
 ******************************************************************************************************/
 void hid_items_dump(hid_items_t *pitems)
 {
-    logd("\tpitems id=%d,len=%d\n",pitems->report_id,pitems->report_length);
-    logd("\tboffset=%d,blen=%d,count=%d\n",pitems->bit_offset,pitems->bit_size,pitems->bit_count);
+    logd("\npitems id=%d,len=%d\n",(uint16_t)pitems->report_id,(uint16_t)pitems->report_length);
+    logd("\tboffset=%d,bzise=%d,count=%d\n",(uint16_t)pitems->bit_offset,(uint16_t)pitems->bit_size,(uint16_t)pitems->bit_count);
+    logd("\tusageMinimum=%d\n",(uint16_t)pitems->usageMinimum);
 }
 void hid_desc_dump(hid_desc_info_t *pinfo)
 {
@@ -191,28 +192,28 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
     uint8_t i;
 
     logd("\n ======================= Report Descriptor Dump ======================= \n");
-    logd("Collections:%x\n",pinfo->collections );
-    logd("maxCollectionNesting:%x\n",pinfo->maxCollectionNesting );
-    logd("Reports:%x\n",pinfo->reports );
-    logd("ReportItems:%x\n",pinfo->reportItems );
-    logd("UsageItems:%x\n",pinfo->usageItems );
+    logd("Collections:%x\n",(uint16_t)pinfo->collections );
+    logd("maxCollectionNesting:%x\n",(uint16_t)pinfo->maxCollectionNesting );
+    logd("Reports:%x\n",(uint16_t)pinfo->reports );
+    logd("ReportItems:%x\n",(uint16_t)pinfo->reportItems );
+    logd("UsageItems:%x\n",(uint16_t)pinfo->usageItems );
 
     
     for (i=0; i<pinfo->collections; i++){
         logd("------------------------\n");
-        logd("Collection   :%x\n",i);
+        logd("Collection   :%x\n",(uint16_t)i);
         lcollection = &pinfo->item_list.collectionList[i];
-        logd("\tusagePage :%x\n",lcollection->usagePage);
-        logd("\tfirstUsageItem :%x\n",lcollection->firstUsageItem);
-        logd("\tusageItems :%x\n",lcollection->usageItems);
-        logd("\tfirstReportItem :%x\n",lcollection->firstReportItem);
-        logd("\treportItems :%x\n",lcollection->reportItems);
-        logd("\tparent :%x\n",lcollection->parent);
+        logd("\tusagePage :%x\n",(uint16_t)lcollection->usagePage);
+        logd("\tfirstUsageItem :%x\n",(uint16_t)lcollection->firstUsageItem);
+        logd("\tusageItems :%x\n",(uint16_t)lcollection->usageItems);
+        logd("\tfirstReportItem :%x\n",(uint16_t)lcollection->firstReportItem);
+        logd("\treportItems :%x\n",(uint16_t)lcollection->reportItems);
+        logd("\tparent :%x\n",(uint16_t)lcollection->parent);
     }
 
     for (i=0; i<pinfo->reports; i++){
         logd("------------------------\n");
-        logd("Report   :%x\n",i);
+        logd("Report   :%x\n",(uint16_t)i);
         lreport = &pinfo->item_list.reportList[i];
         logd("\tReportID :%x\n",lreport->report_id);
         if (lreport->inputBits > 0){
@@ -229,22 +230,22 @@ void hid_desc_dump(hid_desc_info_t *pinfo)
         logd("------------------------\n");
         logd("ReportItem  :%x\n",i);
         lreportItem = &pinfo->item_list.reportItemList[i];
-        logd("\tReportType  :%x\n",lreportItem->reportType);
+        logd("\tReportType  :%x\n",(uint16_t)lreportItem->reportType);
 
-        logd("\tStart Bit   :%x\n",lreportItem->startBit);
-        logd("\tBits        :%x\n",lreportItem->globals.reportsize);
-        logd("\tDataModes   :%x\n",lreportItem->dataModes);
-        logd("\t1st Usage   :%x\n",lreportItem->firstUsageItem);
-        logd("\tUsage Items :%x\n",lreportItem->usageItems);
-        logd("\tusagePage   :%x\n",lreportItem->globals.usagePage);
+        logd("\tStart Bit   :%x\n",(uint16_t)lreportItem->startBit);
+        logd("\tBits        :%x\n",(uint16_t)lreportItem->globals.reportsize);
+        logd("\tDataModes   :%x\n",(uint16_t)lreportItem->dataModes);
+        logd("\t1st Usage   :%x\n",(uint16_t)lreportItem->firstUsageItem);
+        logd("\tUsage Items :%x\n",(uint16_t)lreportItem->usageItems);
+        logd("\tusagePage   :%x\n",(uint16_t)lreportItem->globals.usagePage);
         logd("\tUsage       :%x\n",lreportItem->globals.logicalMinimum);
-        logd("\treportsize  :%x\n",lreportItem->globals.reportsize);
-        logd("\treportID    :%x\n",lreportItem->globals.report_id);
-        logd("\treportCount :%x\n",lreportItem->globals.reportCount);
+        logd("\treportsize  :%x\n",(uint16_t)lreportItem->globals.reportsize);
+        logd("\treportID    :%x\n",(uint16_t)lreportItem->globals.report_id);
+        logd("\treportCount :%x\n",(uint16_t)lreportItem->globals.reportCount);
     }
 
     logd("------------------------\n");
-    logd("UsageItem :%x\n",i);
+    logd("UsageItem :%x\n",(uint16_t)i);
     for (i = 0; i < pinfo->usageItems; i++){
         logd("Usage:    %02x      %02x\n",pinfo->item_list.usageItemList[i].usageMinimum,pinfo->item_list.usageItemList[i].usageMaximum);
     }
@@ -664,7 +665,7 @@ bool hid_match_collection(hid_desc_info_t *pinfo, uint8_t collection_index, uint
     hid_collection_t* pcollection;
 
     pcollection = &pinfo->item_list.collectionList[collection_index];
-	//logd("index%d parent=%d, usag:%x %x",collection_index,pcollection->parent,pcollection->usagePage,pinfo->item_list.usageItemList[pcollection->firstUsageItem].usageMinimum);
+	// logd("index%d parent=%d, usag:%x %x",(uint16_t)collection_index,(uint16_t)pcollection->parent,pcollection->usagePage,pinfo->item_list.usageItemList[pcollection->firstUsageItem].usageMinimum);
     if(0 == pcollection->parent){     //顶层集合确定设备类型
         if((usagePage == pcollection->usagePage)
             && (usage == pinfo->item_list.usageItemList[pcollection->firstUsageItem].usageMinimum)){

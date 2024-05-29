@@ -266,9 +266,12 @@ error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
             }
 
             if(0 == item.led.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_OUTPUT,0X07, KB_A, &item.led)){
+                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_OUTPUT,0X08, 0x01, &item.led)){
+                    uint8_t led = 0;
                     logd("usbh kb led:");
                     hid_items_dump(&item.led);
+					//枚举键盘必须设置led, 否则部分键盘会不识别
+                    usbh_hid_set_report(id, pclass->itf.if_num, HID_REPORT_TYPE_OUTPUT, item.led.report_id, &led,1);  
                 }
             }
         }

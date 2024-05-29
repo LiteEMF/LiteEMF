@@ -829,8 +829,8 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 					}
 					#elif defined BTC_SEARCH_NAME
 					if(strlen(scanp->name)){
-						logi("btc scan name: %s,%s mac:", scanp->name, pa->scan.name);dumpd(scanp->mac,6);
-						if(!memcmp(scanp->name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
+						logi("btc scan name: %s,mac:", scanp->name);dumpd(scanp->mac,6);
+						if(!memcmp(pa->scan.name, BTC_SEARCH_NAME, strlen(BTC_SEARCH_NAME))
 							#ifdef BTC_SEARCH_RSSI
 							&& (pa->scan.rssi >= BTC_SEARCH_RSSI)
 							#endif
