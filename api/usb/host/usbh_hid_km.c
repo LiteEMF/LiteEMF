@@ -55,7 +55,7 @@ km_items_t* malloc_hid_km_items(uint8_t id)
 		if(m_km_items[id][i].magic == 0){
 			memset(&m_km_items[id][i],0,sizeof(m_km_items[id][i]));
             m_km_items[id][i].magic = 1;
-			return &m_km_items[i];
+			return &m_km_items[id][i];
 		}
 	}
 	return NULL;

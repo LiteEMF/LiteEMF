@@ -208,7 +208,7 @@ void  bit12_to_int(uint8_t* buf, int16_t* px, int16_t*py)
                 bit_lens: 数据 bit 长度, bit_lens < 32
                 buf: bit 数据流
 ** Returns:	
-** Description:	从bit 数据流中获取int数据	
+** Description:	从bit 小端数据流中获取int数据	
 *******************************************************************/
 int32_t bits_to_int(uint16_t bit_offset, uint8_t bit_lens,  uint8_t* bbuf, uint8_t len)
 {
@@ -219,6 +219,7 @@ int32_t bits_to_int(uint16_t bit_offset, uint8_t bit_lens,  uint8_t* bbuf, uint8
     if(len > byte_offset){
         bit_offset %= 8;
         memcpy(&val, &bbuf[byte_offset], MIN(len - byte_offset, 4));
+        val = SWAP32_L(val);            //fix BIG ENDP CUP
         mask = (0X01UL << bit_lens) - 1;
 
         ret = (val >> bit_offset) & mask;
