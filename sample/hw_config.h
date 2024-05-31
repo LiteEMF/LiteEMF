@@ -79,8 +79,8 @@ extern "C" {
 #endif
 
 
-#include "emf_config.h"
 #include "hw_board.h"
+#include "emf_config.h"
 #ifdef __cplusplus
 }
 #endif
