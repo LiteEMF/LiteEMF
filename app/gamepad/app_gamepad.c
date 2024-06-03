@@ -296,6 +296,8 @@ hid_type_t app_gamepad_get_hidtype(uint16_t hid_types)
 			hid_type = HID_TYPE_PS4;
 		}else if(BIT(HID_TYPE_PS5) & hid_types){
 			hid_type = HID_TYPE_PS5;
+		}else if(BIT(HID_TYPE_VENDOR) & hid_types){
+			hid_type = HID_TYPE_VENDOR;
 		}
 	}
 	return hid_type;

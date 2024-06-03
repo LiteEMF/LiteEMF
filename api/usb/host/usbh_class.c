@@ -333,6 +333,17 @@ error_t usbh_class_out(dev_type_t type,uint8_t sub_type,void* buf, uint16_t len)
 	return err;
 }
 
+#if WEAK_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:		true: 用户自定义处理, false: 会走通用处理	
+** Description: USB接收数据用户处理
+*******************************************************************/
+__WEAK bool usbh_class_in_event_weak(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+{
+	return false;
+}
+#endif
 
 /*******************************************************************
 ** Parameters:		
@@ -341,6 +352,10 @@ error_t usbh_class_out(dev_type_t type,uint8_t sub_type,void* buf, uint16_t len)
 *******************************************************************/
 void usbh_class_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
+	if(usbh_class_in_event_weak(id, pclass, buf, len)){				//用于自定义处理
+		return;
+	}
+
 	switch(pclass->dev_type){
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 		case DEV_TYPE_HID	:

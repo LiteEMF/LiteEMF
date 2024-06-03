@@ -225,6 +225,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		if(len > CMD_PACK_LEN){
 			dev_ctrl_t ctrl = buf[4];
 			switch(ctrl){
+			#if API_PM_ENABLE
 		    case CTRL_RESET:
 				api_reset();
 				ret = true;
@@ -233,6 +234,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 				api_sleep();
 				ret = true;
 				break;
+			#endif	
 			case CTRL_BOOT:
 				if(len > 6){
 					api_boot(buf[5]);

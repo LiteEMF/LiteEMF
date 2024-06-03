@@ -421,7 +421,7 @@ error_t usbd_hid_x360_out_process(uint8_t id, usbd_class_t* pclass)
 *******************************************************************/
 error_t usbd_hid_x360_init(uint8_t id)
 {
-trp_handle_t trp_handle;
+	trp_handle_t trp_handle;
 		
 	trp_handle.trp = TR_USBD;
 	trp_handle.id = id;

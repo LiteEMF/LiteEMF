@@ -189,6 +189,11 @@ void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
             usbh_hid_gamepad_in_process(id, pclass, buf, len);
             break;
         #endif
+        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+        case HID_TYPE_VENDOR	:
+            usbh_hid_vendor_in_process(id, pclass, buf, len);
+            break;
+        #endif
         default:
             break;
     }
@@ -247,6 +252,11 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
             err = usbh_hid_gamepad_open(id, pclass);
             break;
         #endif
+        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+        case HID_TYPE_VENDOR	:
+            err = usbh_hid_vendor_open(id, pclass);
+            break;
+        #endif
         default:
             break;
     }
@@ -300,6 +310,12 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
                 err = usbh_hid_gamepad_init(id, pclass, &hid_info);
             }
             #endif
+
+            #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+            if(err){
+                err = usbh_hid_vendor_init(id, pclass, &hid_info);
+            }
+            #endif
             hid_desc_info_free(&hid_info);
         }
     }else if(XBOX_CLASS == pclass->itf.if_cls){          //xbox 特殊处理, x360 if_pro 必须是X360_PROTOCOL
@@ -339,6 +355,11 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_PS4	:
         case HID_TYPE_PS5	:
             err = usbh_hid_gamepad_deinit(id, pclass);
+            break;
+        #endif
+        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+        case HID_TYPE_VENDOR	:
+            err = usbh_hid_vendor_deinit(id, pclass);
             break;
         #endif
         default:
