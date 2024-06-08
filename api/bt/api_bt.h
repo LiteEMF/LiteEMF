@@ -261,9 +261,9 @@ typedef enum {
     BLE_ADV_DIRECT_IND_LOW,  /*Connectable low duty cycle directed advertising, 超时后自动重新定向广播*/
 
 	EDR_NON_DISVOVERABLE = 0,		//不可发现,不可连接
-    EDR_NON_CONNECTABLE,			//可发现不可连接
     EDR_LIMIT_DISVOVERABLE, 		//受限可发现可连接
     EDR_GENERAL_DISVOVERABLE,		//通用可发现可连接
+    EDR_NON_CONNECTABLE,			//可发现不可连接
 }bt_adv_t;
 
 
@@ -287,7 +287,9 @@ typedef struct{
 	uint8_t hid_ready:1;		//ble edr hid ready
 	uint8_t vendor_ready:1;		//ble vendor uuid, edr SPP ready
 	uint8_t remote_ios:1;		//is ios remote type is ios
-	uint8_t res:3;
+	uint8_t is_debonded:1; 		//解绑状态(目前只适配EDR)
+	uint8_t res:2;
+	uint8_t bond_index;			//蓝牙配对绑定序号(蓝牙不同模式可以有单独的配对列表)
 	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
 

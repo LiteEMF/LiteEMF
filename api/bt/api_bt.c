@@ -400,6 +400,7 @@ bool api_bt_debond(uint8_t id,bt_t bt)
 	if(NULL == bt_ctbp) return ret;
 	if(!bt_ctbp->init_ok) return ret;
 	logd("bt(%d) debond bt=%d\n",id,bt);
+	bt_ctbp->is_debonded = true;
 
 	if(id == BT_ID0){
 		ret = hal_bt_debond(id, bt);
@@ -639,14 +640,25 @@ __WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 	if(NULL == bt_ctbp) return;
 
 	if(BT_HID & pa->bts){
-		#if EDR_HID_SUPPORT & HID_GAMEPAD_MASK
-		hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
-		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
-		app_gamepad_dev_process(&handle, pa->buf, pa->len);
-		#elif APP_CMD_ENABLE
-		trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
-		app_command_rx(&handle,pa->buf+1, pa->len-1);	//丢弃hid_report_type_t
-		#endif
+		if(bt == BT_EDR){
+			#if EDR_HID_SUPPORT && HID_GAMEPAD_MASK
+			hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
+			trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
+			app_gamepad_dev_process(&handle, pa->buf, pa->len);
+			#elif APP_CMD_ENABLE
+			trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
+			app_command_rx(&handle,pa->buf+1, pa->len-1);	//丢弃 hid_report_type_t
+			#endif
+		}else{
+			#if BLE_HID_SUPPORT &&  HID_GAMEPAD_MASK
+			hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
+			trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};
+			app_gamepad_dev_process(&handle, pa->buf, pa->len);
+			#elif APP_CMD_ENABLE
+			trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
+			app_command_rx(&handle,pa->buf, pa->len);
+			#endif
+		}
 	}else if(BT_UART == pa->bts){					//uart
 		#if APP_CMD_ENABLE
 		uint8_t i;
@@ -682,17 +694,23 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			bt_ctbp->sta = BT_STA_IDLE;
 			bt_ctbp->vendor_ready = false;
 			bt_ctbp->hid_ready = false;
+			bt_ctbp->is_debonded = false;
 			api_bt_enable(id, bt,bt_ctbp->enable);
-			if(api_bt_is_bonded(id, bt)){					//TODO
-				bt_ctbp->sta = BT_STA_DIR_ADV;
+			if(bt_ctbp->enable){
+				if(api_bt_is_bonded(id, bt) && !bt_ctbp->is_debonded){
+					bt_ctbp->sta = BT_STA_DIR_ADV;
+				}else{
+					bt_ctbp->sta = BT_STA_ADV;
+				}
 			}else{
-				bt_ctbp->sta = BT_STA_ADV;
+				bt_ctbp->sta = BT_STA_IDLE;
 			}
 			logd_g("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("bt(%d) connect...\n",bt);
 			bt_ctbp->sta = BT_STA_CONN;
+			bt_ctbp->is_debonded = false;
 
 			#if APP_GAMEAPD_ENABLE
 			if(BIT(DEV_TYPE_HID) & bt_ctbp->types){
@@ -716,7 +734,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			bt_ctbp->sta = BT_STA_IDLE;
 			break;			
 		case BT_EVT_ADV:
-			if(api_bt_is_bonded(id, bt)){
+			if(api_bt_is_bonded(id, bt) && !bt_ctbp->is_debonded){
 				bt_ctbp->sta = BT_STA_DIR_ADV;
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
@@ -727,11 +745,11 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			break;
 		case BT_EVT_DISCONNECTED:
 			logd("bt(%d) disconnected...\n",bt);
-			api_bt_enable(id, bt,bt_ctbp->enable);
 			bt_ctbp->vendor_ready = false;
 			bt_ctbp->hid_ready = false;
+			api_bt_enable(id, bt,bt_ctbp->enable);
 			if(bt_ctbp->enable){
-				if(api_bt_is_bonded(id, bt)){
+				if(api_bt_is_bonded(id, bt) && !bt_ctbp->is_debonded){
 					bt_ctbp->sta = BT_STA_DIR_ADV;
 				}else{
 					bt_ctbp->sta = BT_STA_ADV;
@@ -934,6 +952,9 @@ static bool api_bt_ctb_init(void)
 			bt_ctbp->init_ok = false;
 			bt_ctbp->vendor_ready = false;
 			bt_ctbp->hid_ready = false;
+			bt_ctbp->is_debonded = false;
+			bt_ctbp->bond_index = 0;
+
 			bt_ctbp->inteval_10us = 1500;
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;
