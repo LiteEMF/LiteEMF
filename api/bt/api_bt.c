@@ -744,6 +744,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			bt_ctbp->sta = BT_STA_DIR_ADV;
 			break;
 		case BT_EVT_DISCONNECTED:
+		case BT_EVT_CONNECT_FAIL:
 			logd("bt(%d) disconnected...\n",bt);
 			bt_ctbp->vendor_ready = false;
 			bt_ctbp->hid_ready = false;
@@ -868,6 +869,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			bt_ctbp->sta = BT_STA_DIR_ADV;
 			break;
 		case BT_EVT_DISCONNECTED:
+		case BT_EVT_CONNECT_FAIL:
 			logd("btc(%d) disconnected...\n",bt);
 			api_bt_enable(id, bt,bt_ctbp->enable);
 			bt_ctbp->vendor_ready = false;
