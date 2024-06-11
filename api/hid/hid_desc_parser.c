@@ -682,8 +682,8 @@ bool hid_collection_find_items(hid_desc_info_t *pinfo, hid_collection_t* pcollec
     bool ret = false;
     uint8_t i;
 
-    for(i=pcollection->firstReportItem; i<pcollection->reportItems; i++){
-        ret = hid_reportlist_find_items(pinfo, i, type, usagePage, usage, pitems);
+    for(i=0; i<pcollection->reportItems; i++){
+        ret = hid_reportlist_find_items(pinfo, pcollection->firstReportItem + i, type, usagePage, usage, pitems);
         if(ret) break;
     }
     return ret;

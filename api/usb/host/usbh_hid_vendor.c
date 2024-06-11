@@ -88,17 +88,14 @@ error_t usbh_hid_vendor_open( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:	这里只做识别
 *******************************************************************/
-error_t usbh_hid_vendor_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo)
+error_t usbh_hid_vendor_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo,uint8_t collection_index)
 {
     uint8_t i;
     error_t err = ERROR_NOT_FOUND;
 
-    for(i=0; i<pinfo->collections; i++){
-        if(hid_match_collection(pinfo, i, 0XFF80, 0X01)){ //0x05,0x01  0x09,0X02 fix VENDOR
-            pclass->hid_type = HID_TYPE_VENDOR;
-            err = ERROR_SUCCESS;
-            break;
-        }
+    if(hid_match_collection(pinfo, collection_index, 0XFF80, 0X01)){ //0x05,0x01  0x09,0X02 fix VENDOR
+        pclass->hid_type = HID_TYPE_VENDOR;
+        err = ERROR_SUCCESS;
     }
 
     return err;

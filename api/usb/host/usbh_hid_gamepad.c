@@ -219,7 +219,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:	这里只做识别
 *******************************************************************/
-error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo)
+error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo ,uint8_t collection_index)
 {
     error_t err = ERROR_NOT_FOUND;
     usbh_dev_t* pdev = get_usbh_dev(id);

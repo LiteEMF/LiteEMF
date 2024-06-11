@@ -51,10 +51,10 @@ km_items_t* malloc_hid_km_items(uint8_t id)
 	uint8d_t i;
 
     id >>= 4;
-	for(i=0; i<countof(m_km_items); i++){
-		if(m_km_items[id][i].magic == 0){
+	for(i=0; i<MAX_KM_ITEMS_NUM; i++){
+        // logd("m_km_items[%d][%d].find=%d\n",(uint16_t)id,(uint16_t)i,(uint16_t)m_km_items[id][i].find);
+		if(m_km_items[id][i].kb.find == 0){
 			memset(&m_km_items[id][i],0,sizeof(m_km_items[id][i]));
-            m_km_items[id][i].magic = 1;
 			return &m_km_items[id][i];
 		}
 	}
@@ -117,7 +117,7 @@ uint8_t kb_get_normal_key(hid_items_t *pitem, uint8_t* pkb, uint8_t kb_len, uint
 
     if(1 == pitem->bit_size){
         for(i = 0,k = 0; i < (pitem->bit_count * pitem->bit_size + 7)/8; i++){
-            val = buf[pitem->bit_offset / 8];
+            val = buf[pitem->bit_offset / 8 + i];
             if(0 == val) continue;
             if(k > kb_len) break;
             for(j=0; j<8; j++){
@@ -161,12 +161,6 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
         pitem = &pkm_items->kb.kb_normal;
         if(hid_items_match_id(pitem, buf, len)){
             i = kb_get_normal_key(pitem, km.kb.key, sizeof(km.kb.key), buf, len);
-            match_id = true;
-        }
-
-        pitem = &pkm_items->kb.kb2_normal;
-        if(hid_items_match_id(pitem, buf, len)){
-            i += kb_get_normal_key(pitem, km.kb.key+i, sizeof(km.kb.key)-i, buf, len);
             match_id = true;
         }
 
@@ -230,56 +224,44 @@ error_t usbh_hid_km_open( uint8_t id, usbh_class_t *pclass)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo, kb_items_t *pitems)
+error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo, uint8_t collection_index, kb_items_t *pitem)
 {
     uint8_t i;
     error_t err = ERROR_NOT_FOUND;
     hid_collection_t* pcollection;
     kb_items_t item;
 	
+    if(hid_match_collection(pinfo, collection_index, 0X01, 0X06)){ //0x05,0x01  0x09,0X06 fix kb
+        memset(&item, 0, sizeof(item));
+        pcollection = &pinfo->item_list.collectionList[collection_index];
+        
+        logd("kb match collection %d\n",(uint16_t)collection_index);
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.kb_fun)){
+            logd("usbh kb_fun:");
+            hid_items_dump(&item.kb_fun);
+            err = ERROR_SUCCESS;
+        }
+    
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb_normal)){
+            logd("usbh kb_normal:");
+            hid_items_dump(&item.kb_normal);
+            err = ERROR_SUCCESS;
+        }
 
-    memset(&item, 0, sizeof(item));
-
-    for(i=0; i<pinfo->collections; i++){
-        if(hid_match_collection(pinfo, i, 0X01, 0X06)){ //0x05,0x01  0x09,0X06 fix kb
-            pcollection = &pinfo->item_list.collectionList[i];
-            if(0 == item.kb_fun.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.kb_fun)){
-                    logd("usbh kb_fun:");
-                    hid_items_dump(&item.kb_fun);
-                    err = ERROR_SUCCESS;
-                }
-            }
-
-            if(0 == item.kb_normal.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb_normal)){
-                    logd("usbh kb_normal:");
-                    hid_items_dump(&item.kb_normal);
-                    err = ERROR_SUCCESS;
-                }
-            }else if(0 == item.kb2_normal.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb2_normal)){
-                    logd("usbh kb2_normal:");
-                    hid_items_dump(&item.kb2_normal);
-                    err = ERROR_SUCCESS;
-                }
-            }
-
-            if(0 == item.led.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_OUTPUT,0X08, 0x01, &item.led)){
-                    uint8_t led = 0;
-                    logd("usbh kb led:");
-                    hid_items_dump(&item.led);
-					//枚举键盘必须设置led, 否则部分键盘会不识别
-                    usbh_hid_set_report(id, pclass->itf.if_num, HID_REPORT_TYPE_OUTPUT, item.led.report_id, &led,1);  
-                }
-            }
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_OUTPUT,0X08, 0x01, &item.led)){
+            uint8_t led = 0;
+            logd("usbh kb led:");
+            hid_items_dump(&item.led);
+            //枚举键盘必须设置led, 否则部分键盘会不识别
+            usbh_hid_set_report(id, pclass->itf.if_num, HID_REPORT_TYPE_OUTPUT, item.led.report_id, &led,1);  
         }
     }
 
     if(ERROR_SUCCESS == err){
         item.find = 1;
-        *pitems = item;
+        *pitem = item;
+        pclass->pdat = pitem;
+        pclass->hid_type = HID_TYPE_KB;
         logd("usbh find kb...\n");
     }
 	
@@ -288,57 +270,45 @@ error_t usbh_hid_kb_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
     return err;
 }
 
-error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo, mouse_items_t *pitem)
+error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo, uint8_t collection_index, mouse_items_t *pitem)
 {
-    uint8_t i;
     error_t err = ERROR_NOT_FOUND;
     hid_collection_t* pcollection;
     mouse_items_t item;
     
     memset(&item, 0, sizeof(item));
 
-    for(i=0; i<pinfo->collections; i++){
-        if(hid_match_collection(pinfo, i, 0X01, 0X02)){ //0x05,0x01  0x09,0X02 fix mouse
-        logd("mouse match collection %d",i);
+    if(hid_match_collection(pinfo, collection_index, 0X01, 0X02)){ //0x05,0x01  0x09,0X02 fix mouse
+        logd("mouse match collection %d\n", (uint16_t)collection_index);
+        pcollection = &pinfo->item_list.collectionList[collection_index];
 
-            pcollection = &pinfo->item_list.collectionList[i];
-            if(0 == item.button.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X09, 0X01,&item.button)){
-                    logd("mouse button:");
-                    hid_items_dump(&item.button);
-                    err = ERROR_SUCCESS;
-                }
-            }
-
-            if(0 == item.x.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X30, &item.x)){
-                    logd("mouse x:");
-                    hid_items_dump(&item.x);
-                    err = ERROR_SUCCESS;
-                }
-            }
-
-            if(0 == item.y.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X31, &item.y)){
-                    logd("mouse y:");
-                    hid_items_dump(&item.y);
-                    err = ERROR_SUCCESS;
-                }
-            }
-
-            if(0 == item.w.report_length){
-                if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X38, &item.w)){
-                    logd("mouse w:");
-                    hid_items_dump(&item.w);
-                    err = ERROR_SUCCESS;
-                }
-            }
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X09, 0X01,&item.button)){
+            logd("mouse button:");
+            hid_items_dump(&item.button);
+            err = ERROR_SUCCESS;
+        }
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X30, &item.x)){
+            logd("mouse x:");
+            hid_items_dump(&item.x);
+            err = ERROR_SUCCESS;
+        }
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X31, &item.y)){
+            logd("mouse y:");
+            hid_items_dump(&item.y);
+            err = ERROR_SUCCESS;
+        }
+        if(hid_collection_find_items(pinfo,pcollection,HID_REPORT_TYPE_INPUT,0X01, 0X38, &item.w)){
+            logd("mouse w:");
+            hid_items_dump(&item.w);
+            err = ERROR_SUCCESS;
         }
     }
 
     if(ERROR_SUCCESS == err){
         item.find = 1;
         *pitem = item;
+        pclass->pdat = pitem;
+        pclass->hid_type = HID_TYPE_MOUSE;
         logd("usbh find mouse...\n");
     }
 	
@@ -348,7 +318,7 @@ error_t usbh_hid_mouse_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *p
 }
 
 
-error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo)
+error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass,hid_desc_info_t *pinfo, uint8_t collection_index)
 {
     error_t err = ERROR_NOT_FOUND;
     km_items_t *pitem;
@@ -356,21 +326,12 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
     pitem = malloc_hid_km_items(id);
     if(NULL != pitem){
         memset(pitem, 0, sizeof(km_items_t));
-   
-        usbh_hid_mouse_init(id, pclass, pinfo,&pitem->mouse);
-        usbh_hid_kb_init(id, pclass, pinfo,&pitem->kb);
-
-        if(pitem->mouse.find || pitem->kb.find){
-            pitem->magic = 1;
-            pclass->pdat = pitem;
-            if(HID_ITF_PROTOCOL_MOUSE == pclass->itf.if_pro){
-                pclass->hid_type = HID_TYPE_MOUSE;
-            }else{
-                pclass->hid_type = HID_TYPE_KB;
-            }
-            err = ERROR_SUCCESS;
+        err = usbh_hid_mouse_init(id, pclass, pinfo, collection_index, &pitem->mouse);
+        if(ERROR_SUCCESS != err){
+            err = usbh_hid_kb_init(id, pclass, pinfo, collection_index, &pitem->kb);
         }
     }else{
+        loge_r("malloc_hid_km_items ERROR_NO_MEM...\n");
         err = ERROR_NO_MEM;
     }
 
@@ -385,20 +346,23 @@ error_t usbh_hid_km_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinf
 error_t usbh_hid_km_deinit( uint8_t id, usbh_class_t *pclass) 
 {
     if(NULL != pclass->pdat){
-        if( ((uintptr_t)pclass->pdat >= (uintptr_t)&m_km_items[0]) 
-            && ((uintptr_t)pclass->pdat <= (uintptr_t)&m_km_items[MAX_KM_ITEMS_NUM]) ){
+		id >>= 4;
+        if( ((uintptr_t)pclass->pdat >= (uintptr_t)&m_km_items[id]) 
+            && ((uintptr_t)pclass->pdat <= (uintptr_t)&m_km_items[id][MAX_KM_ITEMS_NUM-1]) ){
             
             if(HID_TYPE_KB == pclass->hid_type){
+                usbh_km.active = true;
                 memset(&usbh_km.kb, 0, sizeof(usbh_km.kb));
             }
             if(HID_TYPE_MOUSE == pclass->hid_type){
+                usbh_km.active = true;
                 memset(&usbh_km.mouse, 0, sizeof(usbh_km.mouse));
             }
 
             memset(pclass->pdat, 0, sizeof(km_items_t));       //释放内存, 注意内存溢出
+            logd_r("free km_items_t...\n");
         }
     }
-	UNUSED_PARAMETER(id);
 	return ERROR_SUCCESS;
 }
 

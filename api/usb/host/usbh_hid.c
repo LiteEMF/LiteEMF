@@ -299,23 +299,33 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
         emf_free(desc_buf);
 
         if(ERROR_SUCCESS == err){
+            uint8_t i;
+            hid_collection_t* pcollection;
+
             err = ERROR_NOT_FOUND;
             hid_desc_dump(&hid_info);
-            #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
-            err = usbh_hid_km_init(id, pclass, &hid_info);
-            #endif
+            
+            for(i=0; i<hid_info.collections; i++){
+                if(0 == pcollection->parent){     //顶层集合确定设备类型
+                    #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+                    if(ERROR_SUCCESS == usbh_hid_km_init(id, pclass, &hid_info,i)){
+                        err = ERROR_SUCCESS;
+                    }
+                    #endif
 
-            #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-            if(err){
-                err = usbh_hid_gamepad_init(id, pclass, &hid_info);
-            }
-            #endif
+                    #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
+                    if(ERROR_SUCCESS == usbh_hid_gamepad_init(id, pclass, &hid_info,i)){
+                        err = ERROR_SUCCESS;
+                    }
+                    #endif
 
-            #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
-            if(err){
-                err = usbh_hid_vendor_init(id, pclass, &hid_info);
+                    #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+                    if(ERROR_SUCCESS == usbh_hid_vendor_init(id, pclass, &hid_info,i)){
+                        err = ERROR_SUCCESS;
+                    }
+                    #endif
+                }
             }
-            #endif
             hid_desc_info_free(&hid_info);
         }
     }else if(XBOX_CLASS == pclass->itf.if_cls){          //xbox 特殊处理, x360 if_pro 必须是X360_PROTOCOL
@@ -323,7 +333,7 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
             || (X360_SUBCLASS == pclass->itf.if_sub_cls)
             || (X360_IDENTIFY_SUBCLASS == pclass->itf.if_sub_cls)){
             #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-            err = usbh_hid_gamepad_init(id, pclass, NULL);
+            err = usbh_hid_gamepad_init(id, pclass, NULL, 0);
             #endif
         }
     }
