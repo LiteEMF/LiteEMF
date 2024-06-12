@@ -87,8 +87,7 @@ usbh_class_t *usbh_class_find_by_ep(uint8_t id,uint8_t ep)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
 
-	if(0 == (API_USBH_BIT_ENABLE & BIT(id>>4))) return NULL; 
-
+	if(NULL == pdev) return NULL;
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if((pos->endpin.addr | TUSB_DIR_IN_MASK) == ep){
 			pclass = pos;
@@ -114,8 +113,7 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos,*pclass = NULL;
 
-	if(0 == (API_USBH_BIT_ENABLE & BIT(id>>4))) return NULL; 
-
+	if(NULL == pdev) return NULL;
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->dev_type == type){
 			if(DEV_TYPE_HID == type){
@@ -144,10 +142,9 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 uint8_t usbh_class_find_by_type_all(dev_type_t type,uint8_t sub_type, usbh_class_t **ppclass)
 {
 	uint8_t i,id = USBH_NULL;
-	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
 	usbh_class_t *pclass = NULL;
 
-	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
+	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++){
 		uint8_t tmp_id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 		pclass = usbh_class_find_by_type(tmp_id,type,sub_type);
 		if(NULL != pclass){
@@ -173,6 +170,7 @@ __WEAK void usbh_class_itf_alt_select(uint8_t id,usbh_class_t* pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pos;
 
+	if(NULL == pdev) return;
 	list_for_each_entry_type(pos,&pdev->class_list, usbh_class_t, list){
 		if(pos->itf.if_num == pclass->itf.if_num){
 			free_usbh_class(pclass);			//默认使用alt 0
@@ -191,7 +189,8 @@ dev_type_t usbh_match_class( uint8_t id, usbh_class_t *pclass)
 {
 	dev_type_t type = DEV_TYPE_NONE;
 	usbh_dev_t* pdev = get_usbh_dev(id);
-
+	
+	if(NULL == pdev) return type;
 	if ( m_usbh_types & BIT(DEV_TYPE_USBMUXD) ){
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_USBMUXD)
 		if(ERROR_SUCCESS == usbh_match_usbmuxd(id, pclass)){
@@ -429,6 +428,7 @@ error_t usbh_class_open(uint8_t id)
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		switch(pos->dev_type){
 			#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
@@ -527,7 +527,7 @@ error_t  usbh_class_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint
 {
 	error_t err = ERROR_UNKNOW;
 	usbh_dev_t* pdev = get_usbh_dev(id);
-	
+	if(NULL == pdev) return err;
 	switch(pclass->dev_type){
 		#if USBH_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_HID)
 		case DEV_TYPE_HID	:
@@ -603,6 +603,7 @@ error_t usbh_class_deinit(uint8_t id)
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL != pdev) return err;
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->endpout.addr){
 			err = usbh_endp_unregister(id,&pos->endpout);
@@ -688,17 +689,19 @@ void usbh_class_task(uint32_t dt_ms)
 {
 	error_t err = ERROR_NOT_FOUND;
 	uint8_t i,id = USBH_NULL;
-	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
+	usbh_dev_t *pdev;
 	usbh_class_t *pos;
 	#if USBH_LOOP_ENABLE
 	static timer_t s_tick;
 	s_tick += dt_ms;
 	#endif
 
-	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
+	for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++){
+		id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
+		pdev = get_usbh_dev(id);
+		if(NULL == pdev) continue;
+		
 		list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
-			id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
-
 			#if USBH_LOOP_ENABLE
 			if(TUSB_ENDP_TYPE_INTER == pos->endpin.type){			//only inter enpd
 				if(0 == (s_tick % pos->endpin.interval)){

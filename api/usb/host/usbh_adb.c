@@ -58,7 +58,6 @@ void usbh_adb_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
 error_t usbh_match_adb( uint8_t id, usbh_class_t *pclass)
 {
 	error_t err = ERROR_NOT_FOUND;
-	usbh_dev_t* pdev = get_usbh_dev(id);
 
 	if((ADB_CLASS == pclass->itf.if_cls) && (pclass->itf.if_sub_cls == ADB_SUBCLASS)){
 		if(pclass->endpin.addr && pclass->endpout.addr){
@@ -79,6 +78,7 @@ error_t usbh_adb_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
     err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err){
 		app_adb_run();

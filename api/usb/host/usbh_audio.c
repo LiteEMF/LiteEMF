@@ -154,6 +154,8 @@ error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+    if(NULL == pdev) return err;
+
 	if(pclass->itf.if_sub_cls == AUDIO_SUBCLASS_CONTROL){
         uint16_t vol;
         uint16_t len = 2;
@@ -210,6 +212,7 @@ error_t usbh_audio_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint1
     uint8_t inf_num = 0;
     uint16_t i, l;
 
+    if(NULL == pdev) return err;
     for ( i = 0; i < len; i += l ){
         l = pdesc[i];
         if(0 == l) break;

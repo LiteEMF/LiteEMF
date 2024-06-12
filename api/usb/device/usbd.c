@@ -807,7 +807,11 @@ void usbd_handler(uint32_t period_10us)
 
 
 
-
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description: usbd硬件初始化,包括部分参数		
+*******************************************************************/
 error_t usbd_init(uint8_t id)
 {
 	if(id >= USBD_NUM) return ERROR_FAILE;

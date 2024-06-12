@@ -224,7 +224,8 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
     error_t err = ERROR_NOT_FOUND;
     usbh_dev_t* pdev = get_usbh_dev(id);
     hid_type_t 	hid_type;
-
+    
+    if(NULL == pdev) return err;
     hid_type = usbh_hid_vendor_gamepad(pdev->vid, pdev->pid);   //先通过vid 获取设备类型
 
     if(HID_TYPE_NONE == hid_type){

@@ -79,6 +79,7 @@ error_t usbh_vendor_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err) pdev->class_ready = true;
     return err;

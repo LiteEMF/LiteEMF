@@ -216,7 +216,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                         usbh_dev_t* pdev = get_usbh_dev(hub_id);
                         err = usbh_hub_port_clear_feature(hub_id, HUB_FEATURE_PORT_RESET_CHANGE);
 
-                        if(TUSB_STA_POWERED == pdev->state){
+                        if((NULL != pdev) && (TUSB_STA_POWERED == pdev->state)){
                             usbh_set_status(hub_id, TUSB_STA_DEFAULT, 0);
                             
                             if(pport_status->status.bits.low_speed){
@@ -269,6 +269,8 @@ error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass)
     usbh_dev_t* pdev = get_usbh_dev(id);
     uint8_t hub_stu[4];
 
+    if(NULL == pdev) return err;
+    
     id &= 0XF0;                             //not support hub connect hub
     port_num = (uint8_t)((uintptr_t)(pclass->pdat));
     // May need to GET_STATUS

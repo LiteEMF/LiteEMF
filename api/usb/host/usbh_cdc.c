@@ -130,6 +130,7 @@ error_t usbh_cdc_open( uint8_t id, usbh_class_t *pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 	cdc_line_coding_t line_coding = CFG_TUH_CDC_LINE_CODING_ON_ENUM;
 
+	if(NULL == pdev) return err;
 	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
 	if(err) return err;
 

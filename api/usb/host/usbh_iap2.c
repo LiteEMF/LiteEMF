@@ -63,6 +63,7 @@ error_t usbh_match_iap2( uint8_t id, usbh_class_t *pclass)
 	error_t err = ERROR_NOT_FOUND;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	if ((pdev->vid == 0x05AC) && ((pdev->pid&0xff00) == 0x1200)){         // apple
 		if(pclass->endpin.addr ){
 			err = ERROR_SUCCESS;
@@ -116,6 +117,8 @@ error_t usbh_iap2_deinit( uint8_t id, usbh_class_t *pclass)
 void usbh_iap2_task(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
+
+	if(NULL == pdev) return err;
 	if(TUSB_STA_CONFIGURED == pdev->state){
 		app_iap2_task(NULL);
 	}

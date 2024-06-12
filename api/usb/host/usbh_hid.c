@@ -233,6 +233,7 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+    if(NULL == pdev) return err;
     switch(pclass->hid_type){
         #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
         case HID_TYPE_KB:

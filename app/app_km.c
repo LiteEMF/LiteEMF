@@ -97,7 +97,7 @@ bool app_km_fill(app_km_t* pkey, app_km_t* pkey_in)
 
 		for(i=0; i<sizeof(pkey->kb.key); i++){
 			if(0 == pkey->kb.key[i]){
-				if(0 == pkey_in->kb.key[k]) break;
+				// if(0 == pkey_in->kb.key[k]) break;		//部分键盘值会不按顺序
 				pkey->kb.key[i] = pkey_in->kb.key[k++];
 			}
 		}

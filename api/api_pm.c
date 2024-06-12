@@ -332,6 +332,7 @@ void api_pm_handler(uint32_t period_10us)
 #endif
 #else
 #include "emf_typedef.h"
+#include "api/api_pm.h"
 #include "api/api_log.h"
 /*******************************************************************
 ** Parameters:index : 1: first boot, 2 : second boot		

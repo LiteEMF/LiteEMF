@@ -171,6 +171,7 @@ error_t usbh_match_aoa( uint8_t id, usbh_class_t *pclass)
 	error_t err = ERROR_NOT_FOUND;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	if ((pdev->vid  == GOOGLE_VID) && ((pdev->pid&0xff00) == GOOGLE_PID_ACCESSORY)){         // apple
 		if(pclass->endpin.addr && pclass->endpout.addr){
 			err = ERROR_SUCCESS;
@@ -195,6 +196,7 @@ error_t usbh_aoa_open( uint8_t id, usbh_class_t *pclass)
 	uint8_t *pdesc;
 	uint16_t len;
 
+	if(NULL == pdev) return err;
 	if ((pdev->vid  == GOOGLE_VID) && ((pdev->pid&0xff00) == GOOGLE_PID_ACCESSORY)) {
 		
 		#if AOA_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))

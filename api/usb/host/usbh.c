@@ -210,8 +210,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 {
     usbh_dev_t* pdev = get_usbh_dev(id);
 
-	if (USBH_NUM <= (id>>4)) return ERROR_PARAM;
-	if (HUB_MAX_PORTS < (id&0x0f)) return ERROR_PARAM;
+	if(NULL == pdev ) return ERROR_PARAM;
 
 	switch (usb_sta){
 	case TUSB_STA_DETACHED:
@@ -252,6 +251,8 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 	usb_endp_t endp;
 	usbh_class_t *pclass;
 
+	if(NULL == pdev ) return err;
+	
 	err = usbh_req_set_configuration(id,cfg);			//set configuration
 	if(err) return err;
 
@@ -321,6 +322,7 @@ static error_t usbh_enum_device( uint8_t id, uint8_t reset_ms )
 	usb_desc_configuration_t *pcfg_desc = (usb_desc_configuration_t *)tmp_buf;
 	uint8_t *pcfg_buf;
 
+	if(NULL == pdev ) return err;
 	logd("\nusbh%x state=%d, enum start...\n",(uint16_t)id,(uint16_t)pdev->state);
 
 	switch(pdev->state){
@@ -402,7 +404,7 @@ static void usbh_enum_all_device( uint32_t period_10us )
 
 		if(USBH_NULL != id){
 			usbh_dev_t* pdev = get_usbh_dev(id);
-			if(s_retry <= USBH_ENUM_RETRY){
+			if((NULL != pdev ) && s_retry <= USBH_ENUM_RETRY){
 				err = usbh_enum_device( id , MIN(60,(s_retry+1)*10));
 
 				if (( err != ERROR_SUCCESS ) && ( err != ERROR_UNSUPPORT )){
@@ -442,7 +444,6 @@ __WEAK void usbh_endp_in_event(uint8_t id, uint8_t ep)
 {
 	#if !USBH_LOOP_ENABLE
 	error_t err;
-	usbh_dev_t* pdev = get_usbh_dev(id);
 	usbh_class_t *pclass = usbh_class_find_by_ep(id,ep);
 	uint8_t buf[64];
 	uint16_t len;
@@ -476,7 +477,7 @@ __WEAK void usbh_endp_out_event(uint8_t id, uint8_t ep)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description: usbh硬件初始化,包括部分参数		
 *******************************************************************/
 error_t usbh_init( uint8_t id )
 {

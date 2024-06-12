@@ -47,7 +47,7 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	包括usb参数和usb硬件初始化	
 *******************************************************************/
 bool api_otg_init(uint8_t id, api_otg_t mode)
 {
@@ -76,7 +76,7 @@ bool api_otg_init(uint8_t id, api_otg_t mode)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	包括usb参数和usb硬件deinit
 *******************************************************************/
 bool api_otg_deinit(uint8_t id, api_otg_t mode)
 {
@@ -96,7 +96,11 @@ bool api_otg_deinit(uint8_t id, api_otg_t mode)
 	return true;
 }
 
-
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	包括usb参数和usb硬件初始化
+*******************************************************************/
 void api_otgs_init(void)
 {
 	uint8_t id;

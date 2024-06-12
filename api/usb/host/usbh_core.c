@@ -297,6 +297,7 @@ usbh_dev_t* get_usbh_dev(uint8_t id)
 
 	if (USBH_NUM <= (id>>4)) return NULL;
 	if (HUB_MAX_PORTS < (id&0x0f)) return NULL;
+    if(0 == (API_USBH_BIT_ENABLE & BIT(id>>4))) return NULL; 		//防止未定义usb id
 
 	pdev = &m_usbh_dev[id>>4][id&0x0f];
 
@@ -308,8 +309,7 @@ error_t usbh_select_hub_port(uint8_t id)
     error_t err = ERROR_SUCCESS;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-    if((id>>4) >= USBH_NUM) return ERROR_FAILE;
-
+    if(NULL == pdev) return ERROR_FAILE;
     err = usbh_set_addr(id & 0xf0, pdev->addr );  // set root hub addr
     err = usbh_set_speed(id, pdev->speed );       // set usb speed
     return err;
@@ -341,8 +341,7 @@ error_t usbh_port_en(uint8_t id, uint8_t en, usb_speed_t* pspeed)
     error_t err;
     usbh_dev_t* pdev = get_usbh_dev(id);
 
-    if((id>>4) >= USBH_NUM) return ERROR_FAILE;
-
+    if(NULL == pdev) return ERROR_FAILE;
     err = hal_usbh_port_en(id, en, pspeed);
     pdev->speed = *pspeed;
     logd("usbh%x en=%d,speed=%d,ret=%d\n",(uint16_t)id,(uint16_t)en,(uint16_t)*pspeed,(uint16_t)err);
@@ -376,11 +375,17 @@ error_t usbh_out(uint8_t id, usb_endp_t *endpp,uint8_t* buf, uint16_t len)
     return hal_usbh_out(id,endpp,buf,len);
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb参数初始化	
+*******************************************************************/
 error_t usbh_core_pa_init( uint8_t id )
 {
 	uint8_t i;
     usbh_dev_t* pdev = get_usbh_dev(id & 0xf0);
 
+    if(NULL == pdev) return ERROR_FAILE;
 	for(i = 0; i < (HUB_MAX_PORTS+1); i++,pdev++){
         memset(pdev, 0 ,sizeof(usbh_dev_t));
 		INIT_LIST_HEAD(&pdev->class_list);

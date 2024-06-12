@@ -75,7 +75,7 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO km ca
 	kb_led_t led,set_port;
 
 	uint8_t i,id = USBH_NULL;
-	usbh_dev_t *pdev = (usbh_dev_t *)m_usbh_dev;
+	usbh_dev_t *pdev;
 	usbh_class_t *pos;
     hid_items_t* pitem;
 
@@ -91,9 +91,12 @@ void usbh_hid_kb_set_led(kb_led_t *pled, uint8_t* pkb, uint8_t len) //TODO km ca
 		pled->val = led.val;
 
         for(i = 0; i < USBH_NUM * (HUB_MAX_PORTS+1); i++,pdev++){
+            id = (i / (HUB_MAX_PORTS+1) << 4) | (i % (HUB_MAX_PORTS+1));
+            pdev = get_usbh_dev(id);
+            if(NULL == pdev) continue;
+
             list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
                 if((pos->dev_type == DEV_TYPE_HID) && (pos->hid_type == HID_TYPE_KB)){
-                    id = (i / (HUB_MAX_PORTS+1) <<4) | (i % (HUB_MAX_PORTS+1));
 
                     pitem = &((km_items_t*)pos->pdat)->kb.led;
                     if( pitem->report_length){

@@ -296,6 +296,11 @@ error_t usbd_reset(uint8_t id)
     return err;
 }
 
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	usb参数初始化	
+*******************************************************************/
 error_t usbd_core_pa_init(uint8_t id)
 {
 	usbd_dev_t *pdev = usbd_get_dev(id);

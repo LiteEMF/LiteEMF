@@ -207,7 +207,7 @@ bool api_transport_ready(trp_handle_t* phandle)
 	#if API_USBH_BIT_ENABLE
 	case TR_USBH	:{
 		usbh_dev_t* pdev = get_usbh_dev(phandle->id);
-		if(TUSB_STA_CONFIGURED == pdev->state){
+		if((NULL != pdev) && (TUSB_STA_CONFIGURED == pdev->state)){
 			ready = true;
 		}
 		break;
@@ -317,6 +317,7 @@ bool api_transport_tx(trp_handle_t* phandle, void* buf,uint16_t len)
 	}
 	if(!ret) {
 		logd("trp%d len=%d err dt=%d\n",(uint16_t)phandle->trp,len,m_systick-err_timer);err_timer = m_systick;
+		//dumpd(buf,len);
 	}
 
 	UNUSED_VARIABLE(tx_timer);

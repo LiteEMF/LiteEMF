@@ -66,6 +66,7 @@ error_t usbh_match_usbmuxd( uint8_t id, usbh_class_t *pclass)
 	error_t err = ERROR_NOT_FOUND;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	if ((pdev->vid  == 0x05AC) && ((pdev->pid&0xff00) == 0x1200)){         // apple
 		if(pclass->endpin.addr && pclass->endpout.addr){
 			err = ERROR_SUCCESS;
@@ -80,6 +81,7 @@ error_t usbh_usbmuxd_open( uint8_t id, usbh_class_t *pclass)
     error_t err = ERROR_UNSUPPORT;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
+	if(NULL == pdev) return err;
 	err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(ERROR_SUCCESS == err){
 		pdev->class_ready = true;
@@ -121,6 +123,8 @@ error_t usbh_usbmuxd_deinit( uint8_t id, usbh_class_t *pclass)
 void usbh_usbmuxd_task(uint8_t id, usbh_class_t *pclass)
 {
 	usbh_dev_t* pdev = get_usbh_dev(id);
+
+	if(NULL == pdev) return err;
 	if(TUSB_STA_CONFIGURED == pdev->state){
 		static timer_t muxd_t;
 		uint8_t err = ERROR_NOT_FOUND;
