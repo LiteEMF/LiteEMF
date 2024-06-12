@@ -44,7 +44,7 @@ uint8_t m_nfc_buf[TAG_SIZE_MAX];
 **  Function
 ******************************************************************************************************/
 
-
+#if WEAK_ENABLE
 /*******************************************************************
 ** Description:
 ** Parameters:		
@@ -54,7 +54,7 @@ __WEAK bool os_nfc_post_msg(uint32_t msg)		//如果使用os,并且需要发送�
 {
 	return true;
 }
-
+#endif
 
 bool api_nfc_start_polling(void)     //任务可以被打断
 {

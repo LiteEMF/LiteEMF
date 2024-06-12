@@ -77,18 +77,18 @@ extern "C" {
 *******************************************************************************************************/
 typedef enum
 {
-  USBD_EVENT_NULL = 0,
-  USBD_EVENT_RESET,
-  USBD_EVENT_SOF,
-  USBD_EVENT_SUSPEND,
-  USBD_EVENT_RESUME,
-  USBD_EVENT_CONFIGURED,			//set cofigured event
-  
-  USBD_EVENT_EP_READY,				//端点 ready, 可以收发数据
-  USBD_EVENT_READY,
+	USBD_EVENT_NULL = 0,
+	USBD_EVENT_RESET,
+	USBD_EVENT_SOF,
+	USBD_EVENT_SUSPEND,
+	USBD_EVENT_RESUME,
+	USBD_EVENT_CONFIGURED,			//set cofigured event
 
-  USBD_EVENT_EP_OUT,
-  USBD_EVENT_EP_IN,
+	USBD_EVENT_EP_READY,				//端点 ready, 可以收发数据
+	USBD_EVENT_READY,
+
+	USBD_EVENT_EP_OUT,
+	USBD_EVENT_EP_IN,
 } usbd_event_t;
 
 

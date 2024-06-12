@@ -616,7 +616,7 @@ static void bt_tx_event_process(uint8_t id, bt_tx_fifo_t* txp, bt_evt_tx_t* pa)
 	}
 }
 
-
+#if WEAK_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:			
@@ -668,6 +668,7 @@ __WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 		#endif
 	}
 }
+#endif
 
 
 
@@ -901,7 +902,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 	}
 }
 
-
+#if WEAK_ENABLE
 /*******************************************************************
 ** Parameters:		
 ** Returns:		true: 用户自定义处理, false: 会走通用处理	
@@ -911,7 +912,7 @@ __WEAK bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_p
 {
 	return false;
 }
-
+#endif
 
 void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 {

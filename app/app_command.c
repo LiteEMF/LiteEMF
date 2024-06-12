@@ -287,11 +287,12 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 ** Returns:	
 ** Description:	注意: 数据长度必须使用len , buf 中的长度不准确
 *******************************************************************/
+#if WEAK_ENABLE
 __WEAK bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 {
 	return app_command_std_decode(phandle,buf,len);
 }
-
+#endif
 
 
 /*******************************************************************

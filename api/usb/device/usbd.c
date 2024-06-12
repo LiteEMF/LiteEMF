@@ -832,6 +832,9 @@ void usbds_init(void)
 {
 	uint8_t id;
 
+	#if API_USBD_BIT_ENABLE
+	usbd_core_pa_init(id);
+	#endif
 	for(id=0; id<USBD_NUM; id++){
 		usbd_init(id);
 	}

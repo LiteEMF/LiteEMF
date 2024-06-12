@@ -51,6 +51,7 @@ error_t usbh_disconnect(uint8_t id);
 error_t usbh_reset(uint8_t id,uint8_t reset_ms);
 error_t usbh_set_address(uint8_t id,uint8_t addr);
 uint8_t usbh_find_by_status(uint8_t usb_stas);   
+void usbh_user_event_weak(uint8_t id, usb_state_t usb_sta);		//__WEAK通知上层usb状态
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr) ; 
 error_t usbh_init( uint8_t id );
 error_t usbh_deinit(uint8_t id);

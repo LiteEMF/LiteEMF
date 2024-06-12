@@ -204,7 +204,17 @@ uint8_t usbh_find_by_status(uint8_t usb_stas)
     return USBH_NULL;
 }
 
+#if WEAK_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description: usbh状态通知用户处理
+*******************************************************************/
+__WEAK void usbh_user_event_weak(uint8_t id, usb_state_t usb_sta)
+{
 
+}
+#endif
 
 error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)   
 {
@@ -235,6 +245,7 @@ error_t usbh_set_status(uint8_t id, usb_state_t usb_sta, uint8_t addr)
 		break;
 	}	
 	pdev->state = usb_sta;
+	usbh_user_event_weak(id, usb_sta);		//用于自定义处理
 
 	
 	logd("usbh%x set status=%d\n",(uint16_t)id,(uint16_t)pdev->state);
@@ -517,6 +528,9 @@ void usbhs_init(void)
 {
 	uint8_t id;
 
+	#if API_USBH_BIT_ENABLE
+	usbh_core_pa_init(id<<4);
+	#endif
 	for(id=0; id<USBH_NUM; id++){
 		usbh_init(id<<4);
 	}
