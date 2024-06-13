@@ -212,9 +212,29 @@ bool api_bt_is_connected(bt_t bt)
 	return ret;
 }
 
+#if WEAK_ENABLE
 /*******************************************************************
-** Parameters: base_mac	:输入基地址
-** Returns:		base_mac:输出计算后的地址
+** Description:	蓝牙MAC地址, 使用大端地址
+ * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
+*******************************************************************/
+__WEAK bool api_bt_vendor_mac(uint8_t id, bt_t bt, uint8_t *pmac )
+{
+	return false;
+}
+/*******************************************************************
+** Parameters:	len:	buf 长度,
+** Returns:		名称字符长度, 0 表示不修改名称
+** Description:	用户自定义蓝牙名称,蓝牙名称会根据模式和蓝牙地址不而不同
+*******************************************************************/
+__WEAK uint8_t api_bt_vendor_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
+{
+	return MIN(len-1,(uint8_t)strlen(buf));
+}
+#endif
+
+/*******************************************************************
+** Parameters: id bt
+** Returns:		获取mac成功
 ** Description:	蓝牙MAC地址, 使用大端地址
  * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
  * add[0] 用于产品后面随机数,经典蓝牙地址是ble地址(ADD[0]+1)
@@ -222,7 +242,7 @@ bool api_bt_is_connected(bt_t bt)
  * add[2] 用于产品不同模式下不同mac地址
  * add[3~5]一般不建议修改
 *******************************************************************/
-bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
+bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *pmac )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
 {
 	bool ret = true;
 	uint8_t base_mac[6];
@@ -291,7 +311,8 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是publ
 	}
 	#endif
 
-	memcpy(buf, base_mac, 6);
+	memcpy(pmac, base_mac, 6);
+	api_bt_vendor_mac(id, bt, pmac );		//用于用户自定义mac地址
 
 	return ret;
 }
@@ -304,7 +325,7 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf )		//这里高3byte是publ
 uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 {
 	bool ret = false;
-	uint8_t name[30] = {0};
+	uint8_t name[33], name_len;
     uint8_t bt_addr[6];
     char chr[3];
 	api_bt_ctb_t* bt_ctbp;
@@ -367,9 +388,12 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	#endif
 
 	memset(buf,0,len);
-    len = MIN(len,(uint8_t)strlen(name));
-    memcpy(buf, name, len);
-	return len;
+    name_len = MIN(len-1,(uint8_t)strlen(name));
+    memcpy(buf, name, name_len);
+
+	name_len = api_bt_vendor_name(id,bt, buf, len);	//用户自定义名称
+
+	return name_len;
 }
 
 bool api_bt_is_bonded(uint8_t id,bt_t bt)

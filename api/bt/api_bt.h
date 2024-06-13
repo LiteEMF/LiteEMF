@@ -338,6 +338,8 @@ extern api_bt_ctb_t m_rfc;
 bt_evt_scan_t* api_bt_get_scan_result(bt_t bt);
 api_bt_ctb_t* api_bt_get_ctb(bt_t bt);
 bool api_bt_is_connected(bt_t bt);
+bool api_bt_vendor_mac(uint8_t id, bt_t bt, uint8_t *pmac );				//__WEAK
+uint8_t api_bt_vendor_name(uint8_t id,bt_t bt, char *buf, uint8_t len );	//__WEAK
 bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *buf );		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
 uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len );
 bool api_bt_is_bonded(uint8_t id,bt_t bt);
