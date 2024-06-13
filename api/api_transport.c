@@ -334,8 +334,15 @@ bool api_trp_init(void)
 {
 	//判断和设置默认模式
 	#if API_STORAGE_ENABLE
+	uint16_t max_trps = BT_SUPPORT | BIT(TR_UART);
+	#if API_USBD_BIT_ENABLE	
+	max_trps |= BIT(TR_USBD);
+	#endif
+	#if API_USBH_BIT_ENABLE
+	max_trps |= BIT(TR_USBH)
+	#endif
 
-	if(m_storage.trps & ~(BIT(TR_MAX) - 1)){
+	if(m_storage.trps & ~(max_trps)){
 		m_storage.trps = DEV_TRPS_DEFAULT;
 	}
 	if(m_storage.dev_mode & ~(USBD_TYPE_SUPPORT | BT_TYPE_SUPPORT)){
