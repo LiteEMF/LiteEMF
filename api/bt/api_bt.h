@@ -64,6 +64,10 @@ extern "C" {
 #define BT_RANDOM_NAME_ENABLE		1
 #endif
 
+#ifndef BLE_RANDOM_MAC_ENABLE					//BLE 使用随机地址, 可以解决ble解绑问题
+#define BLE_RANDOM_MAC_ENABLE		0
+#endif
+
 
 
 // demo search defined
@@ -290,6 +294,7 @@ typedef struct{
 	uint8_t is_debonded:1; 		//解绑状态(目前只适配EDR)
 	uint8_t res:2;
 	uint8_t bond_index;			//蓝牙配对绑定序号(蓝牙不同模式可以有单独的配对列表)
+	uint8_t bt_idx;				//蓝牙地址序号, 不同模式可以有不同的蓝牙mac地址
 	uint16_t inteval_10us;		//10 us
 	bt_sta_t sta;
 

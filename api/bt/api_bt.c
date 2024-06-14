@@ -257,6 +257,13 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *pmac )		//这里高3byte是pub
 	}else{
 		if(!hal_bt_get_mac(id, bt,base_mac)) return false;	//get base_mac
 	}
+	
+	#if BLE_RANDOM_MAC_ENABLE
+	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
+		memcpy(pmac, base_mac, 6);
+		return ret;
+	}
+	#endif
 
 	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
 		base_mac[0] += 1;								//edr address + 1
@@ -980,6 +987,7 @@ static bool api_bt_ctb_init(void)
 			bt_ctbp->hid_ready = false;
 			bt_ctbp->is_debonded = false;
 			bt_ctbp->bond_index = 0;
+			bt_ctbp->bt_idx = 0;
 
 			bt_ctbp->inteval_10us = 1500;
 			bt_ctbp->sta = BT_STA_UNKNOW;
