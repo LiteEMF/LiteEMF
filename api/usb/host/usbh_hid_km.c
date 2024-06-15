@@ -154,7 +154,7 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
     if(NULL == pkm_items) return;
     memset(&km,0, sizeof(km));
 
-    if(pkm_items->kb.find && !match_id){
+    if(pkm_items->kb.find && (HID_TYPE_KB == pclass->hid_type)){
     
         pitem = &pkm_items->kb.kb_fun;
         if(hid_items_match_id(pitem, buf, len)){
@@ -179,7 +179,7 @@ void usbh_hid_km_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint
         }
     }
 
-    if(pkm_items->mouse.find && !match_id){
+    if(pkm_items->mouse.find && (HID_TYPE_MOUSE == pclass->hid_type)){
         pitem = &pkm_items->mouse.button;
         if(hid_items_match_id(pitem, buf, len)){
             km.mouse.but = buf[pitem->bit_offset / 8];
