@@ -83,6 +83,9 @@ bool emf_api_init(void)
 	#endif
 
 	api_trp_init();		//在storage init 之后初始化 设备模式
+	#if API_BT_ENABLE	//为了方便项目初始化蓝牙参数,将蓝牙参数初始化放到最前面
+	api_bt_ctb_init();
+    #endif
 	
 	hw_user_vender_init();	
 

@@ -185,7 +185,8 @@ typedef enum  {
 
 
 typedef enum {
-    BT_EVT_INIT=0, 								//	(pa)
+	BT_EVT_UNKNOW=0,							//上电事件
+    BT_EVT_INIT, 								//init (pa)
 	BT_EVT_IDLE,								//idle
 	
 	BT_EVT_ADV,									//广播中(edr进入通用/限制可发现状态)
@@ -359,6 +360,7 @@ error_t os_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
 void api_bt_rx(uint8_t id,bt_t bt, bt_evt_rx_t* pa);								//__WEAK
 bool api_bt_event_weak(uint8_t id,bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);	//__WEAK
 void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa);
+bool api_bt_ctb_init(void);
 bool api_bt_init(void);
 bool api_bt_deinit(void);
 void api_bt_task(void* pa);

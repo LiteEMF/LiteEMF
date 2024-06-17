@@ -528,10 +528,10 @@ void usbhs_init(void)
 {
 	uint8_t id;
 
-	#if API_USBH_BIT_ENABLE
-	usbh_core_pa_init(id<<4);
-	#endif
 	for(id=0; id<USBH_NUM; id++){
+		#if API_USBH_BIT_ENABLE
+		usbh_core_pa_init(id<<4);
+		#endif
 		usbh_init(id<<4);
 	}
 }

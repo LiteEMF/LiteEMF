@@ -974,7 +974,7 @@ void api_bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 ** Returns:	
 ** Description:		
 *******************************************************************/
-static bool api_bt_ctb_init(void)
+bool api_bt_ctb_init(void)
 {
 	uint8_t bt;
 	api_bt_ctb_t* bt_ctbp;
@@ -1025,13 +1025,19 @@ static bool api_bt_ctb_init(void)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:		
+** Description:	必须先调用蓝牙ctb参数初始化	api_bt_ctb_init();
 *******************************************************************/
 bool api_bt_init(void)
 {
 	uint8_t i;
+	bt_t bt;
 
-	api_bt_ctb_init();
+	/* 蓝牙初始化前发送BT_EVT_UNKNOW事件,可用于蓝牙参数初始化 */
+	for(bt=0; bt<BT_MAX; bt++){
+        if(BT0_SUPPORT & BIT(bt)){      //全部模式
+            api_bt_event(BT_ID0, bt, BT_EVT_UNKNOW, NULL);
+        }
+    }
 	for(i=0; i<BT_ID_MAX; i++){
 		if(i == BT_ID0)hal_bt_init(BT_ID0);
 		else bt_driver_init(i);
