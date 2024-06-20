@@ -43,13 +43,14 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_iap2_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_iap2_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	if(0 == len) return;
 	app_iap2_in_process(buf,len);
 	logd("iap2 endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	return true;
 }
 
 

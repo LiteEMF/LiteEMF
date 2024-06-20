@@ -73,7 +73,7 @@ typedef struct {
 	int16_t imu_cal[6];
 	#endif
 
-	#if API_MODIFY_NAME_ENABLE
+	#if BT_MODIFY_NAME_ENABLE
 	uint8_t device_name_len;
 	char device_name[31];
 	#endif

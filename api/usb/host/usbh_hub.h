@@ -44,7 +44,7 @@ error_t usbh_hub_port_disable(uint8_t id);
 error_t usbh_hub_port_reset(uint8_t id);
 
 
-void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_hub( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hub_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hub_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

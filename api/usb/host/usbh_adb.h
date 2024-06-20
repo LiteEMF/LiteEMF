@@ -39,7 +39,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_adb_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_adb_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_adb( uint8_t id, usbh_class_t *pclass);
 error_t usbh_adb_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_adb_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

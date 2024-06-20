@@ -46,6 +46,10 @@ extern "C" {
 #define USBH_LOOP_ENABLE		1
 #endif
 
+#ifndef USBH_ENDPOINT_MAX_INTERVAL
+#define USBH_ENDPOINT_MAX_INTERVAL		8		/*usb中断端点最大interval,部分键鼠interval不规范*/
+#endif
+
 #define USBH0					0x00
 #define USBH1					0x10
 #define USBH2					0x20
@@ -58,12 +62,13 @@ typedef struct
 {
 	uint8_t		id;				//USBH_NULL: free, 非 USBH_NULL: used
 	dev_type_t 	dev_type;
-	hid_type_t 	hid_type;
+	uint16_t 	hid_types;
 
 	usb_inf_t  	itf;
 	usb_endp_t 	endpin;
 	usb_endp_t 	endpout;
 
+	void		*hid_items[4];		//hid report desc items, 最多一个描述符支持4个设备类型
 	void		*pdat;				//注意内存释放
 	list_head_t list;
 } usbh_class_t;

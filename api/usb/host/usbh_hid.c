@@ -164,40 +164,34 @@ uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
-
-    switch(pclass->hid_type){
-        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
-        case HID_TYPE_KB:
-        case HID_TYPE_MOUSE:
-            usbh_hid_km_in_process(id, pclass, buf, len);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-        case HID_TYPE_GAMEPADE:
-        case HID_TYPE_DINPUT:
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-        case HID_TYPE_SWITCH:
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            usbh_hid_gamepad_in_process(id, pclass, buf, len);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
-        case HID_TYPE_VENDOR	:
-            usbh_hid_vendor_in_process(id, pclass, buf, len);
-            break;
-        #endif
-        default:
-            break;
+	// logd("hid endp%d in%d:",(uint16_t)pclass->endpin.addr,len);dumpd(buf,len);
+    #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+    if((pclass->hid_types) & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE))){
+        if(usbh_hid_km_in_process(id, pclass, buf, len)){
+            return true;
+        }
     }
-    
+    #endif
+    #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+    if((pclass->hid_types) & BIT(HID_TYPE_VENDOR)){      //hid vendor没有ID,不会和其他设备复合
+        if(usbh_hid_vendor_in_process(id, pclass, buf, len)){
+            return true
+        }
+    }
+    #endif
+    #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)           //gamepad比较复杂放到最后
+    if((pclass->hid_types) & HID_GAMEPAD_MASK){
+        if(usbh_hid_gamepad_in_process(id, pclass, buf, len)){
+            return true;
+        }
+    }
+    #endif
+
+    return false;
 }
 
 
@@ -234,35 +228,26 @@ error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass)
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
     if(NULL == pdev) return err;
-    switch(pclass->hid_type){
-        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
-        case HID_TYPE_KB:
-        case HID_TYPE_MOUSE:
-            err = usbh_hid_km_open(id, pclass);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-        case HID_TYPE_GAMEPADE:
-        case HID_TYPE_DINPUT:
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-        case HID_TYPE_SWITCH:
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            err = usbh_hid_gamepad_open(id, pclass);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
-        case HID_TYPE_VENDOR	:
-            err = usbh_hid_vendor_open(id, pclass);
-            break;
-        #endif
-        default:
-            break;
+
+    #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+    if((pclass->hid_types) & (HID_TYPE_KB | HID_TYPE_MOUSE)){
+        err = usbh_hid_km_open(id, pclass);
+        if(err) return err;
     }
-    
-    if(err) return err;
+    #endif
+    #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
+    if((pclass->hid_types) & HID_GAMEPAD_MASK){
+        err = usbh_hid_gamepad_open(id, pclass);
+        if(err) return err;
+    }
+    #endif
+    #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+    if((pclass->hid_types) & BIT(HID_TYPE_VENDOR)){
+        err = usbh_hid_vendor_open(id, pclass);
+        if(err) return err;
+    }
+    #endif
+
     err = usbh_set_status(id, TUSB_STA_CONFIGURED, 0);
     if(err) return err;
 
@@ -307,6 +292,7 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
             hid_desc_dump(&hid_info);
             
             for(i=0; i<hid_info.collections; i++){
+                pcollection = &hid_info.item_list.collectionList[i];
                 if(0 == pcollection->parent){     //顶层集合确定设备类型
                     #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
                     if(ERROR_SUCCESS == usbh_hid_km_init(id, pclass, &hid_info,i)){
@@ -349,33 +335,23 @@ error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_
 error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass) 
 {
     error_t err = ERROR_UNKNOW;
-    switch(pclass->hid_type){
-        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
-        case HID_TYPE_KB:
-        case HID_TYPE_MOUSE:
-            err = usbh_hid_km_deinit(id, pclass);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-        case HID_TYPE_GAMEPADE:
-        case HID_TYPE_DINPUT:
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-        case HID_TYPE_SWITCH:
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            err = usbh_hid_gamepad_deinit(id, pclass);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
-        case HID_TYPE_VENDOR	:
-            err = usbh_hid_vendor_deinit(id, pclass);
-            break;
-        #endif
-        default:
-            break;
+
+    #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+    if((pclass->hid_types) & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE))){
+        err = usbh_hid_km_deinit(id, pclass);
     }
+    #endif
+    #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
+    if((pclass->hid_types) & HID_GAMEPAD_MASK){
+        err = usbh_hid_gamepad_deinit(id, pclass);
+    }
+    #endif
+    #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+    if((pclass->hid_types) & BIT(HID_TYPE_VENDOR)){
+        err = usbh_hid_vendor_deinit(id, pclass);
+    }
+    #endif
+
 	return err;
 }
 
@@ -386,28 +362,21 @@ error_t usbh_hid_deinit( uint8_t id, usbh_class_t *pclass)
 *******************************************************************/
 void usbh_hid_task(uint8_t id, usbh_class_t *pclass)
 {
-    switch(pclass->hid_type){
-        #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
-        case HID_TYPE_KB:
-        case HID_TYPE_MOUSE:
-            usbh_hid_km_task(id, pclass);
-            break;
-        #endif
-        #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
-        case HID_TYPE_GAMEPADE:
-        case HID_TYPE_DINPUT:
-        case HID_TYPE_X360	:
-        case HID_TYPE_XBOX	:
-        case HID_TYPE_SWITCH:
-        case HID_TYPE_PS3	:
-        case HID_TYPE_PS4	:
-        case HID_TYPE_PS5	:
-            usbh_hid_gamepad_task(id, pclass);
-            break;
-        #endif
-        default:
-            break;
+    #if (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
+    if((pclass->hid_types) & (HID_TYPE_KB | HID_TYPE_MOUSE)){
+        usbh_hid_km_task(id, pclass);
     }
+    #endif
+    #if (USBH_HID_SUPPORT & HID_GAMEPAD_MASK)
+    if((pclass->hid_types) & HID_GAMEPAD_MASK){
+        usbh_hid_gamepad_task(id, pclass);
+    }
+    #endif
+    #if (USBH_HID_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR))
+    if((pclass->hid_types) & BIT(HID_TYPE_VENDOR)){
+        usbh_hid_vendor_task(id, pclass);
+    }
+    #endif
 }
 
 #endif

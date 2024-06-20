@@ -36,7 +36,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_iap2_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_iap2_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_iap2( uint8_t id, usbh_class_t *pclass);
 error_t usbh_iap2_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_iap2_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

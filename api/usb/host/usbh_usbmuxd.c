@@ -44,13 +44,14 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_usbmuxd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_usbmuxd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	if(0 == len) return;
 	logd("usbmuxd endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
 	usbmuxd_data_process(buf,len);
+	return true;
 }
 
 

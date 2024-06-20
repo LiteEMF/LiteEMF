@@ -90,11 +90,12 @@ error_t usbh_cdc_set_line_coding(uint8_t id, uint8_t itf, cdc_line_coding_t cons
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_cdc_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_cdc_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	logd("cdc endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	return true;
 }
 
 /*******************************************************************

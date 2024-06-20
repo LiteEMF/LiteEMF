@@ -117,7 +117,7 @@ usbh_class_t *usbh_class_find_by_type(uint8_t id, dev_type_t type,uint8_t sub_ty
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->dev_type == type){
 			if(DEV_TYPE_HID == type){
-				if(sub_type != pos->hid_type) continue;
+				if(0 == (BIT(sub_type) & pos->hid_types)) continue;
 				if(HID_TYPE_XBOX == sub_type){		//xbox特殊处理,xbox音频不在这里处理
 					if(pos->endpin.type != TUSB_ENDP_TYPE_INTER) continue;
 					if(pos->endpout.type != TUSB_ENDP_TYPE_INTER) continue;
@@ -603,7 +603,8 @@ error_t usbh_class_deinit(uint8_t id)
 	usbh_class_t *pos;
 	usbh_dev_t* pdev = get_usbh_dev(id);
 
-	if(NULL != pdev) return err;
+	if(NULL == pdev) return err;
+
 	list_for_each_entry_type(pos,&pdev->class_list,usbh_class_t,list){
 		if(pos->endpout.addr){
 			err = usbh_endp_unregister(id,&pos->endpout);

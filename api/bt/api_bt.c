@@ -387,7 +387,7 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		#endif
 	}
 	
-	#if API_STORAGE_ENABLE && API_MODIFY_NAME_ENABLE
+	#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
 	if((m_storage.device_name_len > 0) && (m_storage.device_name_len <= BT_NAME_LEN_MAX)){
 		memset(name,0,sizeof(name));
 		memcpy(name,m_storage.device_name,m_storage.device_name_len);

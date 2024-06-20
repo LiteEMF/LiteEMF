@@ -60,7 +60,7 @@ extern uint16_t m_aoa_hid_types;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_aoa_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_aoa_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_aoa( uint8_t id, usbh_class_t *pclass);
 error_t usbh_aoa_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_aoa_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

@@ -42,7 +42,7 @@ extern hid_type_t usbh_gamepad_type;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass) ;
 error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *pinfo, uint8_t collection_index);
 error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass); 

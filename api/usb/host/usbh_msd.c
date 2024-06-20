@@ -44,11 +44,12 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_msd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_msd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	logd("msd endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	return true;
 }
 
 /*******************************************************************

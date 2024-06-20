@@ -113,11 +113,12 @@ error_t usbh_audio_endp_set_feature(uint8_t id, uint8_t endp, audio_clock_src_co
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:	
 *******************************************************************/
-void usbh_audio_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_audio_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
 	logd("audio endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+    return true;
 }
 
 /*******************************************************************

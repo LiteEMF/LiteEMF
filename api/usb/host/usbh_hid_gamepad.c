@@ -95,25 +95,28 @@ hid_type_t usbh_hid_vendor_gamepad(uint16_t vid, uint16_t pid)
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:		
 *******************************************************************/
-void usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_hid_gamepad_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-	// logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+	// logd("hid endp%d in%d:",(uint16_t)pclass->endpin.addr,len);dumpd(buf,len);
     bool ret;
     trp_handle_t trp_handle;
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    hid_type_t hid_type = app_gamepad_get_hidtype(pclass->hid_types);
+    trp_handle.index = U16(pclass->dev_type, hid_type);
 
    ret = app_gamepad_host_process(&trp_handle,&usbh_gamepad_key,buf,len);
 
     #if USBH_SOCKET_ENABLE
 	if(!ret){
         usbh_socket_cmd(&usbh_socket_trp,CMD_SOCKET_IN,buf,len);
+        ret = true;
 	}
 	#endif
+    return ret;
 }
 
 error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
@@ -125,9 +128,10 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    hid_type_t hid_type = app_gamepad_get_hidtype(pclass->hid_types);		//注意不会有多个手柄描述符,这里只处理一个手柄设备
+    trp_handle.index = U16(pclass->dev_type, hid_type);
     
-    switch(pclass->hid_type){
+    switch(hid_type){
         #if USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
         case HID_TYPE_GAMEPADE:
         case DEF_HID_TYPE_DINPUT:
@@ -138,7 +142,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
         case HID_TYPE_X360	:
         case HID_TYPE_XBOX	:
             if(pclass->endpin.type == TUSB_ENDP_TYPE_INTER){             //gamepad
-                // if(HID_TYPE_X360 == pclass->hid_type){
+                // if(HID_TYPE_X360 == hid_type){
                 //     uint8_t x360_ift_str[0XB2];
                 //     uint16_t str_len = sizeof(x360_ift_str);
                 //     usbh_req_get_string_desc(id, 4, 0X409, x360_ift_str, &str_len);
@@ -207,7 +211,7 @@ error_t usbh_hid_gamepad_open( uint8_t id, usbh_class_t *pclass)
     
     #if USBH_SOCKET_ENABLE      //socket从这里开始触发引导
     if(ERROR_SUCCESS == err){
-        usbh_socket_init(&usbh_socket_trp, U16(DEV_TYPE_HID, pclass->hid_type));       //TODO 选择socket通讯协议
+        usbh_socket_init(&usbh_socket_trp, U16(DEV_TYPE_HID, hid_type));       //TODO 选择socket通讯协议
     }
 	#endif
 
@@ -281,7 +285,7 @@ error_t usbh_hid_gamepad_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t 
         }   
 
         if(ERROR_SUCCESS == err){
-            pclass->hid_type = hid_type;
+            pclass->hid_types |= BIT(hid_type);
             usbh_gamepad_type = hid_type;
             // logd("usbh gamepad init type=%d\n",usbh_gamepad_type);
         }
@@ -303,7 +307,8 @@ error_t usbh_hid_gamepad_deinit( uint8_t id, usbh_class_t *pclass)
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    hid_type_t hid_type = app_gamepad_get_hidtype(pclass->hid_types);	//注意不会有多个手柄描述符,这里只处理一个手柄设备
+    trp_handle.index = U16(pclass->dev_type, hid_type);
 
     app_gamepad_deinit(&trp_handle);
     usbh_gamepad_type = HID_TYPE_NONE;
@@ -323,7 +328,8 @@ void usbh_hid_gamepad_task(uint8_t id, usbh_class_t *pclass)
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    hid_type_t hid_type = app_gamepad_get_hidtype(pclass->hid_types);
+    trp_handle.index = U16(pclass->dev_type, hid_type);
     app_gamepad_task(&trp_handle);
     UNUSED_PARAMETER(id);
 }

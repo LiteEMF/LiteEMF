@@ -37,7 +37,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_msd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_msd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_msd( uint8_t id, usbh_class_t *pclass);
 error_t usbh_msd_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_msd_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

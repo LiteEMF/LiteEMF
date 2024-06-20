@@ -52,34 +52,36 @@
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
-** Description:	pclass->pdat used storage hub port numbers	
+** Description:		
 *******************************************************************/
-void usbh_hid_vendor_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_hid_vendor_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
-//	logd("hid endp%d in%d:",pclass->endpin.addr,len);dumpd(buf,len);
+    bool ret = true;
+//	logd("hid endp%d in%d:",(uint16_t)pclass->endpin.addr,len);dumpd(buf,len);
 
     #if APP_CMD_ENABLE
     trp_handle_t trp_handle;
 		
     trp_handle.trp = TR_USBH;
     trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    trp_handle.index = U16(pclass->dev_type, HID_TYPE_VENDOR);
 
     app_command_rx(&trp_handle,buf,len);
     #endif
+
+    return ret;
 	
 }
 
 error_t usbh_hid_vendor_open( uint8_t id, usbh_class_t *pclass)
 {
     error_t err = ERROR_SUCCESS;
-    trp_handle_t trp_handle;
+    // trp_handle_t trp_handle;
 		
-    trp_handle.trp = TR_USBH;
-    trp_handle.id = id;
-    trp_handle.index = U16(pclass->dev_type, pclass->hid_type);
+    // trp_handle.trp = TR_USBH;
+    // trp_handle.id = id;
+    // trp_handle.index = U16(pclass->dev_type, HID_TYPE_VENDOR);
     
-
     return err;
 }
 
@@ -94,7 +96,7 @@ error_t usbh_hid_vendor_init(uint8_t id, usbh_class_t *pclass, hid_desc_info_t *
     error_t err = ERROR_NOT_FOUND;
 
     if(hid_match_collection(pinfo, collection_index, 0XFF80, 0X01)){ //0x05,0x01  0x09,0X02 fix VENDOR
-        pclass->hid_type = HID_TYPE_VENDOR;
+        pclass->hid_types |= BIT(HID_TYPE_VENDOR);
         err = ERROR_SUCCESS;
     }
 

@@ -178,6 +178,9 @@ error_t usbh_get_endp( usb_endp_t* endp,uint8_t *buf ,uint16_t len,usb_dir_t dir
             endp->dir = dir;
 			endp->mtu = SWAP16_L(pdesc->wMaxPacketSize) & 0X3FF;
             endp->interval = pdesc->bInterval;
+			if(endp->interval > USBH_ENDPOINT_MAX_INTERVAL){
+				endp->interval = USBH_ENDPOINT_MAX_INTERVAL;
+			}
 			err = ERROR_SUCCESS;
             break;
         }
@@ -296,13 +299,13 @@ static error_t usbh_parse_configuration_desc(uint8_t id,uint8_t cfg,uint8_t *buf
 
 			//这里区分usb class
 			pclass->dev_type = usbh_match_class(id,pclass);
-			logd("usbh match itft%d dev_type=%d\n",pclass->itf.if_num, pclass->dev_type);
+			logd("usbh match itft%d dev_type=%d\n",(uint16_t)pclass->itf.if_num, (uint16_t)pclass->dev_type);
 			usbh_class_itf_alt_select(id,pclass);			//user select
 
 			if((USBH_NULL != pclass->id) && (DEV_TYPE_NONE != pclass->dev_type)){
 				err = usbh_class_init(id, pclass, buf + i, len - i);
 				if(ERROR_SUCCESS == err){
-					logd("usbh match dev_type=%d, hid_type=%d\n",pclass->dev_type, pclass->hid_type);
+					logd("usbh match dev_type=%d, hid_types=%x\n",(uint16_t)pclass->dev_type, pclass->hid_types);
 					list_add(&pclass->list, &pdev->class_list);
 				}
 			}else{

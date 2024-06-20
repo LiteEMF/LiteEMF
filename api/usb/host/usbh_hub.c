@@ -161,7 +161,7 @@ error_t usbh_hub_port_reset(uint8_t id)
 ** Returns:	
 ** Description:	pclass->pdat used storage hub port numbers	
 *******************************************************************/
-void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
+bool usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len)
 {
     error_t err;
     uint8_t i, hub_id,port_num;
@@ -189,7 +189,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                 hub_id = id | i;
 
                 err = usbh_hub_port_get_status(hub_id, hub_stu);
-                if(err) return;
+                if(err) return false;
 
                 logd("hubport%d_stu:",(uint16_t)hub_id);dumpd(hub_stu,4);
                 pport_status->status.value = SWAP16_L(pport_status->status.value);
@@ -198,7 +198,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
                 if(pport_status->change.bits.connection){         // Connection change
                     // Acknowledge Port Connection Change
                     err = usbh_hub_port_clear_feature(hub_id,HUB_FEATURE_PORT_CONNECTION_CHANGE);
-                    if(err) return;
+                    if(err) return false;
 
                     if(pport_status->status.bits.connection){         // Connection
                         usbh_det_event(hub_id, true); 
@@ -236,6 +236,7 @@ void usbh_hub_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_
     }
 	
 	UNUSED_PARAMETER(len);
+    return true;
 }
     
 /*******************************************************************

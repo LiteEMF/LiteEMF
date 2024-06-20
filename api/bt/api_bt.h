@@ -63,6 +63,10 @@ extern "C" {
 #ifndef BT_RANDOM_NAME_ENABLE
 #define BT_RANDOM_NAME_ENABLE		1
 #endif
+#ifndef BT_MODIFY_NAME_ENABLE
+#define BT_MODIFY_NAME_ENABLE		0
+#endif
+
 
 #ifndef BLE_RANDOM_MAC_ENABLE					//BLE 使用随机地址, 可以解决ble解绑问题
 #define BLE_RANDOM_MAC_ENABLE		0

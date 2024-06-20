@@ -16,6 +16,7 @@
 #include "api/usb/usb_typedef.h"
 #include "api/hid/hid_typedef.h"
 #include "api/usb/host/usbh_core.h"
+#include "api/hid/hid_desc_parser.h"
 
 #include  "api/usb/host/usbh_hid_km.h"
 #include  "api/usb/host/usbh_hid_gamepad.h"
@@ -33,7 +34,12 @@ extern "C" {
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
-
+typedef struct 
+{
+	uint8_t mask;			//0: free, 非0: used
+	hid_type_t 	hid_type;
+    hid_items_t item;		//占位用
+} usbh_items_head_t;
 
 
 /*****************************************************************************************************
@@ -46,7 +52,7 @@ error_t usbh_hid_get_report_desc( uint8_t id, uint8_t index, uint16_t itf, uint8
 uint16_t usbh_get_hid_desc_len(uint8_t* buf ,uint16_t len);
 
 
-void usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_hid_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_hid( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hid_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_hid_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

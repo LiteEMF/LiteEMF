@@ -36,7 +36,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_printer_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_printer_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_printer( uint8_t id, usbh_class_t *pclass);
 error_t usbh_printer_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_printer_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

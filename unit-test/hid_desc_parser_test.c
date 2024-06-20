@@ -138,36 +138,30 @@ void hid_desc_parser_test(void)
     
     err = hid_desc_parse_report(&hid_info, pdesc, desc_len);
     if(0 == err){
-        km_items_t item;
+        kb_items_t item;
         memset(&item, 0, sizeof(item));
   
         for(i=0; i<hid_info.reportItems; i++){
-            if(0 == item.kb.kb_fun.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.kb.kb_fun)){
+            if(0 == item.kb_fun.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, 0XE0,&item.kb_fun)){
                     logd("usbh kb_fun:");
-                    hid_items_dump(&item.kb.kb_fun);
+                    hid_items_dump(&item.kb_fun);
                     err = ERROR_SUCCESS;
                 }
             }
 
-            if(0 == item.kb.kb_normal.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb.kb_normal)){
+            if(0 == item.kb_normal.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb_normal)){
                     logd("usbh kb_normal:");
-                    hid_items_dump(&item.kb.kb_normal);
-                    err = ERROR_SUCCESS;
-                }
-            }else if(0 == item.kb.kb2_normal.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_INPUT,0X07, KB_A, &item.kb.kb2_normal)){
-                    logd("usbh kb2_normal:");
-                    hid_items_dump(&item.kb.kb2_normal);
+                    hid_items_dump(&item.kb_normal);
                     err = ERROR_SUCCESS;
                 }
             }
 
-            if(0 == item.kb.led.report_length){
-                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_OUTPUT,0X07, KB_A, &item.kb.led)){
+            if(0 == item.led.report_length){
+                if(hid_find_items(&hid_info,i,HID_REPORT_TYPE_OUTPUT,0X07, KB_A, &item.led)){
                     logd("usbh kb led:");
-                    hid_items_dump(&item.kb.led);
+                    hid_items_dump(&item.led);
                 }
             }
         }

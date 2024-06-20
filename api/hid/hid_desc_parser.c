@@ -108,7 +108,11 @@ static error_t hid_desc_parse_report_type(hid_desc_info_t *pinfo,hid_item_info_t
 
     // The barcode scanner has this issue.  We'll ignore it.
 	// if (pinfo->globals.logicalMinimum > pinfo->globals.logicalMaximum)return(ERROR_DATA);
-    if (pinfo->haveUsageMin || pinfo->haveUsageMax)return(ERROR_UNKNOW);
+
+    //部分设备09 xx, 29 xx的组合
+    //if (pinfo->haveUsageMin || pinfo->haveUsageMax)return(ERROR_UNKNOW);
+    pinfo->haveUsageMax = false;
+    pinfo->haveUsageMin = false;
 
     //  Initialize the new Report Item structure
     lreportItem = &pinfo->item_list.reportItemList[pinfo->reportItems++];
@@ -436,6 +440,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
             dataByte = *currentRptDescPtr++;  /* signed data will be taken care in ItemTag it is expected */
             item.Data.uItemData |= ((uint32_t)dataByte << (i*8));
         }
+        //logd("%x %x",item.ItemDetails.val,item.Data.uItemData);
 
        len_to_be_parsed -= (ldataSize+1);   /* remaining bytes = current - (length of current item + 1)*/
 
@@ -445,6 +450,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                     case HIDTag_Input :
                     case HIDTag_Output :
                     case HIDTag_Feature :
+                        //logd_r( " haveUsageMin=%d haveUsageMax=%d\n", pinfo->haveUsageMin , pinfo->haveUsageMax);
                         err = hid_desc_parse_report_type(pinfo, &item);
                     break;
                     case HIDTag_Collection :
@@ -583,6 +589,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                             }
                             pinfo->haveUsageMin = true;
                         }
+                        //logd("HIDTag_UsageMinimum min=%d max=%d",pinfo->haveUsageMin,pinfo->haveUsageMax);
                         break;
 
                     case HIDTag_UsageMaximum :
@@ -620,6 +627,7 @@ error_t hid_desc_parse_report(hid_desc_info_t *pinfo, uint8_t* pdesc , uint16_t 
                             }
                             pinfo->haveUsageMax = true;
                         }
+                        //logd("HIDTag_UsageMaximum min=%d max=%d",pinfo->haveUsageMin,pinfo->haveUsageMax);
                         break;
 
                     case HIDTag_DesignatorIndex :

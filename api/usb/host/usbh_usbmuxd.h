@@ -36,7 +36,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_usbmuxd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_usbmuxd_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_usbmuxd( uint8_t id, usbh_class_t *pclass);
 error_t usbh_usbmuxd_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_usbmuxd_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);

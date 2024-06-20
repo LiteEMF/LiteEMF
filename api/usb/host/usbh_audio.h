@@ -39,7 +39,7 @@ extern api_audio_t usbh_audio_info;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-void usbh_audio_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
+bool usbh_audio_in_process(uint8_t id, usbh_class_t *pclass, uint8_t* buf, uint16_t len);
 error_t usbh_match_audio( uint8_t id, usbh_class_t *pclass);
 error_t usbh_audio_open( uint8_t id, usbh_class_t *pclass);
 error_t usbh_audio_init( uint8_t id, usbh_class_t *pclass, uint8_t* pdesc, uint16_t len);
