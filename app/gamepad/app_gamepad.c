@@ -275,6 +275,11 @@ __WEAK uint8_t app_gamepad_get_vendor_map(trp_handle_t *phandle,uint32_t(**mapp)
 }
 #endif
 
+/*******************************************************************
+** Function:
+** Parameters:
+** Returns:		gamepade 模式相同传输类型下默认只能有一种,所以可以主机筛选判断
+*******************************************************************/
 hid_type_t app_gamepad_get_hidtype(uint16_t hid_types)
 {
 	hid_type_t hid_type = HID_TYPE_NONE;
