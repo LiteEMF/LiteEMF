@@ -41,7 +41,6 @@
 
 #include  "api/api_log.h"
 
-#include "le_common.h"
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -53,6 +52,7 @@ command_rx_t uart2_cmd_rx = {{uart2_sbuf,0},{NULL,0}};
 #endif
 
 #if API_BT_ENABLE
+#include "le_common.h"
 #if BT_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))					//ble peripheral
 uint8_t ble_sbuf[BLE_CMD_MTU];
 command_rx_t ble_cmd_rx = {{ble_sbuf,0},{NULL,0}};;
@@ -125,8 +125,8 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_GET_DEV_VERSION:
 		#ifdef SW_VERSION
-		replay[0] = SW_VERSION>>8;
-		replay[1] = SW_VERSION;
+		replay[0] = (uint8_t)SW_VERSION>>8;
+		replay[1] = (uint8_t)SW_VERSION;
 		replay[2] = 0;
 		replay[3] = 0;
 		api_command_tx(phandle,phead->cmd, replay, 4);
@@ -164,17 +164,16 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_DEV_EID:
 		break;
-	case CMD_DEV_NAME:
-		#ifdef DEFAULT_NAME
+	case CMD_DEV_NAME:	
+		#if TCFG_USER_BLE_ENABLE
 		char device_name[BT_NAME_LEN_MAX];
-		u8 device_name_len = 0;
+		uint8_t device_name_len = 0;
 		if(len == CMD_PACK_LEN){		//read	
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
 			api_command_tx(phandle,phead->cmd, device_name, device_name_len);
-		//	api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
 			ret = true;
 		}else if(len > CMD_PACK_LEN){				//write
-			#if TCFG_USER_BLE_ENABLE && API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
+			#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
 			memset(device_name,0,sizeof(device_name));
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
 			if(memcmp(device_name, buf+4, buf[1]-5)){
@@ -191,14 +190,23 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			}
 			#endif
 		}
+		#else
+		#ifdef DEFAULT_NAME
+		if(len == CMD_PACK_LEN){		//read	
+			api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
+			ret = true;
+		}else if(len > CMD_PACK_LEN){				//write
+			
+
+		}
+		#endif
 		#endif
 		break;
 
 	/*---- 0x10	设备信息 ----*/
 	case CMD_DEV_MODE:			//TODO 功能待完善修改
 		if(len >= CMD_PACK_LEN + 8){
-			uint16_t type;
-			uint16_t trps = U16(buf[4],buf[5]);
+		//	uint16_t trps = U16(buf[4],buf[5]);
 			m_dev_mode = U16(buf[6],buf[7]);
 			m_hid_mode = U16(buf[8],buf[9]);
 		}
@@ -215,13 +223,14 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_TEST_MODE:
 		if(len > CMD_PACK_LEN){
-			test_trp = buf[4];
+			test_trp = (trp_t)buf[4];
 		}else{
-			test_trp = phandle->trp;
+			test_trp = (trp_t)phandle->trp;
 		}
 		ret = true;
 		break;
 	case CMD_DEV_CTRL:
+		#if API_PM_ENABLE
 		if(len > CMD_PACK_LEN){
 			dev_ctrl_t ctrl = buf[4];
 			switch(ctrl){
@@ -250,6 +259,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 				api_command_tx(phandle,phead->cmd, replay, 2);
 			}
 		}
+		#endif
 		break;
 	case CMD_STORAGE_SYNC:
 		#if API_STORAGE_ENABLE
@@ -346,7 +356,7 @@ command_rx_t* app_get_command_rx(trp_handle_t* phandle)
 		}
 	#endif
 	default:
-		return NULL;
+
 		break;
 	}
 	

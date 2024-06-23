@@ -227,7 +227,7 @@ bool api_storage_set_map(uint8_t index, bool sync)
 	}
 
 	if(ret){
-		ret = api_flash_read(STORAGE_LIST_MAP_ADDR(index),m_storage_list_map, STORAGE_LIST_MAP_SIZE);
+		ret = api_flash_read(STORAGE_LIST_MAP_ADDR(index),(uint8_t*)m_storage_list_map, STORAGE_LIST_MAP_SIZE);
 		m_storage.list_map_index = index;
 	}
 	
@@ -244,7 +244,7 @@ bool api_storage_sync(void)
 	bool ret = false;
 
 	logd("api_storage_sync,map=%d\n",m_storage.list_map_index);
-    ret = api_storage_write_map(m_storage.list_map_index, m_storage_list_map, STORAGE_LIST_MAP_SIZE);
+    ret = api_storage_write_map(m_storage.list_map_index, (uint8_t*)m_storage_list_map, STORAGE_LIST_MAP_SIZE);
 	is_stg_auto_sync = !ret;
 	storage_timer = m_systick;
 	return ret;
@@ -267,7 +267,7 @@ bool api_storage_init(void)
 	if(STORAGE_LIST_MAP_NUM <= m_storage.list_map_index){
 		m_storage.list_map_index = 0;
 	}
-	ret &= api_flash_read(STORAGE_LIST_MAP_ADDR(m_storage.list_map_index),m_storage_list_map, STORAGE_LIST_MAP_SIZE );
+	ret &= api_flash_read(STORAGE_LIST_MAP_ADDR(m_storage.list_map_index),(uint8_t*)m_storage_list_map, STORAGE_LIST_MAP_SIZE );
 	if(!ret){
 		loge_r("storage init error!\n");
 	}
