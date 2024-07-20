@@ -377,7 +377,8 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	}
 	#endif
 
-	if(!ret){
+	#ifdef DEFAULT_NAME
+	// if(!ret){
 		memcpy(name,DEFAULT_NAME,sizeof(DEFAULT_NAME));
 		
 		#if BT_RANDOM_NAME_ENABLE
@@ -385,7 +386,8 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		sprintf(chr, "%02x", bt_addr[0]);
 		memcpy(name+strlen(name),chr,3);
 		#endif
-	}
+	// }
+	#endif
 	
 	#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
 	if((m_storage.device_name_len > 0) && (m_storage.device_name_len <= BT_NAME_LEN_MAX)){

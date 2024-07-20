@@ -91,7 +91,7 @@ typedef struct{
 
 typedef struct {
     axis2i_t stick[APP_STICK_NUMS];
-	int16_t tarigger[APP_TRIGGER_NUMS];
+	int16_t trigger[APP_TRIGGER_NUMS];
 } joystick_t;           //12
 
 

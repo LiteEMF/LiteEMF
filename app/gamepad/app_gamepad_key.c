@@ -187,8 +187,8 @@ void app_gamepad_key_scan_task(app_gamepad_key_t *pkey)
     #if APP_JOYSTICK_ENABLE
     app_key.stick_l = m_joystick.stick[APP_STICK_L_ID];
     app_key.stick_r = m_joystick.stick[APP_STICK_R_ID];
-    app_key.l2 = m_joystick.tarigger[APP_TRIGGER_L_ID];
-    app_key.r2 = m_joystick.tarigger[APP_TRIGGER_R_ID];
+    app_key.l2 = m_joystick.trigger[APP_TRIGGER_L_ID];
+    app_key.r2 = m_joystick.trigger[APP_TRIGGER_R_ID];
     #endif
 
     app_gamepad_key_vendor_scan(&app_key);	
