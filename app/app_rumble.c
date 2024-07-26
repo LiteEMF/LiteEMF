@@ -83,8 +83,10 @@ void app_rumble_set_duty(uint8_t id,uint8_t duty,uint32_t timeout_ms)
     if(0 == duty || 0 == rumble_ctb[id].percent){         
         rumble_duty = 0;
     }else{
-		rumble_duty = duty * rumble_ctb[id].percent * (255-rumble_ctb[id].min) / (255 * 100);
-        rumble_duty += rumble_ctb[id].min;
+		rumble_duty = duty * rumble_ctb[id].percent / 100;
+        if(rumble_duty < rumble_ctb[id].min){
+            rumble_duty = rumble_ctb[id].min;
+        }
     }
 
     if(m_rumble.duty[id] || rumble_duty){

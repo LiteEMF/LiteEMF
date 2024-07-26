@@ -837,7 +837,7 @@ static void btc_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa
 			}else{
 				bt_ctbp->sta = BT_STA_ADV;
 			}
-			logd_g("bt(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
+			logd_g("btc(%d) init ok en=%d sta=%d...\n",bt, bt_ctbp->enable,bt_ctbp->sta);
 			break;
 		case BT_EVT_CONNECTED:
 			logd_g("btc(%d) connect...\n",bt);

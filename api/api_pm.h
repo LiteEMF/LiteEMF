@@ -65,6 +65,7 @@ extern pm_sta_t	m_pm_sta;
 extern timer_t m_pm_sleep_timer;								//休眠定时器
 extern uint32_t m_pm_sleep_timerout;	//休眠超时时间
 extern bool app_pm_key_sleep;		
+extern bool app_key_poweron;
 
 /*****************************************************************************************************
 **  Function
