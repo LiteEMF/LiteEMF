@@ -297,6 +297,8 @@ void api_pm_task(void*pa)
 			logd_r("reset...\n\n");
 			#if API_STORAGE_ENABLE
 			m_storage.reset_reson = SOFT_RESET_MASK;
+			api_storage_sync();
+			if (!api_storage_sync_complete()) return;
 			#endif
 
 			hal_reset();
