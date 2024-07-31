@@ -273,12 +273,6 @@ void api_pm_task(void*pa)
 		if(m_systick - pm_force_shutdown < 3000){
 			if(api_pm_sleep_hook()) return;
 
-			#if API_STORAGE_ENABLE
-			api_storage_sync();
-			if (!api_storage_sync_complete()) return;
-			#endif
-
-
 			#if API_BT_ENABLE
 			if(1){		//蓝牙需要正常断开连接
 				uint8_t bt;
@@ -303,6 +297,11 @@ void api_pm_task(void*pa)
 
 			hal_reset();
 		}else{
+			#if API_STORAGE_ENABLE
+			api_storage_sync();
+			if (!api_storage_sync_complete()) return;
+			#endif
+
 			#if POWER_SWITCH_KEY
 			if(KEY_POWER && app_pm_key_sleep){
 				api_reset();

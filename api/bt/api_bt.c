@@ -216,10 +216,71 @@ bool api_bt_is_connected(bt_t bt)
 /*******************************************************************
 ** Description:	蓝牙MAC地址, 使用大端地址
  * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
+ * add[0] 用于产品后面随机数,经典蓝牙地址是ble地址(ADD[0]+1)
+ * add[1] 用于产品升级时候进入boot蓝牙地址+1
+ * add[2] 用于产品不同模式下不同mac地址
+ * add[3~5]一般不建议修改
+ * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
 *******************************************************************/
 __WEAK bool api_bt_vendor_mac(uint8_t id, bt_t bt, uint8_t *pmac )
 {
-	return false;
+	api_bt_ctb_t* bt_ctbp;
+
+	bt_ctbp = api_bt_get_ctb(bt);
+
+	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
+		pmac[0] += 1;								//edr address + 1
+	}
+
+ 	#if (BT_TYPE_SUPPORT & BIT(DEV_TYPE_HID))					//优化代码,不支持HID不编译
+	if(bt_ctbp->types & BIT(DEV_TYPE_HID)){
+		switch(bt_ctbp->hid_types){
+			case BIT_ENUM(HID_TYPE_GAMEPADE):
+				pmac[2] += HID_TYPE_GAMEPADE;
+				break;
+			case BIT_ENUM(HID_TYPE_DINPUT):
+				pmac[2] += HID_TYPE_DINPUT;
+				break;
+			case BIT_ENUM(HID_TYPE_SWITCH):
+				pmac[2] += HID_TYPE_SWITCH;
+				break;
+			case BIT_ENUM(HID_TYPE_PS3)	:
+				pmac[2] += HID_TYPE_PS3;
+				break;
+			case BIT_ENUM(HID_TYPE_PS4)	:
+				pmac[2] += HID_TYPE_PS4;
+				break;
+			case BIT_ENUM(HID_TYPE_PS5)	:
+				pmac[2] += HID_TYPE_PS5;
+				break;
+			case BIT_ENUM(HID_TYPE_X360)	:
+				pmac[2] += HID_TYPE_X360;
+				break;
+			case BIT_ENUM(HID_TYPE_XBOX)	:
+				pmac[2] += HID_TYPE_XBOX;
+				break;
+			case BIT_ENUM(HID_TYPE_KB) 	:
+				pmac[2] += HID_TYPE_KB;
+				break;
+			case BIT_ENUM(HID_TYPE_MOUSE) :
+				pmac[2] += HID_TYPE_MOUSE;
+				break;
+			case BIT_ENUM(HID_TYPE_CONSUMER)	:
+				pmac[2] += HID_TYPE_CONSUMER;
+				break;
+			case BIT_ENUM(HID_TYPE_MT)	:
+				pmac[2] += HID_TYPE_MT;
+				break;
+			case BIT_ENUM(HID_TYPE_TOUCH)	:
+				pmac[2] += HID_TYPE_TOUCH;
+				break;
+			default :			//comble device
+				pmac[2] += 16;
+				break;
+		}
+	}
+	#endif
+	return true;
 }
 /*******************************************************************
 ** Parameters:	len:	buf 长度,
@@ -236,11 +297,6 @@ __WEAK uint8_t api_bt_vendor_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 ** Parameters: id bt
 ** Returns:		获取mac成功
 ** Description:	蓝牙MAC地址, 使用大端地址
- * add[3~5]为高厂商地址,add[0~2]为低产品地址(NRF工具显示的地址前面是高位,后面是低位)
- * add[0] 用于产品后面随机数,经典蓝牙地址是ble地址(ADD[0]+1)
- * add[1] 用于产品升级时候进入boot蓝牙地址+1
- * add[2] 用于产品不同模式下不同mac地址
- * add[3~5]一般不建议修改
 *******************************************************************/
 bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *pmac )		//这里高3byte是public地址,和nrf(大端输出)搜索是反的
 {
@@ -258,68 +314,8 @@ bool api_bt_get_mac(uint8_t id, bt_t bt, uint8_t *pmac )		//这里高3byte是pub
 		if(!hal_bt_get_mac(id, bt,base_mac)) return false;	//get base_mac
 	}
 	
-	#if BLE_RANDOM_MAC_ENABLE
-	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
-		memcpy(pmac, base_mac, 6);
-		return ret;
-	}
-	#endif
-
-	if((BT_BLE == bt) || (BT_BLE_RF == bt)){
-		base_mac[0] += 1;								//edr address + 1
-	}
-
- 	#if (BT_TYPE_SUPPORT & BIT(DEV_TYPE_HID))					//优化代码,不支持HID不编译
-	if(bt_ctbp->types & BIT(DEV_TYPE_HID)){
-		switch(bt_ctbp->hid_types){
-			case BIT_ENUM(HID_TYPE_GAMEPADE):
-				base_mac[2] += HID_TYPE_GAMEPADE;
-				break;
-			case BIT_ENUM(HID_TYPE_DINPUT):
-				base_mac[2] += HID_TYPE_DINPUT;
-				break;
-			case BIT_ENUM(HID_TYPE_SWITCH):
-				base_mac[2] += HID_TYPE_SWITCH;
-				break;
-			case BIT_ENUM(HID_TYPE_PS3)	:
-				base_mac[2] += HID_TYPE_PS3;
-				break;
-			case BIT_ENUM(HID_TYPE_PS4)	:
-				base_mac[2] += HID_TYPE_PS4;
-				break;
-			case BIT_ENUM(HID_TYPE_PS5)	:
-				base_mac[2] += HID_TYPE_PS5;
-				break;
-			case BIT_ENUM(HID_TYPE_X360)	:
-				base_mac[2] += HID_TYPE_X360;
-				break;
-			case BIT_ENUM(HID_TYPE_XBOX)	:
-				base_mac[2] += HID_TYPE_XBOX;
-				break;
-			case BIT_ENUM(HID_TYPE_KB) 	:
-				base_mac[2] += HID_TYPE_KB;
-				break;
-			case BIT_ENUM(HID_TYPE_MOUSE) :
-				base_mac[2] += HID_TYPE_MOUSE;
-				break;
-			case BIT_ENUM(HID_TYPE_CONSUMER)	:
-				base_mac[2] += HID_TYPE_CONSUMER;
-				break;
-			case BIT_ENUM(HID_TYPE_MT)	:
-				base_mac[2] += HID_TYPE_MT;
-				break;
-			case BIT_ENUM(HID_TYPE_TOUCH)	:
-				base_mac[2] += HID_TYPE_TOUCH;
-				break;
-			default :			//comble device
-				base_mac[2] += 16;
-				break;
-		}
-	}
-	#endif
-
 	memcpy(pmac, base_mac, 6);
-	api_bt_vendor_mac(id, bt, pmac );		//用于用户自定义mac地址
+	ret = api_bt_vendor_mac(id, bt, pmac );		//用于用户自定义mac地址
 
 	return ret;
 }
@@ -378,7 +374,7 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 	#endif
 
 	#ifdef DEFAULT_NAME
-	// if(!ret){
+	if(!ret){
 		memcpy(name,DEFAULT_NAME,sizeof(DEFAULT_NAME));
 		
 		#if BT_RANDOM_NAME_ENABLE
@@ -386,7 +382,7 @@ uint8_t api_bt_get_name(uint8_t id,bt_t bt, char *buf, uint8_t len )
 		sprintf(chr, "%02x", bt_addr[0]);
 		memcpy(name+strlen(name),chr,3);
 		#endif
-	// }
+	}
 	#endif
 	
 	#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
