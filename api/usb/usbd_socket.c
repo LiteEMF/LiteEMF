@@ -55,7 +55,7 @@ bool usbd_socket_cmd(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len
 		ret = usbh_socket_decode(phandle,cmd,buf,len);
 		#endif
 	}else{
-		ret = api_command_tx(phandle,cmd,buf,len);
+		ret = app_command_tx(phandle,cmd,buf,len);
 	}
 	
 	return ret;

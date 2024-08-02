@@ -71,8 +71,13 @@ typedef enum{
 	CMD_USB_STA,					//设备USB状态
 
 	/*---- 0x50	设备配置 ----*/
-	
+	/*---- 0xD0 ~ 0xDF	socket ----*/
+	/*---- 0XDF 自定义封装包  ----*/
+	/*---- 0xE0	~ 0XEF自定义 ----*/
+}app_cmd_t;
 
+
+typedef enum{
 	/*---- 0xD0	socket ----*/
 	CMD_SOCKET_SETUP=0XD0,
 	CMD_SOCKET_OUT,
@@ -81,13 +86,16 @@ typedef enum{
 	CMD_SOCKET_SETUP_STALL,
 	CMD_SOCKET_SYNC,
 	CMD_SOCKET_READY,
+}app_socket_cmd_t;
 
+typedef enum{
 	/*---- 自定义封装包 ----*/
 	CMD_VENDOR_PACK=0XDF,
 	/*---- 0xE0	自定义 ----*/
 	CMD_VENDOR=0XE0,
 	CMD_UNSUPPORT=0XFF,
-}app_cmd_t;
+}app_vendor_cmd_t;
+
 
 
 #define CTRL_SUB_DEV	0X80	//控制从机单片机
@@ -104,6 +112,9 @@ extern trp_t test_trp;
 void app_command_init(void);
 bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);		//WEAK
 bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len);
+
+bool app_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms);
+bool app_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len);
 bool app_command_rx(trp_handle_t *phandle,uint8_t *buf, uint8_t len);
 bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c);		
 bool app_command_rx_fifo(trp_handle_t *phandle, app_fifo_t* fifop);

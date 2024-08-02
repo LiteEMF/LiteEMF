@@ -22,7 +22,7 @@
 #include  "app/app_rumble.h"
 #endif
 #if APP_CMD_ENABLE
-#include "app/app_command.h"
+#include "app/app_commander.h"
 #endif
 
 #include "api/api_log.h"

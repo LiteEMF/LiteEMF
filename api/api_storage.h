@@ -49,8 +49,8 @@ extern "C" {
 typedef  struct {	
 	uint16_t crc;					//crc 包括len 和 map
 	uint16_t res;					//res 0
-	uint16_t max_len;				//map_max len
-	uint16_t map_len;				//map[] len, 
+	uint16_t max_len;				//map_max len, 需要在map初始化的时候设置正确的值
+	uint16_t map_len;				//map[] len, 当前map中数据有效长度
 	uint8_t map[4];					//注意这里只做为占位使用,具体大小根据len和实际空间分配为准	
 }api_storage_map_t;
 
@@ -96,6 +96,7 @@ extern api_storage_map_t* const m_storage_map;
 **  Function
 ******************************************************************************************************/
 bool api_storage_check_map(api_storage_map_t* mapp, uint16_t len);
+bool api_storage_set_crc(api_storage_map_t* mapp, uint16_t map_len);
 uint16_t api_storage_calculate_crc(api_storage_map_t* mapp);
 bool api_storage_read_map(uint8_t index,uint8_t* map, uint16_t map_len);
 bool api_storage_write_map(uint8_t index,uint8_t* map_buf, uint16_t map_len);

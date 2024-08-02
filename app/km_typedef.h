@@ -207,6 +207,10 @@ extern "C" {
 #define   MOUSE_WHILE_D			(0XF5)
 #define   MOUSE_WHILE_U			(0XF6)
 #define   MOUSE_WHILE			(0XF7)
+#define   MOUSE_XY_UP           (0XF8)
+#define   MOUSE_XY_DOWN         (0XF9)
+#define   MOUSE_XY_LEFT         (0XFA)
+#define   MOUSE_XY_RIGHT        (0XFB)
 #define   MOUSE_XY				(0XFE)
 
 #define   KB_DEFAULT			(0XFF)

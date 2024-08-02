@@ -16,7 +16,7 @@
 #if API_USBH_BIT_ENABLE && USBH_SOCKET_ENABLE
 #include "api/usb/usbh_socket.h"
 #include "api/usb/host/usbh.h"
-#include "app/app_command.h"
+#include "app/app_commander.h"
 #if APP_GAMEAPD_ENABLE
 #include "app/gamepad/app_gamepad.h"
 #endif
@@ -69,7 +69,7 @@ bool usbh_socket_cmd(trp_handle_t* phandle,uint8_t cmd,uint8_t* buf,uint16_t len
 		ret = usbd_socket_decode(phandle,cmd,buf,len);
 		#endif
 	}else{
-		ret = api_command_tx(phandle,cmd,buf,len);
+		ret = app_command_tx(phandle,cmd,buf,len);
 	}
 	return ret;
 }

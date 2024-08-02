@@ -98,6 +98,17 @@ uint16_t api_storage_calculate_crc(api_storage_map_t* mapp)
 	return crc16(0XFFFF, (uint8_t*)mapp + 2, mapp->map_len + (STORAGE_MAP_HEAD_LEN - 2));
 }
 
+bool api_storage_set_crc(api_storage_map_t* mapp, uint16_t map_len)
+{
+	if(mapp->map_len <= mapp->max_len){
+		mapp->map_len = map_len;
+		mapp->crc = api_storage_calculate_crc(mapp);
+		return true;
+	}else{
+		return false;
+	}
+}
+
 /*******************************************************************
 ** Parameters:		
 ** Returns:	

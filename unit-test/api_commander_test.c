@@ -34,7 +34,7 @@ void api_commander_test(void)
 	//tx
 	logd("\ncommander_tx test:\n");
 	logd("buf:"); dumpd(test_buf,sizeof(test_buf));
-	api_command_tx(&handle, cmd, test_buf,sizeof(test_buf));
+	app_command_tx(&handle, cmd, test_buf,sizeof(test_buf));
 	
 
 	//rx

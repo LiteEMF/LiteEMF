@@ -10,19 +10,25 @@
 
 ## packet format
 
-通讯协议需要上层协商通讯最大MTU(单包最大长度),确定MTU后指令需要根据MTU大封包.
+通讯协议需要上层协商通讯最大MTU(单包最大长度),确定MTU后指令需要根据MTU大封包.  
+软件必须支持长包和短包的解析, 但是可以只支持长包发送  
+> 数据包帧(command frame):  
 
-> 数据包帧(command frame):
-
-> | HEAD | LEN | PACK INDEX | CMD |    DATA    | CHECKSUM |
+普通长包:
+> | HEAD(A4) | LEN | PACK INDEX | CMD |    DATA    | CHECKSUM |
 > | :--: | :-: | :--------: | :-: | :--------: | :------: |
 > |  1B  | 1B |     1B     | 1B | MTU-5(max) |    1B    |
 
-* HEAD: 包头, bit0: 1:表示起始包,0:普通包
+短包:
+> | HEAD(A5) | LEN | CMD |    DATA    | CHECKSUM |
+> | :--: | :-: | :-: | :--------: | :------: |
+> |  1B  | 1B | 1B | MTU-4(max) |    1B    |
+
+* HEAD: 包头, A4:普通长包, A5:短包短包不发 PACK INDEX
 * LEN: 包长度HEAD+LEN+CMD+INDEX+DATA+CHECKSUM的长度
-* PACK INDEX: 包序号倒序, 包序号从最大包数量~1递减, 如果只有一包数据发送1
+* PACK bit0~6:INDEX: 包序号倒序, 包序号从最大包数量~1递减, 如果只有一包数据发送1, bit7 1起始包
 * CMD: 指令固定一个字节
-* DATA: 数据长度范围0~(MTU-5)
+* DATA: 数据长度范围0~(MTU-4)/(MTU-5)
 * CHECKSUM: 校验: HEAD+LEN+CMD+INDEX+DATA 的校验和
 
 ## packet example
@@ -31,12 +37,17 @@
 
 * > 发送数据:*0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08 0x09 0x0a 0x0b 0x0c*
   >
-  >> `0xa5 0x0a 0x03 0xcc 0x01 0x02 0x03 0x04 0x05 0x8d`  
+  >> `0xa4 0x0a 0x83 0xcc 0x01 0x02 0x03 0x04 0x05 0x8d`  
   >> `0xa4 0x0a 0x02 0xcc 0x06 0x07 0x08 0x09 0x0a 0xa4`  
   >> `0xa4 0x07 0x01 0xcc 0x0b 0x0c 0x8f`  
   >>
   >
 
+* > 发送数据:*0x01 0x02 0x03 0x04 0x05 0x06*
+  >
+  >> `0xa5 0x0a 0xcc 0x01 0x02 0x03 0x04 0x05 0x06 0xxx`  
+  >>
+  >
 ## dev mode
 
 ## command

@@ -24,12 +24,15 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
-#ifndef CMD_SHEAD
-#define CMD_SHEAD		0XA5
-#endif
 #ifndef CMD_HEAD
 #define CMD_HEAD		0XA4
 #endif
+
+#ifndef CMD_SHEAD		//CMD short HEAD
+#define CMD_SHEAD		0XA5	
+#endif
+
+#define CMD_SHEAD_LEN	3
 #define CMD_HEAD_LEN	4
 #define CMD_PACK_LEN	5
 
@@ -40,10 +43,12 @@ extern "C" {
 typedef struct{
 	uint8_t head;
 	uint8_t len;
-	uint8_t pack_index;
+	uint8_t pack_index:7;
+	uint8_t pack_start:1;	//注意短包底层发送数据时候没有pack_start和pack_index
 	uint8_t cmd;
 	uint8_t buf[1];			//占位
 }command_head_t;
+
 
 typedef struct{
 	bytes_t sbuf;				//单字节接收缓存字节,大小为MTU大小			
@@ -65,8 +70,7 @@ typedef struct {
 **  Function
 ******************************************************************************************************/
 uint16_t api_command_pack_size(uint8_t mtu,uint16_t len);
-bool api_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms);
-bool api_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len);
+bool command_frame_tx(command_tx_t *txp);
 bool command_frame_rx(bytes_t *cmdp, uint8_t mtu, uint8_t c);
 bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len);
 

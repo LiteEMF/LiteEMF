@@ -14,7 +14,7 @@
 #define _usbd_socket_h
 #include "emf_typedef.h" 
 #include "api/api_transport.h"
-#include "app/app_command.h"
+#include "app/app_commander.h"
 #include "api/usb/device/usbd_core.h"
 
 #ifdef __cplusplus

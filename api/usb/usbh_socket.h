@@ -14,7 +14,7 @@
 #define _usbh_socket_h
 #include "emf_typedef.h" 
 #include "api/api_transport.h"
-#include "app/app_command.h"
+#include "app/app_commander.h"
 
 #ifdef __cplusplus
 extern "C" {

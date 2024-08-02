@@ -14,7 +14,11 @@
 ************************************************************************************************************/
 #include "hw_config.h"
 #if APP_CMD_ENABLE
-#include "app/app_command.h"
+#include "app/app_commander.h"
+#if API_OS_TIMER_ENABLE
+#include "api/api_os_timer.h"
+#endif
+
 #include "app/emf.h"
 
 #include "api/api_log.h"
@@ -40,7 +44,6 @@
 #include  "api/api_tick.h"
 
 #include  "api/api_log.h"
-
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
@@ -52,7 +55,6 @@ command_rx_t uart2_cmd_rx = {{uart2_sbuf,0},{NULL,0}};
 #endif
 
 #if API_BT_ENABLE
-#include "le_common.h"
 #if BT_SUPPORT & (BIT_ENUM(TR_BLE) | BIT_ENUM(TR_BLE_RF))					//ble peripheral
 uint8_t ble_sbuf[BLE_CMD_MTU];
 command_rx_t ble_cmd_rx = {{ble_sbuf,0},{NULL,0}};;
@@ -114,12 +116,12 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	/*---- 0x00	设备信息 ----*/
 	case CMD_GET_EMF_VERSION:
 		replay[0] = EMF_CMD_VERSION;
-		api_command_tx(phandle,phead->cmd, replay, 1);
+		app_command_tx(phandle,phead->cmd, replay, 1);
 		ret = true;
 		break;
 	case CMD_GET_UUID:
 		if(hal_get_uuid(replay, 16)){
-			api_command_tx(phandle,phead->cmd, replay, 16);
+			app_command_tx(phandle,phead->cmd, replay, 16);
 			ret = true;
 		}
 		break;
@@ -129,13 +131,13 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		replay[1] = (uint8_t)SW_VERSION;
 		replay[2] = 0;
 		replay[3] = 0;
-		api_command_tx(phandle,phead->cmd, replay, 4);
+		app_command_tx(phandle,phead->cmd, replay, 4);
 		ret = true;
 		#endif
 		break;
 	case CMD_GET_MODEL:
 		#ifdef DEFAULT_MODEL
-		api_command_tx(phandle,phead->cmd, DEFAULT_MODEL, strlen(DEFAULT_MODEL));
+		app_command_tx(phandle,phead->cmd, DEFAULT_MODEL, strlen(DEFAULT_MODEL));
 		ret = true;
 		#endif
 		break;
@@ -143,7 +145,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		//获取指令当前传输协议mtu
 		replay[0] = phandle->trp;
 		replay[1] = api_transport_get_mtu(phandle);	
-		api_command_tx(phandle,phead->cmd, replay, 2);
+		app_command_tx(phandle,phead->cmd, replay, 2);
 		ret = true;
 		break;
 	case CMD_DEV_PID_VID:
@@ -156,7 +158,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			replay[0] = phandle->id;
 			replay[1] = buf[4];
 			if(api_bt_get_mac(replay[0], replay[1], replay+2)){
-				api_command_tx(phandle,phead->cmd, replay, 8);
+				app_command_tx(phandle,phead->cmd, replay, 8);
 				ret = true;
 			}
 		}
@@ -170,7 +172,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		uint8_t device_name_len = 0;
 		if(len == CMD_PACK_LEN){		//read	
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
-			api_command_tx(phandle,phead->cmd, device_name, device_name_len);
+			app_command_tx(phandle,phead->cmd, device_name, device_name_len);
 			ret = true;
 		}else if(len > CMD_PACK_LEN){				//write
 			#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
@@ -193,7 +195,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		#else
 		#ifdef DEFAULT_NAME
 		if(len == CMD_PACK_LEN){		//read	
-			api_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
+			app_command_tx(phandle,phead->cmd, DEFAULT_NAME, strlen(DEFAULT_NAME));
 			ret = true;
 		}else if(len > CMD_PACK_LEN){				//write
 			
@@ -218,7 +220,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		replay[5] = m_dev_mode;
 		replay[6] = m_hid_mode>>8;
 		replay[7] = m_hid_mode;
-		api_command_tx(phandle,phead->cmd, replay, 10);
+		app_command_tx(phandle,phead->cmd, replay, 10);
 		ret = true;
 		break;
 	case CMD_TEST_MODE:
@@ -256,7 +258,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			if(ret){
 				replay[0] = ctrl;
 				replay[1] = 0;
-				api_command_tx(phandle,phead->cmd, replay, 2);
+				app_command_tx(phandle,phead->cmd, replay, 2);
 			}
 		}
 		#endif
@@ -264,14 +266,14 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	case CMD_STORAGE_SYNC:
 		#if API_STORAGE_ENABLE
 		ret = api_storage_sync();
-		api_command_tx(phandle,phead->cmd, &ret, 1);
+		app_command_tx(phandle,phead->cmd, &ret, 1);
 		#endif
 		break;
 	case CMD_HEART_BEAT:
-		api_command_tx(phandle,phead->cmd, &ret, 1);
+		app_command_tx(phandle,phead->cmd, &ret, 1);
 		break;
 	case CMD_RECOVER_FACTORY:
-		api_command_tx(phandle,phead->cmd, &ret, 1);
+		app_command_tx(phandle,phead->cmd, &ret, 1);
 		break;
 	default:
 		break;
@@ -303,6 +305,96 @@ __WEAK bool app_command_vendor_decode(trp_handle_t *phandle,uint8_t* buf,uint16_
 	return app_command_std_decode(phandle,buf,len);
 }
 #endif
+
+
+
+static void app_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len)
+{
+	txp->cmd = cmd;
+	txp->handle = *phandle;
+	txp->buf = buf;
+	txp->len = len;
+	txp->index = 0;
+}
+
+
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:	用于类似蓝牙大数据发送, 需要定时拆分发送数据包
+*******************************************************************/
+#if API_OS_TIMER_ENABLE
+static void app_command_timer_cb(command_tx_t *txp)
+{
+	if(NULL != txp->buf){
+		command_frame_tx(txp);
+
+		if(NULL == txp->buf || txp->index == txp->len){
+			emf_free_and_clear(txp->buf);
+			api_os_timer_stop((api_os_timer_t*)txp->ptimer);
+		}
+	}
+
+}
+
+/*******************************************************************
+** Parameters: txp: 传入静态变量 buf:可以是临时变量, 内部会缓存
+** Returns:	
+** Description:	长包定时拆分发送, 注意: 使用到了软件定时器, 该接口不适用于51平台
+*******************************************************************/
+bool app_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len, uint32_t ms)
+{
+	bool ret = false;
+	api_os_timer_t *tx_timer;
+	uint8_t *p;
+	uint8_t mtu = api_transport_get_mtu(phandle);
+
+	if(NULL != txp->buf) {
+		loge("txp buf is not NULL\n");
+		return ret;
+	}
+	
+	if(mtu >= len+5){									//短包直接发送
+		ret = app_command_tx(phandle,cmd, buf,len);
+	}else{
+		p = emf_malloc(len);
+		if(NULL == p) return ret;
+
+		memcpy(p, buf, len);
+		app_command_tx_fill(txp, phandle, cmd, p, len);
+
+		tx_timer = api_os_timer_create((timer_cb_t)&app_command_timer_cb,(void*)txp,ms,0);
+		if(NULL != tx_timer){
+			txp->ptimer = tx_timer;
+			ret = !api_os_timer_start(tx_timer);
+		}else{
+			emf_free_and_clear(txp->buf);
+		}
+	}
+	
+	return ret;
+}
+#endif
+
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:	while(1)循环发送指令
+*******************************************************************/
+bool app_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len)
+{
+	bool ret = false;
+	command_tx_t tx;
+	uint8_t mtu = api_transport_get_mtu(phandle);
+
+	app_command_tx_fill(&tx, phandle, cmd, buf, len);
+	
+	while(tx.index < tx.len){
+		ret = command_frame_tx(&tx);
+		if(!ret) break;
+	}
+	return ret;
+}
 
 
 /*******************************************************************
@@ -403,6 +495,7 @@ bool app_command_rx_byte(trp_handle_t *phandle, uint8_t c)
 
 	if(command_frame_rx(&cmd_rxp->sbuf, mtu, c)){
 		ret = api_command_rx(&cmd_rxp->cmds, cmd_rxp->sbuf.buf,cmd_rxp->sbuf.len);
+		cmd_rxp->sbuf.len = 0;
 		if(ret){
 			cmd_rxp->sbuf.len = 0;
 			app_command_vendor_decode(phandle, cmd_rxp->cmds.buf, cmd_rxp->cmds.len);

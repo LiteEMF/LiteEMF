@@ -18,7 +18,7 @@
 		"app_imu.h": "c",
 		"ps_controller.h": "c",
 		"emf_command.h": "c",
-		"app_command.h": "c",
+		"app_commander.h": "c",
 		"usbd_socket.h": "c",
 		"template.h": "c",
 		"usbh.h": "c",
