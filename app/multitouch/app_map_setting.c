@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if 1
+#if APP_MT_ENABLE
 #include "app/multitouch/app_map_setting.h"
 #include "api/api_tick.h"
 

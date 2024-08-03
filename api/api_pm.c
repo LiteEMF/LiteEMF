@@ -51,7 +51,6 @@ pm_sta_t m_pm_sta = PM_STA_NORMAL;
 timer_t m_pm_sleep_timer;								//休眠定时器
 uint32_t m_pm_sleep_timerout = DISCONNECTED_SLEEP_TIME;	//休眠超时时间
 bool app_pm_key_sleep = 0;								//是否是按键进入休眠, 用于波动开关开关机
-bool app_key_poweron = 0;								//是否是按键开机
 
 /******************************************************************************************************
 **	static Parameters
@@ -136,7 +135,7 @@ void api_pm_weakup_check(void)
 
 	// 首次上电池不开机
 	#if (APP_BATTERY_ENABLE) && (PIN_NULL != KEY_POWER_GPIO)
-	if((PM_RESON_POR == m_reset_reson) || (PM_RESON_VCM == m_reset_reson) || (PM_RESON_SYS == m_reset_reson)){
+	if((PM_RESON_POR == m_reset_reson) || (PM_RESON_VCM == m_reset_reson)){
 		if(KEY_POWER){				//按键开机	
 			#if KEY_POWERON_TIME
 			for(i=0; i<KEY_POWERON_TIME; i++){
@@ -147,7 +146,6 @@ void api_pm_weakup_check(void)
 				}
 			}
 			#endif
-			app_key_poweron = 1;
 		}else{
 			if((BAT_CHARGE_STA == m_battery_sta) || (BAT_CHARGE_DONE_STA == m_battery_sta)){
 				api_sleep();
@@ -155,8 +153,6 @@ void api_pm_weakup_check(void)
 				hal_sleep();
 			}
 		}
-	}else{
-		app_key_poweron = 1;
 	}
 	#endif
 
@@ -206,7 +202,6 @@ void api_sleep(void)
 		m_pm_sta = PM_STA_SLEEP;
 	}
 
-	app_key_poweron = 0;
 	api_pm_sleep_deinit();
 }
 
