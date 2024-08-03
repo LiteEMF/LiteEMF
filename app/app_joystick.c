@@ -215,7 +215,7 @@ void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp)
         if(side_percent > centre_percent){
             scale = (vector.r - centre_percent)/(side_percent - centre_percent);
         }else{
-            scale = 100;
+            scale = 1;
         }
 
 		//normalization
@@ -302,7 +302,7 @@ void app_stick_normalization(uint8_t id, axis2i_t* stickp,joystick_t* adcp)
 
     stickp->x = constrain_int16(x);
     stickp->y = constrain_int16(y);
-    // if(id==0) logd("%d %d %d %d =%d",adcp->stick[0].y, 32768 * (adcp->stick[id].y - m_trim_cal.mid.stick[id].y), caly_r,y,stickp->y );
+    // if(id==0) logd("%d %d %d %d =%d",adcp->stick[0].y, (adcp->stick[id].y - m_trim_cal.mid.stick[id].y), caly_r,y,stickp->y );
 }
 
 

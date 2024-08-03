@@ -91,7 +91,7 @@ command_rx_t usbh_cmd_rx = {{NULL,0},{NULL,0}};
 /******************************************************************************************************
 **	public Parameters
 *******************************************************************************************************/
-trp_t test_trp = TR_NULL;
+trp_t m_test_mode_trp = TR_NULL;
 
 /*****************************************************************************************************
 **	static Function
@@ -156,7 +156,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		#if API_BT_ENABLE
 		if(len == (CMD_PACK_LEN+1)){
 			replay[0] = phandle->id;
-			replay[1] = buf[4];
+			replay[1] = phead->buf[0];
 			if(api_bt_get_mac(replay[0], replay[1], replay+2)){
 				app_command_tx(phandle,phead->cmd, replay, 8);
 				ret = true;
@@ -178,12 +178,12 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			#if API_STORAGE_ENABLE && BT_MODIFY_NAME_ENABLE
 			memset(device_name,0,sizeof(device_name));
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
-			if(memcmp(device_name, buf+4, buf[1]-5)){
-				device_name_len = buf[1]-5;
+			if(memcmp(device_name, phead->buf, len-CMD_PACK_LEN)){
+				device_name_len = len-CMD_PACK_LEN;
 				if (device_name_len > BT_NAME_LEN_MAX) {
 					device_name_len = BT_NAME_LEN_MAX;
 				}
-				memcpy(device_name,buf+4,device_name_len);
+				memcpy(device_name,phead->buf,device_name_len);
 				ble_comm_set_config_name(device_name, 0);	
 				m_storage.device_name_len = device_name_len;	
 				memcpy(m_storage.device_name,device_name,device_name_len);
@@ -208,9 +208,9 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	/*---- 0x10	设备信息 ----*/
 	case CMD_DEV_MODE:			//TODO 功能待完善修改
 		if(len >= CMD_PACK_LEN + 8){
-		//	uint16_t trps = U16(buf[4],buf[5]);
-			m_dev_mode = U16(buf[6],buf[7]);
-			m_hid_mode = U16(buf[8],buf[9]);
+		//	uint16_t trps = U16(phead->buf[0],phead->buf[1]);
+			m_dev_mode = U16(phead->buf[4],phead->buf[5]);
+			m_hid_mode = U16(phead->buf[6],phead->buf[7]);
 		}
 		replay[0] = m_trps>>8;
 		replay[1] = m_trps;
@@ -225,16 +225,16 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_TEST_MODE:
 		if(len > CMD_PACK_LEN){
-			test_trp = (trp_t)buf[4];
+			m_test_mode_trp = (trp_t)phead->buf[0];
 		}else{
-			test_trp = (trp_t)phandle->trp;
+			m_test_mode_trp = (trp_t)phandle->trp;
 		}
 		ret = true;
 		break;
 	case CMD_DEV_CTRL:
 		#if API_PM_ENABLE
 		if(len > CMD_PACK_LEN){
-			dev_ctrl_t ctrl = buf[4];
+			dev_ctrl_t ctrl = phead->buf[0];
 			switch(ctrl){
 			#if API_PM_ENABLE
 		    case CTRL_RESET:
@@ -248,7 +248,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 			#endif	
 			case CTRL_BOOT:
 				if(len > 6){
-					api_boot(buf[5]);
+					api_boot(phead->buf[1]);
 				}else{
 					api_boot(0);
 				}
@@ -281,13 +281,13 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 
 	#if API_USBH_BIT_ENABLE && USBH_SOCKET_ENABLE
 	if(!ret){
-		ret = usbh_socket_decode(phandle,phead->cmd, buf+CMD_HEAD_LEN, len - (CMD_HEAD_LEN+1));
+		ret = usbh_socket_decode(phandle,phead->cmd, phead->buf, len - (CMD_HEAD_LEN+1));
 	}
 	#endif
 
 	#if API_USBD_BIT_ENABLE && USBD_SOCKET_ENABLE
 	if(!ret){
-		ret = usbd_socket_decode(phandle,phead->cmd, buf+CMD_HEAD_LEN, len - (CMD_HEAD_LEN+1));
+		ret = usbd_socket_decode(phandle,phead->cmd, phead->buf, len - (CMD_HEAD_LEN+1));
 	}
 	#endif
 
@@ -326,10 +326,11 @@ static void app_command_tx_fill(command_tx_t *txp, trp_handle_t* phandle,uint8_t
 #if API_OS_TIMER_ENABLE
 static void app_command_timer_cb(command_tx_t *txp)
 {
-	if(NULL != txp->buf){
-		command_frame_tx(txp);
+	bool ret = false;
+	if((NULL != txp->buf) || (0 == txp->len)){
+		ret = command_frame_tx(txp);
 
-		if(NULL == txp->buf || txp->index == txp->len){
+		if(ret && (NULL == txp->buf || txp->index == txp->len)){
 			emf_free_and_clear(txp->buf);
 			api_os_timer_stop((api_os_timer_t*)txp->ptimer);
 		}
@@ -354,22 +355,19 @@ bool app_command_timer_tx(command_tx_t *txp, trp_handle_t* phandle,uint8_t cmd, 
 		return ret;
 	}
 	
-	if(mtu >= len+5){									//短包直接发送
-		ret = app_command_tx(phandle,cmd, buf,len);
-	}else{
-		p = emf_malloc(len);
-		if(NULL == p) return ret;
-
+	p = emf_malloc(len);
+	if(NULL != p) {
 		memcpy(p, buf, len);
-		app_command_tx_fill(txp, phandle, cmd, p, len);
+	}
 
-		tx_timer = api_os_timer_create((timer_cb_t)&app_command_timer_cb,(void*)txp,ms,0);
-		if(NULL != tx_timer){
-			txp->ptimer = tx_timer;
-			ret = !api_os_timer_start(tx_timer);
-		}else{
-			emf_free_and_clear(txp->buf);
-		}
+	app_command_tx_fill(txp, phandle, cmd, p, len);
+
+	tx_timer = api_os_timer_create((timer_cb_t)&app_command_timer_cb,(void*)txp,ms,0);
+	if(NULL != tx_timer){
+		txp->ptimer = tx_timer;
+		ret = !api_os_timer_start(tx_timer);
+	}else{
+		emf_free_and_clear(txp->buf);
 	}
 	
 	return ret;
@@ -389,10 +387,11 @@ bool app_command_tx(trp_handle_t* phandle,uint8_t cmd, uint8_t *buf,uint16_t len
 
 	app_command_tx_fill(&tx, phandle, cmd, buf, len);
 	
-	while(tx.index < tx.len){
+	do{
 		ret = command_frame_tx(&tx);
 		if(!ret) break;
-	}
+	}while(tx.index < tx.len);
+
 	return ret;
 }
 

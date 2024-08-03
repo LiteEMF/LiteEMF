@@ -43,8 +43,10 @@ bool command_frame_tx(command_tx_t *txp)
 	uint8_t index = 0;
 	uint8_t *cmd_buf;
 
-	if(txp->len <= txp->index) return ret;
-	if(NULL == txp->buf) return ret;
+	if(txp->len){									//可以发送数据长度为0的指令
+		if(txp->len <= txp->index) return ret;
+		if(NULL == txp->buf) return ret;
+	}
 
 	mtu = api_transport_get_mtu(&txp->handle);
 	
@@ -82,7 +84,7 @@ bool command_frame_tx(command_tx_t *txp)
 	cmd_buf[index-1] = check_sum(cmd_buf,index-1);		//sum
 	//logd("cmd send:");dumpd(cmd_buf,index);
 
-	ret = api_transport_tx(&txp->handle, cmd_buf,index);
+	ret = api_transport_tx(&txp->handle, cmd_buf, index);
 	if(ret){
 		txp->index += send_data_len;
 	}
@@ -171,7 +173,7 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 	uint8_t ret = false;
 	uint16_t cmd_max_len;
 	command_head_t *phead = (command_head_t*)buf;
-	command_head_t *p_shead = (command_head_t*)rxp->buf;
+	command_head_t *p_shead;
 
 	if((CMD_SHEAD != buf[0]) && (CMD_HEAD != buf[0])) return ret;		//包头判断
 	if(len < phead->len) return ret;									//保证数据完整
@@ -184,6 +186,7 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 		cmd_max_len = phead->len + 1;
 		rxp->buf = emf_malloc(cmd_max_len);
 		memcpy(rxp->buf + CMD_HEAD_LEN, buf + CMD_SHEAD_LEN, phead->len - CMD_SHEAD_LEN);
+		p_shead = (command_head_t*)rxp->buf;
 		p_shead->head = CMD_SHEAD;
 		p_shead->len = cmd_max_len;
 		p_shead->pack_index = 1;
@@ -209,6 +212,7 @@ bool api_command_rx(bytes_t* rxp,uint8_t* buf,uint8_t len)
 		}
 
 		if(NULL != rxp->buf){
+			p_shead = (command_head_t*)rxp->buf;
 			if( (p_shead->cmd == phead->cmd) 
 				&& (p_shead->pack_index == phead->pack_index)
 				&& (p_shead->len >= phead->len) ){			//MTU保证buf不溢出(rxp->buf[1] 可以作为MTU)

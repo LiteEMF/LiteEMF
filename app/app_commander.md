@@ -511,7 +511,7 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint8_t test_trp;       //可以省略, 如果省略模式是通过当前通讯的协议发送测试指令
+    uint8_t m_test_mode_trp;       //可以省略, 如果省略模式是通过当前通讯的协议发送测试指令
     uint8_t sum;
 };
 //回复设备 测试模式状态
@@ -520,7 +520,7 @@ typedef struct{
     uint8_t len;
     uint8_t index;
     uint8_t cmd;
-    uint8_t test_trp;
+    uint8_t m_test_mode_trp;
     uint8_t sum;
 };
 ```
