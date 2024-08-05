@@ -228,7 +228,11 @@ int32_t bits_to_int(uint16_t bit_offset, uint8_t bit_lens,  uint8_t* bbuf, uint8
     return ret;
 }
 
-
+/*******************************************************************
+** Parameters:	
+** Returns:	
+** Description:	从小端获取val bit为1的pos位置	
+*******************************************************************/
 uint8_t get_bit_pos(uint32_t val)
 {
     uint8_t i;

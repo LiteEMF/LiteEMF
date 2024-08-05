@@ -337,7 +337,7 @@ __WEAK void ex_usbd_auto_det(uint8_t id, usbd_det_t dev)
         case USBD_DET_PC:
         case USBD_DET_ANDROID:
         default:
-            m_usbd_hid_types[id] = USBD_HID_SUPPORT;
+            m_usbd_hid_types[id] = BIT(get_bit_pos(USBD_HID_SUPPORT));      //防止USBD_HID_SUPPORT支持多个模式
             break;
     }
 
