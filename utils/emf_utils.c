@@ -37,23 +37,22 @@
 *******************************************************************/
 int32_t remap(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max)
 {
-    if(x <= in_min) return out_min;
-    if(x >= in_max) return out_max;
 	return REMAP(x,in_min,in_max, out_min, out_max);
 }
 
 /*******************************************************************
-** Parameters:	pcurve_shape: 0~100	, shape_cnt: 折线点个数
+** Parameters:	pcurve_shape:0~100	, 
+                shape_cnt: 折线点个数, shape_cnt-1必须能被10整除推荐:3, 6, 11
 ** Returns:	    
 ** Description:	Curve shaping 多点折线比例转换
 @ref: https://github.dev/FreeJoy-Team/FreeJoy ShapeFunc	
 *******************************************************************/
-int16_t curve_shape_remap(int16_t value, uint8_t* pcurve_shape, uint8_t shape_cnt)
+int32_t curve_shape_remap(int32_t value, int32_t max_val, uint8_t* pcurve_shape, uint8_t shape_cnt)
 {
 	int32_t out_min, out_max, step;
 	int32_t in_min, in_max;
-	uint8_t min_index;
-	int16_t ret;
+	int32_t min_index;
+	int32_t ret;
 
     int8_t i, shape_step = 100 / (shape_cnt-1);
 
@@ -65,35 +64,23 @@ int16_t curve_shape_remap(int16_t value, uint8_t* pcurve_shape, uint8_t shape_cn
     }
     if(i == shape_cnt) return value;            // is line
 
-    step = (0 - INT16_MIN) / (shape_cnt-1);
+    step = max_val / (shape_cnt-1);
     min_index = value / step;
-    
-    if (min_index == shape_cnt-1) min_index = shape_cnt-2;
-    
-    in_min = min_index*step;
-    in_max = (min_index+1)*step;
-    
-    out_min = ((int32_t)pcurve_shape[min_index] * (int32_t)(0 - INT16_MIN)/100);
-    out_max = ((int32_t)pcurve_shape[min_index+1] * (int32_t)(0 - INT16_MIN)/100);
-    
-    ret = remap(value, in_min, in_max, out_min, out_max);
 
-    ret = constrain_int16(ret);
-
-	return(ret);
+    if (min_index >= shape_cnt-1){
+        return ((int32_t)pcurve_shape[shape_cnt-1] * (int32_t)max_val/100);
+    }else{
+        in_min = min_index*step;
+        in_max = (min_index+1)*step;
+        
+        out_min = ((int32_t)pcurve_shape[min_index] * (int32_t)max_val/100);
+        out_max = ((int32_t)pcurve_shape[min_index+1] * (int32_t)max_val/100);
+        
+        ret = REMAP(value, in_min, in_max, out_min, out_max);
+	    return(ret);
+    }
 }
 
-void curve_shape_remap_axis2i(axis2i_t* paxis, uint8_t* pcurve_shape, uint8_t shape_cnt)
-{
-    paxis->x = curve_shape_remap(paxis->x, pcurve_shape, shape_cnt);
-    paxis->y = curve_shape_remap(paxis->y, pcurve_shape, shape_cnt);
-}
-void curve_shape_remap_axis3i(axis3i_t* paxis, uint8_t* pcurve_shape, uint8_t shape_cnt)
-{
-    paxis->x = curve_shape_remap(paxis->x, pcurve_shape, shape_cnt);
-    paxis->y = curve_shape_remap(paxis->y, pcurve_shape, shape_cnt);
-    paxis->z = curve_shape_remap(paxis->y, pcurve_shape, shape_cnt);
-}
 
 /*******************************************************************
 ** Parameters:		

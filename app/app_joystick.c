@@ -177,43 +177,27 @@ uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* p
 /*******************************************************************
 ** Parameters: pcurve_shape, shape_cnt: 曲线点
 ** Returns:	
-** Description: 多点曲线转换
+** Description: 摇杆死区设置
 @ref: https://github.dev/FreeJoy-Team/FreeJoy IsDynamicDeadbandHolding	
 *******************************************************************/
-
-void app_stick_curve_shape(axis2i_t* stickp, uint8_t* pcurve_shape, uint8_t shape_cnt)
-{
-    curve_shape_remap_axis2i(stickp, pcurve_shape, shape_cnt);
-}
-void app_trigger_curve_shape(int16_t *valp, uint8_t* pcurve_shape, uint8_t shape_cnt)
-{
-    *valp = curve_shape_remap(*valp, pcurve_shape, shape_cnt);
-}
-
-void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp)
+void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
 {
 	int32_t x,y;
     uint8_t centre_percent=0,side_percent=100;        //deadband percent
-    vector2f_t vector;
-    float scale;
-
-    if((0 == stickp->x) && (0 == stickp->y)) return;
-
-    vector.x = stickp->x;
-    vector.y = stickp->y;
-    vector2f_normalization(&vector);
-    vector.r = vector.r * (100 / 32767.0);
+    float scale, percent_r;
+    
+    percent_r = vectorp->r * (100 / 32767.0);
 
     if(NULL != cfgp){
         centre_percent = cfgp->centre_deadband;
         side_percent = 100-cfgp->side_deadband;
-        if (cfgp->trunx) vector.x = -vector.x;
-        if (cfgp->truny) vector.y = -vector.y;
+        if (cfgp->trunx) vectorp->x = -vectorp->x;
+        if (cfgp->truny) vectorp->y = -vectorp->y;
     }
     
-    if(vector.r > centre_percent){
+    if(percent_r > centre_percent){
         if(side_percent > centre_percent){
-            scale = (vector.r - centre_percent)/(side_percent - centre_percent);
+            scale = (percent_r - centre_percent)/(side_percent - centre_percent);
         }else{
             scale = 1;
         }
@@ -223,15 +207,10 @@ void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp)
             scale = STICK_CIRCLE_LIMIT;
         }
         
-        x = vector.x * scale * 32768;
-        y = vector.y * scale * 32768;
+        vectorp->r *= scale;
     }else{
-        x = 0;
-        y = 0;
+        vectorp->r = 0;
     }
-    
-    stickp->x = constrain_int16(x);
-    stickp->y = constrain_int16(y);
 }
 
 void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp)

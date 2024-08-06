@@ -464,7 +464,7 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 ** Description: usb事件用户处理
 *******************************************************************/
 #if WEAK_ENABLE
-__WEAK bool usbd_class_vendor_process_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
+__WEAK bool usbd_class_event_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
 	return false;
 }
@@ -480,7 +480,7 @@ __WEAK bool usbd_class_vendor_process_weak(uint8_t id, usbd_class_t *pclass, usb
 *******************************************************************/
 void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
-	if(usbd_class_vendor_process_weak(id, pclass, evt, val)){	//用户自定义事件处理
+	if(usbd_class_event_weak(id, pclass, evt, val)){	//用户自定义事件处理
 		return;
 	}
 

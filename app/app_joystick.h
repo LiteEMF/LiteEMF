@@ -84,8 +84,6 @@ typedef struct{
     uint8_t truny;
     uint8_t centre_deadband;
     uint8_t side_deadband;
-
-    
 } joystick_cfg_t;
 
 
@@ -126,7 +124,7 @@ void app_joystick_event(joystick_cal_sta_t event);   //__WEAK
 
 void app_joystack_cal_start(void);
 void app_joystack_cal_end(void);
-void app_stick_deadband(joystick_cfg_t* cfgp,axis2i_t* stickp);
+void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
 void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp);
 uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* pbuf, uint8_t size);
 bool app_joystick_init(void);
