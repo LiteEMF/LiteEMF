@@ -60,6 +60,7 @@ extern uint8c_t m_led_num;
 **  Function
 ******************************************************************************************************/
 bool app_led_show(uint8_t* frame);						//__WEAK
+void app_led_finished_cb(uint8_t id);					//__WEAK
 bool app_set_led(uint8_t id, uint8_t period,uint8_t times);
 uint8_t app_get_led(uint8_t id);
 uint8_t app_get_led_times(uint8_t id);

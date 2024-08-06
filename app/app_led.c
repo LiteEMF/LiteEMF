@@ -70,6 +70,12 @@ __WEAK bool app_led_show(uint8_t* frame)
 
 	return ret;
 }
+
+__WEAK void app_led_finished_cb(uint8_t id)
+{
+
+}
+
 #endif
 	
 /*******************************************************************
@@ -179,6 +185,7 @@ void app_led_show_task(void *pa)
 					led_ctb[i].times--;
 					if(0 == led_ctb[i].times){
 						led_ctb[i].period = LED_OFF;
+						app_led_finished_cb(i);
 					}
 				}
 			}
