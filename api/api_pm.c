@@ -135,7 +135,7 @@ void api_pm_weakup_check(void)
 
 	// 首次上电池不开机
 	#if (APP_BATTERY_ENABLE) && (PIN_NULL != KEY_POWER_GPIO)
-	if((PM_RESON_POR == m_reset_reson) || (PM_RESON_VCM == m_reset_reson)){
+	if((PM_RESON_POR == m_reset_reson) || (PM_RESON_VCM == m_reset_reson) || (PM_RESON_SYS == m_reset_reson)){
 		if(KEY_POWER){				//按键开机	
 			#if KEY_POWERON_TIME
 			for(i=0; i<KEY_POWERON_TIME; i++){
