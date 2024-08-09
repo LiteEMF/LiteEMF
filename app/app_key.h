@@ -37,10 +37,10 @@ extern "C" {
 #ifndef KEY_SHORT_TIME						//short and pressed_b limte time	
 #define KEY_SHORT_TIME 	    		(1000 / ( KEY_PERIOD_DEFAULT) )				
 #endif
-#ifndef KEY_DOUBLE_B_TIME					//double_b time, pressed_b event delay time
+#ifndef KEY_DOUBLE_B_TIME					//double_b time, pressed_b limte time
 #define KEY_DOUBLE_B_TIME			(200 / ( KEY_PERIOD_DEFAULT) )			
 #endif
-#ifndef KEY_PRESSED_B_DELAY
+#ifndef KEY_PRESSED_B_DELAY					// pressed_b,double_b,three_b event delay time
 #define KEY_PRESSED_B_DELAY 		(60 / ( KEY_PERIOD_DEFAULT) )
 #endif
 
@@ -61,6 +61,8 @@ typedef struct{
 	uint32_t long_long;
 	uint32_t double_b;	
 	uint32_t pre_double_b;
+	uint32_t three_b;	
+	uint32_t pre_three_b;
 }app_key_t;
 
 

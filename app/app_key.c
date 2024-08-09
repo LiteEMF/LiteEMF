@@ -192,21 +192,27 @@ void app_key_decode_task(uint32_t key_scan)
                     }
                 }
             }
-        }else{												//key up
+        }else{												    //key up
             if((m_app_key.pressed & bits)){
-                if( 0 == ((m_app_key.pressed_b | m_app_key.double_b) & bits) ){
+                if( 0 == ((m_app_key.pressed_b | m_app_key.double_b | m_app_key.three_b) & bits) ){
                     if(key_cnt[i] < KEY_SHORT_TIME){
-                        if(m_app_key.pre_double_b & bits){
-                            m_app_key.double_b |= bits;
-                            m_app_key.pre_double_b &= ~bits;
-                            #if KEY_DUMP_ENABLE
-                            logd("m_app_key.double_b\n");
-                            #endif
+                        if(m_app_key.pre_double_b & bits){      //第二次快速按下
+                            if(m_app_key.pre_three_b & bits){   //第三次快速按键按下
+                                m_app_key.three_b |= bits;
+                                m_app_key.pre_three_b &= ~bits;
+                                m_app_key.pre_double_b &= ~bits;
+                                #if KEY_DUMP_ENABLE
+                                logd("m_app_key.three_b\n");
+                                #endif
+                            }else{
+                                m_app_key.pre_three_b |= bits;
+                            }
                         }else{
                             m_app_key.pre_double_b |= bits;                          
                         }
                     }else{
                         m_app_key.pre_double_b &= ~bits;
+                        m_app_key.pre_three_b &= ~bits;
                     }
                 }
 
@@ -216,23 +222,32 @@ void app_key_decode_task(uint32_t key_scan)
                 m_app_key.long_long &= ~bits;
                 ret = true;
                 key_cnt[i] = 0;
-            }else if(m_app_key.pre_double_b & bits){
+            }else if((m_app_key.pre_double_b | m_app_key.pre_three_b) & bits){
                 key_cnt[i]++;
                 if(key_cnt[i] >= KEY_DOUBLE_B_TIME){
                     key_cnt[i] = 0;
+                    if(m_app_key.pre_three_b & bits){
+                        m_app_key.double_b |= bits;
+                        #if KEY_DUMP_ENABLE
+                        logd("m_app_key.double_b\n");
+                        #endif
+                    }else{
+                        m_app_key.pressed_b |= bits;
+                        #if KEY_DUMP_ENABLE
+                        logd("m_app_key.pressed_b\n");
+                        #endif
+                    }
+                    m_app_key.pre_three_b &= ~bits;
                     m_app_key.pre_double_b &= ~bits;
-                    m_app_key.pressed_b |= bits;
-                    #if KEY_DUMP_ENABLE
-                    logd("m_app_key.pressed_b\n");
-                    #endif
                     ret = true;
                 }
-            }else if(((m_app_key.pressed_b | m_app_key.double_b) & bits)){
+            }else if(((m_app_key.pressed_b | m_app_key.double_b | m_app_key.three_b) & bits)){
                 key_cnt[i]++;
                 if(key_cnt[i] >= KEY_PRESSED_B_DELAY){
                     key_cnt[i] = 0;
                     m_app_key.pressed_b &= ~bits;
                     m_app_key.double_b &= ~bits;
+                    m_app_key.three_b &= ~bits;
                     ret = true;
                 }
             }
@@ -244,7 +259,7 @@ void app_key_decode_task(uint32_t key_scan)
     }
 
     if(!m_key_power_on){
-        if(!KEY_POWER && !((m_app_key.pressed_b|m_app_key.double_b) & HW_KEY_POWER)){
+        if(!KEY_POWER && !((m_app_key.pressed_b|m_app_key.double_b|m_app_key.three_b) & HW_KEY_POWER)){
             m_key_power_on = true;
         }
     }
