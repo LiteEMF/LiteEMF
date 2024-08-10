@@ -16,12 +16,20 @@
 #if APP_GAMEAPD_ENABLE
 #include  "api/api_tick.h"
 #include  "app/gamepad/app_gamepad.h"
-
 #if APP_JOYSTICK_ENABLE
 #include  "app/app_joystick.h"
 #endif
 #if APP_IMU_ENABLE
 #include  "app/imu/app_imu.h"
+#endif
+#if API_BT_ENABLE
+#include  "api/bt/api_bt.h"
+#endif
+#if API_USBH_BIT_ENABLE
+#include "api/usb/host/usbh.h"
+#endif
+#if API_USBD_BIT_ENABLE
+#include "api/usb/device/usbd.h"
 #endif
 
 #include "api/api_log.h"
@@ -542,6 +550,34 @@ bool app_gamepad_key_send(trp_handle_t *phandle,app_gamepad_key_t *keyp)
 	return ret;
 }
 
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:	手柄标准传输发送, 简化发送流程	
+*******************************************************************/
+bool app_gamepad_std_trp_send(uint8_t id, trp_t trp, app_gamepad_key_t *keyp)
+{
+	trp_handle_t handle;
+	hid_type_t hid_type = HID_TYPE_NONE;
+
+	if(api_trp_is_bt(trp)){
+		#if API_BT_ENABLE
+		api_bt_ctb_t* bt_ctbp = api_bt_get_ctb(trp);
+		if(NULL == bt_ctbp) return false;
+		hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
+		#endif
+	}else if(api_trp_is_usb(trp)){
+		#if API_USBD_BIT_ENABLE
+		hid_type = app_gamepad_get_hidtype(m_usbd_hid_types[id]);
+		#endif
+	}
+
+	handle.id = id;
+	handle.trp = trp;
+	handle.index = U16(DEF_DEV_TYPE_HID,hid_type);
+	return app_gamepad_key_send(&handle, keyp);
+}
 
 bool app_gamepad_dev_process(trp_handle_t *phandle, uint8_t* buf,uint8_t len)
 {

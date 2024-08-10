@@ -59,8 +59,6 @@ axis3i_t m_acc;
 imu_cal_sta_t imu_cal_sta;
 imu_move_t is_imu_move;
 bool imu_auto_cal;
-float accSensitivity   = 0.244f;   //加速度的最小分辨率 mg/LSB
-float gyroSensitivity  = 32.8f;    //陀螺仪的最小分辨率
 /******************************************************************************************************
 **	static Parameters
 *******************************************************************************************************/
@@ -274,9 +272,9 @@ void app_imu_cal_start(void)
 float q0 = 1, q1 = 0, q2 = 0, q3 = 0;    	// 初始姿态四元数，由上篇博文提到的变换四元数公式得来
 float exInt = 0, eyInt = 0, ezInt = 0;    	//当前加计测得的重力加速度在三轴上的分量
                                 	//与用当前姿态计算得来的重力在三轴上的分量的误差的积分
-axis4f_t m_imu_quaternion;		//四元数
-void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az)		//g表陀螺仪，a表加计  
+void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az, axis4f_t* axisp)		//g表陀螺仪，a表加计  
 {
+	axis4f_t imu_quaternion;		//四元数
 	float norm; //矢量的模或四元数的范数
 	float vx, vy, vz;//当前姿态计算得来的重力在三轴上的分量
 	float ex, ey, ez;//当前加计测得的重力加速度在三轴上的分量,与用当前姿态计算得来的重力在三轴上的分量的误差
@@ -284,6 +282,7 @@ void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az)	
 	float q1_last = q1;	
 	float q2_last = q2;	
 	float q3_last = q3;	    
+	float gyroSensitivity = 32768.0 / IMU_GYRO_RANGE_DEFAULT;	//LSB/dps
 
 	// 陀螺仪数据需乘一个系数将其转化为弧度制角速度   (GX*gyroSensitivity)*2*PI/360   gyroSensitivity(度/S) = 量程 / 0x8000
 	gx = gx * gyroSensitivity * 0.017453f;		//转化为弧度制角速度  弧度/S  
@@ -325,11 +324,11 @@ void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az)	
 	q3 = q3_last + (q0_last*gz + q1_last*gy -q2_last*gx)*halfT;
 	//单位化四元数在空间旋转时不会拉伸，仅有旋转角度，这类似线性代数里的正交变换
 	norm = invSqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
-	m_imu_quaternion.x = q0 * norm;
-	m_imu_quaternion.y = q1 * norm;
-	m_imu_quaternion.z = q2 * norm;
-	m_imu_quaternion.w = q3 * norm;
-
+	imu_quaternion.x = q0 * norm;
+	imu_quaternion.y = q1 * norm;
+	imu_quaternion.z = q2 * norm;
+	imu_quaternion.w = q3 * norm;
+	*axisp = imu_quaternion;
 }
 
 bool app_imu_get_val(axis3i_t *accp, axis3i_t *gyrop)
@@ -408,8 +407,7 @@ void app_imu_task(void* pa)
 		m_gyro = gyro;
 		m_acc = acc;
 		#endif
-		app_imu_update(gyro.x,gyro.y,gyro.z, acc.x,acc.y,acc.z);
-				
+			
 		// // logd("imu: %d, %d, %d, %d, %d, %d\n",acc.x, acc.y, acc.z, gyro.x, gyro.y, gyro.z );
 		imu_static_check();
 		imu_do_cal();

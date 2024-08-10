@@ -29,6 +29,14 @@ extern "C" {
 #define IMU_ISR_READ_ENABLE				1
 #endif
 
+#ifndef IMU_GYRO_RANGE_DEFAULT
+#define IMU_GYRO_RANGE_DEFAULT				GYRO_RANGE_2000
+#endif
+
+#ifndef IMU_ACC_RANGE_DEFAULT
+#define IMU_ACC_RANGE_DEFAULT				ACC_RANGE_8G
+#endif
+
 
 typedef enum{
 	ACC_RANGE_1G = 0,

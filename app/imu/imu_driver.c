@@ -128,8 +128,6 @@ bool imu_driver_deinit(void)
 	return true;
 }
 
-
-
 /*******************************************************************
 ** Parameters:		
 ** Returns:	
@@ -147,19 +145,19 @@ void imu_driver_task(void* pa)
 
 		ctbp->retry--;
         #if	defined IMU_SH3001_ID
-        m_imu_init = SH3001_init(ACC_RANGE_8G, GYRO_RANGE_2000);
+        m_imu_init = SH3001_init(IMU_ACC_RANGE_DEFAULT, IMU_GYRO_RANGE_DEFAULT);
         #endif
 
 		#if	defined IMU_ICM42688_ID
-		m_imu_init = ICM42688_init(ACC_RANGE_8G, GYRO_RANGE_2000);
+		m_imu_init = ICM42688_init(IMU_ACC_RANGE_DEFAULT, IMU_GYRO_RANGE_DEFAULT);
 		#endif
 
         #if defined IMU_ICM20600_ID
-        m_imu_init = InitICM20600(ACC_RANGE_8G, GYRO_RANGE_2000);
+        m_imu_init = InitICM20600(IMU_ACC_RANGE_DEFAULT, IMU_GYRO_RANGE_DEFAULT);
         #endif
 
         #if defined IMU_QMI8658_ID
-        m_imu_init = Qmi8658_init(ACC_RANGE_8G, GYRO_RANGE_2000);
+        m_imu_init = Qmi8658_init(IMU_ACC_RANGE_DEFAULT, IMU_GYRO_RANGE_DEFAULT);
         #endif
 
         if(!m_imu_init) {

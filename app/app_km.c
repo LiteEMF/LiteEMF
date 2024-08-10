@@ -26,6 +26,9 @@
 #if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
 #include "api/usb/host/usbh_hid_km.h"
 #endif
+
+#include  "api/api_log.h"
+
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/

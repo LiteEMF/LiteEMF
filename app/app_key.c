@@ -16,8 +16,9 @@
 #if APP_KEY_ENABLE
 
 #include  "app/app_key.h"
-#include  "api/api_log.h"
 #include  "api/api_tick.h"
+
+#include  "api/api_log.h"
 
 /******************************************************************************************************
 ** Defined

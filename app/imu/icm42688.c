@@ -39,10 +39,9 @@ XYZ_GYRO_T GyroXYZ;
 XYZ_GYRO_T GyroOffset={0,0,0};
 
 
-extern float accSensitivity;   	//加速度的最小分辨率 mg/LSB
-extern float gyroSensitivity;    //陀螺仪的最小分辨率
 float bsp_Icm42688GetAres(uint8_t Ascale)
 {
+	float accSensitivity;   	//加速度的最小分辨率 mg/LSB
     switch(Ascale)
     {
     case AFS_2G:
@@ -64,6 +63,7 @@ float bsp_Icm42688GetAres(uint8_t Ascale)
 
 float bsp_Icm42688GetGres(uint8_t Gscale)
 {
+	float gyroSensitivity;    //陀螺仪的最小分辨率
     switch(Gscale)
     {
     case GFS_125DPS:
@@ -129,7 +129,7 @@ uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range)
 				accr = AFS_8G;
 				break;
 		}
-        bsp_Icm42688GetAres(accr);
+        // bsp_Icm42688GetAres(accr);
         reg_val = 0;	
         reg_val |= (accr << 5);   	//量程 
         reg_val |= (AODR_1000Hz);     //输出速率 1000HZ
@@ -155,7 +155,7 @@ uint8_t ICM42688_init(acc_range_t acc_range, gyro_range_t gyro_range)
 				gyror = GFS_1000DPS;
 				break;
 		}
-        bsp_Icm42688GetGres(gyror);
+        // bsp_Icm42688GetGres(gyror);
         reg_val = 0;
         reg_val |= (gyror << 5);   		//量程 
         reg_val |= (GODR_1000Hz);     	//输出速率 1000HZ

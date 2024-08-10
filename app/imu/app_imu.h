@@ -80,6 +80,11 @@ typedef struct{
 } imu_cal_t;	//12
 
 
+extern axis3i_t m_gyro;
+extern axis3i_t m_acc;
+extern imu_cal_sta_t imu_cal_sta;
+extern imu_move_t is_imu_move;
+extern bool imu_auto_cal;
 extern axis4f_t m_imu_quaternion;		//四元数
 
 /*****************************************************************************************************
@@ -89,6 +94,7 @@ bool app_imu_get_raw(axis3i_t* accp,axis3i_t* gyrop);			//__WEAK
 void app_imu_event(imu_cal_sta_t event);			//__WEAK
 void app_imu_cal_start(void);
 bool app_imu_get_val(axis3i_t *accp, axis3i_t *gyrop);
+void app_imu_update(float gx, float gy, float gz, float ax, float ay, float az, axis4f_t* axisp);
 bool app_imu_init(void);
 bool app_imu_deinit(void);
 void app_imu_task(void* pa);
