@@ -155,6 +155,9 @@ error_t usbd_hid_km_control_request_process(uint8_t id, usbd_class_t *pclass, us
 				}
 			}
 			break;
+		case HID_REQ_CONTROL_SET_PROTOCOL:
+		    err = ERROR_SUCCESS;
+			break;
 		default:
 			break;
 		}

@@ -691,9 +691,8 @@ __WEAK void api_bt_rx(uint8_t id, bt_t bt, bt_evt_rx_t* pa)
 		#if APP_CMD_ENABLE
 		uint8_t i;
 		trp_handle_t handle = {bt,id,U16(DEV_TYPE_VENDOR, 0)};
-		for(i=0; i<pa->len; i++){
-			app_command_rx_byte(&handle, pa->buf[i]);
-		}
+		app_command_rx(&handle,pa->buf, pa->len);	//蓝牙数据改为整包处理
+
 		#endif
 	}
 }
