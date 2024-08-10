@@ -40,46 +40,6 @@ int32_t remap(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_
 	return REMAP(x,in_min,in_max, out_min, out_max);
 }
 
-/*******************************************************************
-** Parameters:	pcurve_shape:0~100	, 
-                shape_cnt: 折线点个数, shape_cnt-1必须能被10整除推荐:3, 6, 11
-** Returns:	    
-** Description:	Curve shaping 多点折线比例转换
-@ref: https://github.dev/FreeJoy-Team/FreeJoy ShapeFunc	
-*******************************************************************/
-int32_t curve_shape_remap(int32_t value, int32_t max_val, uint8_t* pcurve_shape, uint8_t shape_cnt)
-{
-	int32_t out_min, out_max, step;
-	int32_t in_min, in_max;
-	int32_t min_index;
-	int32_t ret;
-
-    int8_t i, shape_step = 100 / (shape_cnt-1);
-
-    // check if is not linear shape_cnt-1必须能被10整除
-	for(i=0; i<shape_cnt; i++){
-        if(pcurve_shape[i] != i*shape_step){
-            break;
-        }
-    }
-    if(i == shape_cnt) return value;            // is line
-
-    step = max_val / (shape_cnt-1);
-    min_index = value / step;
-
-    if (min_index >= shape_cnt-1){
-        return ((int32_t)pcurve_shape[shape_cnt-1] * (int32_t)max_val/100);
-    }else{
-        in_min = min_index*step;
-        in_max = (min_index+1)*step;
-        
-        out_min = ((int32_t)pcurve_shape[min_index] * (int32_t)max_val/100);
-        out_max = ((int32_t)pcurve_shape[min_index+1] * (int32_t)max_val/100);
-        
-        ret = REMAP(value, in_min, in_max, out_min, out_max);
-	    return(ret);
-    }
-}
 
 
 /*******************************************************************

@@ -289,6 +289,13 @@ typedef struct
 } app_kb_t;		    //8
 
 
+typedef struct 
+{
+    uint8_t fn;
+	uint8_t key[16];     /*0~128*/
+} app_kb_bit_t;
+
+
 #ifdef __cplusplus
 }
 #endif

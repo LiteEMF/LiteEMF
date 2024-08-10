@@ -41,8 +41,8 @@ extern "C" {
 #endif
 
 //circle limit in square
-#ifndef STICK_CIRCLE_LIMIT				//摇杆画圆切边
-#define STICK_CIRCLE_LIMIT  (1.03)
+#ifndef STICK_CIRCLE_LIMIT_DEFAUL	    //摇杆画圆切边
+#define STICK_CIRCLE_LIMIT_DEFAUL  (103)
 #endif
 #ifndef STICK_LIMIT_MIN_R				//摇杆校准最小限制半径
 #define STICK_LIMIT_MIN_R (ADC_RES_MAX/4)
@@ -80,10 +80,11 @@ extern "C" {
 **	Parameters
 *******************************************************************************************************/
 typedef struct{
-    uint8_t trunx;
-    uint8_t truny;
-    uint8_t centre_deadband;
-    uint8_t side_deadband;
+    uint8_t trunx;                      //摇杆x翻转, 扳机翻转
+    uint8_t truny;                      //摇杆y翻转
+    uint8_t centre_deadband;            //中心死区
+    uint8_t side_deadband;              //边界死区
+    uint8_t circle_liment_percent;      //摇杆圆限制百分百
 } joystick_cfg_t;
 
 
@@ -124,7 +125,9 @@ void app_joystick_event(joystick_cal_sta_t event);   //__WEAK
 
 void app_joystack_cal_start(void);
 void app_joystack_cal_end(void);
-void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
+void app_vector_to_stick(axis2i_t* stickp, vector2f_t* vectorp);
+void app_stick_to_vector(axis2i_t* stickp, vector2f_t* vectorp);
+void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp);
 void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp);
 uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* pbuf, uint8_t size);
 bool app_joystick_init(void);

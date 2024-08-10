@@ -39,11 +39,11 @@ typedef enum{
 }acc_range_t;
 
 typedef enum{
-	GYRO_RANGE_125 = 0,
-	GYRO_RANGE_250,
-	GYRO_RANGE_500,
-	GYRO_RANGE_1000,
-	GYRO_RANGE_2000,
+	GYRO_RANGE_125 = 125,
+	GYRO_RANGE_250 = 250,
+	GYRO_RANGE_500 = 500,
+	GYRO_RANGE_1000 = 1000,
+	GYRO_RANGE_2000 = 2000,
 }gyro_range_t;
 
 

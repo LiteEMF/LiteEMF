@@ -26,7 +26,7 @@ api_storage_map_t:
 ************************************************************************************************************/
 #include "hw_config.h"
 #if APP_MT_ENABLE
-#include "app/multitouch/macro_map.h"
+#include "app/multitouch/mt_macro_map"
 #include "api/api_tick.h"
 #include "api/api_log.h"
 

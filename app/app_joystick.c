@@ -175,6 +175,29 @@ uint8_t is_dynamic_deadband_holding (int16_t value, uint8_t deadband, int16_t* p
 }
 
 /*******************************************************************
+** Parameters: 
+** Returns:	
+** Description: 摇杆数据转换为向量
+*******************************************************************/
+void app_stick_to_vector(axis2i_t* stickp, vector2f_t* vectorp)
+{
+    vectorp->x = stickp->x;
+    vectorp->y = stickp->y;
+    vector2f_normalization(vectorp);
+}
+
+
+void app_vector_to_stick(axis2i_t* stickp, vector2f_t* vectorp)
+{
+    stickp->x = vectorp->r * vectorp->x;    
+    stickp->y = vectorp->r * vectorp->y;    
+    constrain_int16(stickp->x);
+    constrain_int16(stickp->y);
+}
+
+
+
+/*******************************************************************
 ** Parameters: pcurve_shape, shape_cnt: 曲线点
 ** Returns:	
 ** Description: 摇杆死区设置
@@ -184,13 +207,14 @@ void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
 {
 	int32_t x,y;
     uint8_t centre_percent=0,side_percent=100;        //deadband percent
-    float scale, percent_r;
+    float scale, percent_r, circle_liment;
     
     percent_r = vectorp->r * (100 / 32767.0);
 
     if(NULL != cfgp){
         centre_percent = cfgp->centre_deadband;
         side_percent = 100-cfgp->side_deadband;
+        circle_liment = cfgp->circle_liment_percent /  100.0;
         if (cfgp->trunx) vectorp->x = -vectorp->x;
         if (cfgp->truny) vectorp->y = -vectorp->y;
     }
@@ -203,8 +227,8 @@ void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
         }
 
 		//normalization
-        if( scale > STICK_CIRCLE_LIMIT) {
-            scale = STICK_CIRCLE_LIMIT;
+        if( scale > circle_liment) {
+            scale = circle_liment;
         }
         
         vectorp->r *= scale;
@@ -212,6 +236,7 @@ void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
         vectorp->r = 0;
     }
 }
+
 
 void app_trigger_deadband(joystick_cfg_t* cfgp,uint16_t *valp)
 {
@@ -325,14 +350,14 @@ void joystick_set_cal_deadband(joystick_cal_t *calp)
 
     for (id = 0; id < APP_STICK_NUMS; id++){
         axis = calp->mid.stick[id];
-        axis2i_sub(&axis, &calp->min.stick[id]);
+        AXIS2_SUB(&axis, &calp->min.stick[id]);
         AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADBAND/100.0);
-        axis2i_add(&calp->min.stick[id], &axis);
+        AXIS2_SUB(&calp->min.stick[id], &axis);
 
         axis = calp->max.stick[id];
-        axis2i_sub(&axis, &calp->mid.stick[id]);
+        AXIS2_SUB(&axis, &calp->mid.stick[id]);
         AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADBAND/100.0);
-        axis2i_sub(&calp->max.stick[id], &axis);
+        AXIS2_SUB(&calp->max.stick[id], &axis);
     }
     for (id = 0; id < APP_TRIGGER_NUMS; id++){
         //适配扳机硬件死区

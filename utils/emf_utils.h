@@ -42,7 +42,7 @@ extern "C" {
 **  Function
 ******************************************************************************************************/
 int32_t remap(int32_t x, int32_t in_min, int32_t in_max, int32_t out_min, int32_t out_max);
-int32_t curve_shape_remap(int32_t value, uint8_t* pcurve_shape, uint8_t shape_cnt);
+
 void swap_buf(uint8_t *buf, uint16_t len);
 int8_t constrain_int8(int32_t val);
 int16_t constrain_int16(int32_t val);

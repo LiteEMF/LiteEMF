@@ -14,7 +14,7 @@
 ************************************************************************************************************/
 #include "hw_config.h"
 #if APP_MT_ENABLE
-#include "app/multitouch/app_map_setting.h"
+#include "app/multitouch/mt_map_setting.h"
 #include "api/api_tick.h"
 
 #include "api/api_log.h"

@@ -53,6 +53,10 @@ __WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit);			//__WEAK
 void app_km_clean(app_km_t* pkey);
 bool app_km_fill(app_km_t* pkey, app_km_t* pkey_in);
 bool app_km_cache(app_km_t* pkey, app_km_t* pkey_in);
+
+bool app_bit_to_stdkb(app_kb_bit_t* pbit, app_kb_t* out);
+bool app_fill_kb_bit(uint8_t key, app_kb_bit_t* pbit);
+bool app_fill_kb(uint8_t key, app_kb_t* keyp, uint8_t start_index);
 bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse);
 bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey);
 bool app_km_init(void);

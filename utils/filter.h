@@ -106,8 +106,8 @@ extern void kalman_axis2f_filter(kalman_axis2f_t* kalmanp, const axis2f_t* measu
 extern void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep);
 
 extern void fir_fiter_init(firf_t *firp,float* imp,float* fbuf, uint8_t imp_size);
-extern void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf,uint8_t imp_size);
-extern void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf,uint8_t imp_size);
+extern void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf_xy,uint8_t imp_size);
+extern void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf_xyz,uint8_t imp_size);
 extern void fir_fiter(firf_t *firp, float measure);
 extern void fir_axis2l_fiter(firf_axis2_t *firp, const axis2l_t* measurep);
 extern void fir_axis3l_fiter(firf_axis3_t *firp, const axis3l_t* measurep);

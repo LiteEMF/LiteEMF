@@ -80,6 +80,21 @@ void lpf_1st_axis3f(axis3f_t* outp, const axis3f_t* axis_inp, float lpf_factor)
 
 /*******************************************************************
 ** Parameters:	kalmanp: Klaman filter structure
+	Q（过程噪声协方差矩阵）：表示系统模型的不确定性或噪声。它通常反映系统内在的随机波动或模型的不精确性。
+	Q 值越大，表示你认为系统模型的预测不够可靠，滤波器将更依赖测量值。
+	R（测量噪声协方差矩阵）：表示传感器测量的不确定性或噪声。
+	R 值越大，表示你认为测量值不可靠，滤波器将更多依赖系统模型的预测。
+
+	如果滤波器反应过于缓慢（滞后大）：考虑增加 𝑄或减小 𝑅
+	R，这将使滤波器更依赖测量值而非预测值。
+	如果滤波器反应过于剧烈（噪声大）：考虑减小 𝑄或增加 𝑅
+	R，这将使滤波器更依赖系统模型的预测而非测量值。
+
+	Q:过程噪声，Q增大，动态响应变快，收敛稳定性变坏
+	R:测量噪声，R增大，动态响应变慢，收敛稳定性变好 
+	smoot 越大越稳定
+	Q = 100 - smoot;
+	R = smoot;
 ** Returns:	
 ** Description:		kalman filter
 ref: https://github.com/xiahouzuoxin/kalman_filter/blob/master/kalman_filter.c
@@ -149,16 +164,16 @@ void fir_fiter_init(firf_t *firp,float* imp,float* fbuf,uint8_t imp_size)
 	
 	UNUSED_PARAMETER(imp_size);
 }
-void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf,uint8_t imp_size)
+void fir_axis2_fiter_init(firf_axis2_t *firp,float* imp,float* fbuf_xy,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,fbuf,imp,imp_size);
-	fir_fiter_init(&firp->y,fbuf,imp,imp_size);
+	fir_fiter_init(&firp->x,fbuf_xy,imp,imp_size);
+	fir_fiter_init(&firp->y,fbuf_xy + imp_size,imp,imp_size);
 }
-void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf,uint8_t imp_size)
+void fir_axis3_fiter_init(firf_axis3_t *firp,float* imp,float* fbuf_xyz,uint8_t imp_size)
 {
-	fir_fiter_init(&firp->x,fbuf,imp,imp_size);
-	fir_fiter_init(&firp->y,fbuf,imp,imp_size);
-	fir_fiter_init(&firp->z,fbuf,imp,imp_size);
+	fir_fiter_init(&firp->x,fbuf_xyz,imp,imp_size);
+	fir_fiter_init(&firp->y,fbuf_xyz + imp_size,imp,imp_size);
+	fir_fiter_init(&firp->z,fbuf_xyz + 2 * imp_size,imp,imp_size);
 }
 void fir_fiter(firf_t *firp, float measure)
 {

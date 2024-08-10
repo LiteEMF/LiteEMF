@@ -146,7 +146,7 @@ static imu_move_t imu_static_check(void)
 	static axis3i_t s_gyro,s_acc;
 
 	d_gyro = m_gyro;
-	axis3i_sub(&d_gyro,&s_gyro);
+	AXIS3_SUB(&d_gyro,&s_gyro);
 
 	if( (abs(d_gyro.x) > GYRO_LEVE2_DPS) || (abs(d_gyro.x) > GYRO_LEVE2_DPS) || (abs(d_gyro.x) > GYRO_LEVE2_DPS) ){
 		move2 = false;
@@ -155,7 +155,7 @@ static imu_move_t imu_static_check(void)
 
 	if(move2){
 		d_acc = m_acc;
-		axis3i_sub(&d_acc,&s_acc);
+		AXIS3_SUB(&d_acc,&s_acc);
 		if( (abs(d_acc.x) > ACC_LEVE1_DPS) || (abs(d_acc.x) > ACC_LEVE1_DPS) || (abs(d_acc.x) > ACC_LEVE1_DPS) ){
 			move2 = false;
 			move1 = false;
@@ -169,7 +169,7 @@ static imu_move_t imu_static_check(void)
 	}
 	if(move1){
 		d_acc = m_acc;
-		axis3i_sub(&d_acc,&s_acc);
+		AXIS3_SUB(&d_acc,&s_acc);
 		if( (abs(d_acc.x) > ACC_LEVE1_DPS) || (abs(d_acc.x) > ACC_LEVE1_DPS) || (abs(d_acc.x) > ACC_LEVE1_DPS) ){
 			move1 = false;
 		}
@@ -229,8 +229,8 @@ static void imu_do_cal(void)
 			AXIS3_ADD(&acc_sum, &m_acc);
 
 			if(s_count >= 100){
-				axis3l_div(&gyro_sum,s_count);
-				axis3l_div(&acc_sum,s_count);
+				AXIS3_DIV(&gyro_sum,s_count);
+				AXIS3_DIV(&acc_sum,s_count);
 				acc_sum.z -= 4096;		//TODO
 
 				AXIS3_COPY(&(imu_calp->gyro),&gyro_sum);

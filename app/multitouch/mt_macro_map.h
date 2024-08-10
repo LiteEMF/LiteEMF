@@ -10,10 +10,10 @@
 */
 
 
-#ifndef _macro_map_h
-#define _macro_map_h
+#ifndef _mt_macro_map_h
+#define _mt_macro_map_h
 #include "emf_typedef.h" 
-#include "app/multitouch/app_map_setting.h"
+#include "app/multitouch/mt_map_setting.h"
 
 #ifdef __cplusplus
 extern "C" {

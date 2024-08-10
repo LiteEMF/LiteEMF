@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _app_map_setting_h
-#define _app_map_setting_h
+#ifndef _mt_map_h
+#define _mt_map_h
 #include "emf_typedef.h" 
 #include "api/api_storage.h"
 

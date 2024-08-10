@@ -187,13 +187,13 @@ bool switch_key_decode(trp_handle_t *phandle,uint8_t* buf, uint16_t len, app_gam
 
 		axis = switch_inp->acc;
         axis3i_swapl(&axis);
-        axis3i_sub(&axis, &m_switch_cal.acc);
+        AXIS3_SUB(&axis, &m_switch_cal.acc);
         axis.x = 0 - axis.x;
         keyp->acc = axis;
 
 		axis = switch_inp->gyro;
 		axis3i_swapl(&axis);
-        axis3i_sub(&axis, &m_switch_cal.gyro);
+        AXIS3_SUB(&axis, &m_switch_cal.gyro);
         axis.y = 0 - axis.y;
         axis.z = 0 - axis.z;
         keyp->gyro = axis;
@@ -381,8 +381,8 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                     m_switch_cal.l_mid = mid;
                     m_switch_cal.l_min = mid;
                     m_switch_cal.l_max = mid;
-                    axis2i_sub( &m_switch_cal.l_min, &min);
-                    axis2i_add( &m_switch_cal.l_max, &max);
+                    AXIS2_SUB( &m_switch_cal.l_min, &min);
+                    AXIS2_ADD( &m_switch_cal.l_max, &max);
                 }
 
                 bit12_to_uint(switch_stick_calp->rxy_mid,&mid.x, &mid.y);
@@ -392,8 +392,8 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                     m_switch_cal.r_mid = mid;
                     m_switch_cal.r_min = mid;
                     m_switch_cal.r_max = mid;
-                    axis2i_sub( &m_switch_cal.r_min, &min);
-                    axis2i_add( &m_switch_cal.r_max, &max);
+                    AXIS2_SUB( &m_switch_cal.r_min, &min);
+                    AXIS2_ADD( &m_switch_cal.r_max, &max);
                 }
 
                 switch_set_emu(enump,SWITCH_CTRL_ID,SUB_SPI_FLASH_READ,0X6020);   //0x10
@@ -417,8 +417,8 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                     m_switch_cal.l_mid = mid;
                     m_switch_cal.l_min = mid;
                     m_switch_cal.l_max = mid;
-                    axis2i_sub( &m_switch_cal.l_min, &min);
-                    axis2i_add( &m_switch_cal.l_max, &max);
+                    AXIS2_SUB( &m_switch_cal.l_min, &min);
+                    AXIS2_ADD( &m_switch_cal.l_max, &max);
                 }
                 if(switch_user_calp->rMagic == SWITCH_SPI_MAGIC){
                     bit12_to_uint(switch_user_calp->rxy_mid,&mid.x, &mid.y);
@@ -427,8 +427,8 @@ bool switch_in_process(trp_handle_t* phandle, uint8_t* buf,uint16_t len)
                     m_switch_cal.r_mid = mid;
                     m_switch_cal.r_min = mid;
                     m_switch_cal.r_max = mid;
-                    axis2i_sub( &m_switch_cal.r_min, &min);
-                    axis2i_add( &m_switch_cal.r_max, &max);
+                    AXIS2_SUB( &m_switch_cal.r_min, &min);
+                    AXIS2_ADD( &m_switch_cal.r_max, &max);
                 }
                 switch_set_emu(enump,SWITCH_CTRL_ID,SUB_SPI_FLASH_READ,0X8026);   //0x10
             }else if(enump->param == 0X8026) {
@@ -562,8 +562,8 @@ void switch_cal_data_test(void)
     m_switch_cal.l_mid = mid;
     m_switch_cal.l_min = mid;
     m_switch_cal.l_max = mid;
-    axis2i_sub( &m_switch_cal.l_min, &min);
-    axis2i_add( &m_switch_cal.l_max, &max);
+    AXIS2_SUB( &m_switch_cal.l_min, &min);
+    AXIS2_ADD( &m_switch_cal.l_max, &max);
 
     bit12_to_uint(switch_stick_calp->rxy_mid,&mid.x, &mid.y);
     bit12_to_uint(switch_stick_calp->rxy_min_sid,&min.x, &min.y);
@@ -571,8 +571,8 @@ void switch_cal_data_test(void)
     m_switch_cal.r_mid = mid;
     m_switch_cal.r_min = mid;
     m_switch_cal.r_max = mid;
-    axis2i_sub( &m_switch_cal.r_min, &min);
-    axis2i_add( &m_switch_cal.r_max, &max);
+    AXIS2_SUB( &m_switch_cal.r_min, &min);
+    AXIS2_ADD( &m_switch_cal.r_max, &max);
 
     switch_imu_calp = (switch_imu_cal_t*)switch_imu_cal;
     m_switch_cal.acc = switch_imu_calp->acc_cal;
@@ -592,8 +592,8 @@ void switch_cal_data_test(void)
         m_switch_cal.l_mid = mid;
         m_switch_cal.l_min = mid;
         m_switch_cal.l_max = mid;
-        axis2i_sub( &m_switch_cal.l_min, &min);
-        axis2i_add( &m_switch_cal.l_max, &max);
+        AXIS2_SUB( &m_switch_cal.l_min, &min);
+        AXIS2_ADD( &m_switch_cal.l_max, &max);
     }
     if(switch_user_calp->rMagic == SWITCH_SPI_MAGIC){
         bit12_to_uint(switch_user_calp->rxy_mid,&mid.x, &mid.y);
@@ -602,8 +602,8 @@ void switch_cal_data_test(void)
         m_switch_cal.r_mid = mid;
         m_switch_cal.r_min = mid;
         m_switch_cal.r_max = mid;
-        axis2i_sub( &m_switch_cal.r_min, &min);
-        axis2i_add( &m_switch_cal.r_max, &max);
+        AXIS2_SUB( &m_switch_cal.r_min, &min);
+        AXIS2_ADD( &m_switch_cal.r_max, &max);
     }
             
 

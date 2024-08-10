@@ -190,6 +190,46 @@ typedef struct{			//vector
 #define AXIS3_DIV(axisp, div)  do{(axisp)->x /= div;(axisp)->y /= div;(axisp)->z /= div;}while(0)
 
 
+#define VECTOR2_ADD(vectorp, addp)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r + (addp)->x * (addp)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r + (addp)->y * (addp)->r;\
+									}while(0)
+#define VECTOR2_SUB(vectorp, subp)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r - (subp)->x * (subp)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r - (subp)->y * (subp)->r;\
+									}while(0)
+#define VECTOR2_MUL(vectorp, mul)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r * (mul)->x * (mul)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r * (mul)->y * (mul)->r;\
+									}while(0)
+#define VECTOR2_DIV(vectorp, div)  do{\
+										(vectorp)->x = ((vectorp)->x * (vectorp)->r) / ((div)->x * (div)->r);\
+										(vectorp)->y = ((vectorp)->y * (vectorp)->r) / ((div)->y * (div)->r);\
+									}while(0)
+
+
+#define VECTOR3_ADD(vectorp, addp)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r + (addp)->x * (addp)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r + (addp)->y * (addp)->r;\
+										(vectorp)->z = (vectorp)->z * (vectorp)->r + (addp)->z * (addp)->r;\
+									}while(0)
+#define VECTOR3_SUB(vectorp, subp)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r - (subp)->x * (subp)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r - (subp)->y * (subp)->r;\
+										(vectorp)->z = (vectorp)->z * (vectorp)->r - (subp)->z * (subp)->r;\
+									}while(0)
+#define VECTOR3_MUL(vectorp, mul)  do{\
+										(vectorp)->x = (vectorp)->x * (vectorp)->r * (mul)->x * (mul)->r;\
+										(vectorp)->y = (vectorp)->y * (vectorp)->r * (mul)->y * (mul)->r;\
+										(vectorp)->z = (vectorp)->z * (vectorp)->r * (mul)->z * (mul)->r;\
+									}while(0)
+#define VECTOR3_DIV(vectorp, div)  do{\
+										(vectorp)->x = ((vectorp)->x * (vectorp)->r) / ((div)->x * (div)->r);\
+										(vectorp)->y = ((vectorp)->y * (vectorp)->r) / ((div)->y * (div)->r);\
+										(vectorp)->z = ((vectorp)->z * (vectorp)->r) / ((div)->z * (div)->r);\
+									}while(0)
+
+
 void  axis3i_swapl( axis3i_t* p);
 void  axis2i_swapl( axis2i_t* p);
 void  axis3i_swaph( axis3i_t* p);
@@ -198,41 +238,6 @@ void  axis3l_swapl( axis3l_t* p);
 void  axis2l_swapl( axis2l_t* p);
 void  axis3l_swaph( axis3l_t* p);
 void  axis2l_swaph( axis2l_t* p);
-
-void constrain_axis2(axis2i_t* axisp);
-void constrain_axis2i(axis2l_t* axisp);
-void constrain_axis3(axis3i_t* axisp);
-void constrain_axis3i(axis3l_t* axisp);
-
-
-void  axis2i_add( axis2i_t* axisp, axis2i_t* a);
-void  axis3i_add( axis3i_t* axisp, axis3i_t* a);
-void  axis2l_add( axis2l_t* axisp, axis2l_t* a);
-void  axis3l_add( axis3l_t* axisp, axis3l_t* a);
-void  axis2f_add( axis2f_t* axisp, axis2f_t* a);
-void  axis3f_add( axis3f_t* axisp, axis3f_t* a);
-
-
-void  axis2i_sub( axis2i_t* axisp, axis2i_t* a);
-void  axis3i_sub( axis3i_t* axisp, axis3i_t* a);
-void  axis2l_sub( axis2l_t* axisp, axis2l_t* a);
-void  axis3l_sub( axis3l_t* axisp, axis3l_t* a);
-void  axis2f_sub( axis2f_t* axisp, axis2f_t* a);
-void  axis3f_sub( axis3f_t* axisp, axis3f_t* a);
-
-void  axis2i_mul( axis2i_t* axisp,int32_t k);
-void  axis3i_mul( axis3i_t* axisp,int32_t k);
-void  axis2l_mul( axis2l_t* axisp,int32_t k);
-void  axis3l_mul( axis3l_t* axisp,int32_t k);
-void  axis2f_mul( axis2f_t* axisp, float k);
-void  axis3f_mul( axis3f_t* axisp, float k);
-
-void  axis2i_div( axis2i_t* axisp,int32_t k);
-void  axis3i_div( axis3i_t* axisp,int32_t k);
-void  axis2l_div( axis2l_t* axisp,int32_t k);
-void  axis3l_div( axis3l_t* axisp,int32_t k);
-void  axis2f_div( axis2f_t* axisp, float k);
-void  axis3f_div( axis3f_t* axisp, float k);
 
 void vector2f_normalization(vector2f_t* vectorp);
 void vector3f_normalization(vector3f_t* vectorp);
