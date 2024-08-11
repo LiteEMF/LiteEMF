@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 
 #include  "app/gamepad/app_gamepad_key.h"
 

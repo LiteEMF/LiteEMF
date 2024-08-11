@@ -149,7 +149,7 @@ void kalman_axis3f_filter(kalman_axis3f_t* kalmanp, const axis3f_t* measurep)
 /*******************************************************************
 ** Parameters:	imp:fir impulse response
 				fbuf: static tmp buf
-				imp_size: imp size == fbuf size
+				imp_size: fir权重设置 imp size == fbuf size
 ** Returns:	
 ** Description:		fir filter
 *******************************************************************/

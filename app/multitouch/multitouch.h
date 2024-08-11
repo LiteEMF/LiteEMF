@@ -73,7 +73,7 @@ typedef  struct {
 }mt_slot_t;			//6
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack(1)
 #endif
 
@@ -92,7 +92,7 @@ typedef  struct{
 }multitouch_t;
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 

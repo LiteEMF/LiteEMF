@@ -90,7 +90,7 @@
 #if APP_KM_ENABLE
 #include "app/app_km.h"
 #endif
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 #include "app/gamepad/app_gamepad_key.h"
 #endif
 #if APP_IMU_ENABLE

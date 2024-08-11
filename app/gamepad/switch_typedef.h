@@ -593,7 +593,7 @@ typedef struct  {			//用于枚举switch设备
 }switch_enum_t;
 
 
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 

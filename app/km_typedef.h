@@ -242,7 +242,7 @@ typedef struct
 	int16_t y;	
 	int8_t w;	
 } mouse_t;
-#ifndef PRAGMA_PACK_IGNORED
+#ifndef pack
 #pragma pack()
 #endif
 

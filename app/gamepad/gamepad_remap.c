@@ -13,7 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include "hw_config.h"
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 #include "app/gamepad/gamepad_remap.h"
 #include "api/api_tick.h"
 #if APP_KM_ENABLE
@@ -43,29 +43,25 @@
 **  Function
 ******************************************************************************************************/
 
-#if GAMEAPD_IMU_TO_TICK_ENABLE
-static kalman_axis2f_t gyro_kalman;
-static axis2f_t gyro_lpf;
-static firf_axis2_t *gyro_fir;
-static float gyro_fir_buf_xy[32*2];
 
 /*******************************************************************
 ** Parameters:		
 	kalman_smoot = 0.8
-	fir_imp_size max 16
+	fir_buf_xy: fir滤波缓存,buf大小必须是 fir_imp_size*2
+	fir_imp_size:窗口大小
 ** Returns:	
 ** Description:		
 *******************************************************************/
-void gamepad_gyro_filter_init(float kalman_smoot, uint8_t fir_imp_size)
+void gamepad_gyro_filter_init(gamepad_filter_t *filterp, float kalman_smoot, float* fir_buf_xy, uint8_t fir_imp_size)
 {
-	gyro_lpf.x = 0; 
-	gyro_lpf.y = 0;
-	if(fir_imp_size > 32)fir_imp_size = 32;
-	fir_axis2_fiter_init(&gyro_fir,NULL, gyro_fir_buf_xy,fir_imp_size);
-	kalman_axis2f_filter_init(&gyro_kalman, 1-kalman_smoot, kalman_smoot);
+	filterp->lpf.x = 0; 
+	filterp->lpf.y = 0;
+	fir_axis2_fiter_init(&filterp->fir,NULL, fir_buf_xy,fir_imp_size);
+	kalman_axis2f_filter_init(&filterp->kalman, 1-kalman_smoot, kalman_smoot);
 }
 
-void gamepad_gyro_filter(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f)
+GAMEAPD_REMAP_RAM_CODE()
+void gamepad_gyro_filter(gamepad_filter_t *filterp, vector2f_t* vectorp)
 {
 	vector2f_t vector;
 	vector = *vectorp;
@@ -73,25 +69,22 @@ void gamepad_gyro_filter(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, 
 	if(vector.x > 0) vector.x *= 1.05;		//补偿摇杆正负方向
 	if(vector.y > 0) vector.y *= 1.05;
 
-	if(gyro_kalman.x.r || gyro_kalman.y.r){
-		lpf_1st_axis2f(&gyro_lpf, &vector, LPF_1ST_FACTOR(0.008, 100));
-		AXIS2_COPY(&vector, &gyro_lpf);
-		kalman_axis2f_filter(&gyro_kalman, &vector);
-		vector.x = gyro_kalman.x.out;
-		vector.y = gyro_kalman.y.out;
+	if(filterp->kalman.x.r || filterp->kalman.y.r){
+		lpf_1st_axis2f(&filterp->lpf, &vector, LPF_1ST_FACTOR(0.008, 100));
+		AXIS2_COPY(&vector, &filterp->lpf);
+		kalman_axis2f_filter(&filterp->kalman, &vector);
+		vector.x = filterp->kalman.x.out;
+		vector.y = filterp->kalman.y.out;
 	}
-	fir_axis2l_fiter(&gyro_fir, &vector);
+	fir_axis2l_fiter(&filterp->fir, &vector);
 
-	vector2f_normalization(&vector);
-	vector.r = pow(vector.r,exponent_f);
-	vector.x *= kconst.x + slopes.x * vector.r;
-	vector.y *= kconst.y + slopes.y * vector.r;
 	*vectorp = vector;
 }
 
-float gamepad_mouse_to_stick(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f)
+GAMEAPD_REMAP_RAM_CODE()
+void gamepad_mouse_to_stick(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f)
 {
-	vector2f_t vector;
+	vector2f_t vector = *vectorp;
 	vector2f_normalization(&vector);
 
 	vector.r = pow(vector.r,exponent_f);
@@ -102,7 +95,9 @@ float gamepad_mouse_to_stick(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slop
 }
 
 // VECTOR2_ADD
-float gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f)
+
+GAMEAPD_REMAP_RAM_CODE()
+void gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f)
 {
 	vector2f_t vector = *vectorp;
 
@@ -110,6 +105,7 @@ float gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slop
 	vector.y =  (vector.y - kconst.y) / slopes.y;
 	vector2f_normalization(&vector);
 	vector.r = pow(vector.r,1 / exponent_f);
+	*vectorp = vector;
 }
 
 /*******************************************************************
@@ -119,6 +115,7 @@ float gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slop
 ** Returns:	
 ** Description:	获取机身角度		
 *******************************************************************/
+GAMEAPD_REMAP_RAM_CODE()
 void gamepad_imu_get_body_angle(angle_t* anglep, axis3f_t* accp, axis3f_t* gyrop, gyro_range_t gyro_range, float dt)
 {
 	float lsb_dps;
@@ -156,6 +153,7 @@ void gamepad_imu_get_body_angle(angle_t* anglep, axis3f_t* accp, axis3f_t* gyrop
 ** Description:	convert pitch and roll angle to axies	
 	运算完成后可以通过 app_vector_to_stick(tickp, tick_vectorp); 转换成摇杆数据
 *******************************************************************/
+GAMEAPD_REMAP_RAM_CODE()
 void gamepad_angle_to_stick(joystick_cfg_t *tick_cfgp, angle_t* anglep, vector2f_t* tick_vectorp)
 {
 	vector2f_t vector;
@@ -167,7 +165,6 @@ void gamepad_angle_to_stick(joystick_cfg_t *tick_cfgp, angle_t* anglep, vector2f
 	app_stick_deadband(tick_cfgp, &vector);
 	*tick_vectorp = vector;
 }
-#endif
 
 #if GAMEAPD_MACRO_ENABLE
 gamepad_macro_sta_t m_macro_sta;
@@ -358,11 +355,11 @@ bool gamepade_macro_run_task(gp_macro_ctb_t* macrop, gamepad_remap_key_t *rekeyp
     // 0 		1		//按下循环运行, 抬起结束运行
     // 1 		1		//点击开始循环, 点击结束循环
 	if(macrop->step > step_num){						//运行完全部动作
-        if(macro_mapp->head.att & BIT(1)){                       //循环运行    
+        if(macro_mapp->head.att & BIT(1)){              //循环运行    
             if(m_systick - macrop->macro_timer >= macro_mapp->head.time){
                 macrop->step = 1;
                 macrop->timer = m_systick;
-                macrop->macro_timer = m_systick; 
+                macrop->macro_timer = m_systick;
             }
         }else{											//直接退出
             ret = true;
@@ -480,6 +477,30 @@ void gamepad_auto_key(gamepad_auto_t *pauto, uint32_t *pkey)
 	}
 }
 
+
+
+/*******************************************************************
+** Parameters:	pkey:输入要改的按键,输出按键值	
+** Returns:	数字量0 或 INT16_MAX
+** Description:	快速扳机
+*******************************************************************/
+int16_t trigger_fast_convert(fast_trigger_t *fastp,int16_t value)
+{
+	uint16_t abs_value = abs(value - fastp->s_val);
+
+	if((0 == value) || (INT16_MAX == value)){
+		fastp->s_val = value;
+		fastp->active = BOOL_SET(value);
+	}else if(abs_value > fastp->threshold){
+		fastp->s_val = value;
+		if(value > fastp->s_val){
+			fastp->active = 1;
+		}else{
+			fastp->active = 0;
+		}
+	}
+	return fastp->active ? INT16_MAX : 0;
+}
 
 /*******************************************************************
 ** Parameters:	pcurve_shape:0~100	, 

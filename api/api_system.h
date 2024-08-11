@@ -36,6 +36,12 @@ extern "C" {
 #endif
 
 
+//ram code
+#ifndef AT_RAM_CODE()
+#define AT_RAM_CODE()	
+#endif
+
+
 typedef enum{
 	SYSCLK = 0,
 	UARTCLK,

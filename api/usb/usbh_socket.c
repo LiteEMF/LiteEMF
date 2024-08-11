@@ -17,7 +17,7 @@
 #include "api/usb/usbh_socket.h"
 #include "api/usb/host/usbh.h"
 #include "app/app_commander.h"
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 #include "app/gamepad/app_gamepad.h"
 #endif
 #if USBD_SOCKET_ENABLE		//共享内存方式通讯

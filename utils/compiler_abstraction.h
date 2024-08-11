@@ -16,7 +16,6 @@ extern "C" {
 #endif
 
 #define	WEAK_ENABLE         1
-#define PRAGMA_PACK_ENABLE  1
 
 
 
@@ -134,10 +133,8 @@ extern "C" {
     #endif
 
     #undef  WEAK_ENABLE
-    #undef  PRAGMA_PACK_ENABLE
 	#define	WEAK_ENABLE             0			//C51 not support
-    #define	PRAGMA_PACK_ENABLE      0			//C51 not support
-    
+
     #ifndef __WEAK 
         #define  __WEAK              
     #endif
@@ -147,10 +144,10 @@ extern "C" {
     #endif
 
     #ifndef __PACKED
-        #define __PACKED            // == #pragma pack(1)
+        #define __PACKED            /*== #pragma pack(1)*/ 
     #endif
 
-    #define pack(x)                  //for #pragma pack(n) used
+    #define pack(x)                  /*for #pragma pack(n) used*/
 
     #define GET_SP(x)  
 

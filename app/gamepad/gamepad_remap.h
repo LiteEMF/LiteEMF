@@ -34,18 +34,26 @@ extern "C" {
 
 //宏录制
 #ifndef GAMEAPD_MACRO_ENABLE
-#define GAMEAPD_MACRO_ENABLE	0
+#define GAMEAPD_MACRO_ENABLE	1
 #endif
 
-//体感模拟摇杆
-#ifndef GAMEAPD_IMU_TO_TICK_ENABLE
-#define GAMEAPD_IMU_TO_TICK_ENABLE	0
+
+//手柄拓展功能在ram中运行
+#ifndef GAMEAPD_REMAP_RAM_CODE
+#define GAMEAPD_REMAP_RAM_CODE()	AT_RAM_CODE()
 #endif
+
 
 
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/
+typedef struct{
+	axis2f_t lpf;
+	kalman_axis2f_t kalman;
+	firf_axis2_t fir;
+}gamepad_filter_t;
+
 typedef enum {
     KEY_REMAP_NULL = 0,
     GAMEPAD_REMAP_GP_TYEP,
@@ -81,6 +89,12 @@ typedef struct{
 	uint32_t period;		//turbo周期 ms
 }gamepad_auto_t;
 
+//快速扳机
+typedef struct{
+	int16_t s_val;
+	int16_t threshold;
+	uint8_t active;
+}fast_trigger_t;
 
 //宏定义
 typedef enum{
@@ -140,15 +154,17 @@ typedef struct{
 	app_kb_t kb;
 }gamepad_remap_key_t;
 
+extern gamepad_macro_sta_t m_macro_sta;
+extern gp_macro_ctb_t  m_macro_ctb;
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
 //体感模拟摇杆
-void gamepad_gyro_filter_init(float kalman_smoot, uint8_t fir_imp_size);
-void gamepad_gyro_filter(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f);
-float gamepad_mouse_to_stick(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f);
-float gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f);
+void gamepad_gyro_filter_init(gamepad_filter_t *filterp, float kalman_smoot, float* fir_buf_xy, uint8_t fir_imp_size);
+void gamepad_gyro_filter(gamepad_filter_t *filterp, vector2f_t* vectorp);
+void gamepad_mouse_to_stick(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f);
+void gamepad_stick_to_mouse(vector2f_t* vectorp, axis2i_t kconst, axis2f_t slopes, float exponent_f);
 void gamepad_imu_get_body_angle(angle_t* anglep, axis3f_t* accp, axis3f_t* gyrop, gyro_range_t gyro_range, float dt);
 void gamepad_angle_to_stick(joystick_cfg_t *tick_cfgp, angle_t* anglep, vector2f_t* tick_vectorp);
 //宏录制
@@ -158,6 +174,7 @@ void gamepad_macro_task(app_gamepad_key_t* keyp, gamepad_remap_key_t *rekeyp);
 //改建和连点
 void gamepad_remap_key(uint32_t key_in, gamepad_remap_map_t* mapp, gamepad_remap_key_t *rekeyp);
 void gamepad_auto_key(gamepad_auto_t *pauto, uint32_t *pkey);
+int16_t trigger_fast_convert(fast_trigger_t *fastp,int16_t value);
 //曲线转换
 int32_t curve_shape_remap(int32_t value, int32_t max_val, uint8_t* pcurve_shape, uint8_t shape_cnt);
 //快速扳机

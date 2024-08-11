@@ -29,7 +29,7 @@
 #include  "api/bt/api_bt.h"
 #include  "api/api_tick.h"
 
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 #include "app/gamepad/app_gamepad.h"
 #endif
 
@@ -740,7 +740,7 @@ static void bt_event(uint8_t id, bt_t bt, bt_evt_t const event, bt_evt_pa_t* pa)
 			bt_ctbp->sta = BT_STA_CONN;
 			bt_ctbp->is_debonded = false;
 
-			#if APP_GAMEAPD_ENABLE
+			#if APP_GAMEPAD_ENABLE
 			if(BIT(DEV_TYPE_HID) & bt_ctbp->types){
 				hid_type_t hid_type = app_gamepad_get_hidtype(bt_ctbp->hid_types);
 				trp_handle_t handle = {bt,id,U16(DEV_TYPE_HID,hid_type)};

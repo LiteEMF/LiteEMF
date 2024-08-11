@@ -166,7 +166,7 @@ bool emf_init(void)
 	#if APP_JOYSTICK_ENABLE
 	app_joystick_init();
 	#endif
-	#if APP_GAMEAPD_ENABLE
+	#if APP_GAMEPAD_ENABLE
 	app_gamepad_key_init();
 	#endif
 	#if APP_RUMBLE_ENABLE
@@ -277,11 +277,11 @@ void emf_handler(uint32_t period_10us)
 	#if APP_JOYSTICK_ENABLE
 	app_joystick_handler(400);
 	#endif
-	#if APP_GAMEAPD_ENABLE
+	#if APP_GAMEPAD_ENABLE
 	app_gamepad_key_handler(400);
 	#endif
 
-	#if APP_GAMEAPD_ENABLE && APP_KEY_ENABLE	 					//二选一
+	#if APP_GAMEPAD_ENABLE && APP_KEY_ENABLE	 					//二选一
 	app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_gamepad_key.key);
 	#elif APP_KEY_ENABLE
     app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_key_scan);

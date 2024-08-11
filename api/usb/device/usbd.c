@@ -73,17 +73,17 @@ uint16_t m_usbd_hid_types[USBD_NUM] = {	//for default type, please fix in projec
 *******************************************************************/
 #if WEAK_ENABLE
 
-#if APP_GAMEAPD_ENABLE
+#if APP_GAMEPAD_ENABLE
 #include "app/gamepad/app_gamepad.h"
 #endif
 
-__WEAK char* usbd_user_get_string(uint8_t id, uint8_t index)
+__WEAK char* usbd_get_vendor_string(uint8_t id, uint8_t index)
 {
 	char *pstr = NULL;
 	return pstr;
 }
 
-__WEAK void usbd_user_set_device_desc(uint8_t id, usb_desc_device_t *pdesc)
+__WEAK void usbd_set_vendor_device_desc(uint8_t id, usb_desc_device_t *pdesc)
 {
 	
 }
@@ -135,7 +135,7 @@ error_t usbd_get_string_desc(uint8_t id, uint8_t index, uint8_t *pdesc, uint16_t
 		return err;
 	}
 	
-	pstr = usbd_user_get_string(id, index);	//user vendor get string 
+	pstr = usbd_get_vendor_string(id, index);	//user vendor get string 
 
 	//默认分配string
 	if(NULL == pstr){
@@ -236,7 +236,7 @@ error_t usbd_get_device_desc(uint8_t id, uint8_t *pdesc, uint16_t *pdesc_len)
 	}
 	#endif
 
-	usbd_user_set_device_desc(id, &dev);			//user vendor set dev desc
+	usbd_set_vendor_device_desc(id, &dev);			//user vendor set dev desc
 
 	pdev->vid = SWAP16_L(dev.idVendor);
 	pdev->pid = SWAP16_L(dev.idProduct);
