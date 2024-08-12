@@ -191,8 +191,8 @@ void app_vector_to_stick(axis2i_t* stickp, vector2f_t* vectorp)
 {
     stickp->x = vectorp->r * vectorp->x;    
     stickp->y = vectorp->r * vectorp->y;    
-    constrain_int16(stickp->x);
-    constrain_int16(stickp->y);
+    stickp->x = constrain_int16(stickp->x);
+    stickp->y = constrain_int16(stickp->y);
 }
 
 
@@ -231,7 +231,7 @@ void app_stick_deadband(joystick_cfg_t* cfgp, vector2f_t* vectorp)
             scale = circle_liment;
         }
         
-        vectorp->r *= scale;
+        vectorp->r = scale * 32768;
     }else{
         vectorp->r = 0;
     }
@@ -352,7 +352,7 @@ void joystick_set_cal_deadband(joystick_cal_t *calp)
         axis = calp->mid.stick[id];
         AXIS2_SUB(&axis, &calp->min.stick[id]);
         AXIS2_MUL(&axis, STICK_CAL_SIDE_DEADBAND/100.0);
-        AXIS2_SUB(&calp->min.stick[id], &axis);
+        AXIS2_ADD(&calp->min.stick[id], &axis);
 
         axis = calp->max.stick[id];
         AXIS2_SUB(&axis, &calp->mid.stick[id]);

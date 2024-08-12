@@ -69,6 +69,68 @@ uint16_t m_hid_mode = HIDD_TYPES_DEFAULT;
 ** Returns:	
 ** Description:		
 *******************************************************************/
+void api_trp_mode_dump(uint16_t trps, uint16_t dev_mode, uint16_t hid_mode)
+{
+	if(trps){
+		logd_r("trps[0x%x]:",trps);
+		if(trps & BIT(TR_BLE	)) logd("\t TR_BLE");
+		if(trps & BIT(TR_EDR	)) logd("\t TR_EDR");
+		if(trps & BIT(TR_BLEC	)) logd("\t TR_BLEC");
+		if(trps & BIT(TR_EDRC	)) logd("\t TR_EDRC");
+		if(trps & BIT(TR_BLE_RF	)) logd("\t TR_BLE_RF");
+		if(trps & BIT(TR_BLE_RFC)) logd("\t TR_BLE_RFC");
+		if(trps & BIT(TR_RF		)) logd("\t TR_RF");
+		if(trps & BIT(TR_RFC	)) logd("\t TR_RFC");
+		if(trps & BIT(TR_USBD	)) logd("\t TR_USBD");
+		if(trps & BIT(TR_USBH	)) logd("\t TR_USBH");
+		logd("\n");
+	}
+
+	if(dev_mode){
+		logd_r("m_dev_mode[0x%x]:",dev_mode);
+		if(dev_mode & BIT(DEV_TYPE_VENDOR	)) logd("\t DEV_TYPE_VENDOR");
+		if(dev_mode & BIT(DEV_TYPE_AUDIO 	)) logd("\t DEV_TYPE_AUDIO");
+		if(dev_mode & BIT(DEV_TYPE_CDC  	)) logd("\t DEV_TYPE_CDC");
+		if(dev_mode & BIT(DEV_TYPE_HID		)) logd("\t DEV_TYPE_HID");
+		if(dev_mode & BIT(DEV_TYPE_PRINTER	)) logd("\t DEV_TYPE_PRINTER");
+		if(dev_mode & BIT(DEV_TYPE_MSD		)) logd("\t DEV_TYPE_MSD");
+		if(dev_mode & BIT(DEV_TYPE_HUB		)) logd("\t DEV_TYPE_HUB");
+		if(dev_mode & BIT(DEV_TYPE_ADB		)) logd("\t DEV_TYPE_ADB");
+		if(dev_mode & BIT(DEV_TYPE_AOA		)) logd("\t DEV_TYPE_AOA");
+		if(dev_mode & BIT(DEV_TYPE_USBMUXD	)) logd("\t DEV_TYPE_USBMUXD");
+		if(dev_mode & BIT(DEV_TYPE_IAP2		)) logd("\t DEV_TYPE_IAP2");
+		if(dev_mode & BIT(DEV_TYPE_AUTO		)) logd("\t DEV_TYPE_AUTO");
+		if(dev_mode & BIT(HID_TYPE_PS4		)) logd("\t HID_TYPE_PS4");
+		if(dev_mode & BIT(HID_TYPE_PS5		)) logd("\t HID_TYPE_PS5");
+		logd("\n");
+	}
+
+	if(hid_mode){
+		logd_r("hid_mode[0x%x]:",hid_mode);
+		if(hid_mode & BIT(HID_TYPE_VENDOR	)) logd("\t HID_TYPE_VENDOR");
+		if(hid_mode & BIT(HID_TYPE_KB 		)) logd("\t HID_TYPE_KB");
+		if(hid_mode & BIT(HID_TYPE_MOUSE  	)) logd("\t HID_TYPE_MOUSE");
+		if(hid_mode & BIT(HID_TYPE_CONSUMER	)) logd("\t HID_TYPE_CONSUMER");
+		if(hid_mode & BIT(HID_TYPE_TOUCH	)) logd("\t HID_TYPE_TOUCH");
+		if(hid_mode & BIT(HID_TYPE_MT		)) logd("\t HID_TYPE_MT");
+		if(hid_mode & BIT(HID_TYPE_GAMEPADE	)) logd("\t HID_TYPE_GAMEPADE");
+		if(hid_mode & BIT(HID_TYPE_DINPUT	)) logd("\t HID_TYPE_DINPUT");
+		if(hid_mode & BIT(HID_TYPE_X360		)) logd("\t HID_TYPE_X360");
+		if(hid_mode & BIT(HID_TYPE_XBOX		)) logd("\t HID_TYPE_XBOX");
+		if(hid_mode & BIT(HID_TYPE_SWITCH	)) logd("\t HID_TYPE_SWITCH");
+		if(hid_mode & BIT(HID_TYPE_PS3		)) logd("\t HID_TYPE_PS3");
+		if(hid_mode & BIT(HID_TYPE_PS4		)) logd("\t HID_TYPE_PS4");
+		if(hid_mode & BIT(HID_TYPE_PS5		)) logd("\t HID_TYPE_PS5");
+		logd("\n");
+	}
+
+}
+
+/*******************************************************************
+** Parameters:		
+** Returns:	
+** Description:		
+*******************************************************************/
 bool api_trp_is_usb(trp_t trp)
 {	
 	return ((TR_USBD == trp) || (TR_USBH == trp));

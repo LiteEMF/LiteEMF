@@ -138,6 +138,7 @@ extern uint16_t m_hid_mode;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+void api_trp_mode_dump(uint16_t trps, uint16_t dev_mode, uint16_t hid_mode);
 bool api_trp_is_usb(trp_t trp);
 bool api_trp_is_bt(trp_t trp);
 bool api_trp_is_slave(trp_t trp);

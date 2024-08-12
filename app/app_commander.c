@@ -168,7 +168,7 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 		break;
 	case CMD_DEV_NAME:	
 		#if TCFG_USER_BLE_ENABLE
-		char device_name[BT_NAME_LEN_MAX];
+		char device_name[29];
 		uint8_t device_name_len = 0;
 		if(len == CMD_PACK_LEN){		//read	
 			device_name_len = api_bt_get_name(phandle->id,phandle->trp,device_name,sizeof(device_name) );       //获取BLE蓝牙名称
