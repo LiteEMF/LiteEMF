@@ -234,9 +234,8 @@ void emf_handler(uint32_t period_10us)
 		live_timer = m_systick;
 		logd("t=%ld %ld\n", m_systick,m_task_tick10us);
 	}
-
 	#ifdef HW_ADC_MAP
-	api_adc_handler(400);
+	api_adc_handler(period_10us);				//13us at JL240M
 	#endif
 	
 	#if defined HW_UART_MAP && UART_TX_FIFO_ENABLED
@@ -263,10 +262,16 @@ void emf_handler(uint32_t period_10us)
 	app_battery_handler(200*100);
 	#endif
 	#if APP_KEY_ENABLE
-	app_key_handler(100);
+	app_key_handler(period_10us);			//57us at JL240M
 	#endif
 	#if APP_KM_ENABLE
 	app_km_handler(100);
+	#endif
+	#if APP_JOYSTICK_ENABLE
+	app_joystick_handler(period_10us);		//30us at JL240M
+	#endif
+	#if APP_GAMEPAD_ENABLE
+	app_gamepad_key_handler(period_10us);	//12us at JL240M
 	#endif
 	#if APP_IMU_ENABLE
 	app_imu_handler(400);
@@ -274,14 +279,7 @@ void emf_handler(uint32_t period_10us)
 	#if APP_IMU_ENABLE
 	imu_driver_handler(800);					//内部有延时,建议在低优先级任务中运行
 	#endif
-	#if APP_JOYSTICK_ENABLE
-	app_joystick_handler(400);
-	#endif
-	#if APP_GAMEPAD_ENABLE
-	app_gamepad_key_handler(400);
-	#endif
-
-	#if APP_GAMEPAD_ENABLE && APP_KEY_ENABLE	 					//二选一
+	#if APP_GAMEPAD_ENABLE && APP_KEY_ENABLE	 //二选一 //11us at JL240M
 	app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_gamepad_key.key);
 	#elif APP_KEY_ENABLE
     app_key_decode_handler(KEY_PERIOD_DEFAULT*100,m_key_scan);
@@ -312,10 +310,10 @@ void emf_handler(uint32_t period_10us)
 	#endif
 
 	#if API_USBD_BIT_ENABLE
-	usbd_handler(0);
+	usbd_handler(0);		//23us at JL240M
 	#endif
 	#if API_USBH_BIT_ENABLE
-	usbh_handler(100);
+	usbh_handler(period_10us);
 	#endif
 
 	#if API_USBD_BIT_ENABLE && (USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO))

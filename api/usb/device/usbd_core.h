@@ -56,10 +56,12 @@ extern "C" {
 #define USBD_SELF_POWERED		0
 #endif
 
-#ifndef USBD_LOOP_ENABLE			//1 采样轮训方式处理usb //TODO优化兼容函数回调方式
-#define USBD_LOOP_ENABLE		1
+#ifndef USBD_LOOP_IN_ENABLE			//1:采样轮训方式处理usb in  事件,0:中断方式 //TODO优化兼容函数回调方式
+#define USBD_LOOP_IN_ENABLE		0
 #endif
-
+#ifndef USBD_LOOP_OUT_ENABLE		//1:采样轮训方式处理usb out 事件,0:中断方式
+#define USBD_LOOP_OUT_ENABLE	1
+#endif
 
 #ifndef USB_VID
 #define USB_VID				VID_DEFAULT
@@ -82,13 +84,13 @@ typedef enum
 	USBD_EVENT_SOF,
 	USBD_EVENT_SUSPEND,
 	USBD_EVENT_RESUME,
-	USBD_EVENT_CONFIGURED,			//set cofigured event
+	USBD_EVENT_CONFIGURED,			//pa: set cofigured event
 
-	USBD_EVENT_EP_READY,				//端点 ready, 可以收发数据
+	USBD_EVENT_EP_READY,			//pa: 端点 ready, 可以收发数据
 	USBD_EVENT_READY,
 
 	USBD_EVENT_EP_OUT,
-	USBD_EVENT_EP_IN,
+	USBD_EVENT_EP_IN,				//pa: ep num
 } usbd_event_t;
 
 
@@ -123,6 +125,7 @@ typedef struct{
 		volatile uint8_t reset			: 1;		// reset msg
 		volatile uint8_t suspend		: 1;		// suspend msg
 		volatile uint8_t resume			: 1;		// resume msg
+		volatile uint8_t ep_in_evt		: 1;		// ep in event msg
 
 		uint8_t remote_wakeup_en      	: 1; 		// enable/disable by host
 		uint8_t remote_wakeup_support 	: 1; 		// configuration descriptor's attribute
@@ -132,12 +135,11 @@ typedef struct{
 	uint8_t 	ready;								//usbd ready
 	uint8_t 	address;
 	usb_state_t state;
-	uint16_t vid;
-	uint16_t pid;
+	uint16_t 	vid;
+	uint16_t	pid;
 	volatile uint8_t cfg_num; 						// current active configuration (0x00 is not configured)
 	uint8_t itf_alt[USBD_MAX_ITF_NUM];				// current bAlternateSetting
 	usbd_endp_state_t ep_status[USBD_ENDP_NUM][2];
-	volatile uint8_t enpd_in_busy[ USBD_ENDP_NUM ];	//bit0:busy, bit7: 中断标志注意端点0, 和其他端点判断busy方式不一样
 	volatile uint8_t enpd_out_len[ USBD_ENDP_NUM ];
 	uint8_t endp0_mtu;
 }usbd_dev_t;

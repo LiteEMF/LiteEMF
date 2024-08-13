@@ -403,7 +403,7 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 	}else{
 		usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
 		usbd_endp_nak(id, TUSB_DIR_IN_MASK | ep);
-		pdev->enpd_in_busy[ ep_addr ] = 0X80;	//endp in event
+		pdev->dev.ep_in_evt = true;
 		if(NULL != pclass){
 			#if USBD_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_AUDIO))
 			if(TUSB_ENDP_TYPE_ISOCH == pclass->endpin.type){			//TODO 同步传输直接处理
@@ -412,10 +412,10 @@ __WEAK void usbd_endp_in_event(uint8_t id ,uint8_t ep)
 			}
 			#endif
 
-			#if !USBD_LOOP_ENABLE
+			#if !USBD_LOOP_IN_ENABLE
 			{
-				pdev->enpd_in_busy[ ep_addr ] = 0x00;
-				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
+				pdev->dev.ep_in_evt = false;
+				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, ep);
 			}
 			#endif
 		}
@@ -440,9 +440,9 @@ __WEAK void usbd_endp_out_event(uint8_t id ,uint8_t ep, uint8_t len)
 		}
 		#endif
 
-		#if !USBD_LOOP_ENABLE
+		#if !USBD_LOOP_OUT_ENABLE
 		if(pdev->enpd_out_len[ep]){
-			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
+			usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, ep);
 		}
 		#endif
 	}
@@ -453,7 +453,6 @@ __WEAK void usbd_setup_event(uint8_t id,usb_control_request_t *pctrl_req ,uint8_
 	usbd_dev_t *pdev = usbd_get_dev(id);
 	usbd_req_t *preq = usbd_get_req(id);
 
-	pdev->enpd_in_busy[0] = 1;
 	pdev->enpd_out_len[0] = 0;
 	if(NULL != pdev){
 		pdev->dev.setup = 1;
@@ -736,24 +735,33 @@ void usbd_setup_process( uint8_t id )
 
 void usbd_endp_loop(uint8_t id)
 {
-	uint8_t ep;
+	uint8_t ep_addr, ep;
 	usbd_dev_t *pdev = usbd_get_dev(id);
 
 	if(TUSB_STA_CONFIGURED == pdev->state){
-		for(ep=1; ep<USBD_ENDP_NUM; ep++){
+		for(ep_addr=1; ep_addr<USBD_ENDP_NUM; ep_addr++){
 			usbd_dev_t *pdev = usbd_get_dev(id);
-			usbd_class_t *pclass = usbd_class_find_by_ep(id, ep);
+			usbd_class_t *pclass;
 
-			if(NULL == pclass) continue;
-
-			if(pdev->enpd_out_len[ep]){
-				usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, 0);
+			#if USBD_LOOP_OUT_ENABLE
+			ep = ep_addr;
+			pclass = usbd_class_find_by_ep(id, ep);
+			if(NULL != pclass){
+				if(pdev->enpd_out_len[ep_addr]){
+					usbd_class_process(id, pclass, USBD_EVENT_EP_OUT, ep);
+				}
 			}
-
-			if(0x80 == pdev->enpd_in_busy[ep]){
-				pdev->enpd_in_busy[ep] = 0x00;
-				usbd_class_process(id, pclass, USBD_EVENT_EP_IN, 0);
+			#endif
+			#if USBD_LOOP_IN_ENABLE
+			ep = ep_addr | TUSB_DIR_IN_MASK;
+			pclass = usbd_class_find_by_ep(id, ep);
+			if(NULL != pclass){
+				if(pdev->dev.ep_in_evt){
+					pdev->dev.ep_in_evt = false;
+					usbd_class_process(id, pclass, USBD_EVENT_EP_IN, ep);
+				}
 			}
+			#endif
 		}
 	}
 }
@@ -766,7 +774,7 @@ void usbd_endp_loop(uint8_t id)
 *******************************************************************/
 void usbd_task(void *pa)
 {
-	#if USBD_LOOP_ENABLE
+	
 	uint8_t id;
 	usbd_dev_t *pdev;
 
@@ -784,9 +792,11 @@ void usbd_task(void *pa)
 				usbd_setup_process(id);
 			}
 		}
+		#if USBD_LOOP_IN_ENABLE || USBD_LOOP_OUT_ENABLE
 		usbd_endp_loop(id);
+		#endif
 	}
-	#endif
+	
 }
 
 #if TASK_HANDLER_ENABLE

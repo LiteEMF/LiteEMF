@@ -230,6 +230,8 @@ bool api_pm_init(void)
 	}
 	#endif
 
+	api_pm_weakup_check();
+
     return true;
 }
 
@@ -248,13 +250,16 @@ void api_pm_task(void*pa)
 		#if DISCONNECTED_SLEEP_TIME && CONNECTED_SLEEP_TIME
 		if(m_systick - m_pm_sleep_timer > m_pm_sleep_timerout){		//超时休眠
 			m_pm_sleep_timer = m_systick;
-			logd("m_pm_sleep_timer. %d\n", m_pm_sleep_timerout);
+			logd("m_pm_sleep_timer=%d!\n", m_pm_sleep_timerout);
 			api_sleep();	
 		}
 		#endif
 
 		#if APP_BATTERY_ENABLE
-		if(BAT_PROTECT_STA == m_battery_sta) api_sleep();		//低电保护休眠
+		if(BAT_PROTECT_STA == m_battery_sta){
+			logd("battery protect=%d!\n", m_battery_sta);
+			api_sleep();		//低电保护休眠
+		}
 		#endif
 
 		break;

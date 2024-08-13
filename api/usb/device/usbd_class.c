@@ -42,6 +42,7 @@ usbd_class_t m_usbd_class[USBD_NUM][USBD_MAX_ITF_NUM];	//注意由于有itf_alt�
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+AT_RAM_CODE()
 usbd_class_t *usbd_class_find_by_ep(uint8_t id, uint8_t ep)
 {
 	uint8_t i;
@@ -443,7 +444,7 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 
 	#if USBD_TYPE_SUPPORT & BIT_ENUM(DEV_TYPE_AUTO)
 	if(m_usbd_types[id] == BIT(DEV_TYPE_AUTO)){		//auto 特殊处理
-		usbd_auto_process(id, pclass, event, 0);
+		usbd_auto_process(id, pclass, event, val);
 		return ERROR_SUCCESS;
 	}
 	#endif
@@ -451,7 +452,7 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 	for(i=0; i<countof(m_usbd_class[id]); i++){
 		pclass = &m_usbd_class[id][i];
 		if(pclass->endpin.addr || pclass->endpout.addr){
-			usbd_class_process(id, pclass, event, 0);
+			usbd_class_process(id, pclass, event, val);
 		}
 	}
 	
@@ -466,6 +467,18 @@ error_t usbd_class_notify_evt(uint8_t id,usbd_event_t event,uint32_t val)
 #if WEAK_ENABLE
 __WEAK bool usbd_class_event_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {
+	switch(evt){
+		case  USBD_EVENT_RESET:
+			break;
+		case  USBD_EVENT_SUSPEND:
+			break;
+		case  USBD_EVENT_EP_OUT:
+			break;
+		case USBD_EVENT_EP_IN:
+			break;
+		default:
+			break;
+	}
 	return false;
 }
 #endif
@@ -474,9 +487,9 @@ __WEAK bool usbd_class_event_weak(uint8_t id, usbd_class_t *pclass, usbd_event_t
 ** Parameters:		
 ** Returns:	
 ** Description: usb事件触发任务,有3种usb事件处理方式
-	1. 轮询方式 USBD_LOOP_ENABLE 置1
-	2. 中断方式 USBD_LOOP_ENABLE 置0
-	3. 事件方式 USBD_LOOP_ENABLE 置0, 修改 usbd_xxx_event WEAK 在函数中发送事件
+	1. 轮询方式 USBD_LOOP_XX_ENABLE 置1
+	2. 中断方式 USBD_LOOP_XX_ENABLE 置0
+	3. 事件方式 USBD_LOOP_XX_ENABLE 置0, 修改 usbd_xxx_event WEAK 在函数中发送事件
 *******************************************************************/
 void usbd_class_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint32_t val)
 {

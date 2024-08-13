@@ -200,6 +200,7 @@ void* usbd_get_endp_buffer(uint8_t id, uint8_t ep)
 ** Returns:
 ** Description: 注意: 端点0发送完成后必须使用 usbd_free_setup_buffer 释放内存
 *******************************************************************/
+AT_RAM_CODE()
 error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 {
 	error_t err;
@@ -211,8 +212,6 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 		usbd_req_t *preq = usbd_get_req(id);
 
 		API_ENTER_CRITICAL();
-
-		pdev->enpd_in_busy[0] = 1;			//注意endp0开始发发送接触busy状态
 		preq->setup_len = len;
 		preq->setup_index = 0;
 		if(preq->setup_buf != buf){			//TODO out 处理
@@ -223,9 +222,6 @@ error_t usbd_in(uint8_t id, uint8_t ep, uint8_t* buf, uint16_t len)
 		API_EXIT_CRITICAL();
 	}else{
 		if(TUSB_STA_CONFIGURED != pdev->state) return ERROR_DISCON;	//保证端点已经正常打开
-		if (pdev->enpd_in_busy[ep_addr] & 0X01) return ERROR_BUSY;
-	
-		pdev->enpd_in_busy[ep_addr] = 1;
 		err = hal_usbd_in(id, ep, buf, len);
 	}
     return err;

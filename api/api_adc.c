@@ -55,6 +55,14 @@ uint16_t api_adc_to_voltage(uint16_t adc)
 uint16_t api_adc_value(uint8_t id)
 {
     if(id < m_adc_num){
+		#ifdef ADC_BATTERY_ID
+        if(ADC_BATTERY_ID == id){
+			uint16_t adc_val = 0;
+			hal_adc_value(id,&adc_val);
+			return adc_val;
+		}
+		#endif
+
     	return m_adc_val[id];
 	}
     return 0;
@@ -94,6 +102,9 @@ void api_adc_scan_task(void* pa)
 	uint16_t adc_val;
 	uint8_t id;
 	for(id=0; id < m_adc_num; id++){
+		#ifdef ADC_BATTERY_ID
+        if(ADC_BATTERY_ID == id) continue;          //电池采样在battery.c中低速采样
+        #endif
 		if(hal_adc_value(id,&adc_val)){
 			m_adc_val[id] = adc_val;
 		}
