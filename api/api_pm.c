@@ -128,6 +128,9 @@ void api_pm_weakup_check(void)
 {
 	uint16_t i;
 
+	#ifdef HW_ADC_MAP
+	api_adcs_init();
+	#endif
 	#if APP_BATTERY_ENABLE
 	app_battery_init();
 	if(BAT_PROTECT_STA == m_battery_sta) hal_sleep();
@@ -292,11 +295,6 @@ void api_pm_task(void*pa)
 
 			hal_reset();
 		}else{
-			#if API_STORAGE_ENABLE
-			api_storage_sync();
-			if (!api_storage_sync_complete()) return;
-			#endif
-
 			#if POWER_SWITCH_KEY
 			if(KEY_POWER && app_pm_key_sleep){
 				api_reset();
@@ -306,6 +304,12 @@ void api_pm_task(void*pa)
 				return;
 			}
 			#endif 
+
+			#if API_STORAGE_ENABLE
+			api_storage_sync();
+			if (!api_storage_sync_complete()) return;
+			#endif
+
 			logd_r("sleep...\n\n");
 			hal_sleep();
 		}
