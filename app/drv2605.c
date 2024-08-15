@@ -13,6 +13,7 @@
 **	Description:	
 ************************************************************************************************************/
 #include  "hw_config.h"
+#ifdef IMU_DRV2605_ID
 #include  "app/drv2605.h"
 #include  "api/api_iic_host.h"
 #include  "api/api_tick.h"
@@ -190,6 +191,6 @@ bool drv2605_deinit(void)
 	return true;
 }
 
-
+#endif
 
 

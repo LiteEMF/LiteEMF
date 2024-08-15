@@ -297,7 +297,7 @@ void usbd_auto_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint3
 }
 
 #if WEAK_ENABLE
-__WEAK void ex_usbd_auto_det(uint8_t id, usbd_det_t dev)
+__WEAK void usbd_auto_det_cb(uint8_t id, usbd_det_t dev)
 {
 	logd("usbd auto det=%d\n",(uint16_t)dev);
     m_usbd_types[id] = USBD_TYPE_SUPPORT & ~BIT(DEV_TYPE_AUTO);
@@ -354,22 +354,22 @@ void usbd_auto_task(uint8_t id)
 
 		if(USBD_DET_PC == m_usbd_auto_type){				//PC/xbox特殊判断, Xbox 有时候不会set configuration
 			if(usbd_steup_setp > 9){						//判断为PC
-				ex_usbd_auto_det(id, m_usbd_auto_type);
+				usbd_auto_det_cb(id, m_usbd_auto_type);
 			}else if(6 <= usbd_steup_setp){					//大于6 小于 9
 				if((m_systick - usbd_steup_timer) > 170){		//超时没有获取到判断为xbox, xbox 要到第8步骤才停止
 					m_usbd_auto_type = USBD_DET_XBOX;
-					ex_usbd_auto_det(id, m_usbd_auto_type);
+					usbd_auto_det_cb(id, m_usbd_auto_type);
 				}
 			}
 		}else if(USBD_DET_SWITCH == m_usbd_auto_type){		//switch 特殊判断
 			if(TUSB_STA_CONFIGURED != pdev->state) return;  //需等configuration
 			
 			if(usbd_steup_setp >= 5){						//能跑到第五步才是SWITCH
-				ex_usbd_auto_det(id, m_usbd_auto_type);
+				usbd_auto_det_cb(id, m_usbd_auto_type);
 			}else{				//此处可能是PC boot 等待reset
 			}
 		}else{												//其他正常识别到
-			ex_usbd_auto_det(id, m_usbd_auto_type);
+			usbd_auto_det_cb(id, m_usbd_auto_type);
 		}
 	}
 }	

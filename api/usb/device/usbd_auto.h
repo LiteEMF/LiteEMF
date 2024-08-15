@@ -62,7 +62,7 @@ void 	usbd_auto_process(uint8_t id, usbd_class_t *pclass, usbd_event_t evt, uint
 error_t usbd_auto_init(uint8_t id);
 error_t usbd_auto_deinit(uint8_t id);
 
-void ex_usbd_auto_det(uint8_t id, usbd_det_t dev);			//__WEAK
+void usbd_auto_det_cb(uint8_t id, usbd_det_t dev);			//__WEAK
 void usbd_auto_handler(uint8_t id, uint32_t period_10us);
 void usbd_auto_task(uint8_t id);
 

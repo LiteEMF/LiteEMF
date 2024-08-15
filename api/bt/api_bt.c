@@ -64,7 +64,6 @@ bt_evt_scan_t ble_rfc_scan_result;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
-bool edr_sniff_by_remote = false; 					//switch模式下由主机发起进入sniff
 api_bt_ctb_t m_edr = {EDR_TYPE_SUPPORT, EDR_HID_SUPPORT, true};
 #endif
 
@@ -990,17 +989,6 @@ bool api_bt_ctb_init(void)
 			bt_ctbp->sta = BT_STA_UNKNOW;
 			bt_ctbp->fifo_txp = NULL;
 			logd("bt%d type=%x %x", bt, bt_ctbp->types, bt_ctbp->hid_types);
-			
-			if(BT_EDR == bt){
-				#if BT_SUPPORT & BIT_ENUM(TR_EDR)
-				if(bt_ctbp->hid_types & BIT(HID_TYPE_SWITCH)){		//switch sniff by remote
-					edr_sniff_by_remote = true;
-				}else{
-					edr_sniff_by_remote = false;
-				}
-				logd("edr_sniff_by_remote=%d",edr_sniff_by_remote);
-				#endif
-			}
 
 			#if BT_SUPPORT & BIT_ENUM(TR_RF)
 			if(BT_RF == bt){

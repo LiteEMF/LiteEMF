@@ -74,22 +74,26 @@ bool emf_api_init(void)
 	hal_get_reset_reson();
 	#endif
 
-	io_key_init();		//按键上电立即初始化
 
 	api_tick_init();
+	io_key_init();		//按键上电立即初始化
+	#ifdef HW_ADC_MAP
+	api_adcs_init();	//ADC上电初始化,检测按键和电池
+	#endif
 	
 	#if API_STORAGE_ENABLE
-	api_storage_init();
+	api_storage_init();	//存储上电初始化
 	#endif
+
+	api_trp_init();		//在storage init 之后初始化 设备模式
+	
+	#if API_BT_ENABLE	//为了方便项目初始化蓝牙参数,将蓝牙参数初始化放到最前面
+	api_bt_ctb_init();
+    #endif
 
 	#if API_PM_ENABLE
 	api_pm_init();
 	#endif
-
-	api_trp_init();		//在storage init 之后初始化 设备模式
-	#if API_BT_ENABLE	//为了方便项目初始化蓝牙参数,将蓝牙参数初始化放到最前面
-	api_bt_ctb_init();
-    #endif
 	
 	hw_user_vender_init();	
 
@@ -97,9 +101,6 @@ bool emf_api_init(void)
 	api_wdt_init(API_WDT_TIME);
 	#endif
 
-	#ifdef HW_ADC_MAP
-	api_adcs_init();
-	#endif
 	#if	defined HW_TIMER_MAP && API_TIMER_BIT_ENABLE
 	api_timers_init();
 	#endif

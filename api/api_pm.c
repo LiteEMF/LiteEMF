@@ -128,9 +128,6 @@ void api_pm_weakup_check(void)
 {
 	uint16_t i;
 
-	#ifdef HW_ADC_MAP
-	api_adcs_init();
-	#endif
 	#if APP_BATTERY_ENABLE
 	app_battery_init();
 	if(BAT_PROTECT_STA == m_battery_sta) hal_sleep();

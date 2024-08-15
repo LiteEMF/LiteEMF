@@ -21,6 +21,9 @@
 #if	defined IMU_SH3001_ID
 #include "app/imu/sh3001.h"
 #endif
+#if	defined IMU_SH3201_ID
+#include "app/imu/SH3201.h"
+#endif
 #if defined IMU_QMI8658_ID
 #endif
 
@@ -63,6 +66,9 @@ bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop)
 	if(!m_imu_init) return false;
 
 	#if IMU_ISR_READ_ENABLE
+		#if	defined IMU_SH3201_ID
+		ret = SH3201_GetImuData((int16_t *)accp, (int16_t *)gyrop, 1);
+		#endif
 		#if	defined IMU_SH3001_ID
 		ret = SH3001_GetImuCompData((int16_t *)accp, (int16_t *)gyrop,1);
 		#endif
@@ -76,6 +82,9 @@ bool imu_driver_get_raw(axis3i_t* accp,axis3i_t* gyrop)
 		ret = Qmi8658_read_xyz_raw((int16_t *)accp, (int16_t *)gyrop, NULL);
 		#endif
 	#else
+		#if	defined IMU_SH3201_ID
+		ret = SH3201_GetImuData((int16_t *)accp, (int16_t *)gyrop, 0);
+		#endif
 		#if	defined IMU_SH3001_ID
 		ret = SH3001_GetImuCompData((int16_t *)accp, (int16_t *)gyrop,0);
 		#endif
@@ -106,6 +115,9 @@ bool imu_driver_init(acc_range_t acc_range,gyro_range_t gyro_range)	//TODO å¾…ä¼
 	#if	defined IMU_ICM42688_ID
 	imu_init_ctb.timeout = 300;
 	#endif
+	#if	defined IMU_SH3201_ID
+    imu_init_ctb.timeout = 300;
+    #endif
 	#if	defined IMU_SH3001_ID
     imu_init_ctb.timeout = 300;
     #endif
@@ -144,6 +156,10 @@ void imu_driver_task(void* pa)
         ctbp->timer = m_systick;
 
 		ctbp->retry--;
+
+        #if	defined IMU_SH3201_ID
+        m_imu_init = SH3201_init(ACC_RANGE_8G, GYRO_RANGE_2000);
+        #endif
         #if	defined IMU_SH3001_ID
         m_imu_init = SH3001_init(IMU_ACC_RANGE_DEFAULT, IMU_GYRO_RANGE_DEFAULT);
         #endif

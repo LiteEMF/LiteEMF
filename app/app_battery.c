@@ -45,6 +45,32 @@ bat_state_t	m_battery_sta = BAT_NORMAL_STA;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+#if WEAK_ENABLE
+__WEAK void app_battery_event(bat_state_t bat_sta)
+{
+	switch(bat_sta){
+		case BAT_NORMAL_STA:
+			logd("BAT_NORMAL_STA\n");
+			break;
+		case BAT_CHARGE_STA:
+			logd("BAT_CHARGE_STA\n");  
+			break;
+		case BAT_CHARGE_DONE_STA:
+			logd("BAT_CHARGE_DONE_STA\n");
+			break;
+		case BAT_LOWPOWER_STA:
+			logd("BAT_LOWPOWER_STA\n");
+			break;
+		case BAT_PROTECT_STA:
+			logd("BAT_PROTECT_STA\n");
+			break;	
+		default:
+			break;
+	}
+}
+#endif
+
+
 __WEAK bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol)
 {
 	bat_state_t	state;
@@ -116,6 +142,9 @@ void app_battery_scan(bool power_on)
 	if(s_state != state){
 		s_state = state;
 	}else{
+		if(m_battery_sta != state){
+			app_battery_event(state);
+		}
 		m_battery_sta = state;
 	}
 	m_battery = app_battery_percent(vol);

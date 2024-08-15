@@ -54,8 +54,9 @@ extern bat_state_t	m_battery_sta;
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol);		//__WEAK
-uint16_t app_battery_vol(void);						//__WEAK
+bat_state_t app_battery_sta(bool power_on,uint16_t bat_vol);		//__WEAK 用于特殊电池平台适配
+uint16_t app_battery_vol(void);										//__WEAK
+
 uint8_t app_battery_percent(uint16_t vol);
 void app_battery_scan(bool power_on);
 bool app_battery_init(void);

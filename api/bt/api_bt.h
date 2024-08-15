@@ -46,7 +46,7 @@ extern "C" {
 #define EDR_ICON		BD_CLASS_KEYBOARD
 #endif
 #ifndef BLE_MANUFACTURER_COMPANY
-#define BLE_MANUFACTURER_COMPANY			0xFFFE
+#define BLE_MANUFACTURER_COMPANY			0XFF41
 #endif
 
 
@@ -313,7 +313,6 @@ extern bool m_ble_adv_discoverable;
 #endif
 
 #if BT_SUPPORT & BIT_ENUM(TR_EDR)					//edr peripheral
-extern bool edr_sniff_by_remote;
 extern api_bt_ctb_t m_edr;
 #endif
 
