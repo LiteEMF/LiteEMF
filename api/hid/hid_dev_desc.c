@@ -50,13 +50,13 @@ static uint8c_t hid_desc_switch_usb_map[] =
 };
 #endif
 
-#if EDR_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)				//only edr
+#if EDR_HID_SUPPORT & (BIT_ENUM(HID_TYPE_XBOX) | BIT_ENUM(HID_TYPE_X360))				//only edr
 static uint8c_t hid_desc_xbox_edr_map[] =
 {
     #include "hid_desc_xbox_edr.h"
 };
 #endif
-#if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX)	//only ble
+#if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & (BIT_ENUM(HID_TYPE_XBOX) | BIT_ENUM(HID_TYPE_X360))	//only ble
 static uint8c_t hid_desc_xbox_ble_map[] =
 {
     #include "hid_desc_xbox_ble.h"
@@ -209,15 +209,16 @@ uint16_t get_hid_desc_map(trp_t trp, hid_type_t hid_type, uint8_t** ppmap)
                 #endif
             }
             break;
-        #if BT_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+        #if BT_HID_SUPPORT & (BIT_ENUM(HID_TYPE_XBOX) | BIT_ENUM(HID_TYPE_X360))
         case HID_TYPE_XBOX	:
+        case HID_TYPE_X360  :
             if(TR_EDR == trp){
-                #if EDR_HID_SUPPORT & BIT_ENUM(HID_TYPE_XBOX)
+                #if EDR_HID_SUPPORT & (BIT_ENUM(HID_TYPE_XBOX) | BIT_ENUM(HID_TYPE_X360))
                 if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_edr_map;
                 map_len = sizeof(hid_desc_xbox_edr_map);
                 #endif
             }else if((TR_BLE_RF == trp) || (TR_BLE == trp)){
-                #if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX)
+                #if (BLE_RF_HID_SUPPORT | BLE_HID_SUPPORT) & (BIT_ENUM(HID_TYPE_XBOX) | BIT_ENUM(HID_TYPE_X360))
                 if(NULL != ppmap) *ppmap = (uint8_t*)hid_desc_xbox_ble_map;
                 map_len = sizeof(hid_desc_xbox_ble_map);
                 #endif

@@ -238,12 +238,11 @@ uint16_t xbox_key_pack(trp_handle_t *phandle, const app_gamepad_key_t *keyp, uin
 	uint16_t packet_len=0;
 	hid_type_t hid_type = phandle->index & 0XFF;
 
-	if(HID_TYPE_X360 == hid_type){
-		packet_len = x360_key_pack(phandle, keyp, buf, len);
-	}else if(HID_TYPE_XBOX == hid_type){
+	if((HID_TYPE_XBOX == hid_type) || api_trp_is_bt(phandle->trp)) {	//x360模式没有蓝牙,默认走xbox 蓝牙
 		packet_len = xboxs_key_pack(phandle, keyp, buf, len);
-	}
-
+	}else if(HID_TYPE_X360 == hid_type){
+		packet_len = x360_key_pack(phandle, keyp, buf, len);
+	} 
 	return packet_len;
 }
 
