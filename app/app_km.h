@@ -43,13 +43,13 @@ typedef struct
 extern app_km_t m_app_km;
 
 #if APP_BIT_KB_ENABLE
-extern kb_bit_t m_kb_bit;			//全键无冲突
+extern app_kb_bit_t m_kb_bit;			//全键无冲突
 #endif
 
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-__WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit);			//__WEAK
+void app_km_vendor_scan(app_km_t* pkey, app_kb_bit_t *pkey_bit);			//__WEAK
 void app_km_clean(app_km_t* pkey);
 bool app_km_fill(app_km_t* pkey, app_km_t* pkey_in);
 bool app_km_cache(app_km_t* pkey, app_km_t* pkey_in);

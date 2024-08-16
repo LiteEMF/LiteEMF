@@ -44,7 +44,7 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
-uint8_t io_keyboard_scan(app_kb_t* pkey, kb_bit_t *pkey_bit);
+uint8_t io_keyboard_scan(app_kb_t* pkey, app_kb_bit_t *pkey_bit);
 bool io_keyboard_init(void);
 bool io_keyboard_deinit(void);
 

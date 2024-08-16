@@ -48,6 +48,26 @@ uint8c_t vendor_itf_desc_tab[] = {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+#if WEAK_ENABLE
+/*******************************************************************
+** Parameters:		
+** Returns:			
+** Description: usb私有数据接收数据,用于在中断外处理数据
+*******************************************************************/
+__WEAK error_t os_usbd_hid_vendor_rx(trp_handle_t *phandle,uint8_t* buf,uint16_t len)	
+{
+	return ERROR_UNSUPPORT;
+}
+__WEAK void usbd_hid_vendor_rx(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
+{
+    logd("vendor hid ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
+	#if APP_CMD_ENABLE
+    app_command_rx(phandle, buf, len);
+    #endif
+}
+#endif
+
+
 error_t usbd_hid_vendor_reset(uint8_t id)
 {
     UNUSED_PARAMETER(id);
@@ -95,11 +115,10 @@ error_t usbd_hid_vendor_out_process(uint8_t id, usbd_class_t* pclass)
 
     err = usbd_out(id,pclass->endpout.addr,usb_rxbuf,&usb_rxlen);
     if((ERROR_SUCCESS == err) && usb_rxlen){
-        logd("vendor hid ep%d in%d:",pclass->endpout.addr, usb_rxlen);dumpd(usb_rxbuf,usb_rxlen);
-        #if APP_CMD_ENABLE
         trp_handle_t handle = {TR_USBD, id, U16(DEV_TYPE_HID, HID_TYPE_VENDOR)};
-		app_command_rx(&handle, usb_rxbuf, usb_rxlen);
-        #endif
+        if(ERROR_UNSUPPORT == os_usbd_hid_vendor_rx(&handle, usb_rxbuf, usb_rxlen)){
+            usbd_hid_vendor_rx(&handle, usb_rxbuf, usb_rxlen);
+        }
     }
 
     return ERROR_SUCCESS;

@@ -39,7 +39,7 @@
 app_km_t m_app_km;
 
 #if APP_BIT_KB_ENABLE
-kb_bit_t m_kb_bit;			//全键无冲突
+app_kb_bit_t m_kb_bit;			//全键无冲突
 #endif
 
 /******************************************************************************************************
@@ -190,7 +190,7 @@ void app_km_clean(app_km_t* pkey)
 }
 
 #if WEAK_ENABLE
-__WEAK void app_km_vendor_scan(app_km_t* pkey, kb_bit_t *pkey_bit)
+__WEAK void app_km_vendor_scan(app_km_t* pkey, app_kb_bit_t *pkey_bit)
 {
 	#if API_USBH_BIT_ENABLE && (USBH_TYPE_SUPPORT & (BIT_ENUM(DEV_TYPE_HID) | BIT_ENUM(DEV_TYPE_AOA))) && (USBH_HID_SUPPORT & (BIT_ENUM(HID_TYPE_KB) | BIT_ENUM(HID_TYPE_MOUSE)))
 	API_ENTER_CRITICAL();
@@ -236,13 +236,12 @@ bool app_km_deinit(void)
 void app_km_scan_task(void*pa)
 {
     app_km_t key;
+	app_kb_bit_t* pkb_bit = NULL;
+
 	#if APP_BIT_KB_ENABLE
-	kb_bit_t kb_bit;			//全键无冲突
-	kb_bit_t* pkb_bit = &kb_bit;
-	
+	app_kb_bit_t kb_bit;			//全键无冲突
+	pkb_bit = &kb_bit;
 	memset(&kb_bit, 0, sizeof(kb_bit));
-	#else
-	kb_bit_t* pkb_bit = NULL;
 	#endif
 
 	memset(&key,0,sizeof(key));

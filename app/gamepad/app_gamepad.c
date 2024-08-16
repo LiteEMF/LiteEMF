@@ -199,29 +199,6 @@ static uint32c_t x360_key_map[][2] =
 };
 #endif
 
-#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
-static uint32c_t xbox_edr_key_map[][2] =
-{
-	{HW_KEY_A 			,XBOX_EDR_A 	},
-	{HW_KEY_B 			,XBOX_EDR_B 	},
-	{HW_KEY_X 			,XBOX_EDR_X 	},
-	{HW_KEY_Y 			,XBOX_EDR_Y 	},
-	{HW_KEY_L1			,XBOX_EDR_L1	},
-	{HW_KEY_R1			,XBOX_EDR_R1	},
-	{HW_KEY_L2			,XBOX_EDR_L2	},
-	{HW_KEY_R2			,XBOX_EDR_R2	},
-	{HW_KEY_L3			,XBOX_EDR_L3	},
-	{HW_KEY_R3			,XBOX_EDR_R3	},
-	{HW_KEY_SELECT		,XBOX_EDR_MAP	},
-	{HW_KEY_START 		,XBOX_EDR_MENU 	},
-	{HW_KEY_UP			,XBOX_EDR_UP	},
-	{HW_KEY_DOWN		,XBOX_EDR_DOWN	},
-	{HW_KEY_LEFT		,XBOX_EDR_LEFT	},
-	{HW_KEY_RIGHT 		,XBOX_EDR_RIGHT },
-	{HW_KEY_HOME		,XBOX_EDR_HOME	},
-	{HW_KEY_CAPTURE		,XBOX_EDR_SHARE	},
-};
-#endif
 #if (HIDD_SUPPORT | HIDH_SUPPORT) & (BIT_ENUM(HID_TYPE_GAMEPADE) | HID_XBOX_MASK)
 static uint32c_t gamepad_key_map[][2] =
 {
@@ -242,6 +219,7 @@ static uint32c_t gamepad_key_map[][2] =
 	{HW_KEY_LEFT		,GAMEPAD_LEFT	},
 	{HW_KEY_RIGHT 		,GAMEPAD_RIGHT	},
 	{HW_KEY_HOME		,GAMEPAD_HOME	},
+	{HW_KEY_CAPTURE		,GAMEPAD_SHARE	},		//ONLY XBOX BLE
 };
 #endif
 
@@ -398,33 +376,23 @@ uint8_t app_gamepad_get_map(trp_handle_t *phandle,uint32_t(**mapp)[2])
 
 		#if((HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_XBOX))
 		case HID_TYPE_XBOX:
-			if(TR_EDR == phandle->trp){
-				#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
-				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
-				return countof(xbox_edr_key_map);
-				#endif
-			}else if(TR_BLE == phandle->trp){				//ble模式和标准hid gamepad按键相同
-				*mapp = (uint32_t(*)[2])gamepad_key_map;	
-				return countof(gamepad_key_map);
-			}else if(api_trp_is_usb(phandle->trp)){
+			if(api_trp_is_usb(phandle->trp)){
 				*mapp = (uint32_t(*)[2])xbox_key_map;
 				return countof(xbox_key_map);
+			}else{										//蓝牙模式和标准hid gamepad按键相同
+				*mapp = (uint32_t(*)[2])gamepad_key_map;	
+				return countof(gamepad_key_map);
 			}
 		#endif
 
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_X360)
 		case HID_TYPE_X360:
-			if(TR_EDR == phandle->trp){
-				#if (BT_HID_SUPPORT | BTC_HID_SUPPORT) & HID_XBOX_MASK
-				*mapp = (uint32_t(*)[2])xbox_edr_key_map;
-				return countof(xbox_edr_key_map);
-				#endif
-			}else if(TR_BLE == phandle->trp){		//ble模式和标准hid gamepad按键相同
-				*mapp = (uint32_t(*)[2])gamepad_key_map;
-				return countof(gamepad_key_map);
-			}else if(api_trp_is_usb(phandle->trp)){
+			if(api_trp_is_usb(phandle->trp)){
 				*mapp = (uint32_t(*)[2])x360_key_map;
 				return countof(x360_key_map);
+			}else{									//蓝牙模式和标准hid gamepad按键相同
+				*mapp = (uint32_t(*)[2])gamepad_key_map;	
+				return countof(gamepad_key_map);
 			}
 		#endif
 		#if (HIDD_SUPPORT | HIDH_SUPPORT) & BIT_ENUM(HID_TYPE_DINPUT)

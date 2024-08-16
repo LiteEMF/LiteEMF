@@ -38,6 +38,10 @@ extern "C" {
 /*****************************************************************************************************
 **  Function
 ******************************************************************************************************/
+
+error_t os_usbd_hid_vendor_rx(trp_handle_t *phandle,uint8_t* buf,uint16_t len);		//__WEAK 
+void usbd_hid_vendor_rx(trp_handle_t *phandle,uint8_t* buf,uint16_t len);			//__WEAK 
+
 error_t usbd_hid_vendor_reset(uint8_t id);
 error_t usbd_hid_vendor_suspend(uint8_t id);
 uint16_t usbd_hid_vendor_get_itf_desc(uint8_t id, itf_ep_index_t *pindex,uint8_t *pdesc, uint16_t desc_len, uint16_t *pdesc_index);

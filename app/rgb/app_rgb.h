@@ -61,15 +61,16 @@ typedef struct
     uint8_t mode;
     uint8_t brightness;			//unused now
     uint16_t period; 			//period unit ms
-	uint8_t times:7;
-	uint8_t tick_synk:1;		//make sure sync start brink is off , 默认为0, times有效时根据设置时间定义
+    uint8_t times;
 
-	uint8_t offset;
+	uint8_t palette_offset;
 	uint8_t palette_step;	
 	uint8_t palette_size;
 	uint32_t *palette;			//调色板
-
 	uint32_t color;
+
+    uint8_t times_tick;
+	uint8_t times_synk;		//make sure sync start brink is off , 默认为0, times有效时根据设置时间定义
 } rgb_cbt_t;
 
 typedef enum{
@@ -93,6 +94,7 @@ bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t peri
 bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint32_t *palette, uint8_t palette_size, uint16_t period, uint8_t times);
 #define app_rgb_set_static(id,color,period) 	app_rgb_set_mode(id,RGB_STATIC_MODE,color,period,0)
 #define app_rgb_set_blink(id,color,period)  	app_rgb_set_mode(id,RGB_BLINK_MODE, color,period,0)
+#define app_rgb_set_blink_times(id,color,period,times)  	app_rgb_set_mode(id,RGB_BLINK_MODE, color,period,times)
 #define app_rgb_set_breath(id,color,period) 	app_rgb_set_mode(id,RGB_BREATH_MODE,color,period,0)
 #define app_rgb_set_rainbow(id,color,period) 	app_rgb_set_mode(id,RGB_RAINBOW_MODE,color,period,0)
 #define app_rgb_set_pal_static(id,offset,palette,palette_size,period) 	app_rgb_set_palette_mode(id,RGB_STATIC_MODE,offset,palette,palette_size,period0)

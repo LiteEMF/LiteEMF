@@ -12,7 +12,9 @@
 0x06, 0x80, 0xff,              // USAGE_PAGE (Generic Desktop)
 0x09, 0x01,                    // USAGE (Vendor Usage 1)
 0xa1, 0x01,                    // COLLECTION (Application)
-	// 0X85, VENDOR_REPORT_ID,	//NOT ADD REPORT ID
+	#if HID_VENDOR_REPORT_ID_ENABLE
+	0X85, VENDOR_REPORT_ID,	//NOT ADD REPORT ID
+	#endif
 	0x09, 0x02,                    //   USAGE (Vendor Usage 2)
 	0xa1, 0x00,                    //   COLLECTION (Physical)
 		0x09, 0x03,                    //     USAGE (Vendor Usage 1)
@@ -20,7 +22,11 @@
 		0x25, 0xff,                    //     LOGICAL_MAXIMUM (127)
 
 		0x75, 0x08,                    //     REPORT_SIZE (8)
-		0x95, 0x40,                    //     REPORT_COUNT (26)
+		#if HID_VENDOR_REPORT_ID_ENABLE
+		0x95, 0x40,                    //     REPORT_COUNT (64)
+		#else
+		0x95, 0x3F,                    //     REPORT_COUNT (63)
+		#endif
 		0x81, 0x02,                    //     INPUT (Data,Var,Abs)
 
 		0x09, 0x05,                    //     USAGE (Vendor Usage 1)

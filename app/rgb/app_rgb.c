@@ -56,7 +56,7 @@ static bool app_rgb_static(uint8_t id, uint16_t step)
 	rgb_cbt_t *pcbt = &m_rgb_cbt[id];
 	
 	if(NULL != pcbt->palette){
-		index = pcbt->offset + (step>>8) * pcbt->palette_step; 
+		index = pcbt->palette_offset + (step>>8) * pcbt->palette_step; 
 		c = color_from_palette(index, 0XFF, NOBLEND, pcbt->palette, pcbt->palette_size);
 	}else{
 		c = pcbt->color;
@@ -84,7 +84,7 @@ static bool app_rgb_blink(uint8_t id, uint16_t step)
 		if(0 == ((step>>7) & 0x01)){	// (step>>7) == APP_RGB_SLICE*rgb_tick/(pcbt->period/2) 
 
 			if(NULL != pcbt->palette){
-				index = pcbt->offset + (step>>8) * pcbt->palette_step;
+				index = pcbt->palette_offset + (step>>8) * pcbt->palette_step;
 				c = color_from_palette(index, 0XFF, NOBLEND, pcbt->palette, pcbt->palette_size);
 			}else{
 				c = pcbt->color;
@@ -115,8 +115,8 @@ static bool app_rgb_breath(uint8_t id, uint16_t step)
 
 	scale = LOWEST_BRIGHT + SCALE8( sin8( step - 64 ) + 128, 0XFF - LOWEST_BRIGHT);		//sin 同步颜色周期
 	if(NULL != pcbt->palette){
-		index = pcbt->offset + (step>>8) * pcbt->palette_step; 
-		// index = pcbt->offset + scale;  //or used scale(如果palette 不是2的指数,会有略微的不同步)
+		index = pcbt->palette_offset + (step>>8) * pcbt->palette_step; 
+		// index = pcbt->palette_offset + scale;  //or used scale(如果palette 不是2的指数,会有略微的不同步)
 		
 		c = scale32(color_from_palette(index, 0XFF, NOBLEND, pcbt->palette, pcbt->palette_size), scale);
 	}else{
@@ -142,7 +142,7 @@ static bool app_rgb_gradient(uint8_t id, uint16_t step)
 
 	blend = sin8( step - 64 ) + 128;
 	if(NULL != pcbt->palette){
-		c = color_from_palette(pcbt->offset + blend, 0XFF, LINEARBLEND, pcbt->palette, pcbt->palette_size);
+		c = color_from_palette(pcbt->palette_offset + blend, 0XFF, LINEARBLEND, pcbt->palette, pcbt->palette_size);
 	}else{
 		c = blend32(Color_Black, pcbt->color, blend);
 	}
@@ -250,9 +250,11 @@ bool app_rgb_set_mode(uint8_t id, rgb_mode_t mode, uint32_t color, uint16_t peri
 	pcbt->mode = mode;
     pcbt->brightness = m_brightness;
     pcbt->period = period; 				//period unit ms
-	if(times){
-		pcbt->times = times+1;
-		pcbt->tick_synk = 1;
+
+	if(times && (times != pcbt->times)){
+		pcbt->times = times;
+		pcbt->times_synk = 1;
+		pcbt-> times_tick = 0;
 	}
 
 	pcbt->color = color;
@@ -278,12 +280,13 @@ bool app_rgb_set_palette_mode(uint8_t id, rgb_mode_t mode, uint8_t offset, uint3
 	pcbt->mode = mode;
     pcbt->brightness = m_brightness;
     pcbt->period = period; 				//period unit ms
-	if(times){
-		pcbt->times = times+1;
-		pcbt->tick_synk = 1;
+	if(times != pcbt->times){
+		pcbt->times = times;
+		pcbt->times_synk = 1;
+		pcbt-> times_tick = 0;
 	}
 
-	pcbt->offset = offset;
+	pcbt->palette_offset = offset;
 	pcbt->palette_size = palette_size;
 	pcbt->palette_step = 256 / palette_size;
 	pcbt->palette = palette;
@@ -344,7 +347,7 @@ void app_rgb_task(void *pa)
 	for(i=0; i< APP_RGB_NUMS; i++){
 		pcbt = &m_rgb_cbt[i];
 		period = pcbt->period;
-		if(0 == pcbt->period){		//avoid div 0
+		if(0 == period){		//avoid div 0
 			period = APP_RGB_SLICE;
 		}
 		step = 256 * APP_RGB_SLICE * rgb_tick / period;
@@ -352,20 +355,20 @@ void app_rgb_task(void *pa)
 		// logd("rgb%d, mode=%d,step=%x\n", i, pcbt->mode, step);
 		if(pcbt->times){						//定时显示次数
 			if(0 == (step & 0XFF)){				//切换一个完整周期
-				if(pcbt->tick_synk){			//强制同步, 第一个周期不亮灯
-					pcbt->tick_synk = 0;
+				if(pcbt->times_synk){			//强制同步, 第一个周期不亮灯
+					pcbt->times_synk = 0;
 				}else{
-					pcbt->times--;
-					if(0 == pcbt->times) {
+					if(pcbt->times_tick++ == pcbt->times) {
 						pcbt->color = Color_Black;
 						pcbt->mode = RGB_STATIC_MODE;
+						pcbt->times = 0;
 						app_rgb_finished_cb(i);
 					}
 				}
 			}
 		}
 		
-		if(pcbt->tick_synk){
+		if(pcbt->times_synk){
 			ret = set_pixel_color(i, 0x00);
 		}else{
 			switch(pcbt->mode){

@@ -25,9 +25,28 @@ extern "C" {
 /******************************************************************************************************
 ** Defined
 *******************************************************************************************************/
+#ifndef HID_VENDOR_REPORT_ID_ENABLE			//usb vendor hid 是否有report id
+#define HID_VENDOR_REPORT_ID_ENABLE		0
+#endif
+#ifndef KB_BIT_MAP_ENABLE		
+#define KB_BIT_MAP_ENABLE			0
+#endif
+#ifndef MT_CONTACT_MAX		
+#define MT_CONTACT_MAX				3
+#endif
+#ifndef TOUCH_X_LOGICAL_MAX	
+#define TOUCH_X_LOGICAL_MAX			4096
+#endif
+#ifndef TOUCH_Y_LOGICAL_MAX	
+#define TOUCH_Y_LOGICAL_MAX			4096
+#endif
+
 
 enum {					//为了节省蓝牙服务通过宏定义枚举类型
-	VENDOR_REPORT_ID = 0,
+	REPORT_ID_NONE = 0,
+	#if (HIDD_SUPPORT & BIT_ENUM(HID_TYPE_VENDOR)) && HID_VENDOR_REPORT_ID_ENABLE
+	VENDOR_REPORT_ID,
+	#endif
 	#if HIDD_SUPPORT & (BIT_ENUM(HID_TYPE_GAMEPADE) | BIT_ENUM(HID_TYPE_DINPUT))
 	GAMEPAD_REPORT_ID,
 	#endif
@@ -47,19 +66,6 @@ enum {					//为了节省蓝牙服务通过宏定义枚举类型
 };
 
 
-#ifndef KB_BIT_MAP_ENABLE		
-#define KB_BIT_MAP_ENABLE			0
-#endif
-
-#ifndef MT_CONTACT_MAX		
-#define MT_CONTACT_MAX				3
-#endif
-#ifndef TOUCH_X_LOGICAL_MAX	
-#define TOUCH_X_LOGICAL_MAX			4096
-#endif
-#ifndef TOUCH_Y_LOGICAL_MAX	
-#define TOUCH_Y_LOGICAL_MAX			4096
-#endif
 /******************************************************************************************************
 **	Parameters
 *******************************************************************************************************/

@@ -60,7 +60,7 @@ static void matrix_kb_init(void)
 ** Returns:		keyboard scan key num
 ** Description:		
 *******************************************************************/
-static uint8_t matrix_kb_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
+static uint8_t matrix_kb_scan(app_kb_t* pkey, app_kb_bit_t *pkey_bit)
 {
 	uint8_t out;
 	uint8_t in;
@@ -93,6 +93,9 @@ static uint8_t matrix_kb_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
 					}
 				}
 			}
+		}
+		if(NULL != pkey_bit){
+			pkey_bit->fn = pkey->fn;
 		}
 		api_gpio_dir(matrix_kb_out_gpio[out], PIN_IN, PIN_PULLNONE);
 	}
@@ -130,7 +133,7 @@ static void iokb_init(void)
 ** Returns:		keyboard scan key num
 ** Description:		
 *******************************************************************/
-static uint8_t iokb_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
+static uint8_t iokb_scan(app_kb_t* pkey, app_kb_bit_t *pkey_bit)
 {
 	uint8_t key,i=0,k=0;
 	uint8_t i;
@@ -158,6 +161,9 @@ static uint8_t iokb_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
 			}
 		}
 	}
+	if(NULL != pkey_bit){
+		pkey_bit->fn = pkey->fn;
+	}
 	return k;
 }
 
@@ -173,7 +179,7 @@ static uint8_t iokb_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
 ** Returns:		keyboard scan key num
 ** Description:	
 *******************************************************************/
-uint8_t io_keyboard_scan(app_kb_t* pkey, kb_bit_t *pkey_bit)
+uint8_t io_keyboard_scan(app_kb_t* pkey, app_kb_bit_t *pkey_bit)
 {
 	uint8_t k = 0;
 	

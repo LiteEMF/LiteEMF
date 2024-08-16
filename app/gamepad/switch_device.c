@@ -299,10 +299,10 @@ uint16_t switch_normal_key_pack(trp_handle_t *phandle,const app_gamepad_key_t *k
 	switchp->id = SWITCH_NORMAL_REPORT_ID;
 	switchp->button = keyp->key & 0xffff;
 	switchp->hat_switch = gamepad_key_to_hatswitch(keyp->key);
-	switchp->lx = keyp->stick_l.x + 8000;
-	switchp->ly = keyp->stick_l.y + 8000;
-	switchp->rx = keyp->stick_r.x + 8000;
-	switchp->ry = keyp->stick_r.y + 8000;
+	switchp->lx = keyp->stick_l.x + 0x8000;
+	switchp->ly = keyp->stick_l.y + 0x8000;
+	switchp->rx = keyp->stick_r.x + 0x8000;
+	switchp->ry = keyp->stick_r.y + 0x8000;
 
 	packet_len = sizeof(switch_normal_report_t);
 	return packet_len;
