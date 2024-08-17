@@ -217,6 +217,7 @@ extern "C" {
 
 
 // consumer page 
+#define   CONSUMER_POWER		    0X30
 #define   CONSUMER_MENU			    0X40
 #define   CONSUMER_NEXT			    0xB5
 #define   CONSUMER_PREVIOUS		  	0xB6

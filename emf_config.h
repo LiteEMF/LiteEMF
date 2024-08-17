@@ -96,6 +96,7 @@ extern "C" {
 #define DEF_HID_TYPE_CONSUMER    	11
 #define DEF_HID_TYPE_TOUCH			12
 #define DEF_HID_TYPE_MT				13
+
 //RES
 #define DEF_HID_TYPE_NONE 			16
 

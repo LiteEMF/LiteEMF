@@ -207,7 +207,6 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 				bt_ctbp->types = dev_types;
 				bt_ctbp->hid_types = hid_types;
 				ret = true;
-
 				break;
 			case TR_EDR		:
 				dev_types &= EDR_TYPE_SUPPORT;
@@ -215,7 +214,6 @@ bool api_transport_set_type(uint8_t id, trp_t trp, uint16_t dev_types, uint16_t 
 				bt_ctbp->types = dev_types;
 				bt_ctbp->hid_types = hid_types;
 				ret = true;
-				logd("EDR dev_types=%x,hid_types=%x",dev_types,hid_types);
 				break;
 			case TR_BLEC	:
 			case TR_BLE_RF	:

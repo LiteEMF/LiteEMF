@@ -333,7 +333,7 @@ bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
 }
 #endif
 
-#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)	//TODO
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)
 bool app_consumer_key_send(trp_handle_t *phandle,uint16_t *pkey, uint8_t count)
 {
 	consumer_t consumer;
