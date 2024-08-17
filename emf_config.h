@@ -83,19 +83,19 @@ extern "C" {
 
 //hid type
 #define DEF_HID_TYPE_VENDOR			0
-#define DEF_HID_TYPE_KB 			1
-#define DEF_HID_TYPE_MOUSE    		2
-#define DEF_HID_TYPE_CONSUMER    	7
-#define DEF_HID_TYPE_TOUCH			4
-#define DEF_HID_TYPE_MT				5
-#define DEF_HID_TYPE_GAMEPADE		6
-#define DEF_HID_TYPE_DINPUT			3
-#define DEF_HID_TYPE_X360			8
-#define DEF_HID_TYPE_XBOX			9
-#define DEF_HID_TYPE_SWITCH			10
-#define DEF_HID_TYPE_PS3			11
-#define DEF_HID_TYPE_PS4			12
-#define DEF_HID_TYPE_PS5			13
+#define DEF_HID_TYPE_GAMEPADE		1
+#define DEF_HID_TYPE_DINPUT			2
+#define DEF_HID_TYPE_X360			3
+#define DEF_HID_TYPE_XBOX			4
+#define DEF_HID_TYPE_SWITCH			5
+#define DEF_HID_TYPE_PS3			6
+#define DEF_HID_TYPE_PS4			7
+#define DEF_HID_TYPE_PS5			8
+#define DEF_HID_TYPE_KB 			9
+#define DEF_HID_TYPE_MOUSE    		10
+#define DEF_HID_TYPE_CONSUMER    	11
+#define DEF_HID_TYPE_TOUCH			12
+#define DEF_HID_TYPE_MT				13
 //RES
 #define DEF_HID_TYPE_NONE 			16
 
