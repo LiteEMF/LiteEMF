@@ -790,7 +790,7 @@ bool switch_device_init(trp_handle_t *phandle)
     switch_dev_ctb.vibration_enable = false;
     switch_dev_ctb.imu_enable = false;
     switch_dev_ctb.report_mode=SWITCH_NORMAL_REPORT_ID;           //默认switch repot id
-    switch_dev_ctb.lights = 0;
+    switch_dev_ctb.lights = 0x0F;
     //nfc
     #if API_NFC_ENABLE
     switch_nfc_init(&switch_dev_nfc);

@@ -59,6 +59,7 @@ bool app_fill_kb_bit(uint8_t key, app_kb_bit_t* pbit);
 bool app_fill_kb(uint8_t key, app_kb_t* keyp, uint8_t start_index);
 bool app_mouse_key_send(trp_handle_t *phandle,app_mouse_t *pmouse);
 bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey);
+bool app_consumer_key_send(trp_handle_t *phandle,uint16_t *pkey, uint8_t count);
 bool app_km_init(void);
 bool app_km_deinit(void);
 void app_km_scan_task(void*pa);

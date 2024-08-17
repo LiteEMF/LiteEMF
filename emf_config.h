@@ -85,11 +85,11 @@ extern "C" {
 #define DEF_HID_TYPE_VENDOR			0
 #define DEF_HID_TYPE_KB 			1
 #define DEF_HID_TYPE_MOUSE    		2
-#define DEF_HID_TYPE_CONSUMER    	3
+#define DEF_HID_TYPE_CONSUMER    	7
 #define DEF_HID_TYPE_TOUCH			4
 #define DEF_HID_TYPE_MT				5
 #define DEF_HID_TYPE_GAMEPADE		6
-#define DEF_HID_TYPE_DINPUT			7
+#define DEF_HID_TYPE_DINPUT			3
 #define DEF_HID_TYPE_X360			8
 #define DEF_HID_TYPE_XBOX			9
 #define DEF_HID_TYPE_SWITCH			10

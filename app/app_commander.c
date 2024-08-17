@@ -275,6 +275,18 @@ bool app_command_std_decode(trp_handle_t *phandle,uint8_t* buf,uint16_t len)
 	case CMD_RECOVER_FACTORY:
 		app_command_tx(phandle,phead->cmd, &ret, 1);
 		break;
+
+	/*---- 0x20	设备数据和控制 ----*/
+	case CMD_SET_RUMBLE:
+		if(len > CMD_PACK_LEN){		
+			rumble_t	rumble;
+			memset(&rumble, 0, sizeof(rumble));
+			memcpy(&rumble,phead->buf, len-CMD_PACK_LEN);
+			app_set_rumble(&rumble,10000);
+			ret = true;
+		}
+		break;
+
 	default:
 		break;
 	}

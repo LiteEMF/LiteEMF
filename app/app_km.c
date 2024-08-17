@@ -333,4 +333,20 @@ bool app_kb_key_send(trp_handle_t *phandle,app_kb_t *pkey)
 }
 #endif
 
+#if HIDD_SUPPORT & BIT_ENUM(HID_TYPE_CONSUMER)	//TODO
+bool app_consumer_key_send(trp_handle_t *phandle,uint16_t *pkey, uint8_t count)
+{
+	consumer_t consumer;
+	consumer.id = CONSUMER_REPORT_ID;
+	memset(consumer.key, 0, sizeof(consumer.key));
+
+	if(pkey){
+		if(count) consumer.key[0] = SWAP16_L(pkey[0]);
+		if(count > 1) consumer.key[1] = SWAP16_L(pkey[1]);
+	}
+	//logd("mouse:%x %d %d\n",pmouse->but,pmouse->x,pmouse->y);
+	return api_transport_tx(phandle, &consumer, sizeof(consumer));	
+}
+#endif
+
 

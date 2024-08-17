@@ -242,6 +242,12 @@ typedef struct
 	int16_t y;	
 	int8_t w;	
 } mouse_t;
+
+typedef struct 
+{
+    uint8_t id;
+	uint16_t key[2];
+} consumer_t;
 #ifndef pack
 #pragma pack()
 #endif
@@ -294,7 +300,6 @@ typedef struct
     uint8_t fn;
 	uint8_t key[16];     /*0~128*/
 } app_kb_bit_t;
-
 
 #ifdef __cplusplus
 }

@@ -44,6 +44,7 @@ extern "C" {
 typedef struct{
 	uint8_t	period;
     uint8_t	times;
+	uint8_t	times_tick;
 	uint8_t	turn;
 }led_ctb_t;
 

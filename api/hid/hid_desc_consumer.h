@@ -14,7 +14,7 @@
 0xA1, 0x01,        // Collection (Application)
 	0x85, CONSUMER_REPORT_ID,//   Report ID (3)
 	0x75, 0x10,        //   Report Size (16)
-	0x95, 0x01,        //   Report Count (1)
+	0x95, 0x02,        //   Report Count (2)
 	0x15, 0x00,        //   Logical Minimum (0)
 	0x26, 0x8C, 0x02,  //   Logical Maximum (652)
 	0x19, 0x00,        //   Usage Minimum (Unassigned)

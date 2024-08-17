@@ -70,10 +70,10 @@ extern bool app_pm_key_sleep;
 **  Function
 ******************************************************************************************************/
 bool api_pm_sleep_hook(void);				//__WEAK 
-bool api_pm_sleep_deinit(void);				//__WEAK
-void api_weakup_init(void);					//__WEAK
+bool api_pm_vendor_sleep_deinit(void);		//__WEAK
+void api_pm_vendor_weakup_init(void);		//__WEAK
+void api_pm_vendor_weakup(void);			//__WEAK
 
-void api_pm_weakup_check(void);
 void api_boot(uint8_t index);
 void api_reset(void);
 void api_sleep(void);

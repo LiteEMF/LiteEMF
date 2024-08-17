@@ -93,6 +93,7 @@ bool app_set_led(uint8_t id, uint8_t period,uint8_t times)
 	
 	if(times){			//设置默认灭灯,保证完整的闪烁周期
 		led_ctb[id].turn = 0;
+		led_ctb[id].times_tick = 0;
 	}else if((led_ctb[id].period != period) && (period != LED_ON) && (period != LED_OFF)){		//sync
 		for(i=0; i < m_led_num; i++){
 			if(i == id) continue;
@@ -102,7 +103,7 @@ bool app_set_led(uint8_t id, uint8_t period,uint8_t times)
 		}
 	}
 
-	led_ctb[id].times = times? (times+1) : 0;
+	led_ctb[id].times = times? times : 0;
 	led_ctb[id].period = period;
 
 	return true;
@@ -181,10 +182,11 @@ void app_led_show_task(void *pa)
 			if (0 == (led_tick % led_ctb[i].period)){
 				led_ctb[i].turn = !led_ctb[i].turn;	
 
-				if(led_ctb[i].turn && led_ctb[i].times) {
-					led_ctb[i].times--;
-					if(0 == led_ctb[i].times){
+				if(led_ctb[i].turn && (led_ctb[i].times)) {
+					if(led_ctb[i].times_tick++ >= led_ctb[i].times){
 						led_ctb[i].period = LED_OFF;
+						led_ctb[i].turn = 0;
+						led_ctb[i].times = 0;
 						app_led_finished_cb(i);
 					}
 				}

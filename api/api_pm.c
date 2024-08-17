@@ -75,7 +75,7 @@ __WEAK bool api_pm_sleep_hook(void)
 	return false;
 }
 
-__WEAK bool api_pm_sleep_deinit(void)			//api_sleep call
+__WEAK bool api_pm_vendor_sleep_deinit(void)			//api_sleep call
 {
 	if(PM_STA_SLEEP == m_pm_sta){
 		#ifdef HW_ADC_MAP
@@ -105,7 +105,7 @@ __WEAK bool api_pm_sleep_deinit(void)			//api_sleep call
 }
 
 
-__WEAK void api_weakup_init(void)			//系统休眠前初始化唤醒IO
+__WEAK void api_pm_vendor_weakup_init(void)			//系统休眠前初始化唤醒IO
 {
 	#if PIN_NULL != KEY_POWER_GPIO	
 	api_gpio_dir(KEY_POWER_GPIO, PIN_IN, POWER_KEY_PULL);
@@ -124,7 +124,7 @@ __WEAK void api_weakup_init(void)			//系统休眠前初始化唤醒IO
 #endif
 
 
-void api_pm_weakup_check(void)
+__WEAK void api_pm_vendor_weakup(void)
 {
 	uint16_t i;
 
@@ -175,7 +175,7 @@ void api_reset(void)
 	logd("api rest\n");
 	pm_force_shutdown = m_systick;
 	m_pm_sta = PM_STA_RESET;
-	api_pm_sleep_deinit();				//关闭蓝牙
+	api_pm_vendor_sleep_deinit();				//关闭蓝牙
 }
 
 /*******************************************************************
@@ -202,7 +202,7 @@ void api_sleep(void)
 		m_pm_sta = PM_STA_SLEEP;
 	}
 
-	api_pm_sleep_deinit();
+	api_pm_vendor_sleep_deinit();
 }
 
 
@@ -227,7 +227,7 @@ bool api_pm_init(void)
 	}
 	#endif
 
-	api_pm_weakup_check();
+	api_pm_vendor_weakup();
 
     return true;
 }
